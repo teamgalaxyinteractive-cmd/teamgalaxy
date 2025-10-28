@@ -529,36 +529,39 @@
       return date.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric'});
     }
     async function loadBlogs() {
-      const grid = document.getElementById("blogsGrid");
-      grid.innerHTML = "";
-      const snapshot = await db.collection("cards").orderBy("publishedAt", "desc").limit(8).get();
-      snapshot.docs.forEach(doc => {
-        const data = doc.data(); const id = doc.id;
-        const card = document.createElement("div");
-        card.className = "blog-card";
-        card.tabIndex = 0; card.setAttribute("role", "button");
-        card.onclick = () => window.location.href = ` https://www.squadvertex.great-site.net/cards?id=${id}`;
-        card.onkeydown = (e) => { if (e.key==="Enter") card.click(); };
-        const img = document.createElement("img");
-        img.className = "blog-card-image";
-        img.src = data.imageUrl || " https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=500&q=80";
-        img.alt = data.heading || "Blog Post";
-        card.appendChild(img);
-        const info = document.createElement("div");
-        info.className = "blog-card-info";
-        // Views + Published direct on image, no container
-        const viewsRow = document.createElement("div");
-        viewsRow.className = "blog-info-row";
-        viewsRow.innerHTML = `<i class="fa-regular fa-eye"></i> ${data.views || 0}`;
-        const publishedRow = document.createElement("div");
-        publishedRow.className = "blog-info-row";
-        publishedRow.innerHTML = `<i class="fa-regular fa-clock"></i> ${formatPublishedAt(data.publishedAt)}`;
-        info.appendChild(viewsRow);
-        info.appendChild(publishedRow);
-        card.appendChild(info);
-        grid.appendChild(card);
-      });
-    }
+  const grid = document.getElementById("blogsGrid");
+  grid.innerHTML = "";
+  const snapshot = await db.collection("cards").orderBy("publishedAt", "desc").limit(8).get();
+  snapshot.docs.forEach(doc => {
+    const data = doc.data(); const id = doc.id;
+    const card = document.createElement("div");
+    card.className = "blog-card";
+    card.tabIndex = 0; card.setAttribute("role", "button");
+
+    // Updated: Relative path with proper ID encoding
+    card.onclick = () => window.location.href = `/teamgalaxy/card_showcase.html?id=${encodeURIComponent(id)}`;
+
+    card.onkeydown = (e) => { if (e.key==="Enter") card.click(); };
+    const img = document.createElement("img");
+    img.className = "blog-card-image";
+    img.src = data.imageUrl || " https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=500&q=80";
+    img.alt = data.heading || "Blog Post";
+    card.appendChild(img);
+    const info = document.createElement("div");
+    info.className = "blog-card-info";
+    // Views + Published direct on image, no container
+    const viewsRow = document.createElement("div");
+    viewsRow.className = "blog-info-row";
+    viewsRow.innerHTML = `<i class="fa-regular fa-eye"></i> ${data.views || 0}`;
+    const publishedRow = document.createElement("div");
+    publishedRow.className = "blog-info-row";
+    publishedRow.innerHTML = `<i class="fa-regular fa-clock"></i> ${formatPublishedAt(data.publishedAt)}`;
+    info.appendChild(viewsRow);
+    info.appendChild(publishedRow);
+    card.appendChild(info);
+    grid.appendChild(card);
+  });
+}
 
     // Create star background
     const starsContainer = document.getElementById('stars');
