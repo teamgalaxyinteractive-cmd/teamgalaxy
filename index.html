@@ -1194,6 +1194,7 @@ function createCard(id, heading, description, views, likes, imageUrl) {
   card.tabIndex = 0;
   card.setAttribute("role", "button");
 
+  // Updated: Relative path with proper ID encoding
   card.addEventListener("click", () => {
     window.location.href = `/card_showcase.html?id=${encodeURIComponent(id)}`;
   });
@@ -1204,88 +1205,85 @@ function createCard(id, heading, description, views, likes, imageUrl) {
     }
   });
 
-  // ... (baaki card content structure — jo tumne upar nahi diya, lekin yeh function ke andar hi rahega)
-}
+  // Card image
+  const img = document.createElement("img");
+  img.src = imageUrl || "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=500&q=80";
+  img.alt = heading;
+  card.appendChild(img);
 
-      // Card image
-      const img = document.createElement("img");
-      img.src = imageUrl || "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=500&q=80";
-      img.alt = heading;
-      card.appendChild(img);
+  // Content container
+  const content = document.createElement("div");
+  content.className = "card-content";
 
-      // Content container
-      const content = document.createElement("div");
-      content.className = "card-content";
+  const h3 = document.createElement("h3");
+  h3.textContent = heading || "uw gzbskzj haosjj";
 
-      const h3 = document.createElement("h3");
-      h3.textContent = heading || "uw gzbskzj haosjj";
+  const p = document.createElement("p");
+  p.textContent = description || "whhaj wnus hcs hx w whhaj hcs woqw kjqw qowq pwq.";
 
-      const p = document.createElement("p");
-      p.textContent = description || "whhaj wnus hcs hx w whhaj hcs woqw kjqw qowq pwq.";
+  content.appendChild(h3);
+  content.appendChild(p);
+  card.appendChild(content);
 
-      content.appendChild(h3);
-      content.appendChild(p);
-      card.appendChild(content);
+  // Footer container (views and likes)
+  const footer = document.createElement("div");
+  footer.className = "card-footer";
 
-      // Footer container (views and likes)
-      const footer = document.createElement("div");
-      footer.className = "card-footer";
+  // Views
+  const viewsSpan = document.createElement("span");
+  viewsSpan.className = "views";
+  viewsSpan.innerHTML = `<i class="fa-regular fa-eye"></i> ${views}`;
+  footer.appendChild(viewsSpan);
 
-      // Views
-      const viewsSpan = document.createElement("span");
-      viewsSpan.className = "views";
-      viewsSpan.innerHTML = `<i class="fa-regular fa-eye"></i> ${views}`;
-      footer.appendChild(viewsSpan);
+  // Likes (if logged in only)
+  const likesSpan = document.createElement("span");
+  likesSpan.className = "likes";
+  likesSpan.style.cursor = currentUser ? "pointer" : "not-allowed";
+  likesSpan.title = currentUser ? "Like" : "Sign In to Like";
+  likesSpan.innerHTML = `<i class="fa-regular fa-heart"></i> ${likes}`;
 
-      // Likes (if logged in only)
-      const likesSpan = document.createElement("span");
-      likesSpan.className = "likes";
-      likesSpan.style.cursor = currentUser ? "pointer" : "not-allowed";
-      likesSpan.title = currentUser ? "Like" : "Sign In to Like";
-      likesSpan.innerHTML = `<i class="fa-regular fa-heart"></i> ${likes}`;
-
-      likesSpan.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        if (!currentUser) {
-          alert("Please sign in to like.");
-          return;
-        }
-        // Check if user has liked already
-        const likeDoc = await db
-          .collection("cards")
-          .doc(id)
-          .collection("likes")
-          .doc(currentUser.uid)
-          .get();
-
-        if (likeDoc.exists) {
-          alert("You have already liked this card.");
-          return;
-        }
-        try {
-          // Add like doc
-          await db.collection("cards").doc(id).collection("likes").doc(currentUser.uid).set({
-            likedAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-          // Increment likes count
-          await db.collection("cards").doc(id).update({
-            likes: firebase.firestore.FieldValue.increment(1),
-          });
-          // Update UI
-          const newLikes = likes + 1;
-          likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${newLikes}`;
-          likesSpan.style.cursor = "default";
-          likesSpan.title = "You liked this";
-        } catch (err) {
-          alert("Error liking card: " + err.message);
-        }
-      });
-
-      footer.appendChild(likesSpan);
-      card.appendChild(footer);
-
-      return card;
+  likesSpan.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    if (!currentUser) {
+      alert("Please sign in to like.");
+      return;
     }
+    // Check if user has liked already
+    const likeDoc = await db
+      .collection("cards")
+      .doc(id)
+      .collection("likes")
+      .doc(currentUser.uid)
+      .get();
+
+    if (likeDoc.exists) {
+      alert("You have already liked this card.");
+      return;
+    }
+    try {
+      // Add like doc
+      await db.collection("cards").doc(id).collection("likes").doc(currentUser.uid).set({
+        likedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      // Increment likes count
+      await db.collection("cards").doc(id).update({
+        likes: firebase.firestore.FieldValue.increment(1),
+      });
+      // Update UI
+      const newLikes = likes + 1;
+      likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${newLikes}`;
+      likesSpan.style.cursor = "default";
+      likesSpan.title = "You liked this";
+    } catch (err) {
+      alert("Error liking card: " + err.message);
+    }
+  });
+
+  footer.appendChild(likesSpan);
+  card.appendChild(footer);
+
+  return card;
+} // Function ka end
 
     // Initialize
     updateProfileButton();
