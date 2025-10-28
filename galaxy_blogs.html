@@ -586,7 +586,7 @@
 
     // Close 'More' dropdown if clicked outside
     window.addEventListener("click", (event) => {
-        if (!moreOptions.contains(event)) {
+        if (!moreOptions.contains(event.target)) {
             moreDropdown.style.display = "none";
         }
     });
