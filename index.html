@@ -1188,20 +1188,24 @@ body {
     }
 
     // Create a card element
-    function createCard(id, heading, description, views, likes, imageUrl) {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.tabIndex = 0;
-      card.setAttribute("role", "button");
+function createCard(id, heading, description, views, likes, imageUrl) {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.tabIndex = 0;
+  card.setAttribute("role", "button");
 
-      card.addEventListener("click", () => {
-        window.location.href = `https://www.squadvertex.great-site.net/cards?id=${id}`;
-      });
-      card.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          card.click();
-        }
-      });
+  card.addEventListener("click", () => {
+    window.location.href = `/card_showcase.html?id=${encodeURIComponent(id)}`;
+  });
+
+  card.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      card.click();
+    }
+  });
+
+  // ... (baaki card content structure — jo tumne upar nahi diya, lekin yeh function ke andar hi rahega)
+}
 
       // Card image
       const img = document.createElement("img");
