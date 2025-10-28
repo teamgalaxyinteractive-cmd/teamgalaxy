@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Galaxy Design Studio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css " />
+  <link rel="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css  " />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     body { 
@@ -212,10 +212,25 @@
       height: 400px;
       width: 100%;
       background: linear-gradient(90deg, #222435, #232e40 80%);
-      display: flex; align-items: flex-end;
+      display: flex; 
+      align-items: flex-end;
       justify-content: flex-start;
       position: relative;
+      overflow: hidden; /* Ensure image doesn't overflow */
     }
+
+    /* Added: Image behind the title */
+    .banner-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* Cover the entire area */
+      opacity: 0.4; /* Make it semi-transparent */
+      z-index: 1;
+    }
+
     .banner-title {
       font-size: 3rem;
       font-weight: bold;
@@ -223,7 +238,7 @@
       margin-left: 56px;
       margin-bottom: 44px;
       letter-spacing: 1px;
-      z-index: 10;
+      z-index: 10; /* Ensure title is above the image */
       text-shadow: 0 5px 32px #232e408c;
     }
 
@@ -408,7 +423,7 @@
     </button>
     <div class="logo-title">
       <img
-        src="https://dl.dropboxusercontent.com/scl/fi/ulfs6ygkeyvr4mar8bkuz/galaxwbewh.png?rlkey=jq9buj80ny6et6jfbfpiuf14l&st=lwkqobqi&dl=0"
+        src=" https://dl.dropboxusercontent.com/scl/fi/ulfs6ygkeyvr4mar8bkuz/galaxwbewh.png?rlkey=jq9buj80ny6et6jfbfpiuf14l&st=lwkqobqi&dl=0"
         height="46"
         alt="Logo"
       />
@@ -416,14 +431,15 @@
     </div>
 
     <div class="nav-buttons" id="navButtons">
-      <button class="nav-btn">Home</button>
-      <button class="nav-btn">Team Galaxy</button>
+      <!-- Updated: Added the requested links -->
+      <button class="nav-btn" onclick="window.location.href='index.html';">Home</button>
+      <button class="nav-btn" onclick="window.location.href='about_us.html';">Team Galaxy</button>
       <div class="more-options" id="moreOptions">
         <button class="nav-btn">More ▼</button>
         <div class="dropdown-content">
-          <a href="#">Blog</a>
-          <a href="#">Posts</a>
-          <a href="#">Portfolio</a>
+          <a href="galaxy_blogs.html">Blog</a>
+          <a href="galaxy_studio.html">Galaxy Design</a> <!-- Current page -->
+          <a href="galaxy_portfolio.html">Portfolio</a>
         </div>
       </div>
 
@@ -439,6 +455,8 @@
 
   <!-- Banner section -->
   <section class="banner-space">
+    <!-- Updated: Added the image -->
+    <img src="https://www.dropbox.com/scl/fi/a2fkm3joq1re84pbkxclo/1761577613723-02B91580-8615-42CB-9A0B-2D7C78896F96.jpg?rlkey=wbw92qde23xcweh4hfunmqk2f&raw=1" alt="Banner Background" class="banner-image">
     <div class="banner-title">Galaxy Design</div>
   </section>
 
@@ -510,11 +528,11 @@
         </div>
       </div>
       <div class="footer-social">
-        <a href=" https://twitter.com " title="Twitter"><i class="fab fa-twitter"></i></a>
-        <a href="https://facebook.com " title="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="https://instagram.com " title="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://youtube.com " title="YouTube"><i class="fab fa-youtube"></i></a>
-        <a href="https://discord.com " title="Discord"><i class="fab fa-discord"></i></a>
+        <a href="  https://twitter.com  " title="Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="https://facebook.com  " title="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="https://instagram.com  " title="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://youtube.com  " title="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="https://discord.com  " title="Discord"><i class="fab fa-discord"></i></a>
       </div>
     </div>
 
