@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <title>GalaxyWeb Card Detail</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css " />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css  " />
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   /* लोडिंग स्क्रीन के लिए स्टाइल */
@@ -297,7 +297,7 @@
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     top: 50px;
-    z-index: 1000;
+    z-index: 2000; /* Increased z-index */
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     overflow: hidden;
@@ -320,10 +320,12 @@
     color: #64c2ff;
   }
 
-  .nav-buttons .more-options:hover .dropdown-content,
+  /* Removed hover trigger */
+  /* .nav-buttons .more-options:hover .dropdown-content,
   .nav-buttons .profile-btn.show-menu + .dropdown-content {
     display: block;
-  }
+  } */
+
 
   /* Footer */
   .footer {
@@ -501,26 +503,27 @@
 
   <!-- Top Section -->
   <div class="top-bar">
-    <button class="hamburger">
+    <button class="hamburger" id="hamburgerBtn">
       <i class="fa-solid fa-bars"></i>
     </button>
     <div class="logo-title">
       <img
-        src=" https://dl.dropboxusercontent.com/scl/fi/ulfs6ygkeyvr4mar8bkuz/galaxwbewh.png?rlkey=jq9buj80ny6et6jfbfpiuf14l&st=lwkqobqi&dl=0"
+        src="  https://dl.dropboxusercontent.com/scl/fi/ulfs6ygkeyvr4mar8bkuz/galaxwbewh.png?rlkey=jq9buj80ny6et6jfbfpiuf14l&st=lwkqobqi&dl=0"
         height="46"
         alt="Logo"
       />
       GalaxyWeb
     </div>
-    <div class="nav-buttons">
-      <button class="nav-btn">Home</button>
-      <button class="nav-btn">Team Galaxy</button>
-      <div class="more-options">
+    <div class="nav-buttons" id="navButtons">
+      <!-- Updated: Added the requested links -->
+      <button class="nav-btn" onclick="window.location.href='index.html';">Home</button>
+      <button class="nav-btn" onclick="window.location.href='about_us.html';">Team Galaxy</button>
+      <div class="more-options" id="moreOptions">
         <button class="nav-btn">More ▼</button>
         <div class="dropdown-content">
-          <a href="#">Blog</a>
-          <a href="#">Posts</a>
-          <a href="#">Portfolio</a>
+          <a href="galaxy_blogs.html">Blog</a>
+          <a href="galaxy_studio.html">Galaxy Design</a>
+          <a href="galaxy_portfolio.html">Portfolio</a>
         </div>
       </div>
       <button id="profileBtn" class="profile-btn"><i class="fa-solid fa-user"></i></button>
@@ -546,11 +549,11 @@
         </div>
       </div>
       <div class="footer-social">
-        <a href=" https://twitter.com " title="Twitter"><i class="fab fa-twitter"></i></a>
-        <a href="https://facebook.com " title="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="https://instagram.com " title="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://youtube.com " title="YouTube"><i class="fab fa-youtube"></i></a>
-        <a href="https://discord.com " title="Discord"><i class="fab fa-discord"></i></a>
+        <a href="  https://twitter.com  " title="Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="https://facebook.com  " title="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="https://instagram.com  " title="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://youtube.com  " title="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="https://discord.com  " title="Discord"><i class="fab fa-discord"></i></a>
       </div>
     </div>
 
@@ -589,11 +592,10 @@
       </div>
     </div>
   </footer>
-
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js "></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js "></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js "></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-check-compat.js "></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js  "></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js  "></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js  "></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-check-compat.js  "></script>
   <script src="https://www.google.com/recaptcha/api.js?render=6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"></script>
   <script>
     // Firebase initialization
@@ -798,9 +800,38 @@
       }
     };
 
-    // Hamburger menu script
-    document.querySelector('.hamburger').addEventListener('click', function() {
-      document.querySelector('.nav-buttons').classList.toggle('show');
+    // Hamburger menu functionality
+    const hamburgerBtn = document.getElementById("hamburgerBtn");
+    const navButtons = document.getElementById("navButtons");
+
+    hamburgerBtn.addEventListener('click', function() {
+      navButtons.classList.toggle('show');
+    });
+
+    // Close hamburger menu if clicked outside
+    window.addEventListener("click", function(event) {
+        // Check if the click was outside the hamburger button and the nav menu
+        if (!hamburgerBtn.contains(event.target) && !navButtons.contains(event.target)) {
+            navButtons.classList.remove('show'); // Close the menu
+        }
+    });
+
+    // More Options dropdown functionality - FIXED
+    const moreOptions = document.getElementById("moreOptions");
+    const moreDropdown = moreOptions.querySelector(".dropdown-content");
+
+    // Toggle dropdown on button click
+    moreOptions.querySelector(".nav-btn").addEventListener("click", (e) => {
+      e.stopPropagation(); // Prevent immediate closing if clicking the button itself
+      moreDropdown.style.display = moreDropdown.style.display === "block" ? "none" : "block";
+    });
+
+    // Close 'More' dropdown if clicked outside - FIXED
+    window.addEventListener("click", (event) => {
+        // Check if the click was outside the 'moreOptions' container
+        if (!moreOptions.contains(event)) {
+            moreDropdown.style.display = "none";
+        }
     });
 
     // Profile and authentication code (unchanged)
@@ -825,6 +856,7 @@
       profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
     });
 
+    // Close profile menu if clicked outside
     window.addEventListener("click", () => {
       profileMenu.style.display = "none";
     });
@@ -886,6 +918,6 @@
         hideLoading(); // Hide loading if no ID is provided
       }
     };
-  </script>
+</script>
 </body>
 </html>
