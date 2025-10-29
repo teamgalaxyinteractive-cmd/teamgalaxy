@@ -1081,7 +1081,7 @@ body {
       e.stopPropagation();
       // If user is not signed in, trigger sign in
       if (!currentUser) {
-        signIn();
+        window.location.href = "/legal/sign_up.html";
         return;
       }
       // If signed in, show the menu
@@ -1144,7 +1144,7 @@ body {
         // Remove any existing click handler to prevent multiple bindings
         profileBtn.onclick = (e) => {
           e.stopPropagation();
-          signIn();
+          window.location.href = "/legal/sign_up.html";
         };
       }
     }
