@@ -578,8 +578,8 @@
         </div>
       </div>
 
-      <!-- Signed-In View -->
-      <div class="signed-in-view" id="signed-in-view">
+      <!-- Signed-In View (Followers/Following removed from UI per request) -->
+      <div class="signed-in-view" id="signed-in-view" style="display:none;">
         <div class="welcome-card">
           <h2>Welcome to TeamGalaxy, <span id="display-name"></span>!</h2>
           <p>Your account has been successfully created with TeamGalaxy. You are now part of our mission.</p>
@@ -593,14 +593,7 @@
               <div class="info-label">Posts</div>
               <div class="info-value" id="info-posts">0</div>
             </div>
-            <div class="info-item">
-              <div class="info-label">Followers</div>
-              <div class="info-value" id="info-followers">0</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Following</div>
-              <div class="info-value" id="info-following">0</div>
-            </div>
+            <!-- followers/following intentionally not shown in frontend -->
           </div>
         </div>
 
@@ -618,12 +611,12 @@
       </div>
 
       <!-- Console Panel -->
-      <div class="console-panel" id="console-panel">
+      <div class="console-panel" id="console-panel" style="display:block;">
         <div class="console-header">
           <span>Firestore Operations Console</span>
           <button class="console-toggle" id="console-toggle">Hide</button>
         </div>
-        <div id="console-content"></div>
+        <div id="console-content" style="max-height:200px; overflow:auto;"></div>
       </div>
 
       <footer>
@@ -631,6 +624,7 @@
       </footer>
     </div>
   </div>
+
   <script>
     // Firebase configuration
     const firebaseConfig = {
@@ -643,20 +637,33 @@
       measurementId: "G-6C2W9NSNCH"
     };
 
-    // Initialize Firebase with compatibility API
-    firebase.initializeApp(firebaseConfig);
+    // Initialize Firebase (compat)
+    if (!window.firebase) {
+      console.error('Firebase SDK not found. Include compat scripts.');
+    } else {
+      if (!firebase.apps || !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      } else {
+        console.log('Firebase already initialized.');
+      }
+    }
 
-    // Initialize Firebase App Check - SINGLE INITIALIZATION
-    firebase.appCheck().activate(
-      '6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx',
-      true // isTokenAutoRefreshEnabled
-    );
+    // Activate App Check - SINGLE INITIALIZATION (compat style kept)
+    try {
+      // compat activate may differ; this keeps your previous approach
+      firebase.appCheck().activate(
+        '6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx',
+        true // isTokenAutoRefreshEnabled
+      );
+    } catch (e) {
+      console.warn('AppCheck init issue (safe to ignore if AppCheck not required):', e);
+    }
 
     const auth = firebase.auth();
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    // DOM Elements
+    // DOM Elements (only those still present)
     const termsCheckbox = document.getElementById('terms-checkbox');
     const googleSignInBtn = document.getElementById('googleSignInButton');
     const signedInView = document.getElementById('signed-in-view');
@@ -668,21 +675,19 @@
     const goProfileBtn = document.getElementById('go-profile-btn');
     const infoJoinDate = document.getElementById('info-join-date');
     const infoPosts = document.getElementById('info-posts');
-    const infoFollowers = document.getElementById('info-followers');
-    const infoFollowing = document.getElementById('info-following');
     const savedAccountsSection = document.getElementById('saved-accounts');
     const accountsList = document.getElementById('accounts-list');
     const consolePanel = document.getElementById('console-panel');
     const consoleContent = document.getElementById('console-content');
     const consoleToggle = document.getElementById('console-toggle');
 
-    // Console Logging System
     function logToConsole(message, type = 'info') {
+      if (!consoleContent) return;
       const logLine = document.createElement('div');
       logLine.className = `console-line console-${type}`;
       logLine.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
       consoleContent.appendChild(logLine);
-      consolePanel.scrollTop = consolePanel.scrollHeight;
+      consoleContent.scrollTop = consoleContent.scrollHeight;
       consolePanel.style.display = 'block';
     }
 
@@ -696,24 +701,19 @@
       }
     });
 
-    // Enable Google button when terms are accepted
+    // Enable Google button only when terms accepted
     termsCheckbox.addEventListener('change', () => {
       googleSignInBtn.disabled = !termsCheckbox.checked;
       logToConsole(`Terms accepted: ${termsCheckbox.checked}`, 'info');
     });
 
-    // Saved Accounts Functions
+    // Saved Accounts helpers (unchanged)
     function loadSavedAccounts() {
       const data = localStorage.getItem('savedAccounts');
       logToConsole(`Loading saved accounts from localStorage`, 'info');
       return data ? JSON.parse(data) : [];
     }
-
-    function saveAccounts(arr) {
-      localStorage.setItem('savedAccounts', JSON.stringify(arr));
-      logToConsole(`Saved accounts to localStorage`, 'info');
-    }
-
+    function saveAccounts(arr) { localStorage.setItem('savedAccounts', JSON.stringify(arr)); }
     function addSavedAccount(email) {
       if (!email) return;
       const accounts = loadSavedAccounts();
@@ -724,7 +724,6 @@
       }
       renderSavedAccounts();
     }
-
     function removeSavedAccount(email) {
       let accounts = loadSavedAccounts();
       accounts = accounts.filter(e => e !== email);
@@ -732,29 +731,23 @@
       logToConsole(`Removed account: ${email}`, 'warning');
       renderSavedAccounts();
     }
-
     function renderSavedAccounts() {
+      if (!accountsList || !savedAccountsSection) return;
       const accounts = loadSavedAccounts();
       accountsList.innerHTML = '';
-
       if (accounts.length === 0) {
         savedAccountsSection.style.display = 'none';
         return;
       }
-
       savedAccountsSection.style.display = 'block';
-
       accounts.forEach(email => {
         const accountItem = document.createElement('div');
         accountItem.className = 'account-item';
-
         const emailSpan = document.createElement('span');
         emailSpan.className = 'account-email';
         emailSpan.textContent = email;
-
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'account-actions';
-
         const useBtn = document.createElement('button');
         useBtn.className = 'account-btn use-btn';
         useBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Use';
@@ -766,14 +759,12 @@
           }
           signInWithGoogle();
         });
-
         const removeBtn = document.createElement('button');
         removeBtn.className = 'account-btn remove-btn';
         removeBtn.innerHTML = '<i class="fas fa-times"></i> Remove';
         removeBtn.addEventListener('click', () => {
           removeSavedAccount(email);
         });
-
         actionsDiv.appendChild(useBtn);
         actionsDiv.appendChild(removeBtn);
         accountItem.appendChild(emailSpan);
@@ -782,82 +773,90 @@
       });
     }
 
-    // Generate random ID for public profile
     function generateRandomId() {
       return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     }
 
-    // Create Star Background
+    // Stars
     function createStars() {
       const starsContainer = document.getElementById('stars');
-      const starCount = 150; // Number of stars
-
+      if (!starsContainer) return;
+      const starCount = 150;
       for (let i = 0; i < starCount; i++) {
         const star = document.createElement('div');
         star.classList.add('star');
-
-        // Random size (0.5px to 2px)
         const size = Math.random() * 1.5 + 0.5;
         star.style.width = `${size}px`;
         star.style.height = `${size}px`;
-
-        // Random position
         star.style.left = `${Math.random() * 100}%`;
         star.style.top = `${Math.random() * 100}%`;
-
-        // Random twinkle duration
-        const duration = Math.random() * 5 + 3; // Between 3s and 8s
+        const duration = Math.random() * 5 + 3;
         star.style.setProperty('--duration', `${duration}s`);
-
-        // Random delay for animation
         star.style.animationDelay = `${Math.random() * 5}s`;
-
         starsContainer.appendChild(star);
       }
     }
 
-    // Sign-In Handler - UPDATED FOR NEW STRUCTURE
+    // Load user private/profile data and update UI (fixes join date + posts not showing)
+    async function loadUserData(uid) {
+      if (!uid) return;
+      try {
+        const userPrivateRef = db.collection('usersPrivate').doc(uid);
+        const snap = await userPrivateRef.get();
+        if (!snap.exists) {
+          logToConsole('No userPrivate doc found for uid: ' + uid, 'warning');
+          // keep defaults
+          infoJoinDate.textContent = '-';
+          infoPosts.textContent = '0';
+          return;
+        }
+        const data = snap.data();
+        // joinDate may be a Firestore Timestamp
+        if (data.joinDate && data.joinDate.toDate) {
+          infoJoinDate.textContent = data.joinDate.toDate().toLocaleDateString();
+        } else if (data.joinDate) {
+          // fallback if stored as ISO string
+          infoJoinDate.textContent = new Date(data.joinDate).toLocaleDateString();
+        } else {
+          infoJoinDate.textContent = '-';
+        }
+        // posts count - prefer publicPostCount field
+        const postsCount = (data.publicPostCount != null) ? data.publicPostCount : 0;
+        infoPosts.textContent = String(postsCount);
+        logToConsole('Loaded userPrivate data for ' + uid, 'success');
+      } catch (err) {
+        console.error('loadUserData error', err);
+        logToConsole('Failed to load user data: ' + (err.message || err), 'error');
+      }
+    }
+
+    // Sign-In Handler
     async function signInWithGoogle() {
       if (!termsCheckbox.checked) {
         alert("Please accept Terms & Conditions and Privacy Policy first.");
         logToConsole('Sign in attempt without accepting terms', 'error');
         return;
       }
-
       logToConsole('Starting Google sign-in process...', 'info');
-
       try {
         const result = await auth.signInWithPopup(provider);
         const user = result.user;
+        if (!user) throw new Error('No user object returned from sign-in.');
         const userPrivateRef = db.collection('usersPrivate').doc(user.uid);
         logToConsole(`User signed in: ${user.email} (${user.uid})`, 'success');
-
         const now = firebase.firestore.Timestamp.now();
-        const formattedDate = new Date().toLocaleString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
 
         const userPrivateDoc = await userPrivateRef.get();
-        logToConsole(`Checking user private document existence...`, 'info');
-
         if (!userPrivateDoc.exists) {
           logToConsole('Creating new user private document...', 'info');
-
-          // Generate a unique slug
           const slug = generateRandomId();
-
-          // Create private user document
           await userPrivateRef.set({
             email: user.email,
             joinDate: now,
             lastLogin: now,
             name: user.displayName || '',
-            bio: '', // Default empty bio
-            profilePhotoUrl: user.photoURL || '', // Store profile photo
+            bio: '',
+            profilePhotoUrl: user.photoURL || '',
             slug: slug,
             publicPostCount: 0,
             followersCount: 0,
@@ -866,19 +865,8 @@
             termsAccepted: true,
             termsTimestamp: now
           });
-
-          logToConsole('User private document created successfully', 'success');
-
-          // Create settings sub-collection
-          await userPrivateRef.collection('settings').doc('default').set({
-            // Add default settings here if needed
-          });
-          logToConsole('User settings sub-collection created', 'success');
-
-          // Create public profile document
+          await userPrivateRef.collection('settings').doc('default').set({});
           const publicProfileRef = db.collection('publicProfiles').doc(slug);
-          logToConsole(`Creating public profile with slug: ${slug}`, 'info');
-
           await publicProfileRef.set({
             name: user.displayName || '',
             bio: '',
@@ -891,44 +879,37 @@
             visibility: false,
             verified: false
           });
-
-          logToConsole('Public profile document created successfully', 'success');
-
-          // Show success message
-          successMessage.style.display = 'flex';
-          infoJoinDate.textContent = formattedDate; // Set the join date in UI
+          // update UI (formatting join date nicely)
+          displayNameEl.textContent = user.displayName || 'User';
+          infoJoinDate.textContent = new Date().toLocaleDateString();
           infoPosts.textContent = '0';
-          infoFollowers.textContent = '0';
-          infoFollowing.textContent = '0';
-          logToConsole('New user onboarding completed', 'success');
+          successMessage.style.display = 'flex';
+          logToConsole('New user created & onboarded', 'success');
         } else {
-          logToConsole('Updating existing user private document...', 'info');
-          await userPrivateRef.update({
-            lastLogin: now
-          });
-          logToConsole('User private document updated successfully', 'success');
+          // existing user - update lastLogin and load existing fields
+          await userPrivateRef.update({ lastLogin: now }).catch(()=>{});
+          await loadUserData(user.uid);
+          displayNameEl.textContent = user.displayName || 'User';
+          successMessage.style.display = 'none';
+          logToConsole('Existing user updated and loaded', 'info');
         }
 
-        // Add to saved accounts
+        // Add to saved accounts and update UI
         addSavedAccount(user.email);
-
-        // Update UI
         signupForm.style.display = 'none';
         signedInView.style.display = 'block';
-        displayNameEl.textContent = user.displayName || 'User';
-        logToConsole('UI updated for signed-in user', 'info');
-
+        savedAccountsSection.style.display = 'none';
       } catch (error) {
         console.error("Sign-in error:", error);
-        logToConsole(`Sign-in failed: ${error.message}`, 'error');
-        alert("Sign-in failed: " + error.message);
+        logToConsole(`Sign-in failed: ${error.message || error}`, 'error');
+        alert("Sign-in failed: " + (error.message || error));
       }
     }
 
-    // Attach signInWithGoogle to the button
+    // Attach signInWithGoogle to button
     googleSignInBtn.addEventListener('click', signInWithGoogle);
 
-    // Sign out handler
+    // Sign out button
     signoutBtn.addEventListener('click', () => {
       auth.signOut().then(() => {
         signedInView.style.display = 'none';
@@ -937,6 +918,10 @@
         termsCheckbox.checked = false;
         googleSignInBtn.disabled = true;
         renderSavedAccounts();
+        // reset small UI pieces
+        displayNameEl.textContent = '';
+        infoJoinDate.textContent = '-';
+        infoPosts.textContent = '0';
         logToConsole('User signed out', 'info');
       }).catch(error => {
         logToConsole(`Sign-out failed: ${error.message}`, 'error');
@@ -944,7 +929,7 @@
       });
     });
 
-    // Switch account handler
+    // Switch account
     switchAccountBtn.addEventListener('click', () => {
       auth.signOut().then(() => {
         signedInView.style.display = 'none';
@@ -953,63 +938,59 @@
         termsCheckbox.checked = false;
         googleSignInBtn.disabled = true;
         renderSavedAccounts();
+        displayNameEl.textContent = '';
+        infoJoinDate.textContent = '-';
+        infoPosts.textContent = '0';
         logToConsole('Switching accounts', 'info');
       });
     });
 
-    // Open dashboard in a NEW window
+    // Go to dashboard — uses the path you requested
     goProfileBtn.addEventListener('click', () => {
-      logToConsole('Opening dashboard in a new window...', 'info');
-
+      logToConsole('Opening dashboard (requested path) ...', 'info');
       const user = auth.currentUser;
       if (user) {
-        const dashboardUrl = 'https://www.squadvertex.great-site.net/pages/dashboard.html';
         // open in new tab/window safely
-        window.open(dashboardUrl, '_blank', 'noopener,noreferrer');
+        window.open('/teamgalaxy/index.html', '_blank', 'noopener,noreferrer');
       } else {
         alert("Please sign in first to access your dashboard.");
         logToConsole('Dashboard open attempted while not signed in', 'error');
       }
     });
 
-    // Initialize page
-    auth.onAuthStateChanged(user => {
+    // Auth state handling — now also loads user data (fixes join date + posts)
+    auth.onAuthStateChanged(async (user) => {
       if (user) {
         signupForm.style.display = 'none';
         signedInView.style.display = 'block';
         displayNameEl.textContent = user.displayName || 'User';
-        logToConsole(`User authenticated: ${user.email}`, 'success');
-
-        // Hide saved accounts when signed in
         savedAccountsSection.style.display = 'none';
+        logToConsole(`User authenticated: ${user.email}`, 'success');
+        await loadUserData(user.uid); // <-- crucial fix
       } else {
-        // Show saved accounts when signed out
         renderSavedAccounts();
+        signupForm.style.display = 'block';
+        signedInView.style.display = 'none';
         logToConsole('No user authenticated', 'info');
       }
     });
 
-    // Add animation to buttons on hover
+    // Small hover animations (kept)
     const buttons = document.querySelectorAll('.btn, .google-btn, .account-btn');
     buttons.forEach(button => {
       button.addEventListener('mouseenter', () => {
         button.style.transform = 'translateY(-2px)';
         button.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.3)';
       });
-
       button.addEventListener('mouseleave', () => {
         button.style.transform = 'translateY(0)';
         button.style.boxShadow = '0 3px 8px rgba(0, 0, 0, 0.2)';
       });
     });
 
-    // Initial render of saved accounts
+    // Init
     renderSavedAccounts();
-
-    // Initialize stars
     createStars();
-
-    // Log initialization
     logToConsole('Application initialized', 'success');
     logToConsole('Firebase connected successfully', 'success');
     logToConsole('Waiting for user interaction...', 'info');
