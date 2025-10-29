@@ -575,58 +575,102 @@
   </footer>
 
   <script>
-    // Hamburger menu functionality
-    const hamburgerBtn = document.getElementById("hamburgerBtn");
-    const navButtons = document.getElementById("navButtons");
+  // Defensive helper to get live auth user
+  function getLiveUser() {
+    try {
+      if (window.firebase && firebase.auth && typeof firebase.auth === 'function') {
+        // compat SDK: firebase.auth().currentUser
+        return firebase.auth().currentUser;
+      }
+    } catch (e) {
+      // ignore
+    }
+    // fallback to any global currentUser var
+    return window.currentUser || null;
+  }
 
-    hamburgerBtn.addEventListener('click', function() {
-      navButtons.classList.toggle('show');
-    });
-
-    // Close hamburger menu if clicked outside
-    window.addEventListener("click", function(event) {
-        // Check if the click was outside the hamburger button and the nav menu
-        if (!hamburgerBtn.contains(event.target) && !navButtons.contains(event.target)) {
-            navButtons.classList.remove('show'); // Close the menu
-        }
-    });
-
-    // More Options dropdown functionality - FIXED
-    const moreOptions = document.getElementById("moreOptions");
-    const moreDropdown = moreOptions.querySelector(".dropdown-content");
-
-    // Toggle dropdown on button click
-    moreOptions.querySelector(".nav-btn").addEventListener("click", (e) => {
-      e.stopPropagation(); // Prevent immediate closing if clicking the button itself
-      moreDropdown.style.display = moreDropdown.style.display === "block" ? "none" : "block";
-    });
-
-    // Close 'More' dropdown if clicked outside - FIXED
-    window.addEventListener("click", (event) => {
-        // Check if the click was outside the 'moreOptions' container
-        if (!moreOptions.contains(event.target)) {
-            moreDropdown.style.display = "none";
-        }
-    });
-
-    // Profile dropdown functionality (already handles outside click)
-    const profileBtn = document.getElementById("profileBtn");
-    const profileMenu = document.getElementById("profileMenu");
-
-    profileBtn.addEventListener("click", (e) => {
+  // HAMBURGER
+  const hamburgerBtn = document.getElementById("hamburgerBtn");
+  const navButtons = document.getElementById("navButtons");
+  if (hamburgerBtn && !hamburgerBtn._attached) {
+    hamburgerBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
+      if (navButtons) navButtons.classList.toggle('show');
     });
+    hamburgerBtn._attached = true;
+  }
 
-    // Close profile menu if clicked outside
-    window.addEventListener("click", () => {
-      profileMenu.style.display = "none";
+  // MORE OPTIONS
+  const moreOptions = document.getElementById("moreOptions");
+  let moreDropdown = null;
+  if (moreOptions) {
+    moreDropdown = moreOptions.querySelector(".dropdown-content");
+    const moreBtn = moreOptions.querySelector(".nav-btn");
+    if (moreBtn && !moreBtn._attached) {
+      moreBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!moreDropdown) return;
+        moreDropdown.style.display = moreDropdown.style.display === "block" ? "none" : "block";
+      });
+      moreBtn._attached = true;
+    }
+  }
+
+  // PROFILE (robust redirect + toggle)
+  const profileBtn = document.getElementById("profileBtn");
+  const profileMenu = document.getElementById("profileMenu");
+
+  function handleProfileClick(e) {
+    e.stopPropagation();
+    const user = getLiveUser();
+    if (!user) {
+      // redirect to sign-up page if not signed in
+      window.location.href = "/teamgalaxy/legal/sign_up.html";
+      return;
+    }
+    // signed in -> toggle the menu
+    if (!profileMenu) return;
+    profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
+  }
+
+  if (profileBtn && !profileBtn._attached) {
+    profileBtn.addEventListener("click", handleProfileClick);
+    profileBtn._attached = true;
+  }
+
+  // Consolidated outside-click handler to close menus safely
+  if (!window._teamGalaxyGlobalClickAttached) {
+    window.addEventListener("click", (event) => {
+      const target = event.target;
+
+      // close nav / hamburger if click outside both the button and menu
+      if (navButtons && hamburgerBtn) {
+        if (!hamburgerBtn.contains(target) && !navButtons.contains(target)) {
+          navButtons.classList.remove('show');
+        }
+      }
+
+      // close "more" dropdown if clicked outside
+      if (moreOptions && moreDropdown) {
+        if (!moreOptions.contains(target)) {
+          moreDropdown.style.display = "none";
+        }
+      }
+
+      // close profile menu if clicked outside
+      if (profileMenu && profileBtn) {
+        if (!profileBtn.contains(target) && !profileMenu.contains(target)) {
+          profileMenu.style.display = "none";
+        }
+      }
     });
+    window._teamGalaxyGlobalClickAttached = true;
+  }
 
-    // Create star background
-    const starsContainer = document.getElementById('stars');
+  // Stars generation (kept exactly, defensive)
+  const starsContainer = document.getElementById('stars');
+  if (starsContainer && !starsContainer._starsCreated) {
     const starCount = 150; // Adjust number of stars as needed
-
     for (let i = 0; i < starCount; i++) {
       const star = document.createElement('div');
       star.classList.add('star');
@@ -652,6 +696,8 @@
 
       starsContainer.appendChild(star);
     }
-  </script>
+    starsContainer._starsCreated = true;
+  }
+</script>
 </body>
 </html>
