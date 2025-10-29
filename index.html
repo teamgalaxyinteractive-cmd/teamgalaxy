@@ -1034,8 +1034,8 @@ body {
   <script src="https://www.google.com/recaptcha/api.js?render=6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"></script>
 
   <script>
-    // Firebase config
-      const firebaseConfig = {
+  // Firebase config
+  const firebaseConfig = {
     apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
     authDomain: "teamgalaxy-77344.firebaseapp.com",
     projectId: "teamgalaxy-77344",
@@ -1045,295 +1045,273 @@ body {
     measurementId: "G-6C2W9NSNCH"
   };
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
 
-    // Activate App Check
-    try {
-      const appCheckProvider = new firebase.appCheck.ReCaptchaV3Provider(
-        "6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"
-      );
-      firebase.appCheck().activate(appCheckProvider, true);
-      console.log(
-        "App Check (compat) activated — reCaptcha v3 provider attached."
-      );
-    } catch (e) {
-      console.warn("App Check activation failed (compat):", e);
+  // Activate App Check
+  try {
+    const appCheckProvider = new firebase.appCheck.ReCaptchaV3Provider(
+      "6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"
+    );
+    firebase.appCheck().activate(appCheckProvider, true);
+    console.log(
+      "App Check (compat) activated — reCaptcha v3 provider attached."
+    );
+  } catch (e) {
+    console.warn("App Check activation failed (compat):", e);
+  }
+
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const profileBtn = document.getElementById("profileBtn");
+  const profileMenu = document.getElementById("profileMenu");
+
+  // Make collaborator boxes clickable
+  document.querySelectorAll('.collaborator-logo-box').forEach(box => {
+    box.addEventListener('click', () => {
+      const url = box.getAttribute('data-url');
+      if (url) {
+        window.open(url, '_blank');
+      }
+    });
+  });
+
+  profileBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!currentUser) {
+      window.location.href = "/legal/sign_up.html";
+      return;
     }
+    profileMenu.style.display =
+      profileMenu.style.display === "block" ? "none" : "block";
+  });
 
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+  // Close profile menu if clicked outside
+  window.addEventListener("click", () => {
+    profileMenu.style.display = "none";
+  });
 
-    const profileBtn = document.getElementById("profileBtn");
-    const profileMenu = document.getElementById("profileMenu");
+  // Sign-Out Function (signIn removed entirely)
+  async function signOut() {
+    try {
+      await auth.signOut();
+    } catch (error) {
+      alert("Sign-out failed: " + error.message);
+    }
+  }
 
-    // Make collaborator boxes clickable
-    document.querySelectorAll('.collaborator-logo-box').forEach(box => {
-      box.addEventListener('click', () => {
-        const url = box.getAttribute('data-url');
-        if (url) {
-          window.open(url, '_blank');
+  // Track current user
+  let currentUser = null;
+  auth.onAuthStateChanged((user) => {
+    currentUser = user;
+    updateProfileButton();
+    loadCards();
+  });
+
+  // Update Profile Button
+  function updateProfileButton() {
+    if (currentUser) {
+      if (currentUser.photoURL) {
+        profileBtn.innerHTML = `<img src="${currentUser.photoURL}" alt="Profile">`;
+      } else {
+        profileBtn.innerHTML = '<i class="fa-solid fa-user"></i>';
+      }
+      // Logout link
+      document.getElementById("logoutLink").onclick = async (e) => {
+        e.preventDefault();
+        await signOut();
+      };
+      // Profile link placeholder
+      document.getElementById("profileLink").onclick = (e) => {
+        e.preventDefault();
+        alert("Profile clicked - implement profile page.");
+      };
+    } else {
+      profileBtn.innerHTML = "Sign In";
+      // Redirect on click when not signed in
+      profileBtn.onclick = (e) => {
+        e.stopPropagation();
+        window.location.href = "/legal/sign_up.html";
+      };
+    }
+  }
+
+  // Increment views once per session per card for visitor
+  let visitedCards =
+    JSON.parse(sessionStorage.getItem("visitedCards")) || [];
+
+  // Load cards from Firestore
+  async function loadCards() {
+    const cardsContainer = document.getElementById("cardsContainer");
+
+    // Show skeleton loading
+    cardsContainer.innerHTML = `
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-img"></div>
+        <div class="skeleton skeleton-text" style="width: 70%;"></div>
+        <div class="skeleton skeleton-text" style="width: 90%;"></div>
+        <div class="skeleton skeleton-text" style="width: 80%;"></div>
+        <div class="skeleton-footer">
+          <div class="skeleton skeleton-icon"></div>
+          <div class="skeleton skeleton-icon"></div>
+        </div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-img"></div>
+        <div class="skeleton skeleton-text" style="width: 70%;"></div>
+        <div class="skeleton skeleton-text" style="width: 90%;"></div>
+        <div class="skeleton skeleton-text" style="width: 80%;"></div>
+        <div class="skeleton-footer">
+          <div class="skeleton skeleton-icon"></div>
+          <div class="skeleton skeleton-icon"></div>
+        </div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-img"></div>
+        <div class="skeleton skeleton-text" style="width: 70%;"></div>
+        <div class="skeleton skeleton-text" style="width: 90%;"></div>
+        <div class="skeleton skeleton-text" style="width: 80%;"></div>
+        <div class="skeleton-footer">
+          <div class="skeleton skeleton-icon"></div>
+          <div class="skeleton skeleton-icon"></div>
+        </div>
+      </div>
+    `;
+
+    try {
+      const snapshot = await db
+        .collection("cards")
+        .orderBy("publishedAt", "desc")
+        .limit(3)
+        .get();
+
+      cardsContainer.innerHTML = "";
+
+      snapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        const id = doc.id;
+
+        if (!visitedCards.includes(id)) {
+          db.collection("cards").doc(id).update({
+            views: firebase.firestore.FieldValue.increment(1),
+          });
+          visitedCards.push(id);
+          sessionStorage.setItem(
+            "visitedCards",
+            JSON.stringify(visitedCards)
+          );
         }
+
+        const card = createCard(
+          id,
+          data.heading,
+          data.description,
+          data.views || 0,
+          data.likes || 0,
+          data.imageUrl || ""
+        );
+        cardsContainer.appendChild(card);
       });
+    } catch (error) {
+      console.error("Error loading cards:", error);
+      cardsContainer.innerHTML = "<p>Error loading content. Please try again later.</p>";
+    }
+  }
+
+  // Create a card element
+  function createCard(id, heading, description, views, likes, imageUrl) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+
+    card.addEventListener("click", () => {
+      window.location.href = `/teamgalaxy/card_showcase.html?id=${encodeURIComponent(id)}`;
     });
 
-    profileBtn.addEventListener("click", (e) => {
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        card.click();
+      }
+    });
+
+    const img = document.createElement("img");
+    img.src = imageUrl || "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=500&q=80";
+    img.alt = heading;
+    card.appendChild(img);
+
+    const content = document.createElement("div");
+    content.className = "card-content";
+
+    const h3 = document.createElement("h3");
+    h3.textContent = heading || "uw gzbskzj haosjj";
+
+    const p = document.createElement("p");
+    p.textContent = description || "whhaj wnus hcs hx w whhaj hcs woqw kjqw qowq pwq.";
+
+    content.appendChild(h3);
+    content.appendChild(p);
+    card.appendChild(content);
+
+    const footer = document.createElement("div");
+    footer.className = "card-footer";
+
+    const viewsSpan = document.createElement("span");
+    viewsSpan.className = "views";
+    viewsSpan.innerHTML = `<i class="fa-regular fa-eye"></i> ${views}`;
+    footer.appendChild(viewsSpan);
+
+    const likesSpan = document.createElement("span");
+    likesSpan.className = "likes";
+    likesSpan.style.cursor = currentUser ? "pointer" : "not-allowed";
+    likesSpan.title = currentUser ? "Like" : "Sign In to Like";
+    likesSpan.innerHTML = `<i class="fa-regular fa-heart"></i> ${likes}`;
+
+    likesSpan.addEventListener("click", async (e) => {
       e.stopPropagation();
-      // If user is not signed in, trigger sign in
       if (!currentUser) {
+        // ✅ Redirect to sign-in page instead of alert
         window.location.href = "/legal/sign_up.html";
         return;
       }
-      // If signed in, show the menu
-      profileMenu.style.display =
-        profileMenu.style.display === "block" ? "none" : "block";
-    });
+      const likeDoc = await db
+        .collection("cards")
+        .doc(id)
+        .collection("likes")
+        .doc(currentUser.uid)
+        .get();
 
-    // Close profile menu if clicked outside
-    window.addEventListener("click", () => {
-      profileMenu.style.display = "none";
-    });
-
-    // Sign-In Function (Google OAuth)
-    async function signIn() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      try {
-        await auth.signInWithPopup(provider);
-      } catch (error) {
-        alert("Sign-in failed: " + error.message);
+      if (likeDoc.exists) {
+        alert("You have already liked this card.");
+        return;
       }
-    }
-
-    // Sign-Out Function
-    async function signOut() {
       try {
-        await auth.signOut();
-      } catch (error) {
-        alert("Sign-out failed: " + error.message);
-      }
-    }
-
-    // Track current user
-    let currentUser = null;
-    auth.onAuthStateChanged((user) => {
-      currentUser = user;
-      updateProfileButton();
-      loadCards();
-    });
-
-    // Update Profile Button (show sign in or profile photo)
-    function updateProfileButton() {
-      if (currentUser) {
-        if (currentUser.photoURL) {
-          profileBtn.innerHTML = `<img src="${currentUser.photoURL}" alt="Profile">`;
-        } else {
-          profileBtn.innerHTML = '<i class="fa-solid fa-user"></i>';
-        }
-        // Logout link inside the menu
-        document.getElementById("logoutLink").onclick = async (e) => {
-          e.preventDefault();
-          await signOut();
-        };
-        // Profile link placeholder
-        document.getElementById("profileLink").onclick = (e) => {
-          e.preventDefault();
-          alert("Profile clicked - implement profile page.");
-        };
-      } else {
-        profileBtn.innerHTML = "Sign In";
-        // Remove any existing click handler to prevent multiple bindings
-        profileBtn.onclick = (e) => {
-          e.stopPropagation();
-          window.location.href = "/legal/sign_up.html";
-        };
-      }
-    }
-
-    // Increment views once per session per card for visitor
-    let visitedCards =
-      JSON.parse(sessionStorage.getItem("visitedCards")) || [];
-
-    // Load cards from Firestore
-    async function loadCards() {
-      const cardsContainer = document.getElementById("cardsContainer");
-
-      // Show skeleton loading
-      cardsContainer.innerHTML = `
-        <div class="skeleton-card">
-          <div class="skeleton skeleton-img"></div>
-          <div class="skeleton skeleton-text" style="width: 70%;"></div>
-          <div class="skeleton skeleton-text" style="width: 90%;"></div>
-          <div class="skeleton skeleton-text" style="width: 80%;"></div>
-          <div class="skeleton-footer">
-            <div class="skeleton skeleton-icon"></div>
-            <div class="skeleton skeleton-icon"></div>
-          </div>
-        </div>
-        <div class="skeleton-card">
-          <div class="skeleton skeleton-img"></div>
-          <div class="skeleton skeleton-text" style="width: 70%;"></div>
-          <div class="skeleton skeleton-text" style="width: 90%;"></div>
-          <div class="skeleton skeleton-text" style="width: 80%;"></div>
-          <div class="skeleton-footer">
-            <div class="skeleton skeleton-icon"></div>
-            <div class="skeleton skeleton-icon"></div>
-          </div>
-        </div>
-        <div class="skeleton-card">
-          <div class="skeleton skeleton-img"></div>
-          <div class="skeleton skeleton-text" style="width: 70%;"></div>
-          <div class="skeleton skeleton-text" style="width: 90%;"></div>
-          <div class="skeleton skeleton-text" style="width: 80%;"></div>
-          <div class="skeleton-footer">
-            <div class="skeleton skeleton-icon"></div>
-            <div class="skeleton skeleton-icon"></div>
-          </div>
-        </div>
-      `;
-
-      try {
-        const snapshot = await db
-          .collection("cards")
-          .orderBy("publishedAt", "desc")
-          .limit(3)
-          .get();
-
-        cardsContainer.innerHTML = "";
-
-        snapshot.docs.forEach((doc) => {
-          const data = doc.data();
-          const id = doc.id;
-
-          // Increment views once if not visited this session
-          if (!visitedCards.includes(id)) {
-            db.collection("cards").doc(id).update({
-              views: firebase.firestore.FieldValue.increment(1),
-            });
-            visitedCards.push(id);
-            sessionStorage.setItem(
-              "visitedCards",
-              JSON.stringify(visitedCards)
-            );
-          }
-
-          const card = createCard(
-            id,
-            data.heading,
-            data.description,
-            data.views || 0,
-            data.likes || 0,
-            data.imageUrl || ""
-          );
-          cardsContainer.appendChild(card);
+        await db.collection("cards").doc(id).collection("likes").doc(currentUser.uid).set({
+          likedAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
-      } catch (error) {
-        console.error("Error loading cards:", error);
-        cardsContainer.innerHTML = "<p>Error loading content. Please try again later.</p>";
+        await db.collection("cards").doc(id).update({
+          likes: firebase.firestore.FieldValue.increment(1),
+        });
+        const newLikes = likes + 1;
+        likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${newLikes}`;
+        likesSpan.style.cursor = "default";
+        likesSpan.title = "You liked this";
+      } catch (err) {
+        alert("Error liking card: " + err.message);
       }
-    }
+    });
 
-    // Create a card element
-function createCard(id, heading, description, views, likes, imageUrl) {
-  const card = document.createElement("div");
-  card.className = "card";
-  card.tabIndex = 0;
-  card.setAttribute("role", "button");
+    footer.appendChild(likesSpan);
+    card.appendChild(footer);
 
-  // Updated: Relative path with proper ID encoding
-  card.addEventListener("click", () => {
-    window.location.href = `/teamgalaxy/card_showcase.html?id=${encodeURIComponent(id)}`;
-  });
+    return card;
+  }
 
-  card.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      card.click();
-    }
-  });
-
-  // Card image
-  const img = document.createElement("img");
-  img.src = imageUrl || "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=500&q=80";
-  img.alt = heading;
-  card.appendChild(img);
-
-  // Content container
-  const content = document.createElement("div");
-  content.className = "card-content";
-
-  const h3 = document.createElement("h3");
-  h3.textContent = heading || "uw gzbskzj haosjj";
-
-  const p = document.createElement("p");
-  p.textContent = description || "whhaj wnus hcs hx w whhaj hcs woqw kjqw qowq pwq.";
-
-  content.appendChild(h3);
-  content.appendChild(p);
-  card.appendChild(content);
-
-  // Footer container (views and likes)
-  const footer = document.createElement("div");
-  footer.className = "card-footer";
-
-  // Views
-  const viewsSpan = document.createElement("span");
-  viewsSpan.className = "views";
-  viewsSpan.innerHTML = `<i class="fa-regular fa-eye"></i> ${views}`;
-  footer.appendChild(viewsSpan);
-
-  // Likes (if logged in only)
-  const likesSpan = document.createElement("span");
-  likesSpan.className = "likes";
-  likesSpan.style.cursor = currentUser ? "pointer" : "not-allowed";
-  likesSpan.title = currentUser ? "Like" : "Sign In to Like";
-  likesSpan.innerHTML = `<i class="fa-regular fa-heart"></i> ${likes}`;
-
-  likesSpan.addEventListener("click", async (e) => {
-    e.stopPropagation();
-    if (!currentUser) {
-      alert("Please sign in to like.");
-      return;
-    }
-    // Check if user has liked already
-    const likeDoc = await db
-      .collection("cards")
-      .doc(id)
-      .collection("likes")
-      .doc(currentUser.uid)
-      .get();
-
-    if (likeDoc.exists) {
-      alert("You have already liked this card.");
-      return;
-    }
-    try {
-      // Add like doc
-      await db.collection("cards").doc(id).collection("likes").doc(currentUser.uid).set({
-        likedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      });
-      // Increment likes count
-      await db.collection("cards").doc(id).update({
-        likes: firebase.firestore.FieldValue.increment(1),
-      });
-      // Update UI
-      const newLikes = likes + 1;
-      likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${newLikes}`;
-      likesSpan.style.cursor = "default";
-      likesSpan.title = "You liked this";
-    } catch (err) {
-      alert("Error liking card: " + err.message);
-    }
-  });
-
-  footer.appendChild(likesSpan);
-  card.appendChild(footer);
-
-  return card;
-} // Function ka end
-
-    // Initialize
-    updateProfileButton();
-    loadCards();
-  </script>
+  // Initialize
+  updateProfileButton();
+  loadCards();
+</script>
 <script>
   document.querySelector('.hamburger').addEventListener('click', function() {
     document.querySelector('.nav-buttons').classList.toggle('show');
