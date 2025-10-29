@@ -6,6 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css  " />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-check-compat.js"></script>
   <style>
     body { 
       background: #181f2b; 
@@ -639,29 +644,23 @@
       }  
   });  
 
-  // Profile dropdown functionality (with sign-in redirect)
+  // Profile dropdown functionality (with sign-in redirect - FIXED)
   const profileBtn = document.getElementById("profileBtn");
   const profileMenu = document.getElementById("profileMenu");
-
-  // Track current user
-  let currentUser = null;
-  auth.onAuthStateChanged((user) => {
-    currentUser = user;
-    updateProfileButton();
-  });
 
   profileBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     // Close hamburger menu if open
     navButtons.classList.remove('show');
 
-    // If user is not signed in, redirect to sign-up page
-    if (!currentUser) {
+    // Check auth state *at the time of click* using auth.currentUser
+    if (!auth.currentUser) {
+      // User is not signed in -> redirect
       window.location.href = "/teamgalaxy/legal/sign_up.html";
       return;
     }
 
-    // If signed in, show the menu
+    // User is signed in -> toggle menu
     profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
   });
 
@@ -673,11 +672,11 @@
     }
   });
 
-  // Update Profile Button (show sign in or profile photo)
-  function updateProfileButton() {
-    if (currentUser) {
-      if (currentUser.photoURL) {
-        profileBtn.innerHTML = `<img src="${currentUser.photoURL}" alt="Profile">`;
+  // Update Profile Button (show sign in or profile photo) - FIXED
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      if (user.photoURL) {
+        profileBtn.innerHTML = `<img src="${user.photoURL}" alt="Profile">`;
       } else {
         profileBtn.innerHTML = '<i class="fa-solid fa-user"></i>';
       }
@@ -689,13 +688,13 @@
       // Profile link placeholder
       document.getElementById("profileLink").onclick = (e) => {
         e.preventDefault();
-        alert("Profile clicked - implement profile page.");
+        // You can implement profile page navigation here if needed
       };
     } else {
+      // User is signed out, show default icon
       profileBtn.innerHTML = '<i class="fa-solid fa-user"></i>';
-      // No specific click handler needed here, as main click handler handles it
     }
-  }
+  });
 
   // Sign-Out Function
   async function signOut() {
