@@ -1047,11 +1047,11 @@ body {
 
   // ===== Initialize Firebase (compat) safely - only once =====
   if (!window.firebase) {
-    console.error("Firebase SDK not loaded. Make sure your <script src='https://www.gstatic.com/firebasejs/.../firebase-app-compat.js'> and auth/firestore compat scripts are included.");
+    console.error("Firebase SDK not loaded. Make sure compat scripts are included.");
   } else {
     if (!firebase.apps || !firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
-      console.log("Firebase initialized");
+      console.log("Firebase initialized (compat)");
     } else {
       console.log("Firebase already initialized - skipping re-init");
     }
@@ -1066,17 +1066,17 @@ body {
     console.warn("App Check activation failed (compat):", e);
   }
 
+  // ===== compat services =====
   const auth = firebase.auth();
   const db = firebase.firestore();
 
   // ===== Ensure auth persistence is LOCAL so sessions survive reloads =====
   try {
-    // In compat SDK the enum is available on firebase.auth.Auth.Persistence
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
       .then(() => console.log("Auth persistence set to LOCAL"))
       .catch(err => console.warn("Failed to set auth persistence:", err));
   } catch (err) {
-    console.warn("Could not set persistence (maybe already set or compat API mismatch):", err);
+    console.warn("Could not set persistence (maybe compat API mismatch):", err);
   }
 
   // ===== DOM refs (guarded) =====
@@ -1084,6 +1084,7 @@ body {
   const profileMenu = document.getElementById("profileMenu");
   const logoutLink = document.getElementById("logoutLink");
   const profileLink = document.getElementById("profileLink");
+  const cardsContainer = document.getElementById("cardsContainer");
 
   // ===== collaborator boxes (unchanged) =====
   document.querySelectorAll('.collaborator-logo-box').forEach(box => {
@@ -1098,10 +1099,10 @@ body {
     e && e.stopPropagation();
     try {
       const liveUser = auth.currentUser;
+      // Redirect path updated per your request
       if (!liveUser) {
-        // Not signed in -> redirect to sign up / sign in
-        console.log("Profile clicked while not signed in — redirecting to /legal/sign_up.html");
-        window.location.href = "/legal/sign_up.html";
+        console.log("Profile clicked while not signed in — redirecting to /teamgalaxy/legal/sign_up.html");
+        window.location.href = "/teamgalaxy/legal/sign_up.html";
         return;
       }
       // Signed in -> toggle menu
@@ -1156,14 +1157,13 @@ body {
     logoutLink._attached = true;
   }
 
-  // Wire profileLink only for logged in users (safe fallback)
+  // Wire profileLink safely (only once)
   if (profileLink && !profileLink._attached) {
     profileLink.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
       if (!auth.currentUser) {
-        // If somehow clicked while unauthorized, redirect to sign-in
-        window.location.href = "/legal/sign_up.html";
+        window.location.href = "/teamgalaxy/legal/sign_up.html";
         return;
       }
       alert("Profile clicked - implement profile page.");
@@ -1176,12 +1176,10 @@ body {
   if (!auth._ourOnAuthAttached) {
     auth.onAuthStateChanged((user) => {
       console.log("onAuthStateChanged fired. user:", !!user);
-      currentUser = user; // keep the original var used in rest of app
-      updateProfileButton(); // update UI
-      // Only call loadCards once here; don't call it elsewhere to avoid double behaviour
-      if (typeof loadCards === "function") {
-        loadCards();
-      }
+      currentUser = user; // keep compatibility with other code using `currentUser`
+      updateProfileButton();
+      // load cards when auth state changes (safe)
+      if (typeof loadCards === "function") loadCards();
     });
     auth._ourOnAuthAttached = true;
   } else {
@@ -1196,13 +1194,11 @@ body {
     const u = auth.currentUser;
     if (u) {
       currentUser = u;
-      // show user photo or icon
       if (u.photoURL) {
         profileBtn.innerHTML = `<img src="${u.photoURL}" alt="Profile" style="width:36px;height:36px;border-radius:50%;">`;
       } else {
         profileBtn.innerHTML = `<i class="fa-solid fa-user"></i>`;
       }
-      // tooltip / accessible label
       profileBtn.title = u.displayName || u.email || "Profile";
     } else {
       currentUser = null;
@@ -1211,18 +1207,46 @@ body {
     }
   }
 
-  // ===== Prevent accidental auto-run signOuts: do NOT call signOut anywhere else =====
-
-  // ===== Views visited cache (unchanged) =====
+  // ===== Visited cache =====
   let visitedCards = JSON.parse(sessionStorage.getItem("visitedCards")) || [];
 
-  // ===== loadCards (kept same but safe-guarded) =====
+  // ===== loadCards (restored with skeletons & full logic) =====
   async function loadCards() {
-    const cardsContainer = document.getElementById("cardsContainer");
     if (!cardsContainer) return;
 
-    // skeleton
-    cardsContainer.innerHTML = `...`; // (keep your existing skeleton markup if needed)
+    // skeleton loading HTML (same as before)
+    cardsContainer.innerHTML = `
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-img"></div>
+        <div class="skeleton skeleton-text" style="width: 70%;"></div>
+        <div class="skeleton skeleton-text" style="width: 90%;"></div>
+        <div class="skeleton skeleton-text" style="width: 80%;"></div>
+        <div class="skeleton-footer">
+          <div class="skeleton skeleton-icon"></div>
+          <div class="skeleton skeleton-icon"></div>
+        </div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-img"></div>
+        <div class="skeleton skeleton-text" style="width: 70%;"></div>
+        <div class="skeleton skeleton-text" style="width: 90%;"></div>
+        <div class="skeleton skeleton-text" style="width: 80%;"></div>
+        <div class="skeleton-footer">
+          <div class="skeleton skeleton-icon"></div>
+          <div class="skeleton skeleton-icon"></div>
+        </div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton skeleton-img"></div>
+        <div class="skeleton skeleton-text" style="width: 70%;"></div>
+        <div class="skeleton skeleton-text" style="width: 90%;"></div>
+        <div class="skeleton skeleton-text" style="width: 80%;"></div>
+        <div class="skeleton-footer">
+          <div class="skeleton skeleton-icon"></div>
+          <div class="skeleton skeleton-icon"></div>
+        </div>
+      </div>
+    `;
 
     try {
       const snapshot = await db
@@ -1237,6 +1261,7 @@ body {
         const data = docSnap.data();
         const id = docSnap.id;
 
+        // Increment views once per session
         if (!visitedCards.includes(id)) {
           db.collection("cards").doc(id).update({
             views: firebase.firestore.FieldValue.increment(1),
@@ -1255,14 +1280,102 @@ body {
         );
         cardsContainer.appendChild(card);
       });
-    } catch (err) {
-      console.error("Error loading cards:", err);
+    } catch (error) {
+      console.error("Error loading cards:", error);
       cardsContainer.innerHTML = "<p>Error loading content. Please try again later.</p>";
     }
   }
 
-  // ===== End of script =====
-  console.log("Profile/auth safety script loaded");
+  // ===== createCard (restored exactly) =====
+  function createCard(id, heading, description, views, likes, imageUrl) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+
+    // click -> proper encoded path
+    card.addEventListener("click", () => {
+      window.location.href = `/teamgalaxy/card_showcase.html?id=${encodeURIComponent(id)}`;
+    });
+
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") card.click();
+    });
+
+    // Card image
+    const img = document.createElement("img");
+    img.src = imageUrl || "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=500&q=80";
+    img.alt = heading;
+    card.appendChild(img);
+
+    // Content container
+    const content = document.createElement("div");
+    content.className = "card-content";
+
+    const h3 = document.createElement("h3");
+    h3.textContent = heading || "uw gzbskzj haosjj";
+
+    const p = document.createElement("p");
+    p.textContent = description || "whhaj wnus hcs hx w whhaj hcs woqw kjqw qowq pwq.";
+
+    content.appendChild(h3);
+    content.appendChild(p);
+    card.appendChild(content);
+
+    // Footer container (views and likes)
+    const footer = document.createElement("div");
+    footer.className = "card-footer";
+
+    // Views
+    const viewsSpan = document.createElement("span");
+    viewsSpan.className = "views";
+    viewsSpan.innerHTML = `<i class="fa-regular fa-eye"></i> ${views}`;
+    footer.appendChild(viewsSpan);
+
+    // Likes (only for logged-in)
+    const likesSpan = document.createElement("span");
+    likesSpan.className = "likes";
+    likesSpan.style.cursor = auth.currentUser ? "pointer" : "not-allowed";
+    likesSpan.title = auth.currentUser ? "Like" : "Sign In to Like";
+    likesSpan.innerHTML = `<i class="fa-regular fa-heart"></i> ${likes}`;
+
+    likesSpan.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      if (!auth.currentUser) {
+        alert("Please sign in to like.");
+        return;
+      }
+      try {
+        const likeDoc = await db.collection("cards").doc(id).collection("likes").doc(auth.currentUser.uid).get();
+        if (likeDoc.exists) {
+          alert("You have already liked this card.");
+          return;
+        }
+        await db.collection("cards").doc(id).collection("likes").doc(auth.currentUser.uid).set({
+          likedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+        await db.collection("cards").doc(id).update({
+          likes: firebase.firestore.FieldValue.increment(1),
+        });
+        const newLikes = likes + 1;
+        likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${newLikes}`;
+        likesSpan.style.cursor = "default";
+        likesSpan.title = "You liked this";
+      } catch (err) {
+        alert("Error liking card: " + (err && err.message ? err.message : err));
+      }
+    });
+
+    footer.appendChild(likesSpan);
+    card.appendChild(footer);
+
+    return card;
+  } // end createCard
+
+  // ===== Initial run: update UI and load cards once =====
+  updateProfileButton();
+  loadCards();
+  console.log("Auth + cards script loaded");
 </script>
 <script>
   document.querySelector('.hamburger').addEventListener('click', function() {
