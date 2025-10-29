@@ -575,129 +575,166 @@
   </footer>
 
   <script>
-  // Defensive helper to get live auth user
-  function getLiveUser() {
-    try {
-      if (window.firebase && firebase.auth && typeof firebase.auth === 'function') {
-        // compat SDK: firebase.auth().currentUser
-        return firebase.auth().currentUser;
-      }
-    } catch (e) {
-      // ignore
-    }
-    // fallback to any global currentUser var
-    return window.currentUser || null;
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+    authDomain: "teamgalaxy-77344.firebaseapp.com",
+    projectId: "teamgalaxy-77344",
+    storageBucket: "teamgalaxy-77344.firebasestorage.app",
+    messagingSenderId: "770256225320",
+    appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+    measurementId: "G-6C2W9NSNCH"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  // Activate App Check
+  try {
+    const appCheckProvider = new firebase.appCheck.ReCaptchaV3Provider(
+      "6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"
+    );
+    firebase.appCheck().activate(appCheckProvider, true);
+    console.log(
+      "App Check (compat) activated — reCaptcha v3 provider attached."
+    );
+  } catch (e) {
+    console.warn("App Check activation failed (compat):", e);
   }
 
-  // HAMBURGER
-  const hamburgerBtn = document.getElementById("hamburgerBtn");
-  const navButtons = document.getElementById("navButtons");
-  if (hamburgerBtn && !hamburgerBtn._attached) {
-    hamburgerBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (navButtons) navButtons.classList.toggle('show');
-    });
-    hamburgerBtn._attached = true;
-  }
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-  // MORE OPTIONS
-  const moreOptions = document.getElementById("moreOptions");
-  let moreDropdown = null;
-  if (moreOptions) {
-    moreDropdown = moreOptions.querySelector(".dropdown-content");
-    const moreBtn = moreOptions.querySelector(".nav-btn");
-    if (moreBtn && !moreBtn._attached) {
-      moreBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (!moreDropdown) return;
-        moreDropdown.style.display = moreDropdown.style.display === "block" ? "none" : "block";
-      });
-      moreBtn._attached = true;
-    }
-  }
+  // Hamburger menu functionality  
+  const hamburgerBtn = document.getElementById("hamburgerBtn");  
+  const navButtons = document.getElementById("navButtons");  
 
-  // PROFILE (robust redirect + toggle)
+  hamburgerBtn.addEventListener('click', function() {  
+    navButtons.classList.toggle('show');  
+  });  
+
+  // Close hamburger menu if clicked outside  
+  window.addEventListener("click", function(event) {  
+      // Check if the click was outside the hamburger button and the nav menu  
+      if (!hamburgerBtn.contains(event.target) && !navButtons.contains(event.target)) {  
+          navButtons.classList.remove('show'); // Close the menu  
+      }  
+  });  
+
+  // More Options dropdown functionality - FIXED  
+  const moreOptions = document.getElementById("moreOptions");  
+  const moreDropdown = moreOptions.querySelector(".dropdown-content");  
+
+  // Toggle dropdown on button click  
+  moreOptions.querySelector(".nav-btn").addEventListener("click", (e) => {  
+    e.stopPropagation(); // Prevent immediate closing if clicking the button itself  
+    moreDropdown.style.display = moreDropdown.style.display === "block" ? "none" : "block";  
+  });  
+
+  // Close 'More' dropdown if clicked outside - FIXED  
+  window.addEventListener("click", (event) => {  
+      // Check if the click was outside the 'moreOptions' container  
+      if (!moreOptions.contains(event.target)) {  
+          moreDropdown.style.display = "none";  
+      }  
+  });  
+
+  // Profile dropdown functionality (with sign-in redirect)
   const profileBtn = document.getElementById("profileBtn");
   const profileMenu = document.getElementById("profileMenu");
 
-  function handleProfileClick(e) {
+  // Track current user
+  let currentUser = null;
+  auth.onAuthStateChanged((user) => {
+    currentUser = user;
+    updateProfileButton();
+  });
+
+  profileBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    const user = getLiveUser();
-    if (!user) {
-      // redirect to sign-up page if not signed in
+    // Close hamburger menu if open
+    navButtons.classList.remove('show');
+
+    // If user is not signed in, redirect to sign-up page
+    if (!currentUser) {
       window.location.href = "/teamgalaxy/legal/sign_up.html";
       return;
     }
-    // signed in -> toggle the menu
-    if (!profileMenu) return;
+
+    // If signed in, show the menu
     profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
-  }
+  });
 
-  if (profileBtn && !profileBtn._attached) {
-    profileBtn.addEventListener("click", handleProfileClick);
-    profileBtn._attached = true;
-  }
-
-  // Consolidated outside-click handler to close menus safely
-  if (!window._teamGalaxyGlobalClickAttached) {
-    window.addEventListener("click", (event) => {
-      const target = event.target;
-
-      // close nav / hamburger if click outside both the button and menu
-      if (navButtons && hamburgerBtn) {
-        if (!hamburgerBtn.contains(target) && !navButtons.contains(target)) {
-          navButtons.classList.remove('show');
-        }
-      }
-
-      // close "more" dropdown if clicked outside
-      if (moreOptions && moreDropdown) {
-        if (!moreOptions.contains(target)) {
-          moreDropdown.style.display = "none";
-        }
-      }
-
-      // close profile menu if clicked outside
-      if (profileMenu && profileBtn) {
-        if (!profileBtn.contains(target) && !profileMenu.contains(target)) {
-          profileMenu.style.display = "none";
-        }
-      }
-    });
-    window._teamGalaxyGlobalClickAttached = true;
-  }
-
-  // Stars generation (kept exactly, defensive)
-  const starsContainer = document.getElementById('stars');
-  if (starsContainer && !starsContainer._starsCreated) {
-    const starCount = 150; // Adjust number of stars as needed
-    for (let i = 0; i < starCount; i++) {
-      const star = document.createElement('div');
-      star.classList.add('star');
-
-      // Random position
-      const posX = Math.random() * 100;
-      const posY = Math.random() * 100;
-
-      // Random size (0.5px to 2px)
-      const size = Math.random() * 1.5 + 0.5;
-
-      // Random animation duration (2s to 8s)
-      const duration = Math.random() * 6 + 2;
-
-      star.style.left = `${posX}%`;
-      star.style.top = `${posY}%`;
-      star.style.width = `${size}px`;
-      star.style.height = `${size}px`;
-      star.style.setProperty('--duration', `${duration}s`);
-
-      // Random delay for animation
-      star.style.animationDelay = `${Math.random() * 5}s`;
-
-      starsContainer.appendChild(star);
+  // Close profile menu if clicked outside  
+  window.addEventListener("click", (event) => {
+    // Check if click was outside profile menu
+    if (!profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
+      profileMenu.style.display = "none";
     }
-    starsContainer._starsCreated = true;
+  });
+
+  // Update Profile Button (show sign in or profile photo)
+  function updateProfileButton() {
+    if (currentUser) {
+      if (currentUser.photoURL) {
+        profileBtn.innerHTML = `<img src="${currentUser.photoURL}" alt="Profile">`;
+      } else {
+        profileBtn.innerHTML = '<i class="fa-solid fa-user"></i>';
+      }
+      // Logout link inside the menu
+      document.getElementById("logoutLink").onclick = async (e) => {
+        e.preventDefault();
+        await signOut();
+      };
+      // Profile link placeholder
+      document.getElementById("profileLink").onclick = (e) => {
+        e.preventDefault();
+        alert("Profile clicked - implement profile page.");
+      };
+    } else {
+      profileBtn.innerHTML = '<i class="fa-solid fa-user"></i>';
+      // No specific click handler needed here, as main click handler handles it
+    }
   }
+
+  // Sign-Out Function
+  async function signOut() {
+    try {
+      await auth.signOut();
+    } catch (error) {
+      alert("Sign-out failed: " + error.message);
+    }
+  }
+
+  // Create star background  
+  const starsContainer = document.getElementById('stars');  
+  const starCount = 150; // Adjust number of stars as needed  
+
+  for (let i = 0; i < starCount; i++) {  
+    const star = document.createElement('div');  
+    star.classList.add('star');  
+
+    // Random position  
+    const posX = Math.random() * 100;  
+    const posY = Math.random() * 100;  
+
+    // Random size (0.5px to 2px)  
+    const size = Math.random() * 1.5 + 0.5;  
+
+    // Random animation duration (2s to 8s)  
+    const duration = Math.random() * 6 + 2;  
+
+    star.style.left = `${posX}%`;  
+    star.style.top = `${posY}%`;  
+    star.style.width = `${size}px`;  
+    star.style.height = `${size}px`;  
+    star.style.setProperty('--duration', `${duration}s`);  
+
+    // Random delay for animation  
+    star.style.animationDelay = `${Math.random() * 5}s`;  
+
+    starsContainer.appendChild(star);  
+  }  
 </script>
 </body>
 </html>
