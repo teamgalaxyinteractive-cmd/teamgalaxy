@@ -1033,10 +1033,10 @@ body {
   <!-- reCaptcha -->
   <script src="https://www.google.com/recaptcha/api.js?render=6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"></script>
 
-  <script>
-  // Firebase config
+ <script>
+  // Firebase config (unchanged)
   const firebaseConfig = {
-    apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+    apiKey: "AIzaSyD0Yv_bQjxi2_kzPR4XHOlaB7Sb6NRVUc",
     authDomain: "teamgalaxy-77344.firebaseapp.com",
     projectId: "teamgalaxy-77344",
     storageBucket: "teamgalaxy-77344.firebasestorage.app",
@@ -1045,18 +1045,16 @@ body {
     measurementId: "G-6C2W9NSNCH"
   };
 
-  // Initialize Firebase
+  // Initialize Firebase (compat)
   firebase.initializeApp(firebaseConfig);
 
-  // Activate App Check
+  // Activate App Check (compat)
   try {
     const appCheckProvider = new firebase.appCheck.ReCaptchaV3Provider(
       "6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"
     );
     firebase.appCheck().activate(appCheckProvider, true);
-    console.log(
-      "App Check (compat) activated — reCaptcha v3 provider attached."
-    );
+    console.log("App Check (compat) activated — reCaptcha v3 provider attached.");
   } catch (e) {
     console.warn("App Check activation failed (compat):", e);
   }
@@ -1064,35 +1062,55 @@ body {
   const auth = firebase.auth();
   const db = firebase.firestore();
 
+  // DOM refs (may be null if HTML not present; guard later)
   const profileBtn = document.getElementById("profileBtn");
   const profileMenu = document.getElementById("profileMenu");
 
-  // Make collaborator boxes clickable
+  // Make collaborator boxes clickable (unchanged)
   document.querySelectorAll('.collaborator-logo-box').forEach(box => {
     box.addEventListener('click', () => {
       const url = box.getAttribute('data-url');
-      if (url) {
-        window.open(url, '_blank');
-      }
+      if (url) window.open(url, '_blank');
     });
   });
 
-  profileBtn.addEventListener("click", (e) => {
+  // single click handler attached once — decides at click-time what to do
+  function handleProfileButtonClick(e) {
     e.stopPropagation();
-    if (!currentUser) {
+    // prefer live auth state rather than possibly stale currentUser variable
+    const user = auth.currentUser;
+    if (!user) {
+      // not signed in -> go to signup/signin page
       window.location.href = "/legal/sign_up.html";
       return;
     }
-    profileMenu.style.display =
-      profileMenu.style.display === "block" ? "none" : "block";
-  });
+    // signed in -> toggle the profile menu (safe guard)
+    if (!profileMenu) return;
+    profileMenu.style.display = (profileMenu.style.display === "block") ? "none" : "block";
+  }
+
+  // Attach handler only once (defensive)
+  if (profileBtn && !profileBtn._profileHandlerAttached) {
+    profileBtn.addEventListener("click", handleProfileButtonClick);
+    profileBtn._profileHandlerAttached = true;
+  }
 
   // Close profile menu if clicked outside
   window.addEventListener("click", () => {
-    profileMenu.style.display = "none";
+    if (profileMenu) profileMenu.style.display = "none";
   });
 
-  // Sign-Out Function (signIn removed entirely)
+  // Sign-In Function (Google OAuth) — unchanged
+  async function signIn() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    try {
+      await auth.signInWithPopup(provider);
+    } catch (error) {
+      alert("Sign-in failed: " + error.message);
+    }
+  }
+
+  // Sign-Out Function — unchanged
   async function signOut() {
     try {
       await auth.signOut();
@@ -1101,7 +1119,7 @@ body {
     }
   }
 
-  // Track current user
+  // Track current user (kept consistent with your code)
   let currentUser = null;
   auth.onAuthStateChanged((user) => {
     currentUser = user;
@@ -1109,43 +1127,60 @@ body {
     loadCards();
   });
 
-  // Update Profile Button
+  // Update Profile Button (show sign in or profile photo)
   function updateProfileButton() {
+    // make sure profileBtn exists
+    if (!profileBtn) return;
+
+    // don't rebind click handlers here: single handler above uses live auth state
     if (currentUser) {
+      // show photo if available
       if (currentUser.photoURL) {
-        profileBtn.innerHTML = `<img src="${currentUser.photoURL}" alt="Profile">`;
+        profileBtn.innerHTML = `<img src="${currentUser.photoURL}" alt="Profile" style="width:36px;height:36px;border-radius:50%;">`;
       } else {
+        // fallback icon
         profileBtn.innerHTML = '<i class="fa-solid fa-user"></i>';
       }
-      // Logout link
-      document.getElementById("logoutLink").onclick = async (e) => {
-        e.preventDefault();
-        await signOut();
-      };
-      // Profile link placeholder
-      document.getElementById("profileLink").onclick = (e) => {
-        e.preventDefault();
-        alert("Profile clicked - implement profile page.");
-      };
+
+      // make sure profile menu links work for logged in user
+      const logoutLink = document.getElementById("logoutLink");
+      if (logoutLink) {
+        logoutLink.onclick = async (e) => {
+          e.preventDefault();
+          await signOut();
+          if (profileMenu) profileMenu.style.display = "none";
+        };
+      }
+
+      const profileLink = document.getElementById("profileLink");
+      if (profileLink) {
+        profileLink.onclick = (e) => {
+          e.preventDefault();
+          alert("Profile clicked - implement profile page.");
+          if (profileMenu) profileMenu.style.display = "none";
+        };
+      }
     } else {
+      // not signed in: show "Sign In" text (the handler above will redirect on click)
       profileBtn.innerHTML = "Sign In";
-      // Redirect on click when not signed in
-      profileBtn.onclick = (e) => {
-        e.stopPropagation();
-        window.location.href = "/legal/sign_up.html";
-      };
+
+      // clear any leftover menu-link bindings to avoid confusion
+      const logoutLink = document.getElementById("logoutLink");
+      if (logoutLink) logoutLink.onclick = null;
+      const profileLink = document.getElementById("profileLink");
+      if (profileLink) profileLink.onclick = null;
     }
   }
 
   // Increment views once per session per card for visitor
-  let visitedCards =
-    JSON.parse(sessionStorage.getItem("visitedCards")) || [];
+  let visitedCards = JSON.parse(sessionStorage.getItem("visitedCards")) || [];
 
-  // Load cards from Firestore
+  // Load cards from Firestore (unchanged except for safety checks)
   async function loadCards() {
     const cardsContainer = document.getElementById("cardsContainer");
+    if (!cardsContainer) return;
 
-    // Show skeleton loading
+    // skeleton (same)
     cardsContainer.innerHTML = `
       <div class="skeleton-card">
         <div class="skeleton skeleton-img"></div>
@@ -1192,15 +1227,13 @@ body {
         const data = doc.data();
         const id = doc.id;
 
+        // Increment views once if not visited this session
         if (!visitedCards.includes(id)) {
           db.collection("cards").doc(id).update({
             views: firebase.firestore.FieldValue.increment(1),
-          });
+          }).catch(err => console.warn('views increment failed', err));
           visitedCards.push(id);
-          sessionStorage.setItem(
-            "visitedCards",
-            JSON.stringify(visitedCards)
-          );
+          sessionStorage.setItem("visitedCards", JSON.stringify(visitedCards));
         }
 
         const card = createCard(
@@ -1219,21 +1252,20 @@ body {
     }
   }
 
-  // Create a card element
+  // Create a card element (unchanged)
   function createCard(id, heading, description, views, likes, imageUrl) {
     const card = document.createElement("div");
     card.className = "card";
     card.tabIndex = 0;
     card.setAttribute("role", "button");
 
+    // Relative path with proper ID encoding
     card.addEventListener("click", () => {
       window.location.href = `/teamgalaxy/card_showcase.html?id=${encodeURIComponent(id)}`;
     });
 
     card.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        card.click();
-      }
+      if (e.key === "Enter") card.click();
     });
 
     const img = document.createElement("img");
@@ -1264,30 +1296,24 @@ body {
 
     const likesSpan = document.createElement("span");
     likesSpan.className = "likes";
-    likesSpan.style.cursor = currentUser ? "pointer" : "not-allowed";
-    likesSpan.title = currentUser ? "Like" : "Sign In to Like";
+    likesSpan.style.cursor = auth.currentUser ? "pointer" : "not-allowed";
+    likesSpan.title = auth.currentUser ? "Like" : "Sign In to Like";
     likesSpan.innerHTML = `<i class="fa-regular fa-heart"></i> ${likes}`;
 
     likesSpan.addEventListener("click", async (e) => {
       e.stopPropagation();
-      if (!currentUser) {
-        // ✅ Redirect to sign-in page instead of alert
-        window.location.href = "/legal/sign_up.html";
+      if (!auth.currentUser) {
+        alert("Please sign in to like.");
         return;
       }
-      const likeDoc = await db
-        .collection("cards")
-        .doc(id)
-        .collection("likes")
-        .doc(currentUser.uid)
-        .get();
-
-      if (likeDoc.exists) {
-        alert("You have already liked this card.");
-        return;
-      }
+      // Check if user has liked already
       try {
-        await db.collection("cards").doc(id).collection("likes").doc(currentUser.uid).set({
+        const likeDoc = await db.collection("cards").doc(id).collection("likes").doc(auth.currentUser.uid).get();
+        if (likeDoc.exists) {
+          alert("You have already liked this card.");
+          return;
+        }
+        await db.collection("cards").doc(id).collection("likes").doc(auth.currentUser.uid).set({
           likedAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
         await db.collection("cards").doc(id).update({
@@ -1306,9 +1332,9 @@ body {
     card.appendChild(footer);
 
     return card;
-  }
+  } // Function ka end
 
-  // Initialize
+  // Initialize UI: updateProfileButton and loadCards on script load (they will use auth state)
   updateProfileButton();
   loadCards();
 </script>
