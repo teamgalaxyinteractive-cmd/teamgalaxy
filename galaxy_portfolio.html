@@ -389,15 +389,15 @@
       GalaxyWeb
     </div>
 
-        <div class="nav-buttons" id="navButtons">
-      <button class="nav-btn" onclick="window.location.href='index.html';">Home</button>
-      <button class="nav-btn" onclick="window.location.href='about_us.html';">Team Galaxy</button>
+    <div class="nav-buttons" id="navButtons">
+      <button class="nav-btn">Home</button>
+      <button class="nav-btn">Team Galaxy</button>
       <div class="more-options" id="moreOptions">
         <button class="nav-btn">More ▼</button>
         <div class="dropdown-content">
-          <a href="galaxy_blogs.html">Blog</a>
-          <a href="galaxy_studio.html">Galaxy Design</a>
-          <a href="galaxy_portfolio.html">Portfolio</a>
+          <a href="#">Blog</a>
+          <a href="#">Posts</a>
+          <a href="#">Portfolio</a>
         </div>
       </div>
 
@@ -413,7 +413,7 @@
 
   <!-- Banner -->
   <section class="banner-img-section">
-    <img src="   https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80" alt="Banner" />
+    <img src="  https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80" alt="Banner" />
   </section>
 
   <main>
@@ -438,11 +438,11 @@
         </div>
       </div>
       <div class="footer-social">
-        <a href="   https://twitter.com   " title="Twitter"><i class="fab fa-twitter"></i></a>
-        <a href="https://facebook.com   " title="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="https://instagram.com   " title="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://youtube.com   " title="YouTube"><i class="fab fa-youtube"></i></a>
-        <a href="https://discord.com   " title="Discord"><i class="fab fa-discord"></i></a>
+        <a href="  https://twitter.com  " title="Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="https://facebook.com  " title="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="https://instagram.com  " title="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://youtube.com  " title="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="https://discord.com  " title="Discord"><i class="fab fa-discord"></i></a>
       </div>
     </div>
     <!-- Right: Links + Address -->
@@ -480,12 +480,10 @@
       </div>
     </div>
   </footer>
-
-
   <!-- Firebase (compat) kept as-is + App Check -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js   "></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js   "></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-check-compat.js   "></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js  "></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js  "></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-check-compat.js  "></script>
   <!-- reCAPTCHA v3 -->
   <script src="https://www.google.com/recaptcha/api.js?render=6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"></script>
   <script>
@@ -517,7 +515,7 @@
 
     // Close 'More' dropdown if clicked outside
     window.addEventListener("click", (event) => {
-        if (!moreOptions.contains(event.target)) {
+        if (!moreOptions.contains(event)) {
             moreDropdown.style.display = "none";
         }
     });
@@ -599,51 +597,6 @@
         }
     }
 
-    // Function to render actual categories
-    function renderCategories() {
-      const listEl = document.getElementById('portfolioList');
-      listEl.innerHTML = ''; // Clear skeleton cards or previous content
-      categoryDocs.forEach((cat, idx) => {
-        const row = document.createElement('div');
-        row.className = 'portfolio-row';
-        if (idx % 2 === 1) row.classList.add('reverse');
-
-        const text = document.createElement('div');
-        text.className = 'row-text';
-        const ttl = document.createElement('div');
-        ttl.className = 'row-title';
-        ttl.textContent = cat.title;
-        const desc = document.createElement('div');
-        desc.className = 'row-desc';
-        desc.textContent = cat.description || 'No description provided.';
-        const openBtn = document.createElement('button');
-        openBtn.textContent = 'View Gallery';
-        openBtn.style.marginTop = '16px';
-        openBtn.className = 'nav-btn';
-        openBtn.onclick = () => openModal(idx);
-        text.appendChild(ttl);
-        text.appendChild(desc);
-        text.appendChild(openBtn);
-
-        const coverWrap = document.createElement('div');
-        coverWrap.className = 'row-cover';
-        const im = document.createElement('img');
-        im.alt = cat.title;
-        im.loading = 'lazy';
-        im.onclick = () => openModal(idx);
-        if (cat.coverUrl) im.src = cat.coverUrl;
-        else {
-          im.src = '   https://dummyimage.com/1200x800/121824/99a7bf.png&text=No+Cover   ';
-          im.style.opacity = 0.36;
-        }
-        coverWrap.appendChild(im);
-
-        row.appendChild(text);
-        row.appendChild(coverWrap);
-        listEl.appendChild(row);
-      });
-    }
-
     async function loadCategories() {
       const listEl = document.getElementById('portfolioList');
       renderSkeletonCards(); // Show skeleton cards while loading
@@ -674,6 +627,50 @@
         console.error('Failed to load categories', e);
         document.getElementById('portfolioList').innerHTML = '<div style="color:#ffb4b4">Failed to load portfolio. Check console.</div>';
       }
+    }
+
+    function renderCategories() {
+      const listEl = document.getElementById('portfolioList');
+      listEl.innerHTML = ''; // Clear skeleton cards
+      categoryDocs.forEach((cat, idx) => {
+        const row = document.createElement('div');
+        row.className = 'portfolio-row';
+        if (idx % 2 === 1) row.classList.add('reverse');
+
+        const text = document.createElement('div');
+        text.className = 'row-text';
+        const ttl = document.createElement('div');
+        ttl.className = 'row-title';
+        ttl.textContent = cat.title;
+        const desc = document.createElement('div');
+        desc.className = 'row-desc';
+        desc.textContent = cat.description || 'No description provided.';
+        const openBtn = document.createElement('button');
+        openBtn.textContent = 'View Gallery';
+        openBtn.style.marginTop = '16px';
+        openBtn.className = 'nav-btn';
+        openBtn.onclick = () => openModal(idx);
+        text.appendChild(ttl);
+        text.appendChild(desc);
+        text.appendChild(openBtn);
+
+        const coverWrap = document.createElement('div');
+        coverWrap.className = 'row-cover';
+        const im = document.createElement('img');
+        im.alt = cat.title;
+        im.loading = 'lazy';
+        im.onclick = () => openModal(idx);
+        if (cat.coverUrl) im.src = cat.coverUrl;
+        else {
+          im.src = '  https://dummyimage.com/1200x800/121824/99a7bf.png&text=No+Cover  ';
+          im.style.opacity = 0.36;
+        }
+        coverWrap.appendChild(im);
+
+        row.appendChild(text);
+        row.appendChild(coverWrap);
+        listEl.appendChild(row);
+      });
     }
 
     // Open modal for category index. It will fetch images from the 'images' array in the folder document.
@@ -828,7 +825,7 @@
     // keyboard handler when modal is open
     function modalKeyHandler(e){
       const modalWrap = document.getElementById('portfolioModal');
-      if (!modalWrap || modalWrap.style.display = 'none') return;
+      if (!modalWrap || modalWrap.style.display === 'none') return;
       if (e.key === 'Escape') { closeModal(e); return; }
       if (e.key === 'ArrowLeft' && !e.ctrlKey) { prevImage(); }
       else if (e.key === 'ArrowRight' && !e.ctrlKey) { nextImage(); }
@@ -844,8 +841,8 @@
       window.removeEventListener('keydown', modalKeyHandler);
     }
 
-        // small escaping helpers to avoid accidental injection
-    function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'<').replace(/>/g,'>'); }
+    // small escaping helpers to avoid accidental injection
+    function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
     function escapeAttr(str){ if(!str) return ''; return String(str).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
     // Create star background
