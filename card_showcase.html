@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* लोडिंग स्क्रीन के लिए स्टाइल */
   .loading-overlay {
     position: fixed;
     top: 0;
@@ -213,7 +212,7 @@
 </style>
 </head>
 <body>
-  <!-- लोडिंग स्क्रीन -->
+  <!-- Loading Screen -->
   <div id="loadingOverlay" class="loading-overlay">
     <div class="spinner"></div>
   </div>
@@ -244,7 +243,9 @@
         </div>
       </div>
 
-      <button id="profileBtn" class="profile-btn"><i class="fa-solid fa-user"></i></button>
+      <button id="profileBtn" class="profile-btn" title="Sign In">
+        Sign In
+      </button>
       <div id="profileMenu" class="dropdown-content" style="right: 30px; display:none;">
         <a href="#" id="profileLink">Profile</a>
         <a href="#" id="logoutLink">Logout</a>
@@ -263,11 +264,11 @@
         </div>
       </div>
       <div class="footer-social">
-        <a href="https://twitter.com" title="Twitter"><i class="fab fa-twitter"></i></a>
-        <a href="https://facebook.com" title="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="https://instagram.com" title="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://youtube.com" title="YouTube"><i class="fab fa-youtube"></i></a>
-        <a href="https://discord.com" title="Discord"><i class="fab fa-discord"></i></a>
+        <a href=" https://twitter.com " title="Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="https://facebook.com " title="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="https://instagram.com " title="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://youtube.com " title="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="https://discord.com " title="Discord"><i class="fab fa-discord"></i></a>
       </div>
     </div>
 
@@ -306,10 +307,10 @@
     </div>
   </footer>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-check-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js "></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js "></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js "></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-check-compat.js "></script>
   <script src="https://www.google.com/recaptcha/api.js?render=6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"></script>
   <script>
     // Firebase initialization (unchanged)
@@ -480,58 +481,114 @@
         }
     });
 
-    // Profile and authentication code
-    const profileBtn = document.getElementById("profileBtn");
-    const profileMenu = document.getElementById("profileMenu");
-
-    // Safe: only attach click listeners if the nodes exist
-    document.querySelectorAll('.collaborator-logo-box').forEach(box => {
-      box.addEventListener('click', () => {
-        const url = box.getAttribute('data-url');
-        if (url) window.open(url, '_blank');
-      });
-    });
-
-    profileBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      if (!currentUser) { signIn(); return; }
-      profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
-    });
-
-    // Close profile menu if clicked outside (FIX: check event.target)
-    window.addEventListener("click", (e) => {
-      if (!profileMenu.contains(e.target) && !profileBtn.contains(e.target)) {
-        profileMenu.style.display = "none";
+    // ===== Single click handler that checks live auth state =====
+    function handleProfileBtnClick(e) {
+      e && e.stopPropagation();
+      try {
+        const liveUser = auth.currentUser;
+        // Redirect path updated per your request
+        if (!liveUser) {
+          console.log("Profile clicked while not signed in — redirecting to /teamgalaxy/legal/sign_up.html");
+          window.location.href = "/teamgalaxy/legal/sign_up.html";
+          return;
+        }
+        // Signed in -> toggle menu
+        if (!profileMenu) return;
+        profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
+      } catch (err) {
+        console.error("Error in profile button click handler:", err);
       }
+    }
+
+    // Attach once defensively
+    if (profileBtn && !profileBtn._attached) {
+      profileBtn.addEventListener("click", handleProfileBtnClick);
+      profileBtn._attached = true;
+    }
+
+    // Close profile menu if clicking outside (but don't auto-signout)
+    window.addEventListener("click", () => {
+      if (profileMenu) profileMenu.style.display = "none";
     });
 
+    // ===== Sign in / Sign out functions =====
     async function signIn() {
       const provider = new firebase.auth.GoogleAuthProvider();
-      try { await auth.signInWithPopup(provider); } catch (error) { alert("Sign-in failed: " + error.message); }
+      try {
+        await auth.signInWithPopup(provider);
+        console.log("Sign-in succeeded");
+      } catch (error) {
+        console.error("Sign-in failed:", error);
+        alert("Sign-in failed: " + (error && error.message ? error.message : error));
+      }
     }
 
-    async function signOut() {
-      try { await auth.signOut(); } catch (error) { alert("Sign-out failed: " + error.message); }
+    async function signOutUser() {
+      try {
+        await auth.signOut();
+        console.log("User signed out");
+        if (profileMenu) profileMenu.style.display = "none";
+      } catch (error) {
+        console.error("Sign-out failed:", error);
+        alert("Sign-out failed: " + (error && error.message ? error.message : error));
+      }
     }
 
-    let currentUser = null;
-    auth.onAuthStateChanged((user) => {
-      currentUser = user;
-      updateProfileButton();
-    });
+    // Wire logout link safely (only once)
+    if (logoutLink && !logoutLink._attached) {
+      logoutLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        signOutUser();
+      });
+      logoutLink._attached = true;
+    }
 
-    function updateProfileButton() {
-      if (currentUser) {
-        if (currentUser.photoURL) {
-          profileBtn.innerHTML = `<img src="${currentUser.photoURL}" alt="Profile">`;
-        } else {
-          profileBtn.innerHTML = '<i class="fa-solid fa-user"></i>';
+    // Wire profileLink safely (only once)
+    if (profileLink && !profileLink._attached) {
+      profileLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!auth.currentUser) {
+          window.location.href = "/teamgalaxy/legal/sign_up.html";
+          return;
         }
-        document.getElementById("logoutLink").onclick = async (e) => { e.preventDefault(); await signOut(); };
-        document.getElementById("profileLink").onclick = (e) => { e.preventDefault(); alert("Profile clicked - implement profile page."); };
+        alert("Profile clicked - implement profile page.");
+        if (profileMenu) profileMenu.style.display = "none";
+      });
+      profileLink._attached = true;
+    }
+
+    // ===== Keep a single onAuthStateChanged listener (prevent duplicates) =====
+    if (!auth._ourOnAuthAttached) {
+      auth.onAuthStateChanged((user) => {
+        console.log("onAuthStateChanged fired. user:", !!user);
+        currentUser = user; // keep compatibility with other code using `currentUser`
+        updateProfileButton();
+      });
+      auth._ourOnAuthAttached = true;
+    } else {
+      console.log("Auth listener already attached - skipping re-attach");
+    }
+
+    // ===== Update the profile button UI (no event re-binding here) =====
+    let currentUser = null;
+    function updateProfileButton() {
+      if (!profileBtn) return;
+
+      const u = auth.currentUser;
+      if (u) {
+        currentUser = u;
+        if (u.photoURL) {
+          profileBtn.innerHTML = `<img src="${u.photoURL}" alt="Profile" style="width:36px;height:36px;border-radius:50%;">`;
+        } else {
+          profileBtn.innerHTML = `<i class="fa-solid fa-user"></i>`;
+        }
+        profileBtn.title = u.displayName || u.email || "Profile";
       } else {
+        currentUser = null;
         profileBtn.innerHTML = "Sign In";
-        profileBtn.onclick = (e) => { e.stopPropagation(); signIn(); };
+        profileBtn.title = "Sign In";
       }
     }
 
