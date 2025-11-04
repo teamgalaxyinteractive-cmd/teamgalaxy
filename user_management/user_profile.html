@@ -788,21 +788,40 @@
         </div>
       `;
 
-      // Add share button functionality
-      document.getElementById('shareBtn').addEventListener('click', () => {
-        if(data.slug) {
-          const shareUrl = `https://www.squadvertex.great-site.net/public_profile?=${data.slug}`;
-          navigator.clipboard.writeText(shareUrl).then(() => {
-            alert('Profile URL copied to clipboard!');
-          }).catch(err => {
-            console.error('Failed to copy: ', err);
-            alert('Failed to copy URL. Please try again.');
-          });
-        } else {
-          alert('No profile slug available for sharing.');
-        }
-      });
+ // Add share button functionality
+document.getElementById('shareBtn').addEventListener('click', async () => {
+  try {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      alert('No user is currently logged in.');
+      return;
     }
+
+    const userDoc = await getDoc(doc(db, 'userPrivate', currentUser.uid)); 
+    const userData = userDoc.data();
+
+    if (userData && userData.slug) {
+      const currentOrigin = window.location.origin; 
+      const currentPath = window.location.pathname; 
+      const newPath = currentPath.replace('/user_management/user_profile.html', `/public_user_manager/public_user_profile.html?=${userData.slug}`);
+
+      // Final URL
+      const shareUrl = currentOrigin + newPath;
+
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        alert('Profile URL copied to clipboard!');
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+        alert('Failed to copy URL. Please try again.');
+      });
+    } else {
+      alert('No profile slug available for sharing.');
+    }
+  } catch (error) {
+    console.error('Error fetching user data: ', error);
+    alert('Failed to retrieve profile data. Please try again.');
+  }
+});
 
     // Render posts HTML
     async function renderPosts(posts) {
