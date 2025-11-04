@@ -1158,19 +1158,19 @@ body {
   }
 
   // Wire profileLink safely (only once)
-  if (profileLink && !profileLink._attached) {
-    profileLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!auth.currentUser) {
-        window.location.href = "/teamgalaxy/legal/sign_up.html";
-        return;
-      }
-      alert("Profile clicked - implement profile page.");
-      if (profileMenu) profileMenu.style.display = "none";
-    });
-    profileLink._attached = true;
-  }
+if (profileLink && !profileLink._attached) {
+  profileLink.addEventListener("click", (e) => {
+    e.preventDefault(); // लिंक का डिफ़ॉल्ट बर्ताव रोका
+    e.stopPropagation();
+    if (!auth.currentUser) {
+      window.location.href = "/teamgalaxy/legal/sign_up.html";
+      return;
+    }
+    window.location.href = "/teamgalaxy/user_management/user_profile.html"; 
+    if (profileMenu) profileMenu.style.display = "none";
+  });
+  profileLink._attached = true;
+}
 
   // ===== Keep a single onAuthStateChanged listener (prevent duplicates) =====
   if (!auth._ourOnAuthAttached) {
