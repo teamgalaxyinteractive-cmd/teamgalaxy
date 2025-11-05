@@ -6,6 +6,10 @@
   <title>TeamGalaxy — Posts</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    /* Make box-sizing predictable (prevents padding from causing overflow) */
+    html { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: inherit; }
+
     /* Updated theme based on your detailed color palette */
     :root {
       --bg: #0a0e17;
@@ -25,6 +29,10 @@
       --icon-color: #afeafd;
     }
 
+    html, body {
+      height: 100%;
+    }
+
     body {
       margin: 0;
       font-family: 'Segoe UI', system-ui, Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -33,7 +41,7 @@
       line-height: 1.6;
       min-height: 100vh;
       position: relative;
-      overflow-x: hidden;
+      overflow-x: hidden; /* block horizontal scroll */
     }
 
     /* Stars background */
@@ -44,7 +52,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-image: 
+      background-image:
         radial-gradient(2px 2px at 10% 20%, #fff, transparent),
         radial-gradient(1px 1px at 30% 40%, #64c2ff, transparent),
         radial-gradient(1.5px 1.5px at 50% 60%, #fab84f, transparent),
@@ -239,7 +247,7 @@
       color: var(--accent2);
     }
 
-      .comment-form-container {
+    .comment-form-container {
       background: rgba(255, 255, 255, 0.05);
       border-radius: 12px;
       padding: 1rem;
@@ -359,9 +367,9 @@
     /* Skeleton loading */
     .skeleton {
       background-color: #1a2232;
-      background-image: linear-gradient(90deg, 
-        #1a2232 0px, 
-        #232e44 40px, 
+      background-image: linear-gradient(90deg,
+        #1a2232 0px,
+        #232e44 40px,
         #1a2232 80px);
       background-size: 300%;
       animation: shine 1.6s infinite linear;
@@ -503,107 +511,110 @@
       border-radius: 0 0 6px 6px;
     }
 
- /* Footer */
-  .footer {
-    background: rgba(10, 10, 35, 0.95);
-    padding: 3rem 2rem 2rem;
-    margin-top: auto;
-    border-top: 1px solid #5a4fcf;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-    width: 100%;
-    flex-shrink: 0;
-  }
-
-  .footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-  }
-
-  .footer-about-title {
-    font-size: 1.1rem;
-    color: #8a7cff;
-    margin-bottom: 1rem;
-    font-weight: 600;
-  }
-
-  .footer-about-text {
-    color: #a0a0d0;
-    line-height: 1.6;
-    font-size: 0.90rem;
-  }
-
-  .footer-links {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-
-  .footer-links a {
-    color: #a0a0d0;
-    text-decoration: none;
-    font-size: 0.95rem;
-    transition: color 0.3s ease;
-  }
-
-  .footer-links a:hover {
-    color: #8a7cff;
-    text-decoration: underline;
-  }
-
-  .rocket-frame {
-    margin-top: 2rem;
-    padding: 1.2rem 1rem; /* Reduced horizontal padding */
-    border: 2px solid #5a4fcf;
-    border-radius: 12px;
-    background: rgba(20, 20, 40, 0.5);
-    position: relative;
-    overflow: hidden;
-    max-width: 100%; /* Ensure it doesn't exceed container */
-    width: fit-content; /* Only take as much width as needed */
-  }
-
-  .rocket-text {
-    font-size: clamp(1.2rem, 4vw, 1.8rem); /* Responsive font size */
-    font-weight: bold;
-    color: #8a7cff;
-    text-align: center;
-    text-shadow: 0 0 15px rgba(138, 124, 255, 0.6);
-    background: linear-gradient(45deg, #8a7cff, #d66efd, #8a7cff);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmer 3s linear infinite;
-    font-family: 'Arial Rounded MT Bold', 'Segoe UI', sans-serif;
-    word-break: break-word; /* Break long words if necessary */
-    white-space: normal; /* Allow text to wrap */
-    line-height: 1.4; /* Better line height for smaller screens */
-  }
-
-  @keyframes shimmer {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
-  }
-
-  /* Responsive improvements */
-  @media (max-width: 768px) {
-    .footer-content {
-      grid-template-columns: 1fr;
-      gap: 2rem;
-    }
-    
+    /* Footer */
     .footer {
-      padding: 2rem 1.5rem 1.5rem;
+      background: rgba(10, 10, 35, 0.95);
+      padding: 3rem 2rem 2rem;
+      margin-top: auto;
+      border-top: 1px solid #5a4fcf;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      flex-shrink: 0;
+      box-sizing: border-box; /* ensure padding doesn't add to width */
     }
-  }
-  
-  @media (max-width: 480px) {
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      width: 100%;
+      padding: 0 0.5rem; /* small internal padding to avoid edge touching */
+    }
+
+    .footer-about-title {
+      font-size: 1.1rem;
+      color: #8a7cff;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .footer-about-text {
+      color: #a0a0d0;
+      line-height: 1.6;
+      font-size: 0.90rem;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .footer-links a {
+      color: #a0a0d0;
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: #8a7cff;
+      text-decoration: underline;
+    }
     .rocket-frame {
-      padding: 1rem 0.8rem; /* Further reduce padding on very small screens */
+      margin-top: 2rem;
+      padding: 1.2rem 1rem; /* Reduced horizontal padding */
+      border: 2px solid #5a4fcf;
+      border-radius: 12px;
+      background: rgba(20, 20, 40, 0.5);
+      position: relative;
+      overflow: hidden;
+      max-width: 420px; /* prevent it from growing past viewport */
+      width: 100%;       /* be responsive inside footer column */
+      display: inline-block;
     }
-  }
+
+    .rocket-text {
+      font-size: clamp(1.2rem, 4vw, 1.8rem); /* Responsive font size */
+      font-weight: bold;
+      color: #8a7cff;
+      text-align: center;
+      text-shadow: 0 0 15px rgba(138, 124, 255, 0.6);
+      background: linear-gradient(45deg, #8a7cff, #d66efd, #8a7cff);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s linear infinite;
+      font-family: 'Arial Rounded MT Bold', 'Segoe UI', sans-serif;
+      word-break: break-word; /* Break long words if necessary */
+      white-space: normal; /* Allow text to wrap */
+      line-height: 1.4; /* Better line height for smaller screens */
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+      .footer-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .footer {
+        padding: 2rem 1.5rem 1.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .rocket-frame {
+        padding: 1rem 0.8rem; /* Further reduce padding on very small screens */
+      }
+    }
 
     /* Responsive improvements */
     @media (max-width: 768px) {
@@ -899,7 +910,6 @@
             <img class="avatar" id="headerAvatar" src="${escapeHTML(avatarSrc)}" alt="Profile">
           </div>
         `;
-
         // Add event listener to avatar for dropdown, and position dropdown under avatar
         const avatarEl = document.getElementById('headerAvatar');
         avatarEl.addEventListener('click', (e) => {
