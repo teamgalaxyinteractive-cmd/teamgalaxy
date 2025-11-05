@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Not Found</title>
+  <!-- Google Analytics GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-829XDGV4RK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-829XDGV4RK');
+  </script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #000;
+      color: #fff;
+      overflow: hidden;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* Starry Background */
+    #stars {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none; /* Allows clicks to pass through */
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      background-color: #fff;
+      border-radius: 50%;
+      animation: twinkle var(--duration, 5s) infinite ease-in-out;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: var(--opacity, 0.2); }
+      50% { opacity: calc(var(--opacity, 0.2) * 2); }
+    }
+
+    .content {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      padding: 20px; /* Add padding for mobile */
+    }
+
+    .error-container {
+      background: rgba(10, 10, 20, 0.7); /* Dark semi-transparent bg */
+      border-radius: 15px;
+      padding: 30px 40px; /* Adjusted padding */
+      box-shadow: 0 0 50px rgba(231, 76, 60, 0.3), /* Red glow */
+                  inset 0 0 15px rgba(255, 255, 255, 0.1); /* Inner glow */
+      backdrop-filter: blur(10px); /* Frosted glass effect */
+      max-width: 90%; /* Ensure it fits smaller screens */
+      width: 100%;
+      max-width: 600px; /* Maximum width for larger screens */
+      border: 1px solid rgba(231, 76, 60, 0.3);
+    }
+
+    h1 {
+      font-size: 6rem; /* Reduced default size */
+      color: #e74c3c;
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px rgba(231, 76, 60, 0.8); /* Stronger glow */
+      letter-spacing: 5px;
+      position: relative;
+    }
+
+    h1::after {
+      content: "ERROR";
+      position: absolute;
+      top: 0;
+      left: 0;
+      color: transparent;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      clip-path: polygon(0 45%, 100% 35%, 100% 55%, 0 65%);
+      z-index: -1;
+      font-size: 1.2rem; /* Smaller text for ERROR */
+      letter-spacing: 6px; /* Reduced spacing */
+      animation: scanline 8s linear infinite;
+    }
+
+    @keyframes scanline {
+        0% { clip-path: polygon(0 0%, 100% 0%, 100% 5%, 0 5%); }
+        100% { clip-path: polygon(0 95%, 100% 95%, 100% 100%, 0 100%); }
+    }
+
+    p {
+      font-size: 1.1rem; /* Slightly smaller text */
+      color: #ccc;
+      margin-bottom: 25px; /* Adjusted margin */
+      line-height: 1.5; /* Better readability */
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 30px; /* Adjusted padding */
+      font-size: 1.1rem; /* Slightly smaller font */
+      color: #fff;
+      text-decoration: none;
+      background: linear-gradient(45deg, #e74c3c, #f39c12); /* Orange to red gradient */
+      border: none;
+      border-radius: 50px; /* Pill shape */
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+      position: relative;
+      overflow: hidden;
+      font-weight: bold;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      transition: 0.5s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(231, 76, 60, 0.6);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 3px 10px rgba(231, 76, 60, 0.4);
+    }
+
+    .lost-icon {
+      font-size: 8rem; /* Smaller icon */
+      color: rgba(231, 76, 60, 0.1); /* Match theme color */
+      margin-bottom: 15px; /* Adjusted margin */
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); } /* Less movement */
+        100% { transform: translateY(0px); }
+    }
+
+    .footer-text {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+      color: #777;
+      font-size: 0.8rem; /* Smaller text */
+    }
+
+    /* Media Queries for Responsiveness */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 5rem; /* Smaller 404 on tablets */
+      }
+      .error-container {
+        padding: 25px 30px; /* Adjusted padding */
+      }
+      .lost-icon {
+        font-size: 7rem; /* Smaller icon */
+      }
+      p {
+        font-size: 1rem; /* Smaller text */
+      }
+      .btn {
+        padding: 10px 25px; /* Smaller button */
+        font-size: 1rem; /* Smaller button text */
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 4rem; /* Even smaller 404 on mobile */
+      }
+      h1::after {
+          font-size: 0.9rem; /* Even smaller ERROR text */
+          letter-spacing: 3px; /* Tighter spacing */
+      }
+      .error-container {
+        padding: 20px; /* Tighter padding */
+      }
+      .lost-icon {
+        font-size: 6rem; /* Smaller icon */
+      }
+      p {
+        font-size: 0.9rem; /* Smaller text */
+        margin-bottom: 20px; /* Adjusted margin */
+      }
+      .btn {
+        padding: 10px 20px; /* Smaller button */
+        font-size: 0.95rem; /* Smaller button text */
+        width: 100%; /* Full width button on very small screens */
+        max-width: 250px; /* But don't make it too wide */
+      }
+      .footer-text {
+        font-size: 0.7rem; /* Smaller footer text */
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <!-- Starry Background Canvas -->
+  <div id="stars"></div>
+
+  <div class="content">
+    <div class="error-container">
+      <div class="lost-icon">🌌</div>
+      <h1>404</h1>
+      <p>Oops! The page you are looking for seems to be lost in the digital void.</p>
+      <p>It might have been moved, deleted, or perhaps never existed.</p>
+      <a href="/" class="btn">Navigate to Safety</a>
+    </div>
+  </div>
+
+  <div class="footer-text">
+    <p>Lost in Space? Don't worry, we'll bring you back home.</p>
+  </div>
+
+  <script>
+    // --- Starry Background Generation ---
+    const starsContainer = document.getElementById('stars');
+    const starCount = 150; // Slightly reduced for performance on mobile
+
+    for (let i = 0; i < starCount; i++) {
+      const star = document.createElement('div');
+      star.classList.add('star');
+
+      // Random properties for stars
+      const size = Math.random() * 2.5; // Slightly smaller max size
+      const posX = Math.random() * 100;
+      const posY = Math.random() * 100;
+      const opacity = Math.random() * 0.5 + 0.1;
+      const duration = Math.random() * 5 + 3;
+
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      star.style.left = `${posX}%`;
+      star.style.top = `${posY}%`;
+      star.style.setProperty('--opacity', opacity);
+      star.style.setProperty('--duration', `${duration}s`);
+      star.style.animationDelay = `${Math.random() * 5}s`;
+
+      starsContainer.appendChild(star);
+    }
+
+    // --- Button Interaction ---
+    document.querySelector('.btn').addEventListener('click', (e) => {
+      const btn = e.target;
+      btn.textContent = 'Redirecting...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+          window.location.href = '/'; // Redirect after a short delay
+      }, 800);
+    });
+
+    // --- Optional: Add subtle parallax effect to stars ---
+    // (This might be heavy on some mobile devices, consider removing if needed)
+    /*
+    document.addEventListener('mousemove', (e) => {
+      const stars = document.querySelectorAll('.star');
+      const x = (window.innerWidth - e.pageX * 2) / 100;
+      const y = (window.innerHeight - e.pageY * 2) / 100;
+
+      stars.forEach((star, index) => {
+        const speed = (index % 10) * 0.02;
+        star.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+      });
+    });
+    */
+  </script>
+</body>
+</html>
