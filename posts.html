@@ -463,6 +463,35 @@
       color: #8a7cff;
       text-decoration: underline;
     }
+
+    .rocket-frame {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      border: 2px solid #5a4fcf;
+      border-radius: 12px;
+      background: rgba(20, 20, 40, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .rocket-text {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #8a7cff;
+      text-align: center;
+      text-shadow: 0 0 15px rgba(138, 124, 255, 0.6);
+      background: linear-gradient(45deg, #8a7cff, #d66efd, #8a7cff);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s linear infinite;
+      font-family: 'Arial Rounded MT Bold', 'Segoe UI', sans-serif;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
   </style>
 </head>
 <body>
