@@ -14,7 +14,8 @@
       --surface: #161b28;
       --surface-alt: #1c2236;
       --muted: #d0d0d0;
-      --text: #8a7cff;
+      --text: #ffffff;
+      --brand: #8a7cff;
       --accent1: #64c2ff; /* Cyan */
       --accent2: #fab84f; /* Gold */
       --danger: #ff5b5b; /* Red */
@@ -81,7 +82,7 @@
     .brand {
       font-weight: 700;
       font-size: 1.5rem;
-      background: linear-gradient(90deg, var(--text) 0%, var(--accent1) 100%);
+      background: linear-gradient(90deg, var(--brand) 0%, var(--accent1) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -161,12 +162,12 @@
     }
 
     .btn-primary {
-      background: var(--accent1);
+      background: var(--brand);
       color: #fff;
     }
 
     .btn-primary:hover {
-      background: var(--accent2);
+      background: var(--accent1);
       color: #000;
     }
 
