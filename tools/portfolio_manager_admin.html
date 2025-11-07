@@ -928,4 +928,82 @@
                     if (item.folderId) {
                         const oldFolderRef = db.collection('portfolioFolders').doc(item.folderId);
                         const oldFolderDoc = await oldFolderRef.get();
-               
+                        if (oldFolderDoc.exists) {
+                            const oldImages = oldFolderDoc.data().images || [];
+                            const updatedImages = oldImages.filter(img => img.id !== item.id);
+                            batch.update(oldFolderRef, { images: updatedImages });
+                        }
+                    }
+
+                    await batch.commit();
+                    closeAssignModal();
+
+                    // Reload everything to reflect changes
+                    await init();
+                } catch (error) {
+                    console.error('Error assigning item:', error);
+                    alert('Error assigning item. Check console for details.');
+                }
+            }
+        });
+
+        editItemForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (currentItemToEdit) {
+                const item = items.find(i => i.id === currentItemToEdit);
+                if (!item) return;
+
+                try {
+                    const updatedData = {
+                        title: document.getElementById('editItemTitle').value,
+                        description: document.getElementById('editItemDescription').value
+                    };
+
+                    // Update item in Firestore
+                    await db.collection('portfolioItems').doc(currentItemToEdit).update(updatedData);
+
+                    // Update folder's image array if item is in a folder
+                    if (item.folderId) {
+                        const folderRef = db.collection('portfolioFolders').doc(item.folderId);
+                        const folderDoc = await folderRef.get();
+                        if (folderDoc.exists) {
+                            const folderImages = folderDoc.data().images || [];
+                            const imageIndex = folderImages.findIndex(img => img.id === currentItemToEdit);
+                            if (imageIndex !== -1) {
+                                folderImages[imageIndex].title = updatedData.title;
+                                await folderRef.update({ images: folderImages });
+                            }
+                        }
+                    }
+
+                    closeEditItemModal();
+                    // Reload items to reflect changes
+                    await init();
+                } catch (error) {
+                    console.error('Error updating item:', error);
+                    alert('Error updating item. Check console for details.');
+                }
+            }
+        });
+
+        // Helper function to format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Close modals when clicking outside
+        window.onclick = (event) => {
+            if (event.target === folderModal) closeFolderModal();
+            if (event.target === assignModal) closeAssignModal();
+            if (event.target === editItemModal) closeEditItemModal();
+        };
+
+        // Initialize when page loads
+        window.onload = init;
+    </script>
+</body>
+</html>
