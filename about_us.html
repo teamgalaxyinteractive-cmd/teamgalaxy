@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>About Team Galaxy</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css  " />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     body { 
@@ -44,11 +44,10 @@
     .top-bar {
       display: flex;
       align-items: center;
-      /* Desktop: Use space-between to align logo-title to left and nav-buttons to right */
       justify-content: space-between;
       height: 80px;
       background: rgba(16, 23, 36, 0.85);
-      padding: 0 20px; /* Maintain padding */
+      padding: 0 20px;
       backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       position: sticky;
@@ -59,7 +58,6 @@
     }
 
     .logo-title {
-      /* Desktop: Keep it on the left */
       margin-left: 0;
       display: flex;
       align-items: center;
@@ -71,7 +69,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      /* Ensure it doesn't grow */
       flex: 0 0 auto;
     }
 
@@ -179,13 +176,11 @@
       .hamburger {
         display: block;
       }
-      /* Mobile: Change justify-content to flex-end to push logo-title to the right */
       .top-bar {
-        justify-content: flex-end; /* Aligns content to the right */
+        justify-content: flex-end;
       }
-      /* Mobile: Add margin-left to push the logo-title to the right */
       .logo-title {
-        margin-left: auto; /* Pushes the logo-title to the right */
+        margin-left: auto;
       }
       .nav-buttons {
         display: none;
@@ -209,16 +204,83 @@
 
     /* About Container */
     .about-blank-space { height: 380px; }
-    /* Reduced font-size for the main about title, removed shimmer */
     .about-title { font-size: 2rem; font-weight: bold; color: #fab84f; position: absolute; top: 120px; left: 52px; margin: 0; z-index: 2; width: 400px; }
     .about-main { max-width: 900px; margin: 180px auto 50px auto; padding-top: 70px; position: relative; }
     .about-section { background: rgba(24,31,43,0.97); border-radius: 12px; box-shadow: 0 8px 24px #20294429; padding: 44px 48px; margin-bottom: 44px; }
     .about-flex-row { display: flex; align-items: flex-start; gap: 36px; margin-bottom: 38px; flex-wrap: wrap; }
-    .about-img-left { flex: 0 0 270px; margin-right: 20px; margin-bottom: 10px; border-radius: 12px; max-width: 260px; background: transparent; box-shadow: 0 2px 24px #23274680; }
-    .about-img-right { flex: 0 0 270px; margin-left: 35px; margin-bottom: 10px; border-radius: 12px; max-width: 260px; background: transparent; box-shadow: 0 2px 24px #23274680; }
+
+    /* Updated image styles with 3:4 ratio and improved frames */
+    .about-img-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 12px;
+      background: transparent;
+      box-shadow: 0 2px 24px #23274680;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 2px solid rgba(255, 255, 255, 0.15); /* Added border for better frame visibility */
+      position: relative;
+    }
+
+    /* Added pseudo-element for inner border effect */
+    .about-img-container::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      right: 2px;
+      bottom: 2px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      pointer-events: none;
+    }
+
+    .about-img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .about-img-left {
+      width: 260px;
+      height: 347px; /* 3:4 ratio (260 * 4 / 3) */
+      margin-right: 20px;
+      margin-bottom: 10px;
+    }
+
+    .about-img-right {
+      width: 260px;
+      height: 347px; /* 3:4 ratio */
+      margin-left: 35px;
+      margin-bottom: 10px;
+    }
+
+    .about-img-inline {
+      width: 760px;
+      height: 340px; 
+      margin: 16px auto 20px auto;
+      border-radius: 10px;
+      box-shadow: 0 2px 20px #23274680;
+      display: block;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .about-img-inline::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      right: 2px;
+      bottom: 2px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      pointer-events: none;
+    }
+
     .about-flex-text { flex: 1 1 340px; font-size: 1.18rem; line-height: 1.7; white-space: pre-line; color: #fff; }
     .about-section h2 { color: #fab84f; font-size: 2rem; margin-top: 0; margin-bottom: 16px; }
-    .about-img-inline { display: block; width: 100%; max-width: 380px; margin: 16px auto 20px auto; border-radius: 10px; box-shadow: 0 2px 20px #23274680; }
     .about-section ul { margin: 18px 0 18px 24px; }
     .about-section ul li { font-size: 1.10rem; margin-bottom: 9px; color: #b3e6ff; }
 
@@ -317,6 +379,14 @@
       .footer-col {
         flex: 1 1 100%;
       }
+      .about-flex-row {
+        flex-direction: column;
+      }
+      .about-img-left, .about-img-right {
+        margin-left: 0;
+        margin-right: 0;
+        align-self: center;
+      }
     }
   </style>
 </head>
@@ -329,10 +399,9 @@
     <button class="hamburger">
       <i class="fa-solid fa-bars"></i>
     </button>
-    <!-- Removed shimmer class from the logo-title div -->
     <div class="logo-title">
       <img
-        src="  https://dl.dropboxusercontent.com/scl/fi/ulfs6ygkeyvr4mar8bkuz/galaxwbewh.png?rlkey=jq9buj80ny6et6jfbfpiuf14l&st=lwkqobqi&dl=0"
+        src="https://dl.dropboxusercontent.com/scl/fi/ulfs6ygkeyvr4mar8bkuz/galaxwbewh.png?rlkey=jq9buj80ny6et6jfbfpiuf14l&st=lwkqobqi&dl=0"
         height="46"
         alt="Logo"
       />
@@ -360,20 +429,21 @@
   </div>
 
   <!-- Title & Spacing -->
-  <!-- Removed shimmer class from the main about title -->
   <div style="position:relative;"><div class="about-blank-space"></div><h1 class="about-title">About Team Galaxy</h1></div>
   <div class="about-main">
 
     <div class="about-section">
       <div class="about-flex-row">
-        <img src="IMG_5767.png" alt="Team Galaxy" class="about-img-left" />
+        <div class="about-img-container about-img-left">
+          <img src="https://dl.dropboxusercontent.com/scl/fi/4r0o3ymhfol2ndauy5bwb/IMG_20251108_205841.png?rlkey=hagnr2tms6hzf36vc0qgldu4e&st=czyyqfdb&dl=0" alt="Team Galaxy" />
+        </div>
         <div class="about-flex-text">
           <h2>What is Team Galaxy?</h2>
           Est. May 2025<br>
           <br>
           Team Galaxy shines brightly on the competitive stage of World of Tanks Blitz. Our mission is to showcase our skills, push our limits, and aim for the top. With a strong and united roster, we make our mark not only in tournaments but in every battle we fight.<br>
           <br>
-          But Team Galaxy isn’t just about victory — it’s about having fun, too! Our custom ranking system makes clan missions more exciting and creates a sense of friendly competition among members. Whether you want to fight at the highest level or just relax and enjoy the game with friends, you’ll always find your place here.<br>
+          But Team Galaxy isn't just about victory — it's about having fun, too! Our custom ranking system makes clan missions more exciting and creates a sense of friendly competition among members. Whether you want to fight at the highest level or just relax and enjoy the game with friends, you'll always find your place here.<br>
           <br>
           In Galaxy, every member is a star. 🌌
         </div>
@@ -384,19 +454,23 @@
       <div class="about-flex-row">
         <div class="about-flex-text">
           <h2>Clan Events & Activities</h2>
-          At Team Galaxy, we believe that a clan should be more than just a tag next to your name — it should be an experience. That’s why we host exclusive member-only events designed to bring our community closer and keep the game exciting.<br>
+          At Team Galaxy, we believe that a clan should be more than just a tag next to your name — it should be an experience. That's why we host exclusive member-only events designed to bring our community closer and keep the game exciting.<br>
           <br>
           One of our biggest traditions is turning weekly clan missions into a fun competition. Members earn stars by completing missions, and these stars contribute to a long-term leaderboard. The higher you climb, the more rewards you can win — from in-game gifts to special Galaxy merchandise.<br>
           <br>
           These events are perfect for both competitive warriors and laid-back tankers who just want to enjoy the ride while working toward something rewarding.
         </div>
-        <img src="IMG_5767.png" alt="Clan Event" class="about-img-right" />
+        <div class="about-img-container about-img-right">
+          <img src="https://dl.dropboxusercontent.com/scl/fi/g4wq4m8pkzd32dc7g79dt/1762616781.png?rlkey=m4ctngnu14zl6lffhbw5lvexz&st=bbrct8s5&dl=0" alt="Clan Event" />
+        </div>
       </div>
     </div>
 
     <div class="about-section">
       <h2>How to Apply</h2>
-      <img src="IMG_5767.png" class="about-img-inline" alt="Apply Clan" />
+      <div class="about-img-container about-img-inline">
+        <img src="https://dl.dropboxusercontent.com/scl/fi/extuxsxwz66h4kxz8apek/IMG_20251108_212726.jpg?rlkey=xw6xxxqtx62ahy9bikj0em3i3&st=34gxu7oj&dl=0" alt="Apply Clan" />
+      </div>
       <div>
         Currently, we operate one main clan that welcomes both competitive and casual players.<br>
         <br>
@@ -420,23 +494,24 @@
 
     <div class="about-section">
       <div class="about-flex-row">
-        <img src="A63C560A-0A5D-47DE-9775-D54EC4E1A06F.jpg" alt="Team Philosophy" class="about-img-left" />
+        <div class="about-img-container about-img-left">
+          <img src="https://dl.dropboxusercontent.com/scl/fi/2o26yjla61had31bwpcqh/IMG_20251108_213648.jpg?rlkey=dh5e6uqjquk7bb8jnaofxixt5&st=mt7scwa4&dl=0" alt="Team Philosophy" />
+        </div>
         <div class="about-flex-text">
           <h2>Our Playstyle & Philosophy</h2>
-          At Team Galaxy, we believe that victory is built on teamwork, strategy, and trust. We don’t just play — we play smart, fast, and as one. Every battle is a chance to learn, improve, and grow stronger together.<br>
+          At Team Galaxy, we believe that victory is built on teamwork, strategy, and trust. We don't just play — we play smart, fast, and as one. Every battle is a chance to learn, improve, and grow stronger together.<br>
           <br>
-          Our philosophy is simple: push your limits, respect your team, and enjoy the game. Whether we’re fighting for the top spot in a tournament or just having a relaxed evening in platoon, we bring the same passion and dedication to every match.<br>
+          Our philosophy is simple: push your limits, respect your team, and enjoy the game. Whether we're fighting for the top spot in a tournament or just having a relaxed evening in platoon, we bring the same passion and dedication to every match.<br>
           <br>
           We value communication, adaptability, and the drive to become better — because in the Galaxy, every star shines brighter when united. 🌌
         </div>
       </div>
     </div>
-
     <div class="about-section">
       <h2>Achievements & Journey</h2>
       <div class="about-flex-row">
         <div class="about-flex-text">
-          Since our formation in May 2025, Team Galaxy has quickly built a name for itself in the Blitz community. While our sights are set on the biggest stages, we’ve already dominated numerous smaller-scale tournaments and community events — proving that our teamwork and skill can consistently bring home the win.<br>
+          Since our formation in May 2025, Team Galaxy has quickly built a name for itself in the Blitz community. While our sights are set on the biggest stages, we've already dominated numerous smaller-scale tournaments and community events — proving that our teamwork and skill can consistently bring home the win.<br>
           <br>
           <strong>Highlights so far:</strong>
           <ul>
@@ -447,7 +522,9 @@
           </ul>
           Our journey is just beginning — and each win, no matter the size, brings us closer to our ultimate goal: competing and triumphing at the highest levels.
         </div>
-        <img src="A63C560A-0A5D-47DE-9775-D54EC4E1A06F.jpg" alt="Galaxy Journey" class="about-img-right" />
+        <div class="about-img-container about-img-right">
+          <img src="https://dl.dropboxusercontent.com/scl/fi/athrvawp9mjtjc6psfxhv/1762616303.png?rlkey=4wwayymq6wn1632tquut9fn55&st=f10ldv4f&dl=0" alt="Galaxy Journey" />
+        </div>
       </div>
     </div>
   </div>
@@ -457,32 +534,28 @@
     <!-- Left: About + Social -->
     <div class="footer-col footer-left">
       <div>
-        <!-- Removed shimmer class from footer title -->
         <div class="footer-about-title">About TeamGalaxy</div>
-        <!-- Removed shimmer class from footer text -->
         <div class="footer-about-text">
           TeamGalaxy is an innovative gaming and creative community, united by passion and the spirit of collaboration. We host tournaments, share design ideas, and grow talents together — join now to explore the Galaxy!
         </div>
       </div>
       <div class="footer-social">
-        <a href="  https://twitter.com   " title="Twitter"><i class="fab fa-twitter"></i></a>
-        <a href="https://facebook.com   " title="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="https://instagram.com   " title="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://youtube.com   " title="YouTube"><i class="fab fa-youtube"></i></a>
-        <a href="https://discord.com   " title="Discord"><i class="fab fa-discord"></i></a>
+        <a href="https://twitter.com" title="Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="https://facebook.com" title="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="https://instagram.com" title="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://youtube.com" title="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="https://discord.com" title="Discord"><i class="fab fa-discord"></i></a>
       </div>
     </div>
 
     <!-- Right: Links + Address -->
     <div class="footer-col footer-right">
       <div class="footer-links">
-        <!-- Removed shimmer class from footer links -->
         <a href="#">Privacy Policy</a>
         <a href="#">Terms & Conditions</a>
         <a href="#">About</a>
       </div>
       <div>
-        <!-- Removed shimmer class from footer contact rows -->
         <div class="footer-contact-row">
           <span class="footer-contact-label">
             <i class="fa-solid fa-location-dot footer-contact-icon"></i>Address:
@@ -501,7 +574,6 @@
           </span>
           support@gmail.com
         </div>
-        <!-- Removed shimmer class from footer contact hours -->
         <div class="footer-contact">
           <span class="footer-contact-label">
             <i class="fa-regular fa-clock footer-contact-icon"></i>Working Hours:
@@ -524,7 +596,7 @@
       document.querySelector('.nav-buttons').classList.toggle('show');
     });
 
-    // Firebase initialization
+     // Firebase initialization
     const firebaseConfig = {
       apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
       authDomain: "teamgalaxy-77344.firebaseapp.com",
