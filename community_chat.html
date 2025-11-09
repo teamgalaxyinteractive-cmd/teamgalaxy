@@ -8,10 +8,10 @@
   <!-- fontawesome (kept for potential future use) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css "/>
 
-  <!-- Firebase SDK version 11.9.0 modular (no compat) -->
-  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js"></script>
+  <!-- Firebase compat -->
+  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js "></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-auth-compat.js "></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore-compat.js "></script>
 
   <style>
     :root{
@@ -308,11 +308,9 @@
       appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
       measurementId: "G-6C2W9NSNCH"
     };
-
-    // Initialize Firebase using modular SDK
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth(app);
-    const db = firebase.firestore(app);
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
     // DOM refs
     const messagesArea = document.getElementById('messages-area');
@@ -342,7 +340,7 @@
     // show overlay initially
     showLoadingOverlay('Connecting to the chat…', 'Syncing messages and preparing the community feed');
 
-    // State and functions (updated for modular SDK)
+    // State and functions (kept the same as before)
     let unsubscribeMessages = null;
     let unsubscribeTyping = null;
     let currentProfile = null;
@@ -353,7 +351,7 @@
     const MAX_SNIPPET = 120;
     let latestSnapshotDocs = {};
 
-    function escapeHtml(s=''){ return String(s).replace(/&/g,'&amp;').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'&quot;').replace(/'/g,"&#039;"); }
+    function escapeHtml(s=''){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,"&#039;"); }
     function formatTime(ts){ if(!ts) return 'Just now'; try{ const d = ts.toDate?ts.toDate():new Date(ts); return d.toLocaleString('en-IN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'}); }catch(e){return 'Just now'} }
     function snippet(s,n=MAX_SNIPPET){ if(!s) return ''; return s.length>n? s.slice(0,n)+'…': s; }
 
@@ -399,14 +397,14 @@
 
     function renderMessagesFromSnapshot(snapshot){
       latestSnapshotDocs = {};
-      snapshot.forEach(d => latestSnapshotDocs[d.id] = d.data());
+      snapshot.docs.forEach(d => latestSnapshotDocs[d.id] = d.data());
       messagesArea.innerHTML = '';
-      if(!snapshot.size){
+      if(!snapshot.docs.length){
         messagesArea.innerHTML = '<div style="text-align:center;color:#a0a0d0;padding:2rem;">No messages yet. Say hi 👋</div>';
         hideLoadingOverlay();
         return;
       }
-      snapshot.forEach(d => {
+      snapshot.docs.forEach(d => {
         const el = buildMessageElement(d.data(), d.id);
         messagesArea.appendChild(el);
       });
@@ -421,17 +419,10 @@
       try{
         const user = auth.currentUser; if(!user) throw new Error('Not signed in');
         const privateDoc = await db.collection('usersPrivate').doc(user.uid).get();
-        if(!privateDoc.exists){
-          // For compatibility, we still check .exists even though it's different in modular
-          const privateSnap = await db.collection('usersPrivate').doc(user.uid).get();
-          if(!privateSnap.exists) throw new Error('Not set up');
-        }
+        if(!privateDoc.exists) throw new Error('Not set up');
         const p = privateDoc.data(); const slug = p.slug; if(!slug) throw new Error('Slug missing');
         const pub = await db.collection('publicProfiles').doc(slug).get();
-        if(!pub.exists){
-          const pubSnap = await db.collection('publicProfiles').doc(slug).get();
-          if(!pubSnap.exists) throw new Error('Public profile not found');
-        }
+        if(!pub.exists) throw new Error('Public profile not found');
         const pd = pub.data();
         const msg = {
           text,
