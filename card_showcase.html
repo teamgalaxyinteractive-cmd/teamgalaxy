@@ -7,69 +7,74 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+  /* ---------- Professional brand-matching loading overlay ---------- */
   .loading-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    /* now fully opaque as requested */
-    background-color: rgba(0, 0, 0, 1);
-    backdrop-filter: blur(4px);
+    inset: 0; /* top:0;right:0;bottom:0;left:0; */
+    /* Matching site palette — fully opaque (no pure black) */
+    background: linear-gradient(180deg, #111826 0%, #232e44 100%);
+    /* subtle glass center card */
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 99999;
-    flex-direction: column;
-    gap: 12px;
-    padding: 20px;
-    text-align: center;
+    padding: 24px;
   }
 
-  .spinner {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
+  .overlay-card {
+    width: min(520px, 92%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 18px 40px rgba(2,6,23,0.6);
+    border-radius: 14px;
+    padding: 22px;
     display:flex;
-    justify-content:center;
+    gap:18px;
     align-items:center;
-    position:relative;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.6), inset 0 0 18px rgba(255,255,255,0.02);
+    justify-content:flex-start;
+    backdrop-filter: blur(6px) saturate(120%);
   }
 
-  /* Amazing banana */
-  .banana {
-    font-size: 48px;
-    line-height:1;
-    transform-origin: center;
-    animation: banana-wobble 1.2s ease-in-out infinite;
-    filter: drop-shadow(0 6px 18px rgba(0,0,0,0.6));
+  /* spinner (SVG) */
+  .spinner-wrap { width:72px; height:72px; display:flex; align-items:center; justify-content:center; }
+  .spinner {
+    width:54px; height:54px;
+    display:block;
   }
 
-  @keyframes banana-wobble {
-    0% { transform: rotate(-6deg) translateY(0); }
-    25% { transform: rotate(6deg) translateY(-6px); }
-    50% { transform: rotate(0deg) translateY(0); }
-    75% { transform: rotate(6deg) translateY(-4px); }
-    100% { transform: rotate(-6deg) translateY(0); }
+  /* SVG circle styles */
+  .spinner circle { stroke: #fab84f; stroke-linecap: round; stroke-width:6; fill: none; }
+  .spinner .track { stroke: rgba(255,255,255,0.06); stroke-width:6; }
+  .spinner-rotate { transform-origin: 50% 50%; animation: rotate 1.2s linear infinite; }
+
+  @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  .overlay-meta {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    color:#e8eef6;
+    font-family:'Poppins', sans-serif;
+  }
+  .overlay-title {
+    font-size:1.05rem;
+    font-weight:700;
+    color:#fab84f;
+    letter-spacing:0.6px;
+  }
+  .overlay-sub {
+    font-size:0.95rem;
+    color: #cfe9ff;
+    opacity:0.95;
+  }
+  .overlay-note {
+    font-size:0.82rem;
+    color:#b6cbe0;
+    opacity:0.85;
+    margin-top:6px;
   }
 
-  .banana-text {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    color: #fff;
-    margin-top: 6px;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.6);
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
+  /* ---------- Rest of styles (kept as-is except where necessary) ---------- */
   * { box-sizing: border-box; }
 
   body {
@@ -78,8 +83,7 @@
     margin: 0;
     font-family: Arial, sans-serif;
     overflow-x: hidden;
-    /* keep content visible above the fixed footer */
-    padding-bottom: 340px;
+    /* no extra bottom padding since footer is document flow (page end) */
   }
 
   .container {
@@ -158,6 +162,7 @@
     z-index: 100;
     width: 100%;
     max-width: 100%;
+    /* Changed: allow visible overflow so dropdowns aren't clipped */
     overflow: visible;
   }
 
@@ -192,7 +197,7 @@
   .dropdown-content a:last-child { border-bottom:none; }
   .dropdown-content a:hover { background: rgba(100,194,255,0.1); color:#64c2ff; }
 
-  /* Footer fixed to bottom */
+  /* Footer (document flow, page end) */
   .footer {
     min-height:300px;
     background: linear-gradient(90deg, #181f2b 60%, #232e44 100%);
@@ -208,11 +213,8 @@
     width:100%;
     max-width:100vw;
     overflow-x:hidden;
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 60;
+    /* no position fixed — stays at document end */
+    position: static;
   }
 
   .footer-col { display:flex; flex-direction:column; justify-content:space-between; text-align:left; }
@@ -259,16 +261,27 @@
     .nav-buttons.show { display:flex; }
     .controls { flex-direction:column; gap:10px; }
     .btn { width:100%; justify-content:center; }
+    .overlay-card { width: 92%; padding: 16px; gap:12px; }
   }
 </style>
 </head>
 <body>
-  <!-- Loading Screen -->
+  <!-- Loading Screen (professional) -->
   <div id="loadingOverlay" class="loading-overlay" aria-hidden="false">
-    <div class="spinner" role="img" aria-label="Loading">
-      <div class="banana">🍌</div>
+    <div class="overlay-card" role="status" aria-live="polite">
+      <div class="spinner-wrap">
+        <!-- SVG spinner: track + animated stroke -->
+        <svg class="spinner spinner-rotate" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <circle class="track" cx="24" cy="24" r="18"></circle>
+          <circle cx="24" cy="24" r="18" stroke-dasharray="85 150" stroke-dashoffset="0"></circle>
+        </svg>
+      </div>
+      <div class="overlay-meta">
+        <div class="overlay-title">GalaxyWeb · Loading</div>
+        <div class="overlay-sub">Fetching card content & assets — please wait.</div>
+        <div class="overlay-note">We’re loading images and comments to give you a complete preview.</div>
+      </div>
     </div>
-    <div class="banana-text">Amazing Banana — Loading</div>
   </div>
 
   <!-- Top Section -->
@@ -309,7 +322,7 @@
 
   <main class="container" id="content"></main>
 
-  <footer class="footer">
+  <footer class="footer" id="siteFooter">
     <div class="footer-col footer-left">
       <div>
         <div class="footer-about-title">About TeamGalaxy</div>
@@ -368,7 +381,6 @@
   <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-check-compat.js"></script>
 
   <script src="https://www.google.com/recaptcha/api.js?render=6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"></script>
-
   <script>
     // Firebase initialization (unchanged)
     const firebaseConfig = {
@@ -459,6 +471,9 @@
       } finally {
         // only hide after everything above is complete
         hideLoading();
+        // small micro-delay so UI doesn't flicker if things are extremely fast
+        // (kept tiny; remove if you dislike)
+        // await new Promise(r => setTimeout(r, 90));
       }
     }
 
