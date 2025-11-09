@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Public Profile - TeamGalaxy</title>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js "></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js "></script>
   <style>
     * {
       margin: 0;
@@ -518,7 +516,8 @@
       }
     }
   </style>
-</head><body>
+</head>
+<body>
   <!-- Loading Overlay -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-message">Wait for a second...</div>
@@ -561,7 +560,10 @@
     </div>
   </footer>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+
     // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
@@ -574,8 +576,8 @@
     };
 
     // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
     // DOM Elements
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -620,7 +622,7 @@
       if (!dateValue) return 'Invalid Date';
 
       // Check if it's a Firestore Timestamp object
-      if (dateValue && dateValue.seconds) {
+      if (dateValue && dateValue.seconds !== undefined) {
         const date = new Date(dateValue.seconds * 1000);
         return date.toLocaleDateString('en-US', { 
           year: 'numeric', 
@@ -667,7 +669,7 @@
 
       let date;
       // Check if it's a Firestore Timestamp object
-      if (dateValue && dateValue.seconds) {
+      if (dateValue && dateValue.seconds !== undefined) {
         date = new Date(dateValue.seconds * 1000);
       }
       // If it's already a Date object
@@ -711,10 +713,10 @@
       }
 
       try {
-        const docRef = db.collection('publicProfiles').doc(slug);
-        const doc = await docRef.get();
+        const docRef = doc(db, 'publicProfiles', slug);
+        const docSnap = await getDoc(docRef);
 
-        if (!doc.exists) {
+        if (!docSnap.exists()) {
           profileContent.innerHTML = '<div class="loading">Profile not found.</div>';
           // Hide loading overlay
           setTimeout(() => {
@@ -723,7 +725,7 @@
           return;
         }
 
-        const data = doc.data();
+        const data = docSnap.data();
 
         // Check visibility
         if (data.visibility !== true && data.visibility !== 'true') {
@@ -751,14 +753,16 @@
     async function loadUserPostsBySlug(slug) {
       try {
         // Load posts using 'slug' field instead of 'authorSlug'
-        const postsQuery = await db.collection('posts')
-          .where('slug', '==', slug) // Using 'slug' field
-          .orderBy('createdAt', 'desc')
-          .limit(3)
-          .get();
+        const q = query(
+          collection(db, 'posts'),
+          where('slug', '==', slug), // Using 'slug' field
+          orderBy('createdAt', 'desc'),
+          limit(3)
+        );
+        const querySnapshot = await getDocs(q);
 
         const posts = [];
-        postsQuery.forEach(doc => {
+        querySnapshot.forEach(doc => {
           posts.push({ id: doc.id, ...doc.data() });
         });
 
@@ -784,7 +788,7 @@
           
           <!-- Profile Header -->
           <div class="profile-header">
-            <img src="${data.profilePhotoUrl || 'https://via.placeholder.com/150 '}" alt="Profile Photo" class="profile-photo">
+            <img src="${data.profilePhotoUrl || 'https://via.placeholder.com/150  '}" alt="Profile Photo" class="profile-photo">
             <div class="profile-info">
               <h1 class="profile-name">${data.name || 'Unknown User'}</h1>
               <div class="profile-slug">${data.slug ? '@' + data.slug : ''}${data.verified ? '<span class="verified-badge">✓ Verified</span>' : ''}</div>
@@ -839,13 +843,15 @@
 
       for (const post of posts) {
         // Load comments for this post
-        const commentsQuery = await db.collection('posts').doc(post.id).collection('comments')
-          .orderBy('createdAt', 'desc')
-          .limit(3)
-          .get();
+        const commentsQuery = query(
+          collection(db, 'posts', post.id, 'comments'),
+          orderBy('createdAt', 'desc'),
+          limit(3)
+        );
+        const commentsSnapshot = await getDocs(commentsQuery);
 
         const comments = [];
-        commentsQuery.forEach(doc => {
+        commentsSnapshot.forEach(doc => {
           comments.push({ id: doc.id, ...doc.data() });
         });
 
