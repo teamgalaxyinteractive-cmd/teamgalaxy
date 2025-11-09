@@ -424,7 +424,7 @@
         Sign In
       </button>
       <div id="profileMenu" class="dropdown-content" style="right: 30px; display:none;">
-        <a href="#" id="profileLink">Profile</a>
+        <a href="/teamgalaxy/user_management/user_profile.html" id="profileLink">Profile</a>
         <a href="#" id="logoutLink">Logout</a>
       </div>
     </div>
@@ -698,7 +698,7 @@
           window.location.href = "/teamgalaxy/legal/sign_up.html";
           return;
         }
-        alert("Profile clicked - implement profile page.");
+        window.location.href = "/teamgalaxy/user_management/user_profile.html";
         if (profileMenu) profileMenu.style.display = "none";
       });
       profileLink._attached = true;
