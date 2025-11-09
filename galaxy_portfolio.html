@@ -382,7 +382,7 @@
     </button>
     <div class="logo-title">
       <img
-        src=" https://dl.dropboxusercontent.com/scl/fi/ulfs6ygkeyvr4mar8bkuz/galaxwbewh.png?rlkey=jq9buj80ny6et6jfbfpiuf14l&st=lwkqobqi&dl=0"
+        src="https://dl.dropboxusercontent.com/scl/fi/ulfs6ygkeyvr4mar8bkuz/galaxwbewh.png?rlkey=jq9buj80ny6et6jfbfpiuf14l&st=lwkqobqi&dl=0"
         height="46"
         alt="Logo"
       />
@@ -415,7 +415,7 @@
 
   <!-- Banner -->
   <section class="banner-img-section">
-    <img src="    https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80" alt="Banner" />
+    <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80" alt="Banner" />
   </section>
 
   <main>
@@ -440,11 +440,11 @@
         </div>
       </div>
       <div class="footer-social">
-        <a href="    https://twitter.com    " title="Twitter"><i class="fab fa-twitter"></i></a>
-        <a href="https://facebook.com    " title="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="https://instagram.com    " title="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://youtube.com    " title="YouTube"><i class="fab fa-youtube"></i></a>
-        <a href="https://discord.com    " title="Discord"><i class="fab fa-discord"></i></a>
+        <a href="https://twitter.com" title="Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="https://facebook.com" title="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="https://instagram.com" title="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://youtube.com" title="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="https://discord.com" title="Discord"><i class="fab fa-discord"></i></a>
       </div>
     </div>
     <!-- Right: Links + Address -->
@@ -483,11 +483,17 @@
     </div>
   </footer>
 
+  <!-- Firebase (compat) scripts -->
+  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-check-compat.js"></script>
+
   <!-- reCAPTCHA v3 -->
   <script src="https://www.google.com/recaptcha/api.js?render=6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"></script>
 
   <!-- ===== REPLACEMENT SCRIPT: paste in place of your old script ===== -->
- <script type="module">
+ <script>
 /*
   Complete replacement script — paste this in place of your existing scripts.
   Changes made:
@@ -502,12 +508,6 @@
   - Modal/gallery functions included and defensive.
   - RECAPTCHA_SITE_KEY defined to avoid undefined errors in grecaptcha calls.
 */
-
-/* ---------- IMPORTS ---------- */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-import { getFirestore, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
-import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app-check.js";
 
 /* ---------- CONFIG ---------- */
 const RECAPTCHA_SITE_KEY = '6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx';
@@ -567,16 +567,21 @@ function renderSkeletonCards(count = 3) {
 /* ---------- FIREBASE INIT (deferred) ---------- */
 function initFirebaseSafely() {
   try {
-    const app = initializeApp(firebaseConfig);
-    console.log("Firebase initialized");
+    if (!window.firebase) {
+      console.error("Firebase SDK missing. Make sure compat scripts were included.");
+      return;
+    }
+    if (!firebase.apps || !firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+      console.log("Firebase initialized (compat)");
+    } else {
+      console.log("Firebase already initialized - skipping re-init");
+    }
 
     // App Check
     try {
-      const appCheckProvider = new ReCaptchaV3Provider(RECAPTCHA_SITE_KEY);
-      initializeAppCheck(app, {
-        provider: appCheckProvider,
-        isTokenAutoRefreshEnabled: true
-      });
+      const appCheckProvider = new firebase.appCheck.ReCaptchaV3Provider(RECAPTCHA_SITE_KEY);
+      firebase.appCheck().activate(appCheckProvider, true);
     } catch (e) {
       console.warn("App Check activation failed:", e);
     }
@@ -599,22 +604,21 @@ let db = null;
 let currentUser = null;
 
 function wireFirebaseRefs() {
+  if (!window.firebase || !firebase.auth) return;
+  auth = firebase.auth();
+  db = firebase.firestore();
+
   try {
-    auth = getAuth();
-    db = getFirestore();
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(e => console.warn('persistence err', e));
+  } catch (e) {}
 
-    setPersistence(auth, browserLocalPersistence).catch(e => console.warn('persistence err', e));
-
-    if (!auth._ourOnAuthAttached) {
-      onAuthStateChanged(auth, user => {
-        currentUser = user;
-        updateProfileButtonUI();
-        // optional: reload categories or other UI updates here
-      });
-      auth._ourOnAuthAttached = true;
-    }
-  } catch (err) {
-    console.error("Error wiring Firebase refs:", err);
+  if (!auth._ourOnAuthAttached) {
+    auth.onAuthStateChanged(user => {
+      currentUser = user;
+      updateProfileButtonUI();
+      // optional: reload categories or other UI updates here
+    });
+    auth._ourOnAuthAttached = true;
   }
 }
 
@@ -698,7 +702,7 @@ if (logoutLink && !logoutLink._attached) {
   logoutLink.addEventListener('click', (e) => {
     e.preventDefault(); e.stopPropagation();
     if (auth) {
-      signOut(auth).catch(err => console.warn('signout err', err));
+      auth.signOut().catch(err => console.warn('signout err', err));
     }
     if (profileMenu) profileMenu.style.display = 'none';
   });
@@ -804,10 +808,9 @@ async function loadCategories() {
   renderSkeletonCards(3);
   try {
     if (!db) wireFirebaseRefs();
-    const q = query(collection(db, 'portfolioFolders'), orderBy('folderOrder', 'asc'));
-    const snap = await getDocs(q);
+    const snap = await db.collection('portfolioFolders').orderBy('folderOrder', 'asc').get();
     const docs = [];
-    snap.forEach(doc => {
+    snap.docs.forEach(doc => {
       const data = doc.data() || {};
       const folder = {
         id: doc.id,
@@ -852,7 +855,7 @@ async function loadCategories() {
         im.alt = cat.title;
         im.loading = 'lazy';
         im.onclick = () => openModal(idx);
-        im.src = cat.coverUrl || ' https://dummyimage.com/1200x800/121824/99a7bf.png&text=No+Cover ';
+        im.src = cat.coverUrl || 'https://dummyimage.com/1200x800/121824/99a7bf.png&text=No+Cover';
         if (!cat.coverUrl) im.style.opacity = 0.36;
         coverWrap.appendChild(im);
 
@@ -877,7 +880,7 @@ let categoriesFetchedImages = {}; // catIdx -> [urls]
 let currentCatIdx = 0;
 let currentImageIdx = 0;
 
-function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'<').replace(/>/g,'>'); }
+function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function escapeAttr(str){ if(!str) return ''; return String(str).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 async function openModal(catIdx, selectedImageUrl) {
@@ -904,9 +907,8 @@ async function openModal(catIdx, selectedImageUrl) {
       if (categoryDocs && categoryDocs[catIdx] && categoryDocs[catIdx].id) {
         docId = categoryDocs[catIdx].id;
       } else {
-                // fallback: find by order via query (less efficient)
-        const q = query(collection(db, 'portfolioFolders'), orderBy('folderOrder','asc'));
-        const snap = await getDocs(q);
+           // fallback: find by order via query (less efficient)
+        const snap = await db.collection('portfolioFolders').orderBy('folderOrder','asc').get();
         if (snap.docs[catIdx]) docId = snap.docs[catIdx].id;
       }
       if (docId) {
