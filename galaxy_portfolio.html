@@ -825,6 +825,9 @@ async function loadCategories() {
       docs.push(folder);
     });
 
+    // IMPORTANT: populate the global categoryDocs so modal navigation works
+    categoryDocs = docs.slice(); // copy assigned so goToCategory can read ids/titles
+
     setTimeout(() => {
       listEl.innerHTML = '';
       docs.forEach((cat, idx) => {
