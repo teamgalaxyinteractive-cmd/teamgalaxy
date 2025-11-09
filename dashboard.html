@@ -1001,7 +1001,7 @@ body {
   <!-- Banner Section -->
   <div class="banner">
     <img
-      src="https://dl.dropboxusercontent.com/scl/fi/xrm9oz497flxbgeg2ftbh/192f66_67551a1745204b0abb6b170d8aabdea5-mv2.jpg?rlkey=9os8s4wyc1f2mc5xclveeds9t&st=h763i6y8&dl=0"
+      src=" https://dl.dropboxusercontent.com/scl/fi/xrm9oz497flxbgeg2ftbh/192f66_67551a1745204b0abb6b170d8aabdea5-mv2.jpg?rlkey=9os8s4wyc1f2mc5xclveeds9t&st=h763i6y8&dl=0"
       alt="Galaxy Banner"
     />
   </div>
@@ -1016,7 +1016,7 @@ body {
     </div>
     <div class="desc-img">
       <img
-        src="https://dl.dropboxusercontent.com/scl/fi/ulfs6ygkeyvr4mar8bkuz/galaxwbewh.png?rlkey=jq9buj80ny6et6jfbfpiuf14l&st=lwkqobqi&dl=0"
+        src=" https://dl.dropboxusercontent.com/scl/fi/ulfs6ygkeyvr4mar8bkuz/galaxwbewh.png?rlkey=jq9buj80ny6et6jfbfpiuf14l&st=lwkqobqi&dl=0"
         alt="Random PNG"
       />
     </div>
@@ -1033,21 +1033,21 @@ body {
   <div class="collaborators-wrap">
     <div class="collaborators-title">Our Collaborators</div>
     <div class="collaborators-section">
-      <div class="collaborator-logo-box" data-url="https://www.google.com" tabindex="0">
+      <div class="collaborator-logo-box" data-url=" https://www.google.com " tabindex="0">
         <img
           src="https://dl.dropboxusercontent.com/scl/fi/tgfz0bdpfs8r7emm6xqdo/8699158.jpg?rlkey=769ayec8274jsb4c1ms2ojpeh&st=gwaz95i2&dl=0"
           alt="I"
         />
         <div class="collaborator-label">I</div>
       </div>
-      <div class="collaborator-logo-box" data-url="https://www.google.com" tabindex="0">
+      <div class="collaborator-logo-box" data-url=" https://www.google.com " tabindex="0">
         <img
           src="https://dl.dropboxusercontent.com/scl/fi/ih79814t1c2od22jmdbfw/8699161.jpg?rlkey=vxrzhkc3id3njeli1xza6gitc&st=rfqt55u3&dl=0"
           alt="Made"
         />
         <div class="collaborator-label">Made</div>
       </div>
-      <div class="collaborator-logo-box" data-url="https://www.google.com" tabindex="0">
+      <div class="collaborator-logo-box" data-url=" https://www.google.com " tabindex="0">
         <img
           src="https://dl.dropboxusercontent.com/scl/fi/orf6i07ebo705jnq5tkx7/1744702095638.png?rlkey=6jvqg2lrucvw5c8vst71rg5kl&st=r19g59l4&dl=0"
           alt="It!"
@@ -1068,11 +1068,11 @@ body {
         </div>
       </div>
       <div class="footer-social">
-        <a href="https://twitter.com" title="Twitter"><i class="fab fa-twitter"></i></a>
-        <a href="https://facebook.com" title="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="https://instagram.com" title="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://youtube.com" title="YouTube"><i class="fab fa-youtube"></i></a>
-        <a href="https://discord.com" title="Discord"><i class="fab fa-discord"></i></a>
+        <a href=" https://twitter.com " title="Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="https://facebook.com " title="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="https://instagram.com " title="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://youtube.com " title="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="https://discord.com " title="Discord"><i class="fab fa-discord"></i></a>
       </div>
     </div>
 
@@ -1112,378 +1112,372 @@ body {
     </div>
   </footer>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-check-compat.js"></script>
   <!-- reCaptcha -->
   <script src="https://www.google.com/recaptcha/api.js?render=6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"></script>
- <script>
-  // ===== Firebase config (unchanged) =====
-  const firebaseConfig = {
-    apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
-    authDomain: "teamgalaxy-77344.firebaseapp.com",
-    projectId: "teamgalaxy-77344",
-    storageBucket: "teamgalaxy-77344.firebasestorage.app",
-    messagingSenderId: "770256225320",
-    appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
-    measurementId: "G-6C2W9NSNCH"
-  };
+  
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+    import { getFirestore, collection, query, orderBy, limit, getDocs, updateDoc, increment, serverTimestamp, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app-check.js";
 
-  // ===== Initialize Firebase (compat) safely - only once =====
-  if (!window.firebase) {
-    console.error("Firebase SDK not loaded. Make sure compat scripts are included.");
-  } else {
-    if (!firebase.apps || !firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-      console.log("Firebase initialized (compat)");
-    } else {
-      console.log("Firebase already initialized - skipping re-init");
-    }
-  }
+    // ===== Firebase config (unchanged) =====
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+      authDomain: "teamgalaxy-77344.firebaseapp.com",
+      projectId: "teamgalaxy-77344",
+      storageBucket: "teamgalaxy-77344.firebasestorage.app",
+      messagingSenderId: "770256225320",
+      appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+      measurementId: "G-6C2W9NSNCH"
+    };
 
-  // ===== Activate App Check (compat) - safe try/catch =====
-  try {
-    const appCheckProvider = new firebase.appCheck.ReCaptchaV3Provider("6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx");
-    firebase.appCheck().activate(appCheckProvider, true);
-    console.log("App Check (compat) activated");
-  } catch (e) {
-    console.warn("App Check activation failed (compat):", e);
-  }
+    // ===== Initialize Firebase =====
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-  // ===== compat services =====
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-
-  // ===== Ensure auth persistence is LOCAL so sessions survive reloads =====
-  try {
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-      .then(() => console.log("Auth persistence set to LOCAL"))
-      .catch(err => console.warn("Failed to set auth persistence:", err));
-  } catch (err) {
-    console.warn("Could not set persistence (maybe compat API mismatch):", err);
-  }
-
-  // ===== DOM refs (guarded) =====
-  const profileBtn = document.getElementById("profileBtn");
-  const profileMenu = document.getElementById("profileMenu");
-  const logoutLink = document.getElementById("logoutLink");
-  const profileLink = document.getElementById("profileLink");
-  const cardsContainer = document.getElementById("cardsContainer");
-  const loadingOverlay = document.getElementById("loadingOverlay");
-  const starsContainer = document.getElementById("starsContainer");
-
-  // ===== Create Sharp Professional Stars =====
-  function createSharpStars() {
-    const starCount = 350; // Increased for better coverage
-
-    for (let i = 0; i < starCount; i++) {
-      const star = document.createElement('div');
-      const size = Math.random();
-
-      if (size < 0.7) {
-        star.className = 'star small';
-      } else if (size < 0.9) {
-        star.className = 'star medium';
-      } else {
-        star.className = 'star large';
-      }
-
-      star.style.left = `${Math.random() * 100}%`;
-      star.style.top = `${Math.random() * 100}%`;
-
-      starsContainer.appendChild(star);
-    }
-  }
-
-  // Initialize stars when page loads
-  createSharpStars();
-
-  // ===== collaborator boxes (unchanged) =====
-  document.querySelectorAll('.collaborator-logo-box').forEach(box => {
-    box.addEventListener('click', () => {
-      const url = box.getAttribute('data-url');
-      if (url) window.open(url, '_blank');
-    });
-  });
-
-  // ===== Single click handler that checks live auth state =====
-  function handleProfileBtnClick(e) {
-    e && e.stopPropagation();
+    // ===== Activate App Check =====
     try {
-      const liveUser = auth.currentUser;
-      // Redirect path updated per your request
-      if (!liveUser) {
-        console.log("Profile clicked while not signed in — redirecting to /teamgalaxy/legal/sign_up.html");
-        window.location.href = "/teamgalaxy/legal/sign_up.html";
-        return;
-      }
-      // Signed in -> toggle menu
-      if (!profileMenu) return;
-      profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
+      const appCheckProvider = new ReCaptchaV3Provider("6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx");
+      initializeAppCheck(app, {
+        provider: appCheckProvider,
+        isTokenAutoRefreshEnabled: true
+      });
+      console.log("App Check activated");
+    } catch (e) {
+      console.warn("App Check activation failed:", e);
+    }
+
+    // ===== Ensure auth persistence is LOCAL so sessions survive reloads =====
+    try {
+      setPersistence(auth, browserLocalPersistence)
+        .then(() => console.log("Auth persistence set to LOCAL"))
+        .catch(err => console.warn("Failed to set auth persistence:", err));
     } catch (err) {
-      console.error("Error in profile button click handler:", err);
+      console.warn("Could not set persistence:", err);
     }
-  }
 
-  // Attach once defensively
-  if (profileBtn && !profileBtn._attached) {
-    profileBtn.addEventListener("click", handleProfileBtnClick);
-    profileBtn._attached = true;
-  }
+    // ===== DOM refs (guarded) =====
+    const profileBtn = document.getElementById("profileBtn");
+    const profileMenu = document.getElementById("profileMenu");
+    const logoutLink = document.getElementById("logoutLink");
+    const profileLink = document.getElementById("profileLink");
+    const cardsContainer = document.getElementById("cardsContainer");
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    const starsContainer = document.getElementById("starsContainer");
 
-  // Close profile menu if clicking outside (but don't auto-signout)
-  window.addEventListener("click", () => {
-    if (profileMenu) profileMenu.style.display = "none";
-  });
+    // ===== Create Sharp Professional Stars =====
+    function createSharpStars() {
+      const starCount = 350; // Increased for better coverage
 
-  // ===== Sign in / Sign out functions =====
-  async function signIn() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    try {
-      await auth.signInWithPopup(provider);
-      console.log("Sign-in succeeded");
-    } catch (error) {
-      console.error("Sign-in failed:", error);
-      alert("Sign-in failed: " + (error && error.message ? error.message : error));
-    }
-  }
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        const size = Math.random();
 
-  async function signOutUser() {
-    try {
-      await auth.signOut();
-      console.log("User signed out");
-      if (profileMenu) profileMenu.style.display = "none";
-    } catch (error) {
-      console.error("Sign-out failed:", error);
-      alert("Sign-out failed: " + (error && error.message ? error.message : error));
-    }
-  }
-
-  // Wire logout link safely (only once)
-  if (logoutLink && !logoutLink._attached) {
-    logoutLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      signOutUser();
-    });
-    logoutLink._attached = true;
-  }
-
-  // Wire profileLink safely (only once)
-if (profileLink && !profileLink._attached) {
-  profileLink.addEventListener("click", (e) => {
-    e.preventDefault(); // लिंक का डिफ़ॉल्ट बर्ताव रोका
-    e.stopPropagation();
-    if (!auth.currentUser) {
-      window.location.href = "/teamgalaxy/legal/sign_up.html";
-      return;
-    }
-    window.location.href = "/teamgalaxy/user_management/user_profile.html"; 
-    if (profileMenu) profileMenu.style.display = "none";
-  });
-  profileLink._attached = true;
-}
-
-  // ===== Keep a single onAuthStateChanged listener (prevent duplicates) =====
-  if (!auth._ourOnAuthAttached) {
-    auth.onAuthStateChanged((user) => {
-      console.log("onAuthStateChanged fired. user:", !!user);
-      currentUser = user; // keep compatibility with other code using `currentUser`
-      updateProfileButton();
-      // load cards when auth state changes (safe)
-      if (typeof loadCards === "function") loadCards();
-    });
-    auth._ourOnAuthAttached = true;
-  } else {
-    console.log("Auth listener already attached - skipping re-attach");
-  }
-
-  // ===== Update the profile button UI (no event re-binding here) =====
-  let currentUser = null;
-  function updateProfileButton() {
-    if (!profileBtn) return;
-
-    const u = auth.currentUser;
-    if (u) {
-      currentUser = u;
-      if (u.photoURL) {
-        profileBtn.innerHTML = `<img src="${u.photoURL}" alt="Profile" style="width:36px;height:36px;border-radius:50%;">`;
-      } else {
-        profileBtn.innerHTML = `<i class="fa-solid fa-user"></i>`;
-      }
-      profileBtn.title = u.displayName || u.email || "Profile";
-    } else {
-      currentUser = null;
-      profileBtn.innerHTML = "Sign In";
-      profileBtn.title = "Sign In";
-    }
-  }
-
-  // ===== Visited cache =====
-  let visitedCards = JSON.parse(sessionStorage.getItem("visitedCards")) || [];
-
-  // ===== loadCards (modified to work with overlay) =====
-  async function loadCards() {
-    if (!cardsContainer) return;
-
-    try {
-      const snapshot = await db
-        .collection("cards")
-        .orderBy("publishedAt", "desc")
-        .limit(3)
-        .get();
-
-      cardsContainer.innerHTML = "";
-
-      snapshot.docs.forEach((docSnap) => {
-        const data = docSnap.data();
-        const id = docSnap.id;
-
-        // Increment views once per session
-        if (!visitedCards.includes(id)) {
-          db.collection("cards").doc(id).update({
-            views: firebase.firestore.FieldValue.increment(1),
-          }).catch(err => console.warn('views increment failed', err));
-          visitedCards.push(id);
-          sessionStorage.setItem("visitedCards", JSON.stringify(visitedCards));
+        if (size < 0.7) {
+          star.className = 'star small';
+        } else if (size < 0.9) {
+          star.className = 'star medium';
+        } else {
+          star.className = 'star large';
         }
 
-        const card = createCard(
-          id,
-          data.heading,
-          data.description,
-          data.views || 0,
-          data.likes || 0,
-          data.imageUrl || ""
-        );
-        cardsContainer.appendChild(card);
-      });
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
 
-      // Add a small delay to let users enjoy the animation
-      setTimeout(removeOverlay, 1200);
-    } catch (error) {
-      console.error("Error loading cards:", error);
-      cardsContainer.innerHTML = "<p>Error loading content. Please try again later.</p>";
-      // Still remove overlay even if there's an error
-      removeOverlay();
-    }
-  }
-
-  // ===== Remove Overlay Function =====
-  function removeOverlay() {
-    if (loadingOverlay) {
-      // Create a smooth fade out
-      loadingOverlay.style.transition = 'all 0.8s ease';
-      loadingOverlay.style.opacity = '0';
-
-      // Remove from DOM after animation completes
-      setTimeout(() => {
-        loadingOverlay.style.display = 'none';
-      }, 800);
-    }
-  }
-
-  // ===== createCard with limited description =====
-  function createCard(id, heading, description, views, likes, imageUrl) {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.tabIndex = 0;
-    card.setAttribute("role", "button");
-
-    // click -> proper encoded path
-    card.addEventListener("click", () => {
-      window.location.href = `/teamgalaxy/card_showcase.html?id=${encodeURIComponent(id)}`;
-    });
-
-    card.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") card.click();
-    });
-
-    // Card image
-    const img = document.createElement("img");
-    img.src = imageUrl || "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=500&q=80";
-    img.alt = heading;
-    card.appendChild(img);
-
-    // Content container
-    const content = document.createElement("div");
-    content.className = "card-content";
-
-    const h3 = document.createElement("h3");
-    h3.textContent = heading || "Sample Heading";
-
-    const p = document.createElement("p");
-    // Limit description to 120 characters and add "..."
-    const limitedDescription = description && description.length > 120 
-      ? description.substring(0, 120) + "..." 
-      : description || "No description available.";
-    p.textContent = limitedDescription;
-
-    content.appendChild(h3);
-    content.appendChild(p);
-    card.appendChild(content);
-
-    // Footer container (views and likes)
-    const footer = document.createElement("div");
-    footer.className = "card-footer";
-
-    // Views
-    const viewsSpan = document.createElement("span");
-    viewsSpan.className = "views";
-    viewsSpan.innerHTML = `<i class="fa-regular fa-eye"></i> ${views}`;
-    footer.appendChild(viewsSpan);
-
-    // Likes (only for logged-in)
-    const likesSpan = document.createElement("span");
-    likesSpan.className = "likes";
-    likesSpan.style.cursor = auth.currentUser ? "pointer" : "not-allowed";
-    likesSpan.title = auth.currentUser ? "Like" : "Sign In to Like";
-    likesSpan.innerHTML = `<i class="fa-regular fa-heart"></i> ${likes}`;
-
-    likesSpan.addEventListener("click", async (e) => {
-      e.stopPropagation();
-      if (!auth.currentUser) {
-        alert("Please sign in to like.");
-        return;
+        starsContainer.appendChild(star);
       }
+    }
+
+    // Initialize stars when page loads
+    createSharpStars();
+
+    // ===== collaborator boxes (unchanged) =====
+    document.querySelectorAll('.collaborator-logo-box').forEach(box => {
+      box.addEventListener('click', () => {
+        const url = box.getAttribute('data-url');
+        if (url) window.open(url, '_blank');
+      });
+    });
+
+    // ===== Single click handler that checks live auth state =====
+    function handleProfileBtnClick(e) {
+      e && e.stopPropagation();
       try {
-        const likeDoc = await db.collection("cards").doc(id).collection("likes").doc(auth.currentUser.uid).get();
-        if (likeDoc.exists) {
-          alert("You have already liked this card.");
+        const liveUser = auth.currentUser;
+        // Redirect path updated per your request
+        if (!liveUser) {
+          console.log("Profile clicked while not signed in — redirecting to /teamgalaxy/legal/sign_up.html");
+          window.location.href = "/teamgalaxy/legal/sign_up.html";
           return;
         }
-        await db.collection("cards").doc(id).collection("likes").doc(auth.currentUser.uid).set({
-          likedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        });
-        await db.collection("cards").doc(id).update({
-          likes: firebase.firestore.FieldValue.increment(1),
-        });
-        const newLikes = likes + 1;
-        likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${newLikes}`;
-        likesSpan.style.cursor = "default";
-        likesSpan.title = "You liked this";
+        // Signed in -> toggle menu
+        if (!profileMenu) return;
+        profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
       } catch (err) {
-        alert("Error liking card: " + (err && err.message ? error.message : err));
+        console.error("Error in profile button click handler:", err);
       }
+    }
+
+    // Attach once defensively
+    if (profileBtn && !profileBtn._attached) {
+      profileBtn.addEventListener("click", handleProfileBtnClick);
+      profileBtn._attached = true;
+    }
+
+    // Close profile menu if clicking outside (but don't auto-signout)
+    window.addEventListener("click", () => {
+      if (profileMenu) profileMenu.style.display = "none";
     });
 
-    footer.appendChild(likesSpan);
-    card.appendChild(footer);
+    // ===== Sign in / Sign out functions =====
+    async function signIn() {
+      const provider = new GoogleAuthProvider();
+      try {
+        await signInWithPopup(auth, provider);
+        console.log("Sign-in succeeded");
+      } catch (error) {
+        console.error("Sign-in failed:", error);
+        alert("Sign-in failed: " + (error && error.message ? error.message : error));
+      }
+    }
 
-    return card;
-  } // end createCard
+    async function signOutUser() {
+      try {
+        await signOut(auth);
+        console.log("User signed out");
+        if (profileMenu) profileMenu.style.display = "none";
+      } catch (error) {
+        console.error("Sign-out failed:", error);
+        alert("Sign-out failed: " + (error && error.message ? error.message : error));
+      }
+    }
 
-  // ===== Initial run: update UI and load cards once =====
-  updateProfileButton();
-  loadCards();
-  console.log("Auth + cards script loaded");
-</script>
-<script>
-  document.querySelector('.hamburger').addEventListener('click', function() {
-    document.querySelector('.nav-buttons').classList.toggle('show');
-  });
-</script>
+    // Wire logout link safely (only once)
+    if (logoutLink && !logoutLink._attached) {
+      logoutLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        signOutUser();
+      });
+      logoutLink._attached = true;
+    }
+
+    // Wire profileLink safely (only once)
+    if (profileLink && !profileLink._attached) {
+      profileLink.addEventListener("click", (e) => {
+        e.preventDefault(); // लिंक का डिफ़ॉल्ट बर्ताव रोका
+        e.stopPropagation();
+        if (!auth.currentUser) {
+          window.location.href = "/teamgalaxy/legal/sign_up.html";
+          return;
+        }
+        window.location.href = "/teamgalaxy/user_management/user_profile.html"; 
+        if (profileMenu) profileMenu.style.display = "none";
+      });
+      profileLink._attached = true;
+    }
+
+    // ===== Keep a single onAuthStateChanged listener (prevent duplicates) =====
+    if (!auth._ourOnAuthAttached) {
+      onAuthStateChanged(auth, (user) => {
+        console.log("onAuthStateChanged fired. user:", !!user);
+        currentUser = user; // keep compatibility with other code using `currentUser`
+        updateProfileButton();
+        // load cards when auth state changes (safe)
+        if (typeof loadCards === "function") loadCards();
+      });
+      auth._ourOnAuthAttached = true;
+    } else {
+      console.log("Auth listener already attached - skipping re-attach");
+    }
+
+    // ===== Update the profile button UI (no event re-binding here) =====
+    let currentUser = null;
+    function updateProfileButton() {
+      if (!profileBtn) return;
+
+      const u = auth.currentUser;
+      if (u) {
+        currentUser = u;
+        if (u.photoURL) {
+          profileBtn.innerHTML = `<img src="${u.photoURL}" alt="Profile" style="width:36px;height:36px;border-radius:50%;">`;
+        } else {
+          profileBtn.innerHTML = `<i class="fa-solid fa-user"></i>`;
+        }
+        profileBtn.title = u.displayName || u.email || "Profile";
+      } else {
+        currentUser = null;
+        profileBtn.innerHTML = "Sign In";
+        profileBtn.title = "Sign In";
+      }
+    }
+
+    // ===== Visited cache =====
+    let visitedCards = JSON.parse(sessionStorage.getItem("visitedCards")) || [];
+
+    // ===== loadCards (modified to work with overlay) =====
+    async function loadCards() {
+      if (!cardsContainer) return;
+
+      try {
+        const q = query(
+          collection(db, "cards"),
+          orderBy("publishedAt", "desc"),
+          limit(3)
+        );
+        const snapshot = await getDocs(q);
+
+        cardsContainer.innerHTML = "";
+
+        snapshot.docs.forEach((docSnap) => {
+          const data = docSnap.data();
+          const id = docSnap.id;
+
+          // Increment views once per session
+          if (!visitedCards.includes(id)) {
+            updateDoc(doc(db, "cards", id), {
+              views: increment(1),
+            }).catch(err => console.warn('views increment failed', err));
+            visitedCards.push(id);
+            sessionStorage.setItem("visitedCards", JSON.stringify(visitedCards));
+          }
+
+          const card = createCard(
+            id,
+            data.heading,
+            data.description,
+            data.views || 0,
+            data.likes || 0,
+            data.imageUrl || ""
+          );
+          cardsContainer.appendChild(card);
+        });
+
+        // Add a small delay to let users enjoy the animation
+        setTimeout(removeOverlay, 1200);
+      } catch (error) {
+        console.error("Error loading cards:", error);
+        cardsContainer.innerHTML = "<p>Error loading content. Please try again later.</p>";
+        // Still remove overlay even if there's an error
+        removeOverlay();
+      }
+    }
+
+    // ===== Remove Overlay Function =====
+    function removeOverlay() {
+      if (loadingOverlay) {
+        // Create a smooth fade out
+        loadingOverlay.style.transition = 'all 0.8s ease';
+        loadingOverlay.style.opacity = '0';
+
+        // Remove from DOM after animation completes
+        setTimeout(() => {
+          loadingOverlay.style.display = 'none';
+        }, 800);
+      }
+    }
+
+    // ===== createCard with limited description =====
+    function createCard(id, heading, description, views, likes, imageUrl) {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+
+      // click -> proper encoded path
+      card.addEventListener("click", () => {
+        window.location.href = `/teamgalaxy/card_showcase.html?id=${encodeURIComponent(id)}`;
+      });
+
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") card.click();
+      });
+
+      // Card image
+      const img = document.createElement("img");
+      img.src = imageUrl || " https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=500&q=80";
+      img.alt = heading;
+      card.appendChild(img);
+
+      // Content container
+      const content = document.createElement("div");
+      content.className = "card-content";
+
+      const h3 = document.createElement("h3");
+      h3.textContent = heading || "Sample Heading";
+
+      const p = document.createElement("p");
+      // Limit description to 120 characters and add "..."
+      const limitedDescription = description && description.length > 120 
+        ? description.substring(0, 120) + "..." 
+        : description || "No description available.";
+      p.textContent = limitedDescription;
+
+      content.appendChild(h3);
+      content.appendChild(p);
+      card.appendChild(content);
+
+      // Footer container (views and likes)
+      const footer = document.createElement("div");
+      footer.className = "card-footer";
+
+      // Views
+      const viewsSpan = document.createElement("span");
+      viewsSpan.className = "views";
+      viewsSpan.innerHTML = `<i class="fa-regular fa-eye"></i> ${views}`;
+      footer.appendChild(viewsSpan);
+
+      // Likes (only for logged-in)
+      const likesSpan = document.createElement("span");
+      likesSpan.className = "likes";
+      likesSpan.style.cursor = auth.currentUser ? "pointer" : "not-allowed";
+      likesSpan.title = auth.currentUser ? "Like" : "Sign In to Like";
+      likesSpan.innerHTML = `<i class="fa-regular fa-heart"></i> ${likes}`;
+
+      likesSpan.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (!auth.currentUser) {
+          alert("Please sign in to like.");
+          return;
+        }
+        try {
+          const likeDoc = await getDoc(doc(db, "cards", id, "likes", auth.currentUser.uid));
+          if (likeDoc.exists) {
+            alert("You have already liked this card.");
+            return;
+          }
+          await setDoc(doc(db, "cards", id, "likes", auth.currentUser.uid), {
+            likedAt: serverTimestamp(),
+          });
+          await updateDoc(doc(db, "cards", id), {
+            likes: increment(1),
+          });
+          const newLikes = likes + 1;
+          likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${newLikes}`;
+          likesSpan.style.cursor = "default";
+          likesSpan.title = "You liked this";
+        } catch (err) {
+          alert("Error liking card: " + (err && err.message ? err.message : err));
+        }
+      });
+
+      footer.appendChild(likesSpan);
+      card.appendChild(footer);
+
+      return card;
+    } // end createCard
+
+    // ===== Initial run: update UI and load cards once =====
+    updateProfileButton();
+    loadCards();
+    console.log("Auth + cards script loaded");
+  </script>
+  <script>
+    document.querySelector('.hamburger').addEventListener('click', function() {
+      document.querySelector('.nav-buttons').classList.toggle('show');
+    });
+  </script>
 </body>
 </html>
