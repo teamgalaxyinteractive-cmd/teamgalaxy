@@ -4,10 +4,6 @@
 <meta charset="UTF-8" />
 <title>GalaxyWeb Card Management</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-check-compat.js"></script>
 <script src="https://www.google.com/recaptcha/api.js?render=6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"></script>
 
 <style>
@@ -88,7 +84,11 @@
 
 <div class="message" id="messageBox"></div>
 
-<script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+  import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app-check.js";
+
   // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
@@ -100,17 +100,19 @@
     measurementId: "G-6C2W9NSNCH"
   };
 
-  firebase.initializeApp(firebaseConfig);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
   // App Check
   try {
-    const appCheckProvider = new firebase.appCheck.ReCaptchaV3Provider('6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx');
-    firebase.appCheck().activate(appCheckProvider, true);
+    const appCheckProvider = new ReCaptchaV3Provider('6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx');
+    initializeAppCheck(app, {
+      provider: appCheckProvider,
+      isTokenAutoRefreshEnabled: true
+    });
   } catch (e) {
     console.warn('App Check activation failed:', e);
   }
-
-  const db = firebase.firestore();
 
   const cardForm = document.getElementById('cardForm');
   const messageBox = document.getElementById('messageBox');
@@ -129,13 +131,13 @@
     }
 
     try {
-      await db.collection('cards').add({
+      await addDoc(collection(db, 'cards'), {
         heading,
         description,
         imageUrl,
         views: 0,
         likes: 0,
-        publishedAt: firebase.firestore.FieldValue.serverTimestamp()
+        publishedAt: serverTimestamp()
       });
       messageBox.style.color = "#6cdbf7";
       messageBox.textContent = "Card added successfully!";
