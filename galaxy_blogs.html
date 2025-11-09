@@ -494,7 +494,7 @@
 
   <!-- Banner -->
   <section class="banner-img-section">
-    <img src="    https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80" alt="Banner" />
+    <img src="     https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80" alt="Banner" />
   </section>
   <main>
     <!-- Updated: Added skeleton cards (8 now) -->
@@ -571,11 +571,11 @@
         </div>
       </div>
       <div class="footer-social">
-        <a href="    https://twitter.com    " title="Twitter"><i class="fab fa-twitter"></i></a>
-        <a href="https://facebook.com    " title="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="https://instagram.com    " title="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://youtube.com    " title="YouTube"><i class="fab fa-youtube"></i></a>
-        <a href="https://discord.com    " title="Discord"><i class="fab fa-discord"></i></a>
+        <a href="     https://twitter.com     " title="Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="https://facebook.com     " title="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="https://instagram.com     " title="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://youtube.com     " title="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="https://discord.com     " title="Discord"><i class="fab fa-discord"></i></a>
       </div>
     </div>
 
@@ -615,16 +615,15 @@
     </div>
   </footer>
 
-  <!-- Firebase (compat) scripts -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js "></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js "></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js "></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-check-compat.js "></script>
-
   <!-- reCAPTCHA v3 -->
   <script src="https://www.google.com/recaptcha/api.js?render=6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"></script>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+    import { getFirestore, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app-check.js";
+
     // Hamburger menu functionality
     const hamburgerBtn = document.getElementById("hamburgerBtn");
     const navButtons = document.getElementById("navButtons");
@@ -666,34 +665,27 @@
       measurementId: "G-6C2W9NSNCH"
     };
 
-    if (!window.firebase) {
-      console.error("Firebase SDK not loaded. Make sure compat scripts are included.");
-    } else {
-      if (!firebase.apps || !firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-        console.log("Firebase initialized (compat)");
-      } else {
-        console.log("Firebase already initialized - skipping re-init");
-      }
-    }
-
-   try {
-      const appCheckProvider = new firebase.appCheck.ReCaptchaV3Provider("6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx");
-      firebase.appCheck().activate(appCheckProvider, true);
-      console.log("App Check (compat) activated");
-    } catch (e) {
-      console.warn("App Check activation failed (compat):", e);
-    }
-
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
     try {
-      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+      const appCheckProvider = new ReCaptchaV3Provider("6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx");
+      initializeAppCheck(app, {
+        provider: appCheckProvider,
+        isTokenAutoRefreshEnabled: true
+      });
+      console.log("App Check activated");
+    } catch (e) {
+      console.warn("App Check activation failed:", e);
+    }
+
+    try {
+      setPersistence(auth, browserLocalPersistence)
         .then(() => console.log("Auth persistence set to LOCAL"))
         .catch(err => console.warn("Failed to set auth persistence:", err));
     } catch (err) {
-      console.warn("Could not set persistence (maybe compat API mismatch):", err);
+      console.warn("Could not set persistence:", err);
     }
 
     const profileBtn = document.getElementById("profileBtn");
@@ -735,9 +727,9 @@
     });
 
     async function signIn() {
-      const provider = new firebase.auth.GoogleAuthProvider();
+      const provider = new GoogleAuthProvider();
       try {
-        await auth.signInWithPopup(provider);
+        await signInWithPopup(auth, provider);
         console.log("Sign-in succeeded");
       } catch (error) {
         console.error("Sign-in failed:", error);
@@ -747,7 +739,7 @@
 
     async function signOutUser() {
       try {
-        await auth.signOut();
+        await signOut(auth);
         console.log("User signed out");
         if (profileMenu) profileMenu.style.display = "none";
       } catch (error) {
@@ -780,7 +772,7 @@
     }
 
     if (!auth._ourOnAuthAttached) {
-      auth.onAuthStateChanged((user) => {
+      onAuthStateChanged(auth, (user) => {
         console.log("onAuthStateChanged fired. user:", !!user);
         currentUser = user;
         updateProfileButton();
@@ -830,7 +822,8 @@
       // DO NOT clear skeleton immediately — let user see skeleton until content actually ready.
 
       try {
-        const snapshot = await db.collection("cards").orderBy("publishedAt", "desc").limit(8).get();
+        const q = query(collection(db, "cards"), orderBy("publishedAt", "desc"), limit(8));
+        const snapshot = await getDocs(q);
 
         if (snapshot.empty) {
           // no content — keep skeleton for a short moment then show message
@@ -865,7 +858,7 @@
           imgLoadPromises.push(p);
 
           // start loading (assign src after promise set)
-          img.src = data.imageUrl || "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=500&q=80";
+          img.src = data.imageUrl || " https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=500&q=80";
 
           card.appendChild(img);
 
@@ -968,7 +961,7 @@
         s.style.width = `${1 + Math.random()*2}px`;
 
         starsContainer.appendChild(s);
-        // remove after animation completes
+                // remove after animation completes
         s.addEventListener('animationend', () => s.remove());
       }
 
