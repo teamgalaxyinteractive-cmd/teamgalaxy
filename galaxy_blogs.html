@@ -454,6 +454,10 @@
       }
     }
 
+/* Hide reCAPTCHA v3 badge per your requirement, this is temporary and will be removed after i get a fixed domain. */
+  .grecaptcha-badge { 
+    display: none !important; 
+  }
   </style>
 </head>
 <body>
@@ -669,8 +673,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-
-  <!--  try {
+    try {
       const appCheckProvider = new ReCaptchaV3Provider("6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx");
       initializeAppCheck(app, {
         provider: appCheckProvider,
@@ -679,7 +682,7 @@
       console.log("App Check activated");
     } catch (e) {
       console.warn("App Check activation failed:", e);
-    } -->
+    } 
 
     try {
       setPersistence(auth, browserLocalPersistence)
