@@ -669,6 +669,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+<!--
     try {
       const appCheckProvider = new ReCaptchaV3Provider("6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx");
       initializeAppCheck(app, {
@@ -678,7 +679,7 @@
       console.log("App Check activated");
     } catch (e) {
       console.warn("App Check activation failed:", e);
-    }
+    } -->
 
     try {
       setPersistence(auth, browserLocalPersistence)
