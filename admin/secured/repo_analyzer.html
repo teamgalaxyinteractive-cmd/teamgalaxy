@@ -97,9 +97,9 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 100%;
             margin: 0 auto;
-            padding: 20px;
+            padding: 10px;
             position: relative;
             z-index: 10;
             display: none;
@@ -109,8 +109,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 0;
-            margin-bottom: 30px;
+            padding: 15px 0;
+            margin-bottom: 20px;
             border-bottom: 1px solid var(--border);
         }
 
@@ -118,10 +118,10 @@
             background: rgba(255,255,255,0.1);
             border: none;
             color: white;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.9rem;
             transition: all 0.3s ease;
         }
 
@@ -132,16 +132,22 @@
         .card {
             background: var(--card-bg);
             border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
             border: 1px solid var(--border);
             backdrop-filter: blur(10px);
         }
 
         .controls {
             display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 20px;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media (min-width: 992px) {
+            .controls {
+                grid-template-columns: 2fr 1fr;
+            }
         }
 
         .input {
@@ -158,13 +164,14 @@
             background: linear-gradient(45deg, var(--primary), #0077ff);
             color: white;
             border: none;
-            padding: 12px 20px;
+            padding: 10px 16px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.9rem;
             transition: all 0.3s ease;
-            margin-right: 8px;
-            margin-bottom: 8px;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            white-space: nowrap;
         }
 
         .btn:hover {
@@ -173,31 +180,44 @@
         }
 
         .btn.small {
-            padding: 8px 12px;
-            font-size: 0.9rem;
+            padding: 6px 10px;
+            font-size: 0.8rem;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
         }
 
         .stat {
             text-align: center;
+            padding: 10px;
         }
 
         .v {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: bold;
             color: var(--primary);
             margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .label {
             color: var(--muted);
-            font-size: 0.8rem;
+            font-size: 0.7rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .footer-note {
@@ -206,19 +226,27 @@
             background: rgba(255, 165, 0, 0.1);
             border: 1px solid rgba(255, 165, 0, 0.3);
             border-radius: 8px;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
         }
 
         .tabs {
             display: flex;
+            overflow-x: auto;
             border-bottom: 1px solid var(--border);
             margin-bottom: 20px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
         }
 
         .tab {
-            padding: 10px 20px;
+            padding: 10px 15px;
             cursor: pointer;
             border-bottom: 2px solid transparent;
+            white-space: nowrap;
         }
 
         .tab.active {
@@ -244,9 +272,19 @@
         }
 
         th, td {
-            padding: 12px;
+            padding: 10px;
             text-align: left;
             border-bottom: 1px solid var(--border);
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        @media (min-width: 768px) {
+            th, td {
+                max-width: 200px;
+            }
         }
 
         th {
@@ -255,9 +293,9 @@
 
         .file-type {
             background: rgba(0, 212, 255, 0.2);
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
         }
 
         .tree-view {
@@ -266,11 +304,15 @@
             border-radius: 8px;
             max-height: 400px;
             overflow-y: auto;
+            font-size: 0.9rem;
         }
 
         .tree-item {
             margin-left: 20px;
             margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .tree-folder {
@@ -280,7 +322,7 @@
         }
 
         .tree-file {
-            color: #a0aec0;
+            color: var(--muted);
         }
 
         .loading, .error {
@@ -301,6 +343,78 @@
 
         .hidden {
             display: none !important;
+        }
+
+        /* Enhanced Overview Styles */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .overview-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .overview-section {
+            padding: 15px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+
+        .overview-title {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .file-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .file-size {
+            color: var(--muted);
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .card {
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .v {
+                font-size: 1.1rem;
+            }
+            
+            .label {
+                font-size: 0.6rem;
+            }
         }
     </style>
 </head>
@@ -333,20 +447,20 @@
                 <input id="branch" class="input" placeholder="branch" value="main">
                 <input id="root" class="input" placeholder="root path (optional)" value="">
 
-                <div style="display:flex;gap:8px;margin-top:8px">
-                    <input id="extensions" class="input" style="flex:1" placeholder=".js,.py" value=".js,.ts,.py,.html,.css,.json,.md">
+                <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+                    <input id="extensions" class="input" style="flex:1;min-width:150px" placeholder=".js,.py" value=".js,.ts,.py,.html,.css,.json,.md">
                 </div>
 
-                <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-                    <input id="minSize" class="input" style="width:120px" type="number" placeholder="min size bytes" value="0">
-                    <input id="maxContentFetch" class="input" style="width:120px" type="number" placeholder="content fetch N" value="10" title="Max files to fetch content for (0 = none)">
+                <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap">
+                    <input id="minSize" class="input" style="width:100px" type="number" placeholder="min size bytes" value="0">
+                    <input id="maxContentFetch" class="input" style="width:100px" type="number" placeholder="content fetch N" value="10" title="Max files to fetch content for (0 = none)">
                 </div>
 
-                <div style="display:flex;gap:8px;margin-top:8px">
-                    <input id="ghToken" class="input" placeholder="GitHub token (optional)" title="Use a personal token to increase rate limit">
+                <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+                    <input id="ghToken" class="input" placeholder="GitHub token (optional)" title="Use a personal token to increase rate limit" style="flex:1;min-width:200px">
                 </div>
 
-                <div style="display:flex;gap:8px;margin-top:8px">
+                <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
                     <button id="analyzeBtn" class="btn">🔄 Analyze</button>
                     <button id="fetchTopContentBtn" class="btn small" style="background:linear-gradient(45deg,#60a5fa,#3b82f6)">📄 Fetch top N</button>
                     <button id="exportBtn" class="btn small" style="background:linear-gradient(45deg,#4ade80,#22c55e)">📥 Export</button>
@@ -360,22 +474,22 @@
             <div class="card">
                 <div style="margin-bottom:6px"><strong>Quick stats</strong></div>
                 <div class="stats-grid" id="quickStats">
-                    <div class="stat"><div class="v" id="totalFiles">0</div><div class="label" style="color:var(--muted)">Files</div></div>
-                    <div class="stat"><div class="v" id="totalSize">0 Bytes</div><div class="label" style="color:var(--muted)">Total size</div></div>
-                    <div class="stat"><div class="v" id="largestFile">—</div><div class="label" style="color:var(--muted)">Largest</div></div>
-                    <div class="stat"><div class="v" id="avgSize">—</div><div class="label" style="color:var(--muted)">Average</div></div>
+                    <div class="stat"><div class="v" id="totalFiles">0</div><div class="label">Files</div></div>
+                    <div class="stat"><div class="v" id="totalSize">0 Bytes</div><div class="label">Total size</div></div>
+                    <div class="stat"><div class="v" id="largestFile">—</div><div class="label">Largest</div></div>
+                    <div class="stat"><div class="v" id="avgSize">—</div><div class="label">Average</div></div>
                 </div>
 
                 <div style="margin-top:6px"><strong>Search / Filter</strong></div>
                 <input id="searchFilter" class="input" placeholder="Filter by filename or path">
 
                 <div style="margin-top:6px"><strong>Charts</strong></div>
-                <div style="display:flex;gap:8px">
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
                     <button id="showChartsBtn" class="btn small">Show charts</button>
                     <button id="loadCacheBtn" class="btn small" style="background:linear-gradient(45deg,#f59e0b,#f97316)">Load cache</button>
                 </div>
 
-                <div id="rateInfo" class="footer-note" style="margin-top:8px;color:var(--muted)"></div>
+                <div id="rateInfo" class="footer-note" style="margin-top:8px;color:var(--muted);font-size:0.7rem"></div>
             </div>
         </div>
 
@@ -389,16 +503,32 @@
                 <div class="tab" data-tab="details">📋 Details</div>
             </div>
 
-            <!-- Overview -->
+            <!-- Enhanced Overview -->
             <div id="overview" class="tab-content active">
-                <div style="display:flex;gap:12px;flex-wrap:wrap">
-                    <div style="flex:1">
-                        <h3 style="margin-bottom:8px">Summary</h3>
-                        <div id="summaryText" style="color:var(--muted)">No analysis run yet.</div>
+                <div class="overview-grid">
+                    <div class="overview-section">
+                        <h3 class="overview-title">Repository Summary</h3>
+                        <div id="summaryText" style="color:var(--muted);line-height:1.6">No analysis run yet.</div>
+                        
+                        <h3 class="overview-title" style="margin-top:20px">Repository Details</h3>
+                        <div style="color:var(--muted);font-size:0.9rem">
+                            <p><strong>Owner:</strong> <span id="repoOwner">—</span></p>
+                            <p><strong>Repository:</strong> <span id="repoName">—</span></p>
+                            <p><strong>Branch:</strong> <span id="repoBranch">—</span></p>
+                            <p><strong>Root Path:</strong> <span id="repoRoot">—</span></p>
+                        </div>
                     </div>
-                    <div style="width:360px">
-                        <h3 style="margin-bottom:8px">Top files</h3>
-                        <div id="topFilesList" style="color:var(--muted)">—</div>
+                    
+                    <div class="overview-section">
+                        <h3 class="overview-title">Top Files by Size</h3>
+                        <div id="topFilesList"></div>
+                        
+                        <h3 class="overview-title" style="margin-top:20px">Analysis Stats</h3>
+                        <div style="color:var(--muted);font-size:0.9rem">
+                            <p><strong>Extensions Filtered:</strong> <span id="usedExtensions">—</span></p>
+                            <p><strong>Minimum Size:</strong> <span id="usedMinSize">—</span></p>
+                            <p><strong>Token Used:</strong> <span id="usedToken">No</span></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -411,12 +541,15 @@
                         <tbody id="filesTableBody"></tbody>
                     </table>
                 </div>
-                <div id="filesNote" style="color:var(--muted);margin-top:8px">Click 🔍 to load file content (this will perform a single request for that file).</div>
+                <div id="filesNote" style="color:var(--muted);margin-top:8px;font-size:0.8rem">Click 🔍 to load file content (this will perform a single request for that file).</div>
             </div>
 
             <!-- Charts -->
             <div id="charts" class="tab-content">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div style="display:grid;grid-template-columns:1fr;gap:10px">
+                    @media (min-width: 768px) {
+                        div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"
+                    }
                     <div style="background:rgba(0,0,0,0.25);padding:10px;border-radius:8px"><canvas id="typeChart"></canvas></div>
                     <div style="background:rgba(0,0,0,0.25);padding:10px;border-radius:8px"><canvas id="sizeChart"></canvas></div>
                 </div>
@@ -536,7 +669,7 @@
         function getFileType(name){ const ext = (name.split('.').pop()||'').toLowerCase(); const map={'js':'JavaScript','ts':'TypeScript','py':'Python','html':'HTML','css':'CSS','json':'JSON','md':'Markdown'}; return map[ext]||(ext?ext.toUpperCase():'Unknown'); }
         function safeDecodeURIPath(p){ try { return decodeURIComponent(p); } catch(e){ return p; } }
         function escapeForAttr(s){ return (s||'').replace(/'/g,"\\'").replace(/"/g,'\\"'); }
-        function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'<').replace(/>/g,'>'); }
+        function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
         // Tab switching
         document.querySelectorAll('.tab').forEach(t=>{
@@ -603,7 +736,7 @@
             }));
 
             window.analysisData = built;
-            updateUIAfterAnalysis(built);
+            updateUIAfterAnalysis(built, {owner, repo, branch, root, extensions, minSize, token: !!token});
             buildTreeStructure(built);
             hideLoading();
 
@@ -661,7 +794,7 @@
         }
 
         // Update UI after analysis
-        function updateUIAfterAnalysis(files){
+        function updateUIAfterAnalysis(files, params){
           const totalFiles = files.length;
           const totalSize = files.reduce((s,f)=>s + (f.size||0), 0);
           const largest = files.reduce((best,f)=> (!best || (f.size||0) > (best.size||0)) ? f : best, null);
@@ -669,13 +802,34 @@
 
           el('totalFiles').textContent = totalFiles;
           el('totalSize').textContent = formatBytes(totalSize);
-          el('largestFile').textContent = largest ? `${largest.name} — ${formatBytes(largest.size)}` : '—';
+          el('largestFile').textContent = largest ? `${largest.name}` : '—';
           el('avgSize').textContent = avg ? formatBytes(avg) : '—';
+
+          // Update overview details
+          el('repoOwner').textContent = params.owner;
+          el('repoName').textContent = params.repo;
+          el('repoBranch').textContent = params.branch;
+          el('repoRoot').textContent = params.root || 'root';
+          el('usedExtensions').textContent = params.extensions.join(', ');
+          el('usedMinSize').textContent = params.minSize + ' bytes';
+          el('usedToken').textContent = params.token ? 'Yes' : 'No';
 
           el('summaryText').textContent = `Found ${totalFiles} files (${formatBytes(totalSize)}). Largest: ${largest ? largest.name : '—'}. Average size: ${avg ? formatBytes(avg) : '—'}. Content NOT fetched by default to save rate tokens. Click a file to load content on-demand.`;
 
-          const top = [...files].sort((a,b)=> (b.size||0) - (a.size||0)).slice(0,8);
-          el('topFilesList').innerHTML = top.map(t=> `<div style="margin-bottom:6px">${t.name} — <span style="color:var(--muted)">${formatBytes(t.size)}</span></div>`).join('') || '—';
+          // Top files list (enhanced)
+          const top = [...files].sort((a,b)=> (b.size||0) - (a.size||0)).slice(0,10);
+          const topFilesList = el('topFilesList');
+          topFilesList.innerHTML = '';
+          
+          top.forEach(file => {
+              const fileItem = document.createElement('div');
+              fileItem.className = 'file-item';
+              fileItem.innerHTML = `
+                  <span class="file-name">${file.name}</span>
+                  <span class="file-size">${formatBytes(file.size)}</span>
+              `;
+              topFilesList.appendChild(fileItem);
+          });
 
           renderFilesTable(files);
           renderCharts(files);
@@ -691,13 +845,13 @@
           filtered.forEach(f=>{
             const tr = document.createElement('tr');
             tr.innerHTML = `
-              <td>${f.name}</td>
-              <td style="max-width:420px;word-break:break-all">${f.path}</td>
+              <td title="${f.name}">${f.name}</td>
+              <td title="${f.path}" style="max-width:150px">${f.path}</td>
               <td>${formatBytes(f.size)}</td>
               <td><span class="file-type">${f.type}</span></td>
               <td>${f.lines === null ? '—' : f.lines}</td>
               <td style="white-space:nowrap">
-                <button class="btn small" onclick="loadSingleFile('${escapeForAttr(f.url)}','${escapeForAttr(f.path)}')">🔍 Load</button>
+                <button class="btn small" onclick="loadSingleFile('${escapeForAttr(f.url)}','${escapeForAttr(f.path)}')">🔍</button>
                 <button class="btn small" style="background:linear-gradient(45deg,#3b82f6,#2563eb)" onclick="downloadDirect('${escapeForAttr(f.url)}','${escapeForAttr(f.name)}')">📥</button>
               </td>
             `;
@@ -717,26 +871,29 @@
             const ctx1 = el('typeChart').getContext('2d');
             window.charts.typeChart = new Chart(ctx1, {
               type: 'doughnut',
-              data: { labels, datasets: [{ data }] },
+               { labels, datasets: [{ data }] },
               options: { 
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins:{legend:{position:'bottom', color: '#fff'}}
               }
             });
 
             const top = [...files].sort((a,b)=> (b.size||0)-(a.size||0)).slice(0,10);
-            const sizeLabels = top.map(t=> t.name);
+            const sizeLabels = top.map(t=> t.name.length > 15 ? t.name.substring(0,15) + '...' : t.name);
             const sizeValues = top.map(t=> Math.round((t.size||0)/1024));
             if(window.charts.sizeChart) window.charts.sizeChart.destroy();
             const ctx2 = el('sizeChart').getContext('2d');
             window.charts.sizeChart = new Chart(ctx2, {
               type:'bar',
-              data: { labels: sizeLabels, datasets: [{ label: 'Size (KB)', data: sizeValues, backgroundColor: '#00d4ff' }] },
+               { labels: sizeLabels, datasets: [{ label: 'Size (KB)', data: sizeValues, backgroundColor: '#00d4ff' }] },
               options: { 
                 indexAxis: 'y', 
+                responsive: true,
+                maintainAspectRatio: false,
                 plugins:{legend:{display:false}},
                 scales: {
-                  x: { ticks: { color: '#a0aec0' } },
+                  x: { ticks: { color: '#a0aec0' }, title: { display: true, text: 'KB', color: '#a0aec0' } },
                   y: { ticks: { color: '#a0aec0' } }
                 }
               }
@@ -774,7 +931,7 @@
           target.innerHTML = `
             <h3 style="margin-top:0">${safePath}</h3>
             <div style="color:var(--muted);margin-bottom:8px">Size: ${content.length} bytes — Loaded on demand</div>
-            <pre style="white-space:pre-wrap;max-height:420px;overflow:auto;background:rgba(0,0,0,0.2);padding:12px;border-radius:8px">${escapeHtml(content)}</pre>
+            <pre style="white-space:pre-wrap;max-height:420px;overflow:auto;background:rgba(0,0,0,0.2);padding:12px;border-radius:8px;font-size:0.9rem">${escapeHtml(content)}</pre>
           `;
         }
 
@@ -845,7 +1002,7 @@
             const obj = JSON.parse(raw);
             if(!obj.data) return alert('Invalid cache');
             window.analysisData = obj.data;
-            updateUIAfterAnalysis(window.analysisData);
+            updateUIAfterAnalysis(window.analysisData, JSON.parse(localStorage.getItem('lastAnalysisParams') || '{}'));
             buildTreeStructure(window.analysisData);
             alert('Loaded cached analysis from ' + (obj.timestamp||'unknown'));
           }catch(e){ alert('Load cache failed: '+e) }
@@ -857,7 +1014,19 @@
           analyzeRepo = async function(){
             await origAnalyze();
             try{
-              if(window.analysisData) localStorage.setItem('lastAnalysis', JSON.stringify({timestamp:new Date().toISOString(), data: window.analysisData}));
+              if(window.analysisData) {
+                localStorage.setItem('lastAnalysis', JSON.stringify({timestamp:new Date().toISOString(),  window.analysisData}));
+                // Store params too
+                localStorage.setItem('lastAnalysisParams', JSON.stringify({
+                  owner: el('owner').value,
+                  repo: el('repo').value,
+                  branch: el('branch').value,
+                  root: el('root').value,
+                  extensions: el('extensions').value,
+                  minSize: el('minSize').value,
+                  token: !!el('ghToken').value
+                }));
+              }
             }catch(e){ console.warn('cache fail', e); }
           };
         })();
