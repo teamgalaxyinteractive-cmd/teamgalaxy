@@ -135,10 +135,13 @@
             to { transform: rotate(360deg); }
         }
 
-        .redirect-message {
-            font-size: 0.9rem;
-            color: #a0aec0;
-            margin-top: 0.5rem;
+        .google-btn {
+            background: #4285f4;
+            margin: 0.5rem 0;
+        }
+
+        .google-btn:hover {
+            background: #3367d6;
         }
     </style>
 </head>
@@ -151,13 +154,14 @@
         <div id="authSection">
             <div class="message">
                 <p><strong>Welcome to Admin Panel</strong></p>
-                <p>If you're not signed up, please register first and then come back here.</p>
+                <p>Please sign in with Google to continue.</p>
             </div>
             
             <div class="status" id="authStatus"></div>
             
-            <button class="btn" onclick="checkAuth()">Check Authentication</button>
-            <button class="btn" onclick="login()" id="loginBtn">Sign In</button>
+            <button class="btn google-btn" onclick="googleSignIn()">
+                <span>Sign In with Google</span>
+            </button>
         </div>
 
         <div id="adminSection" class="hidden">
@@ -186,19 +190,21 @@
     </div>
 
     <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
-      authDomain: "teamgalaxy-77344.firebaseapp.com",
-      projectId: "teamgalaxy-77344",
-      storageBucket: "teamgalaxy-77344.firebasestorage.app",
-      messagingSenderId: "770256225320",
-      appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
-      measurementId: "G-6C2W9NSNCH"
-    };
+        // Initialize Firebase with your credentials
+        const firebaseConfig = {
+          apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+          authDomain: "teamgalaxy-77344.firebaseapp.com",
+          projectId: "teamgalaxy-77344",
+          storageBucket: "teamgalaxy-77344.firebasestorage.app",
+          messagingSenderId: "770256225320",
+          appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+          measurementId: "G-6C2W9NSNCH"
+        };
 
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        const provider = new firebase.auth.GoogleAuthProvider();
 
         // Create star background
         function createStars() {
@@ -228,41 +234,31 @@
             }
         }
 
-        // Check authentication status
-        function checkAuth() {
+        // Google Sign-In
+        function googleSignIn() {
             const statusDiv = document.getElementById('authStatus');
-            statusDiv.innerHTML = '<div class="loading"></div> Checking authentication...';
+            statusDiv.innerHTML = '<div class="loading"></div> Signing in with Google...';
             statusDiv.className = 'status';
             
-            auth.onAuthStateChanged(user => {
-                if (user) {
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    const user = result.user;
                     statusDiv.innerHTML = `Signed in as: ${user.email}`;
                     statusDiv.className = 'status success';
-                    document.getElementById('authSection').classList.add('hidden');
-                    document.getElementById('adminSection').classList.remove('hidden');
-                } else {
-                    statusDiv.innerHTML = 'Not signed in. Please sign in first.';
+                    
+                    // Move to admin verification
+                    setTimeout(() => {
+                        document.getElementById('authSection').classList.add('hidden');
+                        document.getElementById('adminSection').classList.remove('hidden');
+                        // Auto-verify admin after sign-in
+                        verifyAdmin();
+                    }, 1500);
+                })
+                .catch((error) => {
+                    console.error('Google Sign-In error:', error);
+                    statusDiv.innerHTML = 'Sign-in failed: ' + error.message;
                     statusDiv.className = 'status error';
-                }
-            });
-        }
-
-        // Login function
-        function login() {
-            const email = prompt('Enter your email:');
-            const password = prompt('Enter your password:');
-            
-            if (email && password) {
-                auth.signInWithEmailAndPassword(email, password)
-                    .then(() => {
-                        alert('Successfully signed in!');
-                        checkAuth();
-                    })
-                    .catch(error => {
-                        console.error('Login error:', error);
-                        alert('Login failed: ' + error.message);
-                    });
-            }
+                });
         }
 
         // Verify admin access
@@ -279,31 +275,29 @@
             }
 
             try {
-                // Check if user exists in admin collection
-                const adminDoc = await db.collection('admin').doc(user.uid).get();
+                // Check if user's email exists in admin collection
+                const adminQuery = await db.collection('admin').where('gmail', '==', user.email).limit(1).get();
                 
-                if (adminDoc.exists) {
-                    const adminData = adminDoc.data();
-                    if (adminData.gmail === user.email) {
-                        statusDiv.innerHTML = `Admin verified: ${user.email}`;
-                        statusDiv.className = 'status success';
+                if (!adminQuery.empty) {
+                    // Admin found
+                    statusDiv.innerHTML = `Admin verified: ${user.email}`;
+                    statusDiv.className = 'status success';
+                    
+                    // Enable access after verification
+                    setTimeout(() => {
+                        document.getElementById('adminSection').classList.add('hidden');
+                        document.getElementById('accessSection').classList.remove('hidden');
                         
-                        // Enable access button after verification
-                        setTimeout(() => {
-                            document.getElementById('adminSection').classList.add('hidden');
-                            document.getElementById('accessSection').classList.remove('hidden');
-                            
-                            const accessStatus = document.getElementById('accessStatus');
-                            accessStatus.innerHTML = 'Ready to access admin panel!';
-                            accessStatus.className = 'status success';
-                        }, 1000);
-                    } else {
-                        statusDiv.innerHTML = 'Admin verification failed.';
-                        statusDiv.className = 'status error';
-                    }
+                        const accessStatus = document.getElementById('accessStatus');
+                        accessStatus.innerHTML = 'Ready to access admin panel!';
+                        accessStatus.className = 'status success';
+                    }, 1000);
                 } else {
                     statusDiv.innerHTML = 'User is not an admin.';
                     statusDiv.className = 'status error';
+                    
+                    // Disable verify button after failed attempt
+                    document.getElementById('verifyBtn').disabled = true;
                 }
             } catch (error) {
                 console.error('Admin verification error:', error);
@@ -375,8 +369,10 @@
                 if (user) {
                     document.getElementById('authSection').classList.add('hidden');
                     document.getElementById('adminSection').classList.remove('hidden');
-                    document.getElementById('authStatus').innerHTML = `Already signed in as: ${user.email}`;
-                    document.getElementById('authStatus').className = 'status success';
+                    document.getElementById('adminStatus').innerHTML = `Already signed in as: ${user.email}`;
+                    document.getElementById('adminStatus').className = 'status success';
+                    // Auto-verify admin
+                    verifyAdmin();
                 }
             });
         });
