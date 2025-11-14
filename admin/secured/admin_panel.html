@@ -227,7 +227,7 @@
 </head>
 <body>
     <div class="stars" id="stars"></div>
-    
+
     <!-- Loading Screen -->
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-spinner"></div>
@@ -314,7 +314,7 @@
                 </div>
                 <h3 class="module-title">PORTFOLIO</h3>
                 <p class="module-description">Manage portfolio items and folders.</p>
-                
+
                 <div class="sub-modules">
                     <div class="sub-module" onclick="navigateTo('items')">
                         <h4>ITEM MANAGER</h4>
@@ -376,26 +376,26 @@
         function createStars() {
             const starsContainer = document.getElementById('stars');
             const starCount = 150;
-            
+
             for (let i = 0; i < starCount; i++) {
                 const star = document.createElement('div');
                 star.classList.add('star');
-                
+
                 // Random position
                 const x = Math.random() * 100;
                 const y = Math.random() * 100;
                 star.style.left = `${x}%`;
                 star.style.top = `${y}%`;
-                
+
                 // Random size
                 const size = Math.random() * 3 + 1;
                 star.style.width = `${size}px`;
                 star.style.height = `${size}px`;
-                
+
                 // Random animation duration
                 const duration = Math.random() * 5 + 2;
                 star.style.setProperty('--duration', `${duration}s`);
-                
+
                 starsContainer.appendChild(star);
             }
         }
@@ -408,47 +408,39 @@
                     if (user) {
                         // Check if user is admin
                         const adminQuery = await db.collection('admin').where('gmail', '==', user.email).limit(1).get();
-                        
+
                         if (!adminQuery.empty) {
                             // Get admin document data
                             const adminDoc = adminQuery.docs[0];
                             const adminData = adminDoc.data();
-                            
+
                             // Show dashboard and hide loading
                             setTimeout(() => {
                                 document.getElementById('loadingScreen').style.opacity = '0';
                                 setTimeout(() => {
                                     document.getElementById('loadingScreen').classList.add('hidden');
                                     document.getElementById('dashboardContainer').style.display = 'block';
-                                    
+
                                     // Set admin name
                                     document.getElementById('adminName').textContent = adminData.name || user.email;
-                                    
+
                                     // Load stats
                                     loadStats();
                                 }, 500);
                             }, 2000); // Simulate setup time
                         } else {
-                            // Not an admin - redirect or show error
-                            document.getElementById('loadingScreen').querySelector('.loading-text').textContent = 'Access denied. Redirecting...';
-                            setTimeout(() => {
-                                window.location.href = 'index.html'; // Redirect to login
-                            }, 2000);
+                            // Not an admin - redirect to login
+                            window.location.href = 'index.html';
                         }
                     } else {
                         // Not signed in - redirect to login
-                        document.getElementById('loadingScreen').querySelector('.loading-text').textContent = 'Please sign in first...';
-                        setTimeout(() => {
-                            window.location.href = 'index.html'; // Redirect to login
-                        }, 2000);
+                        window.location.href = 'index.html';
                     }
                 });
             } catch (error) {
                 console.error('Auth check error:', error);
-                document.getElementById('loadingScreen').querySelector('.loading-text').textContent = 'Authentication error. Redirecting...';
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000);
+                // Redirect to login on error
+                window.location.href = 'index.html';
             }
         }
 
@@ -458,15 +450,15 @@
                 // Count users
                 const usersSnapshot = await db.collection('users').count().get();
                 document.getElementById('userCount').textContent = usersSnapshot.data().count || 0;
-                
+
                 // Count admins
                 const adminsSnapshot = await db.collection('admin').count().get();
                 document.getElementById('adminCount').textContent = adminsSnapshot.data().count || 0;
-                
+
                 // Count repositories (example collection)
                 const reposSnapshot = await db.collection('repositories').count().get();
                 document.getElementById('repoCount').textContent = reposSnapshot.data().count || 0;
-                
+
                 // Count support tickets
                 const ticketsSnapshot = await db.collection('support_tickets').count().get();
                 document.getElementById('supportTickets').textContent = ticketsSnapshot.data().count || 0;
@@ -480,11 +472,44 @@
             }
         }
 
-        // Navigation function
+        // Navigation function - redirects to the specified module
         function navigateTo(module) {
-            // In a real implementation, this would navigate to the specific module
-            alert(`Navigating to ${module} module...`);
-            // Example: window.location.href = `${module}.html`;
+            // Construct the URL based on the module
+            let url = '';
+            switch(module) {
+                case 'user_data/data_visualizer':
+                    url = 'user_data/data_visualizer.html';
+                    break;
+                case 'analytics':
+                    url = 'analytics.html';
+                    break;
+                case 'repo_analyzer':
+                    url = 'repo_analyzer.html';
+                    break;
+                case 'card_manager':
+                    url = 'card_manager.html';
+                    break;
+                case 'items':
+                    url = 'items.html';
+                    break;
+                case 'folders':
+                    url = 'folders.html';
+                    break;
+                case 'licenses':
+                    url = 'licenses.html';
+                    break;
+                case 'agreements':
+                    url = 'agreements.html';
+                    break;
+                case 'support':
+                    url = 'support.html';
+                    break;
+                default:
+                    url = module + '.html';
+            }
+            
+            // Redirect to the constructed URL
+            window.location.href = url;
         }
 
         // Logout function
@@ -495,7 +520,8 @@
                 })
                 .catch(error => {
                     console.error('Logout error:', error);
-                    alert('Logout failed: ' + error.message);
+                    // Redirect to login even if signOut fails
+                    window.location.href = 'index.html';
                 });
         }
 
