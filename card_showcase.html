@@ -134,6 +134,17 @@
   .stats { display:flex; gap:32px; font-size:1.2rem; opacity:0.8; margin-bottom:64px; }
   .stats span { display:flex; align-items:center; gap:8px; }
 
+  /* Like button styling */
+  .like-btn {
+    cursor: pointer;
+    transition: color 0.3s;
+    user-select: none;
+  }
+  
+  .like-btn.liked {
+    color: #ff6b6b;
+  }
+
   .comments-section { margin-top:40px; padding-top:20px; border-top:1px solid #344261; }
   .comments-section h2 { color: #fab84f; margin-bottom:20px; }
   .comment-input-container { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
@@ -166,8 +177,8 @@
     overflow: visible;
   }
 
-  .logo-title { display:flex; align-items:center; gap:10px; font-size:1.5rem; font-weight:bold; font-family:'Montserrat', sans-serif; color:#fff; white-space:nowrap; }
-  .logo-title img { height:60px; filter: drop-shadow(0 0 8px rgba(97,218,251,0.7)); }
+  .logo-title { display:flex; align-items:center; gap:10px; font-size:1.5rem; font-weight:bold; font-family:'Montserrat', sans-serif; color:#fff; white-space:nowrap; cursor: pointer; }
+  .logo-title img { height:80px; filter: drop-shadow(0 0 8px rgba(97,218,251,0.7)); } /* Increased size by 1.8x */
   .hamburger { display:none; background:none; border:none; color:#e0e0e0; cursor:pointer; font-size:1.2rem; padding:8px; margin-right:10px; }
   .nav-buttons { display:flex; align-items:center; gap:15px; font-size:1rem; position:relative; }
   .nav-btn, .profile-btn {
@@ -240,7 +251,7 @@
 
   @media (max-width:768px) {
     .logo-title { font-size:1.2rem; }
-    .logo-title img { height:40px; }
+    .logo-title img { height:72px; } /* Scaled for mobile too */
     .hamburger { display:block; }
     .nav-buttons {
       display: none;
@@ -289,10 +300,10 @@
     <button class="hamburger" id="hamburgerBtn">
       <i class="fa-solid fa-bars"></i>
     </button>
-    <div class="logo-title">
+    <div class="logo-title" id="logoTitle">
       <img
         src="https://dl.dropboxusercontent.com/scl/fi/ulfs6ygkeyvr4mar8bkuz/galaxwbewh.png?rlkey=jq9buj80ny6et6jfbfpiuf14l&st=lwkqobqi&dl=0"
-        height="46"
+        height="80"
         alt="Logo"
       />
       GalaxyWeb
@@ -310,7 +321,7 @@
           <a href="posts.html">Posts</a>
           <a href="community_chat.html">Community Chat</a>
           <a href="galaxy_studio.html">Galaxy Design</a>
-          
+
         </div>
       </div>
       <button id="profileBtn" class="profile-btn" title="Sign In">
@@ -378,10 +389,10 @@
   </footer>
 
   <!-- Firebase v11.9.0 compat builds -->
-  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js "></script>
-  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore-compat.js "></script>
-  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-auth-compat.js "></script>
-  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-check-compat.js "></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js  "></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore-compat.js  "></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-auth-compat.js  "></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-check-compat.js  "></script>
 
   <script src="https://www.google.com/recaptcha/api.js?render=6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"></script>
   <script>
@@ -411,11 +422,53 @@
     const profileMenu = document.getElementById("profileMenu");
     const logoutLink = document.getElementById("logoutLink");
     const profileLink = document.getElementById("profileLink");
+    const logoTitle = document.getElementById("logoTitle"); // Added logo title reference
 
     function showLoading(){ loadingOverlay.style.display = "flex"; loadingOverlay.setAttribute('aria-hidden', 'false'); }
     function hideLoading(){ loadingOverlay.style.display = "none"; loadingOverlay.setAttribute('aria-hidden', 'true'); }
 
     function getQueryParam(param){ const urlParams = new URLSearchParams(window.location.search); return urlParams.get(param); }
+
+    // Like functionality
+    async function handleLike(cardId, currentLikes) {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Please sign in to like this post.");
+        return;
+      }
+
+      const likeRef = db.collection("cards").doc(cardId).collection("likes").doc(user.uid);
+      const cardRef = db.collection("cards").doc(cardId);
+
+      try {
+        // Check if user already liked the post
+        const likeDoc = await likeRef.get();
+        if (likeDoc.exists) {
+          // Unlike
+          await likeRef.delete();
+          await cardRef.update({
+            likes: firebase.firestore.FieldValue.increment(-1)
+          });
+          // Update UI
+          document.getElementById("likeBtn").classList.remove("liked");
+          document.getElementById("likeCount").textContent = Math.max(0, currentLikes - 1);
+        } else {
+          // Like
+          await likeRef.set({
+            likedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          await cardRef.update({
+            likes: firebase.firestore.FieldValue.increment(1)
+          });
+          // Update UI
+          document.getElementById("likeBtn").classList.add("liked");
+          document.getElementById("likeCount").textContent = currentLikes + 1;
+        }
+      } catch (error) {
+        console.error("Error toggling like:", error);
+        alert("Failed to update like status. Please try again.");
+      }
+    }
 
     async function fetchCardDetail(id) {
       showLoading();
@@ -442,10 +495,96 @@
           </div>
           <div class="stats">
             <span><i class="fa-regular fa-eye"></i> ${data.views || 0}</span>
-            <span><i class="fa-regular fa-heart"></i> ${data.likes || 0}</span>
+            <span>
+              <i class="fa-regular fa-heart like-btn" id="likeBtn" style="cursor: pointer;"></i> 
+              <span id="likeCount">${data.likes || 0}</span>
+            </span>
           </div>
         `;
         contentElement.innerHTML = controlsHTML + cardHTML;
+        
+        // Set up like button
+        const likeBtn = document.getElementById("likeBtn");
+        const currentLikes = data.likes || 0;
+        likeBtn.addEventListener("click", () => handleLike(id, currentLikes));
+
+        // Check if user already liked the post
+        const likeDoc = await likeRef.get();
+        if (likeDoc.exists) {
+          // Unlike
+          await likeRef.delete();
+          await cardRef.update({
+            likes: firebase.firestore.FieldValue.increment(-1)
+          });
+          // Update UI
+          document.getElementById("likeBtn").classList.remove("liked");
+          document.getElementById("likeCount").textContent = Math.max(0, currentLikes - 1);
+        } else {
+          // Like
+          await likeRef.set({
+            likedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          await cardRef.update({
+            likes: firebase.firestore.FieldValue.increment(1)
+          });
+          // Update UI
+          document.getElementById("likeBtn").classList.add("liked");
+          document.getElementById("likeCount").textContent = currentLikes + 1;
+        }
+      } catch (error) {
+        console.error("Error toggling like:", error);
+        alert("Failed to update like status. Please try again.");
+      }
+    }
+
+    async function fetchCardDetail(id) {
+      showLoading();
+      try {
+        const docRef = db.collection("cards").doc(id);
+        const docSnap = await docRef.get();
+        if (!docSnap.exists) {
+          contentElement.innerHTML = "<p>No card found for this ID.</p>";
+          hideLoading();
+          return;
+        }
+        const data = docSnap.data();
+        const controlsHTML = `
+          <div class="controls">
+            <button id="copyLinkBtn" class="btn"><i class="fas fa-link"></i> Copy Link</button>
+            <button id="shareBtn" class="btn"><i class="fas fa-share-alt"></i> Share</button>
+          </div>
+        `;
+        const cardHTML = `
+          <h1>${data.heading}</h1>
+          <p class="description">${data.description}</p>
+          <div class="image-container">
+            <img class="card-image" src="${data.imageUrl}" alt="${data.heading}" />
+          </div>
+          <div class="stats">
+            <span><i class="fa-regular fa-eye"></i> ${data.views || 0}</span>
+            <span>
+              <i class="fa-regular fa-heart like-btn" id="likeBtn" style="cursor: pointer;"></i> 
+              <span id="likeCount">${data.likes || 0}</span>
+            </span>
+          </div>
+        `;
+        contentElement.innerHTML = controlsHTML + cardHTML;
+        
+        // Set up like button
+        const likeBtn = document.getElementById("likeBtn");
+        const currentLikes = data.likes || 0;
+        likeBtn.addEventListener("click", () => handleLike(id, currentLikes));
+
+        // Check if user already liked this post
+        const user = auth.currentUser;
+        if (user) {
+          const likeRef = db.collection("cards").doc(id).collection("likes").doc(user.uid);
+          const likeDoc = await likeRef.get();
+          if (likeDoc.exists) {
+            likeBtn.classList.add("liked");
+          }
+        }
+
         document.getElementById("copyLinkBtn").addEventListener("click", copyLink);
         document.getElementById("shareBtn").addEventListener("click", shareCard);
 
@@ -694,6 +833,11 @@
         profileBtn.title = "Sign In";
       }
     }
+
+    // Logo click handler
+    logoTitle.addEventListener("click", () => {
+      window.location.href = "/teamgalaxy/dashboard.html";
+    });
 
     // Load card detail on page load
     window.onload = () => {
