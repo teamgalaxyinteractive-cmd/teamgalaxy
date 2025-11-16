@@ -18,6 +18,33 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* BACKGROUND IMAGE LAYER (edit the URL below or set via inline style attribute on .bg-layer) */
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      filter: brightness(0.55) saturate(0.9);
+      /* example fallback: use your image URL here or set data-bg on the element in HTML */
+      /* background-image: url('path/to/your-image.jpg'); */
+    }
+
+    /* Star canvas sits above the bg image but behind UI */
+    #bgStars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+      display: block;
     }
 
     /* Header */
@@ -525,6 +552,12 @@
   </style>
 </head>
 <body>
+  <!-- Background image layer: edit style attribute or add class with background-image in CSS -->
+  <div class="bg-layer" style="background-image: url('https://dl.dropboxusercontent.com/scl/fi/1csa5jjslfhutldgd4in9/IMG_20251116_113654.png?rlkey=p2jqe4ngtw8z2id5rpqspw9sb&st=grvkp8p9&dl=0');"></div>
+
+  <!-- Star canvas over the background image -->
+  <canvas id="bgStars" aria-hidden="true"></canvas>
+
   <!-- Loading Overlay -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-message">Building your profile, wait for a second...</div>
@@ -533,7 +566,7 @@
 
   <!-- Header -->
   <header class="header">
-    <div class="logo">GalaxyWeb</div>
+    <div class="logo" onclick="window.location.href='teamgalaxy/dashboard.html'" style="cursor: pointer;">GalaxyWeb</div>
     <div class="header-buttons">
       <button class="btn btn-settings">Settings</button>
       <button class="btn btn-logout">Log Out</button>
@@ -598,8 +631,8 @@
     const logoutBtn = document.querySelector('.btn-logout');
     const settingsBtn = document.querySelector('.btn-settings');
 
-    // Create stars for loading overlay
-    function createStars() {
+    // Create stars for loading overlay (unchanged)
+    function createLoadingStars() {
       const container = document.getElementById('starsContainer');
       container.innerHTML = '';
       for (let i = 0; i < 30; i++) {
@@ -777,7 +810,6 @@
           </div>
 
           <!-- Bio Section -->
-          <!-- Bio Section -->
           <div class="bio-section">
             <h2 class="section-title">Bio</h2>
             <p class="bio-text">${data.bio || 'No bio available.'}</p>
@@ -793,7 +825,7 @@
         </div>
       `;
 
-// Add share button functionality
+      // Add share button functionality
       document.getElementById('shareBtn').addEventListener('click', () => {
         if(data.slug) {
           const shareUrl = `https://teamgalaxyinteractive-cmd.github.io/teamgalaxy/public_data_manager/public_user_profile.html?=${data.slug}`;
@@ -914,18 +946,138 @@
 
     // Settings functionality
     settingsBtn.addEventListener('click', () => {
-      window.location.href = 'settings.html';
+      window.location.href = 'user_settings.html';
     });
 
     // Initialize stars and handle loading overlay
     window.addEventListener('load', () => {
-      createStars();
+      createLoadingStars();
 
       // Simulate a minimum 2 second load time
       setTimeout(() => {
         loadingOverlay.classList.add('hidden');
       }, 3000);
+
+      // Start background star animation
+      initBgStars();
     });
+
+    /* -----------------------------
+       Background star animation code
+       Lightweight, twinkling stars with subtle parallax
+       ----------------------------- */
+    function initBgStars() {
+      const canvas = document.getElementById('bgStars');
+      const ctx = canvas.getContext('2d');
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+      let stars = [];
+      const STAR_COUNT = Math.round((width * height) / 6000); // scale by screen area (keeps perf)
+      let mouseX = width / 2, mouseY = height / 2;
+
+      function resetStars() {
+        stars = [];
+        for (let i = 0; i < STAR_COUNT; i++) {
+          const radius = Math.random() * 1.2 + 0.3; // small stars
+          stars.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            baseX: 0, // will set below
+            baseY: 0,
+            r: radius,
+            alpha: Math.random() * 0.9 + 0.1,
+            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            phase: Math.random() * Math.PI * 2
+          });
+        }
+        // set base positions
+        stars.forEach(s => { s.baseX = s.x; s.baseY = s.y; });
+      }
+
+      function onResize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        resetStars();
+      }
+
+      window.addEventListener('resize', throttle(onResize, 150));
+
+      // subtle parallax on mouse move
+      window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+
+      let lastTime = 0;
+      function animate(time) {
+        const dt = (time - lastTime) / 1000;
+        lastTime = time;
+        ctx.clearRect(0, 0, width, height);
+
+        // draw subtle vignette to better integrate stars with bg image
+        const vignette = ctx.createRadialGradient(width/2, height/2, Math.max(width, height)/8, width/2, height/2, Math.max(width, height)/1.2);
+        vignette.addColorStop(0, 'rgba(255,255,255,0.00)');
+        vignette.addColorStop(1, 'rgba(0,0,0,0.18)');
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0,0,width,height);
+
+        for (let i = 0; i < stars.length; i++) {
+          const s = stars[i];
+
+          // twinkle
+          s.phase += s.twinkleSpeed;
+          const tw = (Math.sin(s.phase) + 1) / 2; // 0..1
+          const alpha = s.alpha * (0.6 + 0.4 * tw);
+
+          // parallax offset (small)
+          const px = (mouseX - width/2) * (s.r * 0.003);
+          const py = (mouseY - height/2) * (s.r * 0.003);
+
+          const drawX = s.baseX + px;
+          const drawY = s.baseY + py;
+
+          // subtle movement to mimic depth drift
+          s.baseX += Math.sin((i + time*0.0001) * 0.0003) * 0.02;
+          s.baseY += Math.cos((i + time*0.0002) * 0.0004) * 0.02;
+
+          ctx.beginPath();
+          ctx.globalAlpha = alpha;
+          // draw glow for larger-ish stars
+          if (s.r > 0.9) {
+            const g = ctx.createRadialGradient(drawX, drawY, 0, drawX, drawY, s.r * 6);
+            g.addColorStop(0, `rgba(255,255,255,${alpha})`);
+            g.addColorStop(1, `rgba(255,255,255,0)`);
+            ctx.fillStyle = g;
+            ctx.arc(drawX, drawY, s.r * 6, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          // core
+          ctx.beginPath();
+          ctx.fillStyle = 'white';
+          ctx.arc(drawX, drawY, s.r, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.globalAlpha = 1;
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      resetStars();
+      requestAnimationFrame(animate);
+
+      // simple throttle utility
+      function throttle(fn, wait) {
+        let time = Date.now();
+        return function() {
+          if ((time + wait - Date.now()) < 0) {
+            fn();
+            time = Date.now();
+          }
+        }
+      }
+    }
+
   </script>
 </body>
 </html>
