@@ -946,6 +946,56 @@
 
   /* Hide reCAPTCHA v3 badge per your requirement, this is temporary and will be removed after i get a fixed domain. */
   .grecaptcha-badge { display: none !important; }
+
+/* add to your CSS */
+.more-options {
+  position: relative;           /* parent for absolute child */
+  display: inline-block;
+}
+
+/* dropdown hidden by default */
+.more-options .dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;                    /* flush right below the button */
+  left: 0;
+  margin-top: 4px;              /* small gap if you want */
+  min-width: 180px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  border-radius: 6px;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+/* show on hover of the parent — no gap between button and dropdown */
+.more-options:hover .dropdown-content,
+.more-options:focus-within .dropdown-content {
+  display: block;
+}
+
+/* optional: make the button full width of the parent on desktop */
+.more-options > .nav-btn {
+  cursor: pointer;
+  user-select: none;
+}
+
+.more-options .dropdown-content {
+  display: none;              /* JS controls display */
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 9999;
+  min-width: 180px;
+}
+
+.more-options.open .dropdown-content {
+  display: block;
+}
+
+/* nice small transition */
+.more-options .dropdown-content {
+  transition: opacity 120ms ease;
+}
 </style>
 </head>
 <body>
@@ -1494,5 +1544,71 @@
       document.querySelector('.nav-buttons').classList.toggle('show');
     });
   </script>
+<script>
+(function() {
+  const more = document.querySelector('.more-options');
+  if (!more) return;
+
+  // Ensure parent is focusable for keyboard accessibility
+  if (!more.hasAttribute('tabindex')) more.setAttribute('tabindex', '0');
+
+  const dropdown = more.querySelector('.dropdown-content');
+
+  // CSS fallback: .open class will show dropdown
+  const show = () => {
+    more.classList.add('open');
+    dropdown.style.display = 'block';
+  };
+  const hide = () => {
+    more.classList.remove('open');
+    dropdown.style.display = 'none';
+  };
+
+  // Pointer events are better than mouse events (covers stylus, etc.)
+  more.addEventListener('pointerenter', (e) => {
+    // Only handle real mouse/pointer hover, not touch taps
+    if (e.pointerType === 'mouse' || e.pointerType === 'pen') show();
+  });
+
+  more.addEventListener('pointerleave', (e) => {
+    if (e.pointerType === 'mouse' || e.pointerType === 'pen') hide();
+  });
+
+  // For touch devices / mobile: toggle on click/tap
+  // (so mobile behaviour remains intact)
+  const btn = more.querySelector('.nav-btn');
+  btn.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    // On touch, toggle; on mouse click (desktop) also toggle
+    if (more.classList.contains('open')) hide();
+    else show();
+  });
+
+  // Keyboard support: Enter / Space opens; Escape closes
+  more.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter' || ev.key === ' ') {
+      ev.preventDefault();
+      if (more.classList.contains('open')) hide(); else show();
+    } else if (ev.key === 'Escape') {
+      hide();
+      // move focus back to button for a11y
+      btn.focus();
+    }
+  });
+
+  // Close if user clicks anywhere outside this .more-options
+  document.addEventListener('click', (e) => {
+    if (!more.contains(e.target)) hide();
+  });
+
+  // Prevent accidental page-level click handlers from closing immediately
+  dropdown.addEventListener('click', (e) => e.stopPropagation());
+
+  // Defensive single-attach flag if you load scripts multiple times
+  if (!more._dropdownAttached) {
+    more._dropdownAttached = true;
+  }
+})();
+</script>
 </body>
 </html>
