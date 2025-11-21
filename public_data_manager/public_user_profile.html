@@ -562,7 +562,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+  import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
   // Firebase configuration
   const firebaseConfig = {
@@ -591,102 +591,71 @@
     for (let i = 0; i < 30; i++) {
       const star = document.createElement('div');
       star.classList.add('star');
-
-      // Random position
       const x = Math.random() * 100;
       const y = Math.random() * 100;
       star.style.left = `${x}%`;
       star.style.top = `${y}%`;
-
-      // Random size
       const size = Math.random() * 3 + 1;
       star.style.width = `${size}px`;
       star.style.height = `${size}px`;
-
-      // Random animation duration
       const duration = Math.random() * 3 + 2;
       star.style.setProperty('--duration', `${duration}s`);
-
       container.appendChild(star);
     }
   }
 
-  // Get slug from URL
-  function getSlugFromUrl() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(''); // Empty string because after ? it's just the value
+  // Get UID from URL (supports ?uid=..., ?id=..., ?=UID or ?UID)
+  function getUidFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    let uid = params.get('uid') || params.get('id') || null;
+
+    if (!uid) {
+      const raw = window.location.search.replace(/^\?/, '');
+      if (!raw) return null;
+      if (raw.startsWith('=')) uid = raw.slice(1);
+      else if (raw.includes('=')) uid = raw.split('=')[1];
+      else uid = raw;
+    }
+
+    if (!uid) return null;
+    return decodeURIComponent(uid);
   }
 
-  // Format date - FIXED
+  // Format date
   function formatDate(dateValue) {
-    if (!dateValue) return 'Invalid Date';
-
-    // Check if it's a Firestore Timestamp object
+    if (!dateValue) return 'Unknown';
     if (dateValue && dateValue.seconds !== undefined) {
       const date = new Date(dateValue.seconds * 1000);
-      return date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      });
-    }
-    // If it's already a Date object
-    else if (dateValue instanceof Date) {
-      return dateValue.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      });
-    }
-    // If it's a string or number
-    else {
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    } else if (dateValue instanceof Date) {
+      return dateValue.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    } else {
       const date = new Date(dateValue);
-      if (isNaN(date.getTime())) {
-        return 'Invalid Date';
-      }
-      return date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      });
+      if (isNaN(date.getTime())) return 'Unknown';
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     }
   }
 
   // Format number (e.g., 1000 -> 1K)
   function formatNumber(num) {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M';
-    }
-    if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K';
-    }
+    if (!num && num !== 0) return '0';
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
     return num.toString();
   }
 
-  // Time ago function - FIXED
+  // Time ago
   function timeAgo(dateValue) {
     if (!dateValue) return 'Just now';
-
     let date;
-    // Check if it's a Firestore Timestamp object
-    if (dateValue && dateValue.seconds !== undefined) {
-      date = new Date(dateValue.seconds * 1000);
-    }
-    // If it's already a Date object
-    else if (dateValue instanceof Date) {
-      date = dateValue;
-    }
-    // If it's a string or number
+    if (dateValue && dateValue.seconds !== undefined) date = new Date(dateValue.seconds * 1000);
+    else if (dateValue instanceof Date) date = dateValue;
     else {
       date = new Date(dateValue);
-      if (isNaN(date.getTime())) {
-        return 'Invalid Date';
-      }
+      if (isNaN(date.getTime())) return 'Just now';
     }
-
     const now = new Date();
     const seconds = Math.floor((now - date) / 1000);
-
     let interval = seconds / 31536000;
     if (interval > 1) return Math.floor(interval) + ' years ago';
     interval = seconds / 2592000;
@@ -700,64 +669,54 @@
     return Math.floor(seconds) + ' seconds ago';
   }
 
-  // Load public profile data - UPDATED TO USE SLUG FIELD
+  // Load public profile by UID (searches publicProfiles where uid == provided uid)
   async function loadPublicProfile() {
-    const slug = getSlugFromUrl();
-    if (!slug) {
-      profileContent.innerHTML = '<div class="loading">Profile slug not found in URL.</div>';
-      // Hide loading overlay
-      setTimeout(() => {
-        loadingOverlay.classList.add('hidden');
-      }, 500);
+    const uid = getUidFromUrl();
+    if (!uid) {
+      profileContent.innerHTML = '<div class="loading">Profile UID not found in URL.</div>';
+      setTimeout(() => loadingOverlay.classList.add('hidden'), 500);
       return;
     }
 
     try {
-      // CHANGED: Query by slug field instead of document ID
       const q = query(
         collection(db, 'publicProfiles'),
-        where('slug', '==', slug),
+        where('uid', '==', uid),
         limit(1)
       );
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
         profileContent.innerHTML = '<div class="loading">Profile not found.</div>';
-        setTimeout(() => {
-          loadingOverlay.classList.add('hidden');
-        }, 500);
+        setTimeout(() => loadingOverlay.classList.add('hidden'), 500);
         return;
       }
 
       const docSnap = querySnapshot.docs[0];
       const data = docSnap.data();
 
-      // Check visibility
+      // Respect visibility
       if (data.visibility !== true && data.visibility !== 'true') {
         profileContent.innerHTML = '<div class="loading">This profile is not visible to public.</div>';
-        setTimeout(() => {
-          loadingOverlay.classList.add('hidden');
-        }, 500);
+        setTimeout(() => loadingOverlay.classList.add('hidden'), 500);
         return;
       }
 
-      renderProfile(data);
-      await loadUserPostsBySlug(slug);
+      renderProfile(data, uid);
+      await loadUserPostsByUid(uid);
     } catch (error) {
       console.error('Error loading public profile:', error);
       profileContent.innerHTML = '<div class="loading">Error loading profile.</div>';
-      setTimeout(() => {
-        loadingOverlay.classList.add('hidden');
-      }, 500);
+      setTimeout(() => loadingOverlay.classList.add('hidden'), 500);
     }
   }
 
-  // Load user posts by slug - FIXED to use 'slug' field
-  async function loadUserPostsBySlug(slug) {
+  // Load user posts by authorId (authorId == uid)
+  async function loadUserPostsByUid(uid) {
     try {
       const q = query(
         collection(db, 'posts'),
-        where('slug', '==', slug),
+        where('authorId', '==', uid),
         orderBy('createdAt', 'desc'),
         limit(3)
       );
@@ -768,19 +727,19 @@
         posts.push({ id: doc.id, ...doc.data() });
       });
 
-      renderPosts(posts);
+      await renderPosts(posts);
     } catch (error) {
       console.error('Error loading posts:', error);
       postsSection.innerHTML = '<div class="loading">Error loading posts.</div>';
     } finally {
-      setTimeout(() => {
-        loadingOverlay.classList.add('hidden');
-      }, 2000);
+      setTimeout(() => loadingOverlay.classList.add('hidden'), 2000);
     }
   }
 
-  // Render profile HTML
-  function renderProfile(data) {
+  // Render profile HTML; display slug (if present) but keep uid as canonical id for sharing/routing
+  function renderProfile(data, uid) {
+    const displayHandle = data.slug ? '@' + data.slug : (uid ? uid : 'Unknown');
+
     profileContent.innerHTML = `
       <div class="profile-card">
         <div class="profile-actions">
@@ -792,7 +751,7 @@
           <img src="${data.profilePhotoUrl || 'https://via.placeholder.com/150'}" alt="Profile Photo" class="profile-photo">
           <div class="profile-info">
             <h1 class="profile-name">${data.name || 'Unknown User'}</h1>
-            <div class="profile-slug">${data.slug ? '@' + data.slug : ''}${data.verified ? '<span class="verified-badge">✓ Verified</span>' : ''}</div>
+            <div class="profile-handle">${displayHandle}${data.verified ? ' <span class="verified-badge">✓ Verified</span>' : ''}</div>
             <div class="join-date">Joined: ${formatDate(data.joinDate)}</div>
           </div>
         </div>
@@ -813,25 +772,28 @@
       </div>
     `;
 
-    // Add share button functionality
-    document.getElementById('shareBtn').addEventListener('click', () => {
-      if(data.slug) {
-        const shareUrl = `https://www.squadvertex.great-site.net/public_profile?=${data.slug}`;
-        navigator.clipboard.writeText(shareUrl).then(() => {
+    // Share button uses UID in URL (routing stable)
+    document.getElementById('shareBtn').addEventListener('click', async () => {
+      try {
+        const shareUrl = `${window.location.origin}/public_profile?=${encodeURIComponent(uid)}`;
+        if (navigator.share) {
+          await navigator.share({ title: `${data.name || 'Profile'}`, url: shareUrl });
+        } else if (navigator.clipboard) {
+          await navigator.clipboard.writeText(shareUrl);
           alert('Profile URL copied to clipboard!');
-        }).catch(err => {
-          console.error('Failed to copy: ', err);
-          alert('Failed to copy URL. Please try again.');
-        });
-      } else {
-        alert('No profile slug available for sharing.');
+        } else {
+          prompt('Copy profile URL:', shareUrl);
+        }
+      } catch (err) {
+        console.error('Failed to share/copy: ', err);
+        alert('Failed to share profile. Try copying manually: ' + `${window.location.origin}/public_profile?=${encodeURIComponent(uid)}`);
       }
     });
   }
 
   // Render posts HTML
   async function renderPosts(posts) {
-    if (posts.length === 0) {
+    if (!posts || posts.length === 0) {
       postsSection.innerHTML = '<div class="loading">No posts found.</div>';
       return;
     }
@@ -843,17 +805,18 @@
     `;
 
     for (const post of posts) {
-      const commentsQuery = query(
-        collection(db, 'posts', post.id, 'comments'),
-        orderBy('createdAt', 'desc'),
-        limit(3)
-      );
-      const commentsSnapshot = await getDocs(commentsQuery);
-
-      const comments = [];
-      commentsSnapshot.forEach(doc => {
-        comments.push({ id: doc.id, ...doc.data() });
-      });
+      let comments = [];
+      try {
+        const commentsQuery = query(
+          collection(db, 'posts', post.id, 'comments'),
+          orderBy('createdAt', 'desc'),
+          limit(3)
+        );
+        const commentsSnapshot = await getDocs(commentsQuery);
+        commentsSnapshot.forEach(doc => comments.push({ id: doc.id, ...doc.data() }));
+      } catch (e) {
+        console.warn('comments fetch failed for post', post.id, e);
+      }
 
       postsHTML += `
         <div class="post-card">
@@ -905,7 +868,12 @@
     });
 
     document.getElementById('show-all-btn').addEventListener('click', () => {
-      window.location.href = 'public_user_posts.html';
+      const uid = getUidFromUrl();
+      if (uid) {
+        window.location.href = `public_user_posts.html?=${encodeURIComponent(uid)}`;
+      } else {
+        window.location.href = 'public_user_posts.html';
+      }
     });
   }
 
