@@ -618,15 +618,15 @@
         grid-template-columns: 1fr;
         gap: 2rem;
       }
-      
+
       .container {
         padding: 0 1rem;
       }
-      
+
       .comment-actions {
         flex-wrap: wrap;
       }
-      
+
       .comment-status {
         margin-left: 0;
         margin-top: 0.5rem;
@@ -649,24 +649,19 @@ footer.footer {
   </style>
 </head>
 <body>
-    <!-- Header -->
+  <!-- Header -->
   <header class="header">
     <div class="logo">GalaxyWeb</div>
     <div class="public-label">Public Profile</div>
   </header>
 
   <div class="container">
-    <!-- Create Post button -->
-    <div style="text-align: center; margin-bottom: 1.5rem;">
-      <button class="create-post-btn">Create Post</button>
-    </div>
-
     <!-- FEED (main page) -->
     <div id="feedView" style="display:none">
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div>
-            <h2 style="margin:0">My Posts</h2>
+            <h2 style="margin:0" id="feed-title">My Posts</h2>
             <div class="small muted">Sorted by publish time — newest first</div>
           </div>
           <div><button id="refreshBtn" class="btn-ghost"><i class="fas fa-sync-alt"></i> Refresh</button></div>
@@ -702,7 +697,7 @@ footer.footer {
       </div>
     </div>
 
-    <!-- Dropdown menu (kept in container but positioned via JS) -->
+    <!-- Dropdown menu -->
     <div id="dropdownMenu" class="dropdown" aria-hidden="true">
       <a href="#" class="dropdown-item" id="profileLink">Profile</a>
       <a href="#" class="dropdown-item" id="settingsLink">Settings</a>
@@ -710,7 +705,7 @@ footer.footer {
     </div>
   </div> <!-- /.container -->
 
-  <!-- FOOTER (intentionally OUTSIDE .container and outside #postView/#feedView) -->
+  <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-content">
       <div class="footer-left">
@@ -735,11 +730,9 @@ footer.footer {
   <!-- Defensive JS: if footer accidentally ends up inside a hidden parent, move it to body -->
   <script>
     (function ensureFooterVisible(){
-      // run after DOM loaded (safe even if script already at bottom)
       const tryMove = () => {
         const footer = document.querySelector('footer.footer');
         if(!footer) return;
-        // if any ancestor has display:none, move footer to body
         let p = footer.parentElement;
         let hiddenAncestor = null;
         while(p && p !== document.body) {
@@ -748,13 +741,11 @@ footer.footer {
         }
         if(hiddenAncestor) {
           document.body.appendChild(footer);
-          // restore sane styles
           footer.style.position = 'relative';
           footer.style.display = 'block';
           footer.style.width = '100%';
           footer.style.minHeight = footer.style.minHeight || '120px';
           footer.style.zIndex = '20';
-          // remove debug outline if any
           footer.style.outline = footer.style.outline || 'none';
           console.log('Footer moved out of hidden ancestor to <body>');
         }
@@ -762,12 +753,12 @@ footer.footer {
 
       if (document.readyState === 'complete' || document.readyState === 'interactive') tryMove();
       else document.addEventListener('DOMContentLoaded', tryMove);
-      // also try again after a short delay (in case your script toggles views after load)
       setTimeout(tryMove, 400);
     })();
   </script>
+
 <script type="module">
-  // ---------- CONFIG (do not change unless needed) ----------
+  // ---------- CONFIG ----------
   const firebaseConfig = {
     apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
     authDomain: "teamgalaxy-77344.firebaseapp.com",
@@ -778,6 +769,10 @@ footer.footer {
     measurementId: "G-6C2W9NSNCH"
   };
   const RECAPTCHA_SITE_KEY = "6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx";
+
+  // === BACKGROUND IMAGE (put your URL here) ===
+  // Leave empty string for no image. Example: "https://example.com/bg.jpg"
+  const BG_IMAGE_URL = ""; // <-- replace with your image URL when ready
 
   // ---------- Firebase imports (v11.9.0) ----------
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js';
@@ -816,13 +811,10 @@ footer.footer {
   const commentsList = document.getElementById('commentsList');
   const commentStatus = document.getElementById('commentStatus');
   const clearComment = document.getElementById('clearComment');
-  const createPostBtn = document.querySelector('.create-post-btn');
   const dropdownMenu = document.getElementById('dropdownMenu');
   const profileLink = document.getElementById('profileLink');
   const settingsLink = document.getElementById('settingsLink');
   const signOutLink = document.getElementById('signOutLink');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const settingsBtn = document.getElementById('settingsBtn');
 
   let lastVisible = null;
   const PAGE_SIZE = 8;
@@ -830,23 +822,26 @@ footer.footer {
   let currentUserProfile = null; // from /users/{uid} if exists
   let currentPostId = null;
   let commentsUnsub = null;
-  let isVoting = false; // Track if a vote is in progress
+  let isVoting = false;
   let authInitialized = false;
 
-  // Determine URL params: postId and profileSlug
+  // Dedup + fetch-lock controls
+  const renderedPostIds = new Set();
+  let isFetchingFeed = false;
+  let pendingRefresh = false;
+
+  // Determine URL params: postId and profileUid
   const urlParams = new URLSearchParams(window.location.search);
   const requestedPostId = urlParams.get('postId');
 
-  // support ?slug=xxx OR weird ?=xxx format (the value after '=' is the slug)
-  let profileSlug = null;
+  // support patterns: ?uid=xxx OR ?id=xxx OR ?=xxx OR ?xxx (fallback)
+  let profileUid = null;
   if (!requestedPostId) {
-    profileSlug = urlParams.get('slug') || (function(){
+    profileUid = urlParams.get('uid') || urlParams.get('id') || (function(){
       const raw = window.location.search || '';
       if (raw.startsWith('?=')) {
-        // take everything after '?=' until & or end
         return raw.slice(2).split('&')[0] || null;
       }
-      // Also handle case where entire search is like "?abcdef" (no equals) — not expected but safe:
       if (raw.startsWith('?') && raw.indexOf('=') === -1 && raw.length > 1) {
         return raw.slice(1).split('&')[0];
       }
@@ -865,8 +860,6 @@ footer.footer {
     return Math.floor(diff/86400) + 'd';
   }
   function snippet(text, n=220){ return (text||'').length>n ? text.slice(0,n)+'…' : (text||''); }
-
-  // Escape HTML to prevent XSS
   function escapeHTML(s){
     return String(s || '')
       .replaceAll('&','&amp;')
@@ -875,13 +868,10 @@ footer.footer {
       .replaceAll('"','&quot;')
       .replaceAll("'",'&#039;');
   }
-
-  // Generate initials from name
   function getInitials(name) {
     return name ? name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U';
   }
 
-  // Show skeleton loading for posts
   function renderPostSkeletons(count) {
     let skeletonsHtml = '';
     for (let i = 0; i < count; i++) {
@@ -909,7 +899,6 @@ footer.footer {
     }
     postsListEl.innerHTML = skeletonsHtml;
   }
-  // Show skeleton loading for comments
   function renderCommentSkeletons(count) {
     let skeletonsHtml = '';
     for (let i = 0; i < count; i++) {
@@ -923,8 +912,6 @@ footer.footer {
     }
     commentsList.innerHTML = skeletonsHtml;
   }
-
-  // Show skeleton for post view
   function renderPostViewSkeleton() {
     postContainer.innerHTML = `
       <div class="card post-skeleton">
@@ -945,77 +932,72 @@ footer.footer {
         </div>
       </div>
     `;
-
-    // Also render comment skeletons
     renderCommentSkeletons(3);
+  }
+
+  // resolve user's slug/handle by uid (optional - used for friendly messages)
+  async function resolveHandleByUid(uid) {
+    if (!uid) return null;
+    try {
+      const q = query(collection(db, 'publicProfiles'), where('uid','==',uid), limit(1));
+      const snaps = await getDocs(q);
+      if (!snaps.empty) {
+        const data = snaps.docs[0].data();
+        return data.slug || null;
+      }
+    } catch (e) { console.warn('resolveHandle failed', e); }
+    return null;
   }
 
   // ---------- auth ----------
   async function signIn() {
-    try {
-      await signInWithPopup(auth, provider);
-    }
-    catch(e){
-      console.error('Signin error', e);
-      alert('Signin failed: ' + e.message);
-    }
+    try { await signInWithPopup(auth, provider); }
+    catch(e){ console.error('Signin error', e); alert('Signin failed: ' + e.message); }
   }
 
-  // Optimized auth state listener with loading state
   onAuthStateChanged(auth, async (user) => {
     currentUser = user;
     authInitialized = true;
 
     if (user) {
-      // try read existing users/{uid} doc for name/email
       try {
         const udocRef = doc(db,'users', user.uid);
         const uSnap = await getDoc(udocRef);
-        if (uSnap.exists()) {
-          currentUserProfile = uSnap.data();
-        } else {
-          currentUserProfile = { name: user.displayName || null, email: user.email || null, photoURL: user.photoURL || null };
-        }
+        if (uSnap.exists()) currentUserProfile = uSnap.data();
+        else currentUserProfile = { name: user.displayName || null, email: user.email || null, photoURL: user.photoURL || null };
       } catch(e) {
         console.warn('users read failed', e);
         currentUserProfile = { name: user.displayName || null, email: user.email || null, photoURL: user.photoURL || null };
       }
 
-      // place avatar image (use photoURL if available, else placeholder initials image)
-      const avatarSrc = user.photoURL || (`https://via.placeholder.com/80/444444/ffffff?text=${encodeURIComponent(getInitials(currentUserProfile?.name || user.email))}`);
-      document.querySelector('.header-buttons').innerHTML = `
-        <button class="btn btn-settings" id="settingsBtn">Settings</button>
-        <button class="btn btn-logout" id="logoutBtn">Log Out</button>
-      `;
-
-      // Re-attach event listeners for the new buttons
-      document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
-      document.getElementById('settingsBtn').addEventListener('click', () => {
-        window.location.href = 'settings.html';
-      });
+      const headerButtons = document.querySelector('.header-buttons');
+      if (headerButtons) {
+        headerButtons.innerHTML = `
+          <button class="btn btn-settings" id="settingsBtn">Settings</button>
+          <button class="btn btn-logout" id="logoutBtn">Log Out</button>
+        `;
+        document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
+        document.getElementById('settingsBtn').addEventListener('click', () => { window.location.href = 'settings.html'; });
+      }
     } else {
-      document.querySelector('.header-buttons').innerHTML = `
-        <button class="btn btn-settings" id="settingsBtn">Settings</button>
-        <button class="btn btn-logout" id="logoutBtn">Log In</button>
-      `;
-
-      // Re-attach event listeners for the new buttons
-      document.getElementById('logoutBtn').addEventListener('click', signIn);
-      document.getElementById('settingsBtn').addEventListener('click', () => {
-        window.location.href = 'settings.html';
-      });
+      const headerButtons = document.querySelector('.header-buttons');
+      if (headerButtons) {
+        headerButtons.innerHTML = `
+          <button class="btn btn-settings" id="settingsBtn">Settings</button>
+          <button class="btn btn-logout" id="logoutBtn">Log In</button>
+        `;
+        document.getElementById('logoutBtn').addEventListener('click', signIn);
+        document.getElementById('settingsBtn').addEventListener('click', () => { window.location.href = 'settings.html'; });
+      }
       currentUserProfile = null;
     }
 
-    // Re-render feed to reflect auth state
+    // If user navigated back from a post page (single-post mode), re-render correctly
     if (currentPostId) renderPostView(currentPostId);
-    else {
-      // refreshFeed behaviour handles both profileSlug (public) and user posts
-      refreshFeed(true);
-    }
+    else refreshFeed(true);
   });
 
-  // Close dropdown when clicking outside
+  // Click outside dropdown closes it
   document.addEventListener('click', (e) => {
     if (!dropdownMenu.contains(e.target) && !e.target.classList.contains('avatar') && e.target.id !== 'headerAvatar') {
       dropdownMenu.classList.remove('show');
@@ -1023,72 +1005,56 @@ footer.footer {
     }
   });
 
-  // Dropdown item event listeners
-  profileLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    window.location.href = 'profile.html';
-    dropdownMenu.classList.remove('show');
-  });
-
-  settingsLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    window.location.href = 'settings.html';
-    dropdownMenu.classList.remove('show');
-  });
-
-  signOutLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    signOut(auth);
-    dropdownMenu.classList.remove('show');
-  });
-
-  // Create Post button functionality
-  createPostBtn.addEventListener('click', () => {
-    if (!currentUser) {
-      alert('Sign in to create a post');
-      return;
-    }
-    window.location.href = '/teamgalaxy/tools/create_post.html';
-  });
+  profileLink.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'profile.html'; dropdownMenu.classList.remove('show'); });
+  settingsLink.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'settings.html'; dropdownMenu.classList.remove('show'); });
+  signOutLink.addEventListener('click', (e) => { e.preventDefault(); signOut(auth); dropdownMenu.classList.remove('show'); });
 
   // ---------- routing: if ?postId=... show single post view ----------
   if (requestedPostId) {
-    // show single post page
     feedView.style.display = 'none';
     postView.style.display = 'block';
     currentPostId = requestedPostId;
     renderPostView(requestedPostId);
   } else {
-    // show feed (either profileSlug public feed OR currentUser posts)
     feedView.style.display = 'block';
     postView.style.display = 'none';
-    // call to refreshFeed should wait for auth init only for non-public-case;
-    // but we want it to run now (refreshFeed internally handles whether currentUser is required).
     refreshFeed(true);
   }
 
-  // ---------- FEED: fetch posts (paged) ----------
+  // ---------- FEED: fetch posts (paged) with dedupe + fetch-lock ----------
   async function refreshFeed(reset=false) {
+    // Handle concurrency: coalesce multiple requests into one
+    if (isFetchingFeed) {
+      // mark that a fresh refresh was requested while a fetch was in progress
+      pendingRefresh = pendingRefresh || reset;
+      return;
+    }
+    isFetchingFeed = true;
+
     if (reset) {
       lastVisible = null;
-      renderPostSkeletons(4); // Show 4 skeleton loaders
+      renderedPostIds.clear();
+      postsListEl.innerHTML = ''; // ensure we clear to avoid duplicates
+      renderPostSkeletons(4);
     }
 
     const postsRef = collection(db, 'posts');
     let q;
 
-    // If profileSlug is provided in URL -> public profile view: fetch posts with slug == profileSlug
-    if (profileSlug) {
-      // build query for slug (slug must exist in post documents)
-      if (!lastVisible) q = query(postsRef, where('slug', '==', profileSlug), orderBy('createdAt','desc'), limit(PAGE_SIZE));
-      else q = query(postsRef, where('slug', '==', profileSlug), orderBy('createdAt','desc'), startAfter(lastVisible), limit(PAGE_SIZE));
+    if (profileUid) {
+      if (!lastVisible) q = query(postsRef, where('authorId', '==', profileUid), orderBy('createdAt','desc'), limit(PAGE_SIZE));
+      else q = query(postsRef, where('authorId', '==', profileUid), orderBy('createdAt','desc'), startAfter(lastVisible), limit(PAGE_SIZE));
+      // update header title to include a friendly handle if available (non-blocking)
+      resolveHandleByUid(profileUid).then(handle => {
+        const titleEl = document.getElementById('feed-title');
+        if (titleEl) titleEl.textContent = handle ? `${handle} — Posts` : 'User Posts';
+      }).catch(()=>{});
     } else {
-      // No slug: fall back to currentUser's posts (private feed). require auth
       if (!currentUser) {
-        // If auth hasn't initialized yet, show skeleton until it does
-        if (!authInitialized) { renderPostSkeletons(4); loadMoreBtn.style.display = 'none'; return; }
+        if (!authInitialized) { renderPostSkeletons(4); loadMoreBtn.style.display = 'none'; isFetchingFeed = false; return; }
         postsListEl.innerHTML = '<div class="card small muted">Sign in to view your posts.</div>';
         loadMoreBtn.style.display = 'none';
+        isFetchingFeed = false;
         return;
       }
       if (!lastVisible) q = query(postsRef, where('authorId', '==', currentUser.uid), orderBy('createdAt','desc'), limit(PAGE_SIZE));
@@ -1099,27 +1065,40 @@ footer.footer {
       const snaps = await getDocs(q);
       if (snaps.docs.length === 0) {
         if (!lastVisible) {
-          if (profileSlug) postsListEl.innerHTML = `<div class="card small muted">No posts found for "${escapeHTML(profileSlug)}".</div>`;
-          else postsListEl.innerHTML = '<div class="card small muted">You have no posts yet — create one!</div>';
+          if (profileUid) {
+            const handle = await resolveHandleByUid(profileUid);
+            postsListEl.innerHTML = `<div class="card small muted">No posts found for ${handle ? '@' + escapeHTML(handle) : escapeHTML(profileUid)}.</div>`;
+          } else {
+            postsListEl.innerHTML = '<div class="card small muted">You have no posts yet.</div>';
+          }
         }
         loadMoreBtn.style.display = 'none';
         return;
       }
 
-      // If resetting, clear skeletons and list
-      if (!lastVisible) postsListEl.innerHTML = '';
-
+      // If this is the first page, we've already cleared list above (reset case)
       for (const d of snaps.docs) {
+        if (renderedPostIds.has(d.id)) {
+          // skip duplicates
+          continue;
+        }
+        renderedPostIds.add(d.id);
         renderPostCard(d.id, d.data());
       }
 
       lastVisible = snaps.docs[snaps.docs.length - 1];
-      // show load more only if returned PAGE_SIZE items
       loadMoreBtn.style.display = snaps.docs.length === PAGE_SIZE ? 'inline-block' : 'none';
     } catch(e){
       console.error('feed fetch error', e);
       postsListEl.innerHTML = '<div class="card small muted">Failed to load posts</div>';
       loadMoreBtn.style.display = 'none';
+    } finally {
+      isFetchingFeed = false;
+      if (pendingRefresh) {
+        pendingRefresh = false;
+        // next refresh will clear and re-fetch
+        refreshFeed(true);
+      }
     }
   }
 
@@ -1130,18 +1109,11 @@ footer.footer {
 
   loadMoreBtn.addEventListener('click', ()=> refreshFeed(false));
 
-  // Helper to choose avatar for posts/comments
   function avatarHtmlFor(author, data) {
-    // Check for photoUrl first, then other possible fields
     const photo = (data && (data.photoUrl || data.authorPhotoUrl || data.authorPhoto || data.photoURL || data.authorAvatar)) || null;
-    // Google default avatar fallback (public-ish)
     const googleDefault = 'https://www.gstatic.com/images/branding/product/2x/avatar_square_64dp.png';
-    if (photo) {
-      return `<img class="avatar small" src="${escapeHTML(photo)}" alt="${escapeHTML(author)}">`;
-    } else {
-      // Use googleDefault if you want a consistent "google-like" fallback
-      return `<img class="avatar small" src="${googleDefault}" alt="avatar">`;
-    }
+    if (photo) return `<img class="avatar small" src="${escapeHTML(photo)}" alt="${escapeHTML(author)}">`;
+    return `<img class="avatar small" src="${googleDefault}" alt="avatar">`;
   }
 
   function renderPostCard(postId, data) {
@@ -1149,8 +1121,6 @@ footer.footer {
     el.className = 'card';
     const author = data.authorName || data.authorEmail || 'Unknown';
     const created = data.createdAt ? timeAgo(data.createdAt) : '';
-
-    // build avatar (image if available else google default image)
     const avatarHtml = avatarHtmlFor(author, data);
 
     el.innerHTML = `
@@ -1176,7 +1146,6 @@ footer.footer {
     `;
     postsListEl.appendChild(el);
 
-    // attach handlers
     el.querySelector('.viewBtn').addEventListener('click', ()=> openPostPage(postId));
     el.querySelector('.commentBtn').addEventListener('click', ()=> openPostPage(postId));
     el.querySelector('.upvote').addEventListener('click', ()=> handleVoteClick(postId, 1));
@@ -1184,21 +1153,19 @@ footer.footer {
   }
 
   function openPostPage(postId) {
-    // navigate to same file with ?postId
     const base = window.location.href.split('?')[0];
     window.location.href = base + '?postId=' + postId;
   }
 
-  // ---------- Voting logic (safe per-user using 'votes' collection) ----------
+  // ---------- Voting logic ----------
   async function handleVoteClick(postId, delta) {
-    if (isVoting) return; // Prevent multiple simultaneous votes
+    if (isVoting) return;
     if (!currentUser) { alert('Sign in to vote'); return; }
 
     const uid = currentUser.uid;
     const voteDocRef = doc(db, 'votes', `${postId}_${uid}`);
     const postRef = doc(db, 'posts', postId);
 
-    // Set voting state and update UI
     isVoting = true;
     const voteButtons = document.querySelectorAll(`.upvote[data-id="${postId}"], .downvote[data-id="${postId}"]`);
     voteButtons.forEach(btn => {
@@ -1218,17 +1185,14 @@ footer.footer {
         let down = postSnap.data().downvotesCount || 0;
 
         if (!voteSnap.exists()) {
-          // create vote
           tx.set(voteDocRef, { postId, userId: uid, vote: delta, createdAt: serverTimestamp() });
           if (delta === 1) up++; else down++;
         } else {
           const prev = voteSnap.data().vote || 0;
           if (prev === delta) {
-            // undo
             tx.delete(voteDocRef);
             if (delta === 1) up = Math.max(0, up-1); else down = Math.max(0, down-1);
           } else {
-            // switch
             tx.update(voteDocRef, { vote: delta, updatedAt: serverTimestamp() });
             if (delta === 1) { up++; down = Math.max(0, down-1); }
             else { down++; up = Math.max(0, up-1); }
@@ -1236,7 +1200,6 @@ footer.footer {
         }
         tx.update(postRef, { upvotesCount: up, downvotesCount: down });
       });
-      // update UI quickly by refetching either the single post view or the feed counts
       if (currentPostId === postId) renderPostView(postId);
       else refreshFeed(true);
     } catch(e) {
@@ -1244,7 +1207,6 @@ footer.footer {
       alert('Vote failed');
     } finally {
       isVoting = false;
-      // Reset UI state
       voteButtons.forEach(btn => {
         btn.classList.remove('vote-loading');
         btn.innerHTML = btn.classList.contains('upvote') ? '▲' : '▼';
@@ -1254,13 +1216,14 @@ footer.footer {
 
   // ---------- POST VIEW (single post + comments) ----------
   backToFeed.addEventListener('click', ()=> {
+    // Unsubscribe comments listener when leaving single-post view (prevents duplicated subscriptions)
+    try { if (typeof commentsUnsub === 'function') { commentsUnsub(); commentsUnsub = null; } } catch(e){}
     const base = window.location.href.split('?')[0];
-    window.location.href = base; // go back to feed
+    window.location.href = base;
   });
 
   async function renderPostView(postId) {
     currentPostId = postId;
-    // Show skeleton while loading
     renderPostViewSkeleton();
 
     try {
@@ -1274,8 +1237,6 @@ footer.footer {
       const data = pSnap.data();
       const author = data.authorName || data.authorEmail || 'Unknown';
       const created = data.createdAt ? timeAgo(data.createdAt) : '';
-
-      // Use image avatar if present in post data; fallback to google default
       const avatarForPost = (data.photoUrl || data.authorPhotoUrl || data.authorPhoto || data.authorAvatar || data.photoURL) || 'https://www.gstatic.com/images/branding/product/2x/avatar_square_64dp.png';
 
       postContainer.innerHTML = `
@@ -1299,11 +1260,9 @@ footer.footer {
         </div>
       `;
 
-      // bind vote handlers and show user's current vote visually
       document.getElementById('pvUp').addEventListener('click', ()=> handleVoteClick(postId, 1));
       document.getElementById('pvDown').addEventListener('click', ()=> handleVoteClick(postId, -1));
 
-      // fetch and highlight user's vote (if logged in)
       if (currentUser) {
         try {
           const voteSnap = await getDoc(doc(db,'votes', `${postId}_${currentUser.uid}`));
@@ -1312,9 +1271,11 @@ footer.footer {
         } catch(e){ console.warn('vote read failed', e); }
       } else highlightVoteButtons(0);
 
-      // subscribe to comments in real-time
+      // subscribe to comments in real-time (store unsub to remove later)
       const commentsRef = collection(db, 'posts', postId, 'comments');
       const commentsQuery = query(commentsRef, orderBy('createdAt','asc'));
+      // unsubscribe previous if any
+      try { if (typeof commentsUnsub === 'function') { commentsUnsub(); commentsUnsub = null; } } catch(e){}
       commentsUnsub = onSnapshot(commentsQuery, (snap) => {
         commentsList.innerHTML = '';
         if (snap.empty) {
@@ -1325,7 +1286,6 @@ footer.footer {
         snap.forEach(docSnap => {
           const c = docSnap.data();
           const authorC = c.authorName || 'Anonymous';
-          // choose avatar for comment: check comment data for photo fields, prioritizing photoUrl
           const cAvatar = (c.photoUrl || c.authorPhotoUrl || c.authorPhoto || c.photoURL) || 'https://www.gstatic.com/images/branding/product/2x/avatar_square_64dp.png';
           const cEl = document.createElement('div');
           cEl.className = 'comment';
@@ -1352,7 +1312,6 @@ footer.footer {
     const up = document.getElementById('pvUp');
     const down = document.getElementById('pvDown');
     if (!up || !down) return;
-
     up.style.color = v === 1 ? 'var(--accent1)' : 'var(--muted)';
     down.style.color = v === -1 ? 'var(--accent1)' : 'var(--muted)';
     up.style.fontWeight = v === 1 ? '900' : '600';
@@ -1376,11 +1335,10 @@ footer.footer {
         body: text,
         authorId: currentUser.uid,
         authorName: currentUserProfile?.name || currentUser.email || null,
-        photoUrl: currentUserProfile?.photoURL || currentUser.photoURL || null, // Add photoUrl to comment
+        photoUrl: currentUserProfile?.photoURL || currentUser.photoURL || null,
         createdAt: serverTimestamp(),
         upvotesCount: 0
       });
-      // increment commentsCount on post
       await updateDoc(doc(db,'posts',currentPostId), { commentsCount: increment(1) });
       commentInput.value = '';
       commentStatus.textContent = 'Posted';
@@ -1394,43 +1352,30 @@ footer.footer {
   });
 
   // ---------- initial render for feed view ----------
-  function showFeed() {
-    feedView.style.display = 'block';
-    postView.style.display = 'none';
-  }
-  function showPost() {
-    feedView.style.display = 'none';
-    postView.style.display = 'block';
-  }
-  // ensure proper view shown depending on currentPostId
+  function showFeed() { feedView.style.display = 'block'; postView.style.display = 'none'; }
+  function showPost() { feedView.style.display = 'none'; postView.style.display = 'block'; }
   if (currentPostId) { showPost(); } else { showFeed(); }
 
-  // Logout functionality
-  logoutBtn.addEventListener('click', () => {
-    signOut(auth).then(() => {
-      console.log('User signed out');
-    }).catch((error) => {
-      console.error('Sign out error:', error);
-      alert('Error signing out. Please try again.');
-    });
-  });
-
-  // Settings functionality
-  settingsBtn.addEventListener('click', () => {
-    window.location.href = 'settings.html';
-  });
-
-  // Wait for auth to be initialized before showing non-public content
-  function waitForAuthInitialization() {
-    if (authInitialized) {
-      // Always refresh feed once auth state is known (refreshFeed handles public vs private)
-      refreshFeed(true);
-    } else {
-      setTimeout(waitForAuthInitialization, 100);
-    }
+  // ---------- background application ----------
+  function applyBackgroundImage() {
+    if (!BG_IMAGE_URL) return;
+    // apply to body, non-intrusive
+    document.body.style.backgroundImage = `url("${BG_IMAGE_URL}")`;
+    document.body.style.backgroundAttachment = 'fixed';
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center center';
+    document.body.style.backgroundRepeat = 'no-repeat';
+    // optional subtle overlay (uncomment if desired)
+    // document.body.style.backgroundColor = 'rgba(0,0,0,0.12)';
+    // document.body.style.backgroundBlendMode = 'overlay';
   }
+  applyBackgroundImage();
 
+  // ---------- Wait for auth to be initialized ----------
+  function waitForAuthInitialization() {
+    if (authInitialized) refreshFeed(true);
+    else setTimeout(waitForAuthInitialization, 100);
+  }
   waitForAuthInitialization();
 </script>
 </body>
-</html>
