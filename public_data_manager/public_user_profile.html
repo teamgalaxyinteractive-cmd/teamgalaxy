@@ -21,6 +21,19 @@
     }
 
 
+    /* BACKGROUND IMAGE LAYER (edit the URL below or set via inline style attribute on .bg-layer) */
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      filter: brightness(0.55) saturate(0.9);
+      /* example fallback: use your image URL here or set data-bg on the element in HTML */
+      /* background-image: url('path/to/your-image.jpg'); */
+    }
+
         /* ---------------------------------- */
         /* 1. FONT DEFINITION (@font-face Rule) */
         /* ---------------------------------- */
@@ -557,6 +570,9 @@
     </div>
     <div class="public-label">Public Profile</div>
   </header>
+
+  <!-- Background image layer: edit style attribute or add class with background-image in CSS -->
+  <div class="bg-layer" style="background-image: url('https://dl.dropboxusercontent.com/scl/fi/1csa5jjslfhutldgd4in9/IMG_20251116_113654.png?rlkey=p2jqe4ngtw8z2id5rpqspw9sb&st=grvkp8p9&dl=0');"></div>
 
   <!-- Main Content -->
   <div class="container">
