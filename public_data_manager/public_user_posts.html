@@ -770,16 +770,15 @@ footer.footer {
   };
   const RECAPTCHA_SITE_KEY = "6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx";
 
-  // === BACKGROUND IMAGE (put your URL here) ===
-  // Leave empty string for no image. Example: "https://example.com/bg.jpg"
-  const BG_IMAGE_URL = ""; // <-- replace with your image URL when ready
+  // === BACKGROUND IMAGE (you gave this URL) ===
+  const BG_IMAGE_URL = "https://dl.dropboxusercontent.com/scl/fi/1csa5jjslfhutldgd4in9/IMG_20251116_113654.png?rlkey=p2jqe4ngtw8z2id5rpqspw9sb&st=grvkp8p9&dl=0";
 
   // ---------- Firebase imports (v11.9.0) ----------
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js';
   import { initializeAppCheck, ReCaptchaV3Provider } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-app-check.js';
   import {
     getFirestore, collection, query, orderBy, limit, startAfter, getDocs,
-    doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot,
+    doc, getDoc, addDoc, updateDoc, onSnapshot,
     where, serverTimestamp, runTransaction, increment
   } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js';
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js';
@@ -819,18 +818,16 @@ footer.footer {
   let lastVisible = null;
   const PAGE_SIZE = 8;
   let currentUser = null;
-  let currentUserProfile = null; // from /users/{uid} if exists
+  let currentUserProfile = null;
   let currentPostId = null;
   let commentsUnsub = null;
   let isVoting = false;
   let authInitialized = false;
 
-  // Dedup + fetch-lock controls
   const renderedPostIds = new Set();
   let isFetchingFeed = false;
   let pendingRefresh = false;
 
-  // Determine URL params: postId and profileUid
   const urlParams = new URLSearchParams(window.location.search);
   const requestedPostId = urlParams.get('postId');
 
@@ -839,17 +836,13 @@ footer.footer {
   if (!requestedPostId) {
     profileUid = urlParams.get('uid') || urlParams.get('id') || (function(){
       const raw = window.location.search || '';
-      if (raw.startsWith('?=')) {
-        return raw.slice(2).split('&')[0] || null;
-      }
-      if (raw.startsWith('?') && raw.indexOf('=') === -1 && raw.length > 1) {
-        return raw.slice(1).split('&')[0];
-      }
+      if (raw.startsWith('?=')) return raw.slice(2).split('&')[0] || null;
+      if (raw.startsWith('?') && raw.indexOf('=') === -1 && raw.length > 1) return raw.slice(1).split('&')[0];
       return null;
     })();
   }
 
-  // ---------- small helpers ----------
+  // ---------- helpers ----------
   function timeAgo(ts) {
     if (!ts) return '';
     const d = ts.toDate ? ts.toDate() : new Date(ts);
@@ -868,9 +861,7 @@ footer.footer {
       .replaceAll('"','&quot;')
       .replaceAll("'",'&#039;');
   }
-  function getInitials(name) {
-    return name ? name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U';
-  }
+  function getInitials(name) { return name ? name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U'; }
 
   function renderPostSkeletons(count) {
     let skeletonsHtml = '';
@@ -899,6 +890,12 @@ footer.footer {
     }
     postsListEl.innerHTML = skeletonsHtml;
   }
+
+  function removePostSkeletons() {
+    const skeletons = postsListEl.querySelectorAll('.post-skeleton');
+    skeletons.forEach(el => el.remove());
+  }
+
   function renderCommentSkeletons(count) {
     let skeletonsHtml = '';
     for (let i = 0; i < count; i++) {
@@ -912,6 +909,7 @@ footer.footer {
     }
     commentsList.innerHTML = skeletonsHtml;
   }
+
   function renderPostViewSkeleton() {
     postContainer.innerHTML = `
       <div class="card post-skeleton">
@@ -935,16 +933,12 @@ footer.footer {
     renderCommentSkeletons(3);
   }
 
-  // resolve user's slug/handle by uid (optional - used for friendly messages)
   async function resolveHandleByUid(uid) {
     if (!uid) return null;
     try {
       const q = query(collection(db, 'publicProfiles'), where('uid','==',uid), limit(1));
       const snaps = await getDocs(q);
-      if (!snaps.empty) {
-        const data = snaps.docs[0].data();
-        return data.slug || null;
-      }
+      if (!snaps.empty) return snaps.docs[0].data().slug || null;
     } catch (e) { console.warn('resolveHandle failed', e); }
     return null;
   }
@@ -963,41 +957,32 @@ footer.footer {
       try {
         const udocRef = doc(db,'users', user.uid);
         const uSnap = await getDoc(udocRef);
-        if (uSnap.exists()) currentUserProfile = uSnap.data();
-        else currentUserProfile = { name: user.displayName || null, email: user.email || null, photoURL: user.photoURL || null };
+        currentUserProfile = uSnap.exists() ? uSnap.data() : { name: user.displayName || null, email: user.email || null, photoURL: user.photoURL || null };
       } catch(e) {
         console.warn('users read failed', e);
         currentUserProfile = { name: user.displayName || null, email: user.email || null, photoURL: user.photoURL || null };
       }
-
       const headerButtons = document.querySelector('.header-buttons');
       if (headerButtons) {
-        headerButtons.innerHTML = `
-          <button class="btn btn-settings" id="settingsBtn">Settings</button>
-          <button class="btn btn-logout" id="logoutBtn">Log Out</button>
-        `;
+        headerButtons.innerHTML = `<button class="btn btn-settings" id="settingsBtn">Settings</button><button class="btn btn-logout" id="logoutBtn">Log Out</button>`;
         document.getElementById('logoutBtn').addEventListener('click', () => signOut(auth));
         document.getElementById('settingsBtn').addEventListener('click', () => { window.location.href = 'settings.html'; });
       }
     } else {
       const headerButtons = document.querySelector('.header-buttons');
       if (headerButtons) {
-        headerButtons.innerHTML = `
-          <button class="btn btn-settings" id="settingsBtn">Settings</button>
-          <button class="btn btn-logout" id="logoutBtn">Log In</button>
-        `;
+        headerButtons.innerHTML = `<button class="btn btn-settings" id="settingsBtn">Settings</button><button class="btn btn-logout" id="logoutBtn">Log In</button>`;
         document.getElementById('logoutBtn').addEventListener('click', signIn);
         document.getElementById('settingsBtn').addEventListener('click', () => { window.location.href = 'settings.html'; });
       }
       currentUserProfile = null;
     }
 
-    // If user navigated back from a post page (single-post mode), re-render correctly
     if (currentPostId) renderPostView(currentPostId);
     else refreshFeed(true);
   });
 
-  // Click outside dropdown closes it
+  // Close dropdown when clicking outside
   document.addEventListener('click', (e) => {
     if (!dropdownMenu.contains(e.target) && !e.target.classList.contains('avatar') && e.target.id !== 'headerAvatar') {
       dropdownMenu.classList.remove('show');
@@ -1009,7 +994,7 @@ footer.footer {
   settingsLink.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'settings.html'; dropdownMenu.classList.remove('show'); });
   signOutLink.addEventListener('click', (e) => { e.preventDefault(); signOut(auth); dropdownMenu.classList.remove('show'); });
 
-  // ---------- routing: if ?postId=... show single post view ----------
+  // ---------- routing ----------
   if (requestedPostId) {
     feedView.style.display = 'none';
     postView.style.display = 'block';
@@ -1023,9 +1008,7 @@ footer.footer {
 
   // ---------- FEED: fetch posts (paged) with dedupe + fetch-lock ----------
   async function refreshFeed(reset=false) {
-    // Handle concurrency: coalesce multiple requests into one
     if (isFetchingFeed) {
-      // mark that a fresh refresh was requested while a fetch was in progress
       pendingRefresh = pendingRefresh || reset;
       return;
     }
@@ -1034,7 +1017,7 @@ footer.footer {
     if (reset) {
       lastVisible = null;
       renderedPostIds.clear();
-      postsListEl.innerHTML = ''; // ensure we clear to avoid duplicates
+      postsListEl.innerHTML = '';
       renderPostSkeletons(4);
     }
 
@@ -1044,7 +1027,6 @@ footer.footer {
     if (profileUid) {
       if (!lastVisible) q = query(postsRef, where('authorId', '==', profileUid), orderBy('createdAt','desc'), limit(PAGE_SIZE));
       else q = query(postsRef, where('authorId', '==', profileUid), orderBy('createdAt','desc'), startAfter(lastVisible), limit(PAGE_SIZE));
-      // update header title to include a friendly handle if available (non-blocking)
       resolveHandleByUid(profileUid).then(handle => {
         const titleEl = document.getElementById('feed-title');
         if (titleEl) titleEl.textContent = handle ? `${handle} — Posts` : 'User Posts';
@@ -1063,6 +1045,10 @@ footer.footer {
 
     try {
       const snaps = await getDocs(q);
+
+      // remove skeletons as soon as we have a result (success path)
+      removePostSkeletons();
+
       if (snaps.docs.length === 0) {
         if (!lastVisible) {
           if (profileUid) {
@@ -1076,12 +1062,8 @@ footer.footer {
         return;
       }
 
-      // If this is the first page, we've already cleared list above (reset case)
       for (const d of snaps.docs) {
-        if (renderedPostIds.has(d.id)) {
-          // skip duplicates
-          continue;
-        }
+        if (renderedPostIds.has(d.id)) continue;
         renderedPostIds.add(d.id);
         renderPostCard(d.id, d.data());
       }
@@ -1090,13 +1072,14 @@ footer.footer {
       loadMoreBtn.style.display = snaps.docs.length === PAGE_SIZE ? 'inline-block' : 'none';
     } catch(e){
       console.error('feed fetch error', e);
+      // ensure skeletons removed on error as well
+      removePostSkeletons();
       postsListEl.innerHTML = '<div class="card small muted">Failed to load posts</div>';
       loadMoreBtn.style.display = 'none';
     } finally {
       isFetchingFeed = false;
       if (pendingRefresh) {
         pendingRefresh = false;
-        // next refresh will clear and re-fetch
         refreshFeed(true);
       }
     }
@@ -1216,7 +1199,6 @@ footer.footer {
 
   // ---------- POST VIEW (single post + comments) ----------
   backToFeed.addEventListener('click', ()=> {
-    // Unsubscribe comments listener when leaving single-post view (prevents duplicated subscriptions)
     try { if (typeof commentsUnsub === 'function') { commentsUnsub(); commentsUnsub = null; } } catch(e){}
     const base = window.location.href.split('?')[0];
     window.location.href = base;
@@ -1271,10 +1253,8 @@ footer.footer {
         } catch(e){ console.warn('vote read failed', e); }
       } else highlightVoteButtons(0);
 
-      // subscribe to comments in real-time (store unsub to remove later)
       const commentsRef = collection(db, 'posts', postId, 'comments');
       const commentsQuery = query(commentsRef, orderBy('createdAt','asc'));
-      // unsubscribe previous if any
       try { if (typeof commentsUnsub === 'function') { commentsUnsub(); commentsUnsub = null; } } catch(e){}
       commentsUnsub = onSnapshot(commentsQuery, (snap) => {
         commentsList.innerHTML = '';
@@ -1359,15 +1339,11 @@ footer.footer {
   // ---------- background application ----------
   function applyBackgroundImage() {
     if (!BG_IMAGE_URL) return;
-    // apply to body, non-intrusive
     document.body.style.backgroundImage = `url("${BG_IMAGE_URL}")`;
     document.body.style.backgroundAttachment = 'fixed';
     document.body.style.backgroundSize = 'cover';
     document.body.style.backgroundPosition = 'center center';
     document.body.style.backgroundRepeat = 'no-repeat';
-    // optional subtle overlay (uncomment if desired)
-    // document.body.style.backgroundColor = 'rgba(0,0,0,0.12)';
-    // document.body.style.backgroundBlendMode = 'overlay';
   }
   applyBackgroundImage();
 
@@ -1379,3 +1355,4 @@ footer.footer {
   waitForAuthInitialization();
 </script>
 </body>
+</html>
