@@ -37,6 +37,20 @@
       overflow-x: hidden;
     }
 
+
+        /* ---------------------------------- */
+        /* 1. FONT DEFINITION (@font-face Rule) */
+        /* ---------------------------------- */
+        @font-face {
+            font-family: 'Sefa Regular'; 
+            src: url('../assets/fonts/Sefa-Regular.woff2') format('woff2'),
+                 url('../assets/fonts/Sefa-Regular.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap; 
+        }
+
+
     /* Stars background */
     body::before {
       content: "";
@@ -651,7 +665,21 @@ footer.footer {
 <body>
   <!-- Header -->
   <header class="header">
-    <div class="logo">GalaxyWeb</div>
+    <div 
+        class="logo" 
+        onclick="window.location.href='../dashboard.html'" 
+        style="
+            cursor: pointer;
+            
+            font-family: 'Sefa Regular', sans-serif; 
+            font-size: 2.5em; 
+            font-weight: bold;
+            color: #ccf381; /* Neon color */
+            letter-spacing: 3px;
+        "
+    >
+        GalaxyWeb
+    </div>
     <div class="public-label">Public Profile</div>
   </header>
 
