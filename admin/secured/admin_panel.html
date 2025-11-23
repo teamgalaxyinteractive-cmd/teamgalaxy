@@ -444,31 +444,31 @@
             }
         }
 
-        // Load statistics
+        // Load statistics (updated per request)
         async function loadStats() {
             try {
-                // Count users
-                const usersSnapshot = await db.collection('users').count().get();
-                document.getElementById('userCount').textContent = usersSnapshot.data().count || 0;
+                // Count users by checking usersPrivate collection documents
+                const usersSnapshot = await db.collection('usersPrivate').get();
+                const usersCount = (usersSnapshot && typeof usersSnapshot.size === 'number') ? usersSnapshot.size : (usersSnapshot.docs ? usersSnapshot.docs.length : 0);
+                document.getElementById('userCount').textContent = usersCount || 0;
 
-                // Count admins
-                const adminsSnapshot = await db.collection('admin').count().get();
-                document.getElementById('adminCount').textContent = adminsSnapshot.data().count || 0;
+                // Count admins by checking admin collection documents
+                const adminsSnapshot = await db.collection('admin').get();
+                const adminsCount = (adminsSnapshot && typeof adminsSnapshot.size === 'number') ? adminsSnapshot.size : (adminsSnapshot.docs ? adminsSnapshot.docs.length : 0);
+                document.getElementById('adminCount').textContent = adminsCount || 0;
 
-                // Count repositories (example collection)
-                const reposSnapshot = await db.collection('repositories').count().get();
-                document.getElementById('repoCount').textContent = reposSnapshot.data().count || 0;
+                // Repositories - set to 1 (hardcoded per request)
+                document.getElementById('repoCount').textContent = '1';
 
-                // Count support tickets
-                const ticketsSnapshot = await db.collection('support_tickets').count().get();
-                document.getElementById('supportTickets').textContent = ticketsSnapshot.data().count || 0;
+                // Support tickets - show N/A
+                document.getElementById('supportTickets').textContent = 'N/A';
             } catch (error) {
                 console.error('Stats loading error:', error);
                 // Set default values if error
                 document.getElementById('userCount').textContent = '0';
                 document.getElementById('adminCount').textContent = '0';
-                document.getElementById('repoCount').textContent = '0';
-                document.getElementById('supportTickets').textContent = '0';
+                document.getElementById('repoCount').textContent = '1';
+                document.getElementById('supportTickets').textContent = 'N/A';
             }
         }
 
@@ -507,7 +507,7 @@
                 default:
                     url = module + '.html';
             }
-            
+
             // Redirect to the constructed URL
             window.location.href = url;
         }
