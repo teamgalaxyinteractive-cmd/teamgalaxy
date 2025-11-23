@@ -1055,20 +1055,6 @@
         />
         <div class="collaborator-label">VZN</div>
       </div>
-     <!-- <div class="collaborator-logo-box" data-url=" https://www.google.com " tabindex="0">
-        <img
-          src="https://dl.dropboxusercontent.com/scl/fi/ih79814t1c2od22jmdbfw/8699161.jpg?rlkey=vxrzhkc3id3njeli1xza6gitc&st=rfqt55u3&dl=0"
-          alt="Made"
-        />
-        <div class="collaborator-label">Made</div>
-      </div>
-      <div class="collaborator-logo-box" data-url=" https://www.google.com " tabindex="0">
-        <img
-          src="https://dl.dropboxusercontent.com/scl/fi/orf6i07ebo705jnq5tkx7/1744702095638.png?rlkey=6jvqg2lrucvw5c8vst71rg5kl&st=r19g59l4&dl=0"
-          alt="It!"
-        />
-        <div class="collaborator-label">It!</div>
-      </div> -->
     </div>
   </div>
 
@@ -1084,9 +1070,6 @@
       </div>
       <div class="footer-social">
         <a href="https://x.com/teamgalaxy_wotb" title="Twitter"><i class="fab fa-twitter"></i></a>
-      <!--  <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a> -->
         <a href="https://discord.gg/26pSCyMRPM" title="Discord"><i class="fab fa-discord"></i></a>
       </div>
     </div>
@@ -1099,18 +1082,6 @@
         <a href="about_us.html">About</a>
       </div>
       <div>
-       <!-- <div class="footer-contact-row">
-          <span class="footer-contact-label">
-            <i class="fa-solid fa-location-dot footer-contact-icon"></i>Address:
-          </span>
-          Not Available
-        </div>
-        <div class="footer-contact-row">
-          <span class="footer-contact-label">
-            <i class="fa-solid fa-phone footer-contact-icon"></i>Phone:
-          </span>
-          Not Available
-        </div> -->
         <div class="footer-contact-row">
           <span class="footer-contact-label">
             <i class="fa-solid fa-envelope footer-contact-icon"></i>Email:
@@ -1129,7 +1100,7 @@
 
   <!-- reCaptcha -->
   <script src="https://www.google.com/recaptcha/api.js?render=6LfJDgcsAAAAABRkg1BC_ni3R8dFSCAXimVRAYOD"></script>
-  
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
@@ -1332,70 +1303,22 @@
     // ===== Visited cache =====
     let visitedCards = JSON.parse(sessionStorage.getItem("visitedCards")) || [];
 
-    // ===== loadCards (modified to work with overlay) =====
-    async function loadCards() {
-      if (!cardsContainer) return;
-
+    // ===== Helper: check if current user has liked a card (safe) =====
+    async function userHasLiked(cardId) {
       try {
-        const q = query(
-          collection(db, "cards"),
-          orderBy("publishedAt", "desc"),
-          limit(3)
-        );
-        const snapshot = await getDocs(q);
-
-        cardsContainer.innerHTML = "";
-
-        snapshot.docs.forEach((docSnap) => {
-          const data = docSnap.data();
-          const id = docSnap.id;
-
-          // Increment views once per session
-          if (!visitedCards.includes(id)) {
-            updateDoc(doc(db, "cards", id), {
-              views: increment(1),
-            }).catch(err => console.warn('views increment failed', err));
-            visitedCards.push(id);
-            sessionStorage.setItem("visitedCards", JSON.stringify(visitedCards));
-          }
-
-          const card = createCard(
-            id,
-            data.heading,
-            data.description,
-            data.views || 0,
-            data.likes || 0,
-            data.imageUrl || ""
-          );
-          cardsContainer.appendChild(card);
-        });
-
-        // Add a small delay to let users enjoy the animation
-        setTimeout(removeOverlay, 1200);
-      } catch (error) {
-        console.error("Error loading cards:", error);
-        cardsContainer.innerHTML = "<p>Error loading content. Please try again later.</p>";
-        // Still remove overlay even if there's an error
-        removeOverlay();
+        const user = auth.currentUser;
+        if (!user || !user.uid) return false;
+        const likeRef = doc(db, "cards", cardId, "likes", user.uid);
+        const snap = await getDoc(likeRef);
+        return snap.exists();
+      } catch (err) {
+        console.warn("userHasLiked error:", err);
+        return false;
       }
     }
 
-    // ===== Remove Overlay Function =====
-    function removeOverlay() {
-      if (loadingOverlay) {
-        // Create a smooth fade out
-        loadingOverlay.style.transition = 'all 0.8s ease';
-        loadingOverlay.style.opacity = '0';
-
-        // Remove from DOM after animation completes
-        setTimeout(() => {
-          loadingOverlay.style.display = 'none';
-        }, 800);
-      }
-    }
-
-    // ===== createCard with limited description =====
-    function createCard(id, heading, description, views, likes, imageUrl) {
+    // ===== createCard with robust like handling (keeps visual & styling intact) =====
+    function createCard(id, heading, description, views, likesInitial, imageUrl) {
       const card = document.createElement("div");
       card.className = "card";
       card.tabIndex = 0;
@@ -1449,32 +1372,78 @@
       likesSpan.className = "likes";
       likesSpan.style.cursor = auth.currentUser ? "pointer" : "not-allowed";
       likesSpan.title = auth.currentUser ? "Like" : "Sign In to Like";
-      likesSpan.innerHTML = `<i class="fa-regular fa-heart"></i> ${likes}`;
+      likesSpan.innerHTML = `<i class="fa-regular fa-heart"></i> ${likesInitial}`;
+
+      // Mark loading state while we check server for whether user already liked
+      likesSpan.dataset.loading = "1";
+      (async () => {
+        try {
+          if (!auth.currentUser || !auth.currentUser.uid) {
+            // If no user yet, just clear loading; auth listener will cause reload later
+            delete likesSpan.dataset.loading;
+            return;
+          }
+          const liked = await userHasLiked(id);
+          if (liked) {
+            likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${likesInitial}`;
+            likesSpan.dataset.liked = "true";
+            likesSpan.style.cursor = "default";
+            likesSpan.title = "You liked this";
+          }
+        } catch (err) {
+          console.warn('Initial like-check failed for', id, err);
+        } finally {
+          delete likesSpan.dataset.loading;
+        }
+      })();
 
       likesSpan.addEventListener("click", async (e) => {
         e.stopPropagation();
-        if (!auth.currentUser) {
+        // if still checking initial state, ignore clicks
+        if (likesSpan.dataset.loading) return;
+
+        if (!auth.currentUser || !auth.currentUser.uid) {
           alert("Please sign in to like.");
           return;
         }
+
+        // If already liked (UI says so), reflect and stop
+        if (likesSpan.dataset.liked === "true") {
+          alert("You have already liked this card.");
+          return;
+        }
+
+        // disable during operation
+        likesSpan.dataset.loading = "1";
+
         try {
-          const likeDoc = await getDoc(doc(db, "cards", id, "likes", auth.currentUser.uid));
-          if (likeDoc.exists) {
+          // re-verify server-side (avoids race / stale UI state)
+          const likeRef = doc(db, "cards", id, "likes", auth.currentUser.uid);
+          const likeSnap = await getDoc(likeRef);
+          if (likeSnap.exists()) {
+            likesSpan.dataset.liked = "true";
+            likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${likesInitial}`;
+            likesSpan.style.cursor = "default";
+            likesSpan.title = "You liked this";
             alert("You have already liked this card.");
             return;
           }
-          await setDoc(doc(db, "cards", id, "likes", auth.currentUser.uid), {
-            likedAt: serverTimestamp(),
-          });
-          await updateDoc(doc(db, "cards", id), {
-            likes: increment(1),
-          });
-          const newLikes = likes + 1;
+
+          // create like doc + increment likes atomically-ish
+          await setDoc(likeRef, { likedAt: serverTimestamp() });
+          await updateDoc(doc(db, "cards", id), { likes: increment(1) });
+
+          // update UI
+          const newLikes = Number(likesInitial) + 1;
+          likesSpan.dataset.liked = "true";
           likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${newLikes}`;
           likesSpan.style.cursor = "default";
           likesSpan.title = "You liked this";
         } catch (err) {
+          console.error("Error liking card:", err);
           alert("Error liking card: " + (err && err.message ? err.message : err));
+        } finally {
+          delete likesSpan.dataset.loading;
         }
       });
 
@@ -1484,15 +1453,115 @@
       return card;
     } // end createCard
 
+    // ===== loadCards (modified to validate likes on render and show only latest 3) =====
+    async function loadCards() {
+      if (!cardsContainer) return;
+
+      try {
+        const q = query(
+          collection(db, "cards"),
+          orderBy("publishedAt", "desc"),
+          limit(3) // <-- show only latest 3 cards
+        );
+        const snapshot = await getDocs(q);
+
+        cardsContainer.innerHTML = "";
+
+        for (const docSnap of snapshot.docs) {
+          const data = docSnap.data();
+          const id = docSnap.id;
+
+          // Increment views once per session
+          if (!visitedCards.includes(id)) {
+            updateDoc(doc(db, "cards", id), {
+              views: increment(1),
+            }).catch(err => console.warn('views increment failed', err));
+            visitedCards.push(id);
+            sessionStorage.setItem("visitedCards", JSON.stringify(visitedCards));
+          }
+
+          const card = createCard(
+            id,
+            data.heading,
+            data.description,
+            data.views || 0,
+            data.likes || 0,
+            data.imageUrl || ""
+          );
+          cardsContainer.appendChild(card);
+        }
+
+        // Add a small delay to let users enjoy the animation then remove overlay
+        setTimeout(() => {
+          if (loadingOverlay) {
+            loadingOverlay.style.transition = 'all 0.8s ease';
+            loadingOverlay.style.opacity = '0';
+            setTimeout(() => {
+              loadingOverlay.style.display = 'none';
+            }, 800);
+          }
+        }, 900);
+      } catch (error) {
+        console.error("Error loading cards:", error);
+        cardsContainer.innerHTML = "<p>Error loading content. Please try again later.</p>";
+        // Still remove overlay even if there's an error
+        if (loadingOverlay) {
+          loadingOverlay.style.transition = 'all 0.8s ease';
+          loadingOverlay.style.opacity = '0';
+          setTimeout(() => { loadingOverlay.style.display = 'none'; }, 800);
+        }
+      }
+    }
+
     // ===== Initial run: update UI and load cards once =====
     updateProfileButton();
     loadCards();
     console.log("Auth + cards script loaded");
   </script>
+
   <script>
     document.querySelector('.hamburger').addEventListener('click', function() {
       document.querySelector('.nav-buttons').classList.toggle('show');
     });
+
+    // ===== "More" dropdown fix: keep open while pointer inside and toggle on click =====
+    (function fixMoreDropdown() {
+      const moreOptions = document.getElementById('moreOptions');
+      const moreDropdown = document.getElementById('moreDropdown');
+      if (!moreOptions || !moreDropdown) return;
+      const moreBtn = moreOptions.querySelector('button');
+
+      // Ensure hidden initially
+      moreDropdown.style.display = moreDropdown.style.display || 'none';
+
+      // For cursor devices: keep dropdown visible while pointer is inside the container
+      moreOptions.addEventListener('pointerenter', () => {
+        moreDropdown.style.display = 'block';
+      });
+      moreOptions.addEventListener('pointerleave', () => {
+        moreDropdown.style.display = 'none';
+      });
+
+      // For touch devices / clicks: toggle on button click
+      moreBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isShown = moreDropdown.style.display === 'block';
+        moreDropdown.style.display = isShown ? 'none' : 'block';
+      });
+
+      // Prevent clicks inside dropdown from closing when used
+      moreDropdown.addEventListener('click', (e) => e.stopPropagation());
+
+      // Clicking anywhere else closes the dropdown
+      document.addEventListener('click', () => {
+        moreDropdown.style.display = 'none';
+      });
+
+      // Accessibility: close on Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') moreDropdown.style.display = 'none';
+      });
+    })();
   </script>
 </body>
 </html>
