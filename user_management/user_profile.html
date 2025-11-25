@@ -623,13 +623,13 @@
           <a href="../about_us.html">About</a>
         </div>
         <div class="rocket-frame">
-          <div class="rocket-text">🚀 ROCKET 🚀</div>
+          <div class="rocket-text">🚀 ROCKET 
+
+🚀</div>
         </div>
       </div>
     </div>
   </footer>
-
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
@@ -854,8 +854,9 @@
 
       // Add share button functionality
       document.getElementById('shareBtn').addEventListener('click', () => {
-        if(data.slug) {
-          const shareUrl = `https://teamgalaxyinteractive-cmd.github.io/teamgalaxy/public_data_manager/public_user_profile.html?=${data.uid}`;
+        // Changed: use UID instead of slug
+        if(data.uid) {
+          const shareUrl = `https://teamgalaxyinteractive-cmd.github.io/teamgalaxy/public_data_manager/public_user_profile.html?uid=${data.uid}`;
           navigator.clipboard.writeText(shareUrl).then(() => {
             alert('Profile URL copied to clipboard!');
           }).catch(err => {
