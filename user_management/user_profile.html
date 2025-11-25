@@ -629,7 +629,7 @@
     </div>
   </footer>
 
-  <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
@@ -826,7 +826,7 @@
           
           <!-- Profile Header -->
           <div class="profile-header">
-            <img src="${data.profilePhotoUrl || 'https://via.placeholder.com/150   '}" alt="Profile Photo" class="profile-photo">
+            <img src="${data.profilePhotoUrl || 'https://via.placeholder.com/150'}" alt="Profile Photo" class="profile-photo">
             <div class="profile-info">
               <h1 class="profile-name">${data.name || 'Unknown User'}</h1>
               <div class="profile-slug">${data.slug ? '@' + data.slug : ''}${data.verified ? '<span class="verified-badge">✓ Verified</span>' : ''}</div>
@@ -851,19 +851,21 @@
         </div>
       `;
 
-      // Add share button functionality
+      // Add share button functionality - Updated to always use UID
       document.getElementById('shareBtn').addEventListener('click', () => {
-        if(data.slug) {
-          const shareUrl = `https://teamgalaxyinteractive-cmd.github.io/teamgalaxy/public_data_manager/public_user_profile.html?=${data.slug}`;
-          navigator.clipboard.writeText(shareUrl).then(() => {
-            alert('Profile URL copied to clipboard!');
-          }).catch(err => {
-            console.error('Failed to copy: ', err);
-            alert('Failed to copy URL. Please try again.');
-          });
-        } else {
-          alert('No profile slug available for sharing.');
-        }
+          // Ensure data.uid exists before creating the URL
+          if (data && data.uid) {
+              const shareUrl = `https://teamgalaxyinteractive-cmd.github.io/teamgalaxy/public_data_manager/public_user_profile.html?=${data.uid}`;
+              navigator.clipboard.writeText(shareUrl).then(() => {
+                  alert('Profile URL copied to clipboard!');
+              }).catch(err => {
+                  console.error('Failed to copy: ', err);
+                  alert('Failed to copy URL. Please try again.');
+              });
+          } else {
+              console.error('User ID not available for sharing.');
+              alert('Cannot generate share URL at this time.');
+          }
       });
     } 
 
@@ -1104,6 +1106,6 @@
       }
     }
 
-  </script>
+</script>
 </body>
 </html>
