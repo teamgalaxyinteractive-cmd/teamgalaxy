@@ -854,9 +854,8 @@
 
       // Add share button functionality
       document.getElementById('shareBtn').addEventListener('click', () => {
-        // Changed: use UID instead of slug
-        if(data.uid) {
-          const shareUrl = `https://teamgalaxyinteractive-cmd.github.io/teamgalaxy/public_data_manager/public_user_profile.html?uid=${data.uid}`;
+        if(data.slug) {
+          const shareUrl = `https://teamgalaxyinteractive-cmd.github.io/teamgalaxy/public_data_manager/public_user_profile.html?=${data.uid}`;
           navigator.clipboard.writeText(shareUrl).then(() => {
             alert('Profile URL copied to clipboard!');
           }).catch(err => {
