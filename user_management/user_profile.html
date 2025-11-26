@@ -615,479 +615,516 @@
 </div>
 
   </footer>  
-  <script type="module">  
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";  
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";  
-    import { getFirestore, doc, getDoc, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";  // Firebase configuration  
-const firebaseConfig = {  
-  apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",  
-  authDomain: "teamgalaxy-77344.firebaseapp.com",  
-  projectId: "teamgalaxy-77344",  
-  storageBucket: "teamgalaxy-77344.firebasestorage.app",  
-  messagingSenderId: "770256225320",  
-  appId: "1:770256225320:web:5a363ebd757de6cde3a11d",  
-  measurementId: "G-6C2W9NSNCH"  
-};  
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
-// Initialize Firebase  
-const app = initializeApp(firebaseConfig);  
-const auth = getAuth(app);  
-const db = getFirestore(app);  
+  // Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+    authDomain: "teamgalaxy-77344.firebaseapp.com",
+    projectId: "teamgalaxy-77344",
+    storageBucket: "teamgalaxy-77344.firebasestorage.app",
+    messagingSenderId: "770256225320",
+    appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+    measurementId: "G-6C2W9NSNCH"
+  };
 
-// DOM Elements  
-const loadingOverlay = document.getElementById('loadingOverlay');  
-const profileContent = document.getElementById('profile-content');  
-const postsSection = document.getElementById('posts-section');  
-const logoutBtn = document.querySelector('.btn-logout');  
-const settingsBtn = document.querySelector('.btn-settings');  
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-// Create stars for loading overlay (unchanged)  
-function createLoadingStars() {  
-  const container = document.getElementById('starsContainer');  
-  container.innerHTML = '';  
-  for (let i = 0; i < 30; i++) {  
-    const star = document.createElement('div');  
-    star.classList.add('star');  
+  // DOM Elements
+  const loadingOverlay = document.getElementById('loadingOverlay');
+  const profileContent = document.getElementById('profile-content');
+  const postsSection = document.getElementById('posts-section');
+  const logoutBtn = document.querySelector('.btn-logout');
+  const settingsBtn = document.querySelector('.btn-settings');
 
-    // Random position  
-    const x = Math.random() * 100;  
-    const y = Math.random() * 100;  
-    star.style.left = `${x}%`;  
-    star.style.top = `${y}%`;  
+  // Create stars for loading overlay (unchanged)
+  function createLoadingStars() {
+    const container = document.getElementById('starsContainer');
+    container.innerHTML = '';
+    for (let i = 0; i < 30; i++) {
+      const star = document.createElement('div');
+      star.classList.add('star');
 
-    // Random size  
-    const size = Math.random() * 3 + 1;  
-    star.style.width = `${size}px`;  
-    star.style.height = `${size}px`;  
+      // Random position
+      const x = Math.random() * 100;
+      const y = Math.random() * 100;
+      star.style.left = `${x}%`;
+      star.style.top = `${y}%`;
 
-    // Random animation duration  
-    const duration = Math.random() * 3 + 2;  
-    star.style.setProperty('--duration', `${duration}s`);  
+      // Random size
+      const size = Math.random() * 3 + 1;
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
 
-    container.appendChild(star);  
-  }  
-}  
+      // Random animation duration
+      const duration = Math.random() * 3 + 2;
+      star.style.setProperty('--duration', `${duration}s`);
 
-// Format date - FIXED  
-function formatDate(dateValue) {  
-  if (!dateValue) return '';  
+      container.appendChild(star);
+    }
+  }
 
-  // Check if it's a Firestore Timestamp object  
-  if (dateValue && dateValue.seconds !== undefined) {  
-    const date = new Date(dateValue.seconds * 1000);  
-    return date.toLocaleDateString('en-US', {   
-      year: 'numeric',   
-      month: 'long',   
-      day: 'numeric'   
-    });  
-  }  
-  // If it's already a Date object  
-  else if (dateValue instanceof Date) {  
-    return dateValue.toLocaleDateString('en-US', {   
-      year: 'numeric',   
-      month: 'long',   
-      day: 'numeric'   
-    });  
-  }  
-  // If it's a string or number  
-  else {  
-    const date = new Date(dateValue);  
-    if (isNaN(date.getTime())) {  
-      return 'Invalid Date';  
-    }  
-    return date.toLocaleDateString('en-US', {   
-      year: 'numeric',   
-      month: 'long',   
-      day: 'numeric'   
-    });  
-  }  
-}  
+  // Format date - FIXED
+  function formatDate(dateValue) {
+    if (!dateValue) return '';
 
-// Format number (e.g., 1000 -> 1K)  
-function formatNumber(num) {  
-  if (num >= 1000000) {  
-    return (num / 1000000).toFixed(1) + 'M';  
-  }  
-  if (num >= 1000) {  
-    return (num / 1000).toFixed(1) + 'K';  
-  }  
-  return num.toString();  
-}  
+    // Check if it's a Firestore Timestamp object
+    if (dateValue && dateValue.seconds !== undefined) {
+      const date = new Date(dateValue.seconds * 1000);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+    // If it's already a Date object
+    else if (dateValue instanceof Date) {
+      return dateValue.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+    // If it's a string or number
+    else {
+      const date = new Date(dateValue);
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+  }
 
-// Time ago function - FIXED  
-function timeAgo(dateValue) {  
-  if (!dateValue) return 'Just now';  
+  // Format number (e.g., 1000 -> 1K)
+  function formatNumber(num) {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    }
+    if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
+  }
 
-  let date;  
-  // Check if it's a Firestore Timestamp object  
-  if (dateValue && dateValue.seconds !== undefined) {  
-    date = new Date(dateValue.seconds * 1000);  
-  }  
-  // If it's already a Date object  
-  else if (dateValue instanceof Date) {  
-    date = dateValue;  
-  }  
-  // If it's a string or number  
-  else {  
-    date = new Date(dateValue);  
-    if (isNaN(date.getTime())) {  
-      return 'Invalid Date';  
-    }  
-  }  
+  // Time ago function - FIXED
+  function timeAgo(dateValue) {
+    if (!dateValue) return 'Just now';
 
-  const now = new Date();  
-  const seconds = Math.floor((now - date) / 1000);  
+    let date;
+    // Check if it's a Firestore Timestamp object
+    if (dateValue && dateValue.seconds !== undefined) {
+      date = new Date(dateValue.seconds * 1000);
+    }
+    // If it's already a Date object
+    else if (dateValue instanceof Date) {
+      date = dateValue;
+    }
+    // If it's a string or number
+    else {
+      date = new Date(dateValue);
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+    }
 
-  let interval = seconds / 31536000;  
-  if (interval > 1) return Math.floor(interval) + ' years ago';  
-  interval = seconds / 2592000;  
-  if (interval > 1) return Math.floor(interval) + ' months ago';  
-  interval = seconds / 86400;  
-  if (interval > 1) return Math.floor(interval) + ' days ago';  
-  interval = seconds / 3600;  
-  if (interval > 1) return Math.floor(interval) + ' hours ago';  
-  interval = seconds / 60;  
-  if (interval > 1) return Math.floor(interval) + ' minutes ago';  
-  return Math.floor(seconds) + ' seconds ago';  
-}  
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
 
-// Load profile data  
-async function loadProfile() {  
-  const user = auth.currentUser;  
-  if (!user) {  
-    profileContent.innerHTML = '<div class="loading">Please log in to view your profile.</div>';  
-    return;  
-  }  
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + ' years ago';
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + ' months ago';
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + ' days ago';
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + ' hours ago';
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + ' minutes ago';
+    return Math.floor(seconds) + ' seconds ago';
+  }
 
-  try {  
-    const docRef = doc(db, 'usersPrivate', user.uid);  
-    const docSnap = await getDoc(docRef);  
+  // Load profile data - now accepts user object so we always have the UID
+  async function loadProfile(user) {
+    if (!user) {
+      profileContent.innerHTML = '<div class="loading">Please log in to view your profile.</div>';
+      return;
+    }
 
-    if (!docSnap.exists()) {  
-      profileContent.innerHTML = '<div class="loading">Profile not found.</div>';  
-      return;  
-    }  
+    try {
+      const docRef = doc(db, 'usersPrivate', user.uid);
+      const docSnap = await getDoc(docRef);
 
-    const data = docSnap.data();  
-    renderProfile(data);  
-    await loadUserPosts(user.uid);  
-  } catch (error) {  
-    console.error('Error loading profile:', error);  
-    profileContent.innerHTML = '<div class="loading">Error loading profile.</div>';  
-  }  
-}  
+      if (!docSnap.exists()) {
+        profileContent.innerHTML = '<div class="loading">Profile not found.</div>';
+        return;
+      }
 
-// Load user posts  
-async function loadUserPosts(userId) {  
-  try {  
-    const q = query(  
-      collection(db, 'posts'),  
-      where('authorId', '==', userId),  
-      orderBy('createdAt', 'desc'),  
-      limit(3)  
-    );  
-    const querySnapshot = await getDocs(q);  
+      const data = docSnap.data();
+      // Pass the authenticated user's UID to renderProfile
+      renderProfile(data, user.uid);
+      await loadUserPosts(user.uid);
+    } catch (error) {
+      console.error('Error loading profile:', error);
+      profileContent.innerHTML = '<div class="loading">Error loading profile.</div>';
+    }
+  }
 
-    const posts = [];  
-    querySnapshot.forEach(doc => {  
-      posts.push({ id: doc.id, ...doc.data() });  
-    });  
+  // Load user posts
+  async function loadUserPosts(userId) {
+    try {
+      const q = query(
+        collection(db, 'posts'),
+        where('authorId', '==', userId),
+        orderBy('createdAt', 'desc'),
+        limit(3)
+      );
+      const querySnapshot = await getDocs(q);
 
-    renderPosts(posts);  
-  } catch (error) {  
-    console.error('Error loading posts:', error);  
-    postsSection.innerHTML = '<div class="loading">Error loading posts.</div>';  
-  }  
-}  
+      const posts = [];
+      querySnapshot.forEach(doc => {
+        posts.push({ id: doc.id, ...doc.data() });
+      });
 
-// Render profile HTML  
-function renderProfile(data) {  
-  profileContent.innerHTML = `  
-    <div class="profile-card">  
-      <div class="profile-actions">  
-        <button class="btn-share" id="shareBtn">Share Profile</button>  
-      </div>  
+      renderPosts(posts);
+    } catch (error) {
+      console.error('Error loading posts:', error);
+      postsSection.innerHTML = '<div class="loading">Error loading posts.</div>';
+    }
+  }
+
+  // Render profile HTML
+  // Now accepts userUid so we can attach it to the share URL reliably
+  function renderProfile(data, userUid) {
+    profileContent.innerHTML = `
+      <div class="profile-card">
+        <div class="profile-actions">
+          <button class="btn-share" id="shareBtn">Share Profile</button>
+        </div>
         
-      <!-- Profile Header -->  
-      <div class="profile-header">  
-        <img src="${data.profilePhotoUrl || 'https://via.placeholder.com/150   '}" alt="Profile Photo" class="profile-photo">  
-        <div class="profile-info">  
-          <h1 class="profile-name">${data.name || 'Unknown User'}</h1>  
-          <div class="profile-slug">${data.slug ? '@' + data.slug : ''}${data.verified ? '<span class="verified-badge">✓ Verified</span>' : ''}</div>  
-          <div class="join-date">Joined: ${formatDate(data.joinDate)}</div>  
-          <div class="email">${data.email || ''}</div>  
-        </div>  
-      </div>  
+        <!-- Profile Header -->
+        <div class="profile-header">
+          <img src="${data.profilePhotoUrl || 'https://via.placeholder.com/150'}" alt="Profile Photo" class="profile-photo">
+          <div class="profile-info">
+            <h1 class="profile-name">${data.name || 'Unknown User'}</h1>
+            <div class="profile-slug">${data.slug ? '@' + data.slug : ''}${data.verified ? '<span class="verified-badge">✓ Verified</span>' : ''}</div>
+            <div class="join-date">Joined: ${formatDate(data.joinDate)}</div>
+            <div class="email">${data.email || ''}</div>
+          </div>
+        </div>
 
-      <!-- Bio Section -->  
-      <div class="bio-section">  
-        <h2 class="section-title">Bio</h2>  
-        <p class="bio-text">${data.bio || 'No bio available.'}</p>  
-      </div>  
+        <!-- Bio Section -->
+        <div class="bio-section">
+          <h2 class="section-title">Bio</h2>
+          <p class="bio-text">${data.bio || 'No bio available.'}</p>
+        </div>
 
-      <!-- Stats Section -->  
-      <div class="profile-stats">  
-        <div class="stat-card">  
-          <div class="stat-value">${formatNumber(data.publicPostCount || 0)}</div>  
-          <div class="stat-label">Public Posts</div>  
-        </div>  
-      </div>  
-    </div>  
-  `;  
+        <!-- Stats Section -->
+        <div class="profile-stats">
+          <div class="stat-card">
+            <div class="stat-value">${formatNumber(data.publicPostCount || 0)}</div>
+            <div class="stat-label">Public Posts</div>
+          </div>
+        </div>
+      </div>
+    `;
 
-  // Add share button functionality  
-  document.getElementById('shareBtn').addEventListener('click', () => {  
-    if(data.slug) {  
-      const shareUrl = `https://teamgalaxyinteractive-cmd.github.io/teamgalaxy/public_data_manager/public_user_profile.html?=${data.uid}`;  
-      navigator.clipboard.writeText(shareUrl).then(() => {  
-        alert('Profile URL copied to clipboard!');  
-      }).catch(err => {  
-        console.error('Failed to copy: ', err);  
-        alert('Failed to copy URL. Please try again.');  
-      });  
-    } else {  
-      alert('No profile slug available for sharing.');  
-    }  
-  });  
-}   
+    // Add share button functionality
+    const shareBtn = document.getElementById('shareBtn');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', async () => {
+        // Ensure we have a UID from authenticated user
+        if (!userUid) {
+          alert('Unable to share profile: user not authenticated.');
+          return;
+        }
 
-// Render posts HTML  
-async function renderPosts(posts) {  
-  if (posts.length === 0) {  
-    postsSection.innerHTML = '<div class="loading">No posts found.</div>';  
-    return;  
-  }  
+        // Build the share URL with UID attached exactly as ?={user.uid}
+        const shareUrl = `https://teamgalaxyinteractive-cmd.github.io/teamgalaxy/public_data_manager/public_user_profile.html?=${encodeURIComponent(userUid)}`;
 
-  let postsHTML = `  
-    <div class="posts-section">  
-      <h2 class="section-title">Recent Posts</h2>  
-      <div class="posts-grid">  
-  `;  
+        // If Web Share API available, prefer it
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: `${data.name || 'TeamGalaxy User'} - Profile`,
+              text: `Check out this profile on TeamGalaxy:`,
+              url: shareUrl
+            });
+            // Optionally notify user - Web Share API shows native UI already
+          } catch (err) {
+            // share() may throw if user cancels; fallback to clipboard
+            console.warn('Navigator.share failed or cancelled:', err);
+            try {
+              await navigator.clipboard.writeText(shareUrl);
+              alert('Profile URL copied to clipboard!');
+            } catch (copyErr) {
+              console.error('Failed to copy: ', copyErr);
+              alert('Failed to share or copy URL. Please try again.');
+            }
+          }
+        } else {
+          // Fallback: copy to clipboard
+          try {
+            await navigator.clipboard.writeText(shareUrl);
+            alert('Profile URL copied to clipboard!');
+          } catch (err) {
+            console.error('Failed to copy: ', err);
+            alert('Failed to copy URL. Please try again.');
+          }
+        }
+      });
+    }
+  }
 
-  for (const post of posts) {  
-    // Load comments for this post  
-    const commentsQuery = query(  
-      collection(db, 'posts', post.id, 'comments'),  
-      orderBy('createdAt', 'desc'),  
-      limit(3)  
-    );  
-    const commentsSnapshot = await getDocs(commentsQuery);  
+  // Render posts HTML
+  async function renderPosts(posts) {
+    if (posts.length === 0) {
+      postsSection.innerHTML = '<div class="loading">No posts found.</div>';
+      return;
+    }
 
-    const comments = [];  
-    commentsSnapshot.forEach(doc => {  
-      comments.push({ id: doc.id, ...doc.data() });  
-    });  
+    let postsHTML = `
+      <div class="posts-section">
+        <h2 class="section-title">Recent Posts</h2>
+        <div class="posts-grid">
+    `;
 
-    postsHTML += `  
-      <div class="post-card">  
-        <h3 class="post-title">${post.title || 'Untitled Post'}</h3>  
-        <p class="post-body">${post.body || 'No content available.'}</p>  
-        <div class="post-meta">  
-          <span class="post-author">By ${post.authorName || 'Anonymous'}</span>  
-          <span class="post-time">${timeAgo(post.createdAt)}</span>  
-        </div>  
-        <div class="post-meta">  
-          <span>👍 ${formatNumber(post.upvotesCount || 0)}</span>  
-          <span>👎 ${formatNumber(post.downvotesCount || 0)}</span>  
-          <span>💬 ${formatNumber(post.commentsCount || 0)}</span>  
-        </div>  
+    for (const post of posts) {
+      // Load comments for this post
+      const commentsQuery = query(
+        collection(db, 'posts', post.id, 'comments'),
+        orderBy('createdAt', 'desc'),
+        limit(3)
+      );
+      const commentsSnapshot = await getDocs(commentsQuery);
 
-        ${comments.length > 0 ? `  
-          <div class="comments-section">  
-            <h4>Recent Comments</h4>  
-            <div class="comments-grid">  
-              ${comments.map(comment => `  
-                <div class="comment-card">  
-                  <div class="comment-header">  
-                    <span class="comment-author">${comment.authorName || 'Anonymous'}</span>  
-                    <span class="comment-time">${timeAgo(comment.createdAt)}</span>  
-                  </div>  
-                  <p class="comment-body">${comment.body || ''}</p>  
-                </div>  
-              `).join('')}  
-            </div>  
-          </div>  
-        ` : ''}  
-      </div>  
-    `;  
-  }  
+      const comments = [];
+      commentsSnapshot.forEach(doc => {
+        comments.push({ id: doc.id, ...doc.data() });
+      });
 
-  postsHTML += `  
-      </div>  
-      <div class="post-actions">  
-        <button class="btn-post" id="explore-btn">Explore</button>  
-        <button class="btn-post" id="show-all-btn">Show All Posts</button>  
-      </div>  
-    </div>  
-  `;  
+      postsHTML += `
+        <div class="post-card">
+          <h3 class="post-title">${post.title || 'Untitled Post'}</h3>
+          <p class="post-body">${post.body || 'No content available.'}</p>
+          <div class="post-meta">
+            <span class="post-author">By ${post.authorName || 'Anonymous'}</span>
+            <span class="post-time">${timeAgo(post.createdAt)}</span>
+          </div>
+          <div class="post-meta">
+            <span>👍 ${formatNumber(post.upvotesCount || 0)}</span>
+            <span>👎 ${formatNumber(post.downvotesCount || 0)}</span>
+            <span>💬 ${formatNumber(post.commentsCount || 0)}</span>
+          </div>
 
-  postsSection.innerHTML = postsHTML;  
+          ${comments.length > 0 ? `
+            <div class="comments-section">
+              <h4>Recent Comments</h4>
+              <div class="comments-grid">
+                ${comments.map(comment => `
+                  <div class="comment-card">
+                    <div class="comment-header">
+                      <span class="comment-author">${comment.authorName || 'Anonymous'}</span>
+                      <span class="comment-time">${timeAgo(comment.createdAt)}</span>
+                    </div>
+                    <p class="comment-body">${comment.body || ''}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
 
-  // Add event listeners for buttons  
-  document.getElementById('explore-btn').addEventListener('click', () => {  
-    window.location.href = '../posts.html';  
-  });  
+    postsHTML += `
+        </div>
+        <div class="post-actions">
+          <button class="btn-post" id="explore-btn">Explore</button>
+          <button class="btn-post" id="show-all-btn">Show All Posts</button>
+        </div>
+      </div>
+    `;
 
-  document.getElementById('show-all-btn').addEventListener('click', () => {  
-    window.location.href = 'user_posts.html';  
-  });  
-}  
+    postsSection.innerHTML = postsHTML;
 
-// Auth state listener  
-onAuthStateChanged(auth, (user) => {  
-  if (user) {  
-    loadProfile();  
-  } else {  
-    profileContent.innerHTML = '<div class="loading">Please log in to view your profile.</div>';  
-    postsSection.innerHTML = '';  
-  }  
-});  
+    // Add event listeners for buttons
+    document.getElementById('explore-btn').addEventListener('click', () => {
+      window.location.href = '../posts.html';
+    });
 
-// Logout functionality  
-logoutBtn.addEventListener('click', () => {  
-  signOut(auth).then(() => {  
-    console.log('User signed out');  
-    window.location.href = 'index.html';  
-  }).catch((error) => {  
-    console.error('Sign out error:', error);  
-    alert('Error signing out. Please try again.');  
-  });  
-});  
+    document.getElementById('show-all-btn').addEventListener('click', () => {
+      window.location.href = 'user_posts.html';
+    });
+  }
 
-// Settings functionality  
-settingsBtn.addEventListener('click', () => {  
-  window.location.href = 'user_settings.html';  
-});  
+  // Auth state listener - pass user object into loadProfile
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      loadProfile(user);
+    } else {
+      profileContent.innerHTML = '<div class="loading">Please log in to view your profile.</div>';
+      postsSection.innerHTML = '';
+    }
+  });
 
-// Initialize stars and handle loading overlay  
-window.addEventListener('load', () => {  
-  createLoadingStars();  
+  // Logout functionality
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      signOut(auth).then(() => {
+        console.log('User signed out');
+        window.location.href = 'index.html';
+      }).catch((error) => {
+        console.error('Sign out error:', error);
+        alert('Error signing out. Please try again.');
+      });
+    });
+  }
 
-  // Simulate a minimum 2 second load time  
-  setTimeout(() => {  
-    loadingOverlay.classList.add('hidden');  
-  }, 3000);  
+  // Settings functionality
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+      window.location.href = 'user_settings.html';
+    });
+  }
 
-  // Start background star animation  
-  initBgStars();  
-});  
+  // Initialize stars and handle loading overlay
+  window.addEventListener('load', () => {
+    createLoadingStars();
 
-/* -----------------------------  
-   Background star animation code  
-   Lightweight, twinkling stars with subtle parallax  
-   ----------------------------- */  
-function initBgStars() {  
-  const canvas = document.getElementById('bgStars');  
-  const ctx = canvas.getContext('2d');  
-  let width = canvas.width = window.innerWidth;  
-  let height = canvas.height = window.innerHeight;  
-  let stars = [];  
-  const STAR_COUNT = Math.round((width * height) / 6000); // scale by screen area (keeps perf)  
-  let mouseX = width / 2, mouseY = height / 2;  
+    // Simulate a minimum 2 second load time
+    setTimeout(() => {
+      loadingOverlay.classList.add('hidden');
+    }, 3000);
 
-  function resetStars() {  
-    stars = [];  
-    for (let i = 0; i < STAR_COUNT; i++) {  
-      const radius = Math.random() * 1.2 + 0.3; // small stars  
-      stars.push({  
-        x: Math.random() * width,  
-        y: Math.random() * height,  
-        baseX: 0, // will set below  
-        baseY: 0,  
-        r: radius,  
-        alpha: Math.random() * 0.9 + 0.1,  
-        twinkleSpeed: Math.random() * 0.02 + 0.005,  
-        phase: Math.random() * Math.PI * 2  
-      });  
-    }  
-    // set base positions  
-    stars.forEach(s => { s.baseX = s.x; s.baseY = s.y; });  
-  }  
+    // Start background star animation
+    initBgStars();
+  });
 
-  function onResize() {  
-    width = canvas.width = window.innerWidth;  
-    height = canvas.height = window.innerHeight;  
-    resetStars();  
-  }  
+  /* -----------------------------
+     Background star animation code
+     Lightweight, twinkling stars with subtle parallax
+     ----------------------------- */
+  function initBgStars() {
+    const canvas = document.getElementById('bgStars');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+    let stars = [];
+    const STAR_COUNT = Math.round((width * height) / 6000); // scale by screen area (keeps perf)
+    let mouseX = width / 2, mouseY = height / 2;
 
-  window.addEventListener('resize', throttle(onResize, 150));  
+    function resetStars() {
+      stars = [];
+      for (let i = 0; i < STAR_COUNT; i++) {
+        const radius = Math.random() * 1.2 + 0.3; // small stars
+        stars.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          baseX: 0, // will set below
+          baseY: 0,
+          r: radius,
+          alpha: Math.random() * 0.9 + 0.1,
+          twinkleSpeed: Math.random() * 0.02 + 0.005,
+          phase: Math.random() * Math.PI * 2
+        });
+      }
+      // set base positions
+      stars.forEach(s => { s.baseX = s.x; s.baseY = s.y; });
+    }
 
-  // subtle parallax on mouse move  
-  window.addEventListener('mousemove', (e) => {  
-    mouseX = e.clientX;  
-    mouseY = e.clientY;  
-  });  
+    function onResize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      resetStars();
+    }
 
-  let lastTime = 0;  
-  function animate(time) {  
-    const dt = (time - lastTime) / 1000;  
-    lastTime = time;  
-    ctx.clearRect(0, 0, width, height);  
+    window.addEventListener('resize', throttle(onResize, 150));
 
-    // draw subtle vignette to better integrate stars with bg image  
-    const vignette = ctx.createRadialGradient(width/2, height/2, Math.max(width, height)/8, width/2, height/2, Math.max(width, height)/1.2);  
-    vignette.addColorStop(0, 'rgba(255,255,255,0.00)');  
-    vignette.addColorStop(1, 'rgba(0,0,0,0.18)');  
-    ctx.fillStyle = vignette;  
-    ctx.fillRect(0,0,width,height);  
+    // subtle parallax on mouse move
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
 
-    for (let i = 0; i < stars.length; i++) {  
-      const s = stars[i];  
+    let lastTime = 0;
+    function animate(time) {
+      const dt = (time - lastTime) / 1000;
+      lastTime = time;
+      ctx.clearRect(0, 0, width, height);
 
-      // twinkle  
-      s.phase += s.twinkleSpeed;  
-      const tw = (Math.sin(s.phase) + 1) / 2; // 0..1  
-      const alpha = s.alpha * (0.6 + 0.4 * tw);  
+      // draw subtle vignette to better integrate stars with bg image
+      const vignette = ctx.createRadialGradient(width/2, height/2, Math.max(width, height)/8, width/2, height/2, Math.max(width, height)/1.2);
+      vignette.addColorStop(0, 'rgba(255,255,255,0.00)');
+      vignette.addColorStop(1, 'rgba(0,0,0,0.18)');
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0,0,width,height);
 
-      // parallax offset (small)  
-      const px = (mouseX - width/2) * (s.r * 0.003);  
-      const py = (mouseY - height/2) * (s.r * 0.003);  
+      for (let i = 0; i < stars.length; i++) {
+        const s = stars[i];
 
-      const drawX = s.baseX + px;  
-      const drawY = s.baseY + py;  
+        // twinkle
+        s.phase += s.twinkleSpeed;
+        const tw = (Math.sin(s.phase) + 1) / 2; // 0..1
+        const alpha = s.alpha * (0.6 + 0.4 * tw);
 
-      // subtle movement to mimic depth drift  
-      s.baseX += Math.sin((i + time*0.0001) * 0.0003) * 0.02;  
-      s.baseY += Math.cos((i + time*0.0002) * 0.0004) * 0.02;  
+        // parallax offset (small)
+        const px = (mouseX - width/2) * (s.r * 0.003);
+        const py = (mouseY - height/2) * (s.r * 0.003);
 
-      ctx.beginPath();  
-      ctx.globalAlpha = alpha;  
-      // draw glow for larger-ish stars  
-      if (s.r > 0.9) {  
-        const g = ctx.createRadialGradient(drawX, drawY, 0, drawX, drawY, s.r * 6);  
-        g.addColorStop(0, `rgba(255,255,255,${alpha})`);  
-        g.addColorStop(1, `rgba(255,255,255,0)`);  
-        ctx.fillStyle = g;  
-        ctx.arc(drawX, drawY, s.r * 6, 0, Math.PI * 2);  
-        ctx.fill();  
-      }  
-      // core  
-      ctx.beginPath();  
-      ctx.fillStyle = 'white';  
-      ctx.arc(drawX, drawY, s.r, 0, Math.PI * 2);  
-      ctx.fill();  
+        const drawX = s.baseX + px;
+        const drawY = s.baseY + py;
 
-      ctx.globalAlpha = 1;  
-    }  
+        // subtle movement to mimic depth drift
+        s.baseX += Math.sin((i + time*0.0001) * 0.0003) * 0.02;
+        s.baseY += Math.cos((i + time*0.0002) * 0.0004) * 0.02;
 
-    requestAnimationFrame(animate);  
-  }  
+        ctx.beginPath();
+        ctx.globalAlpha = alpha;
+        // draw glow for larger-ish stars
+        if (s.r > 0.9) {
+          const g = ctx.createRadialGradient(drawX, drawY, 0, drawX, drawY, s.r * 6);
+          g.addColorStop(0, `rgba(255,255,255,${alpha})`);
+          g.addColorStop(1, `rgba(255,255,255,0)`);
+          ctx.fillStyle = g;
+          ctx.arc(drawX, drawY, s.r * 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        // core
+        ctx.beginPath();
+        ctx.fillStyle = 'white';
+        ctx.arc(drawX, drawY, s.r, 0, Math.PI * 2);
+        ctx.fill();
 
-  resetStars();  
-  requestAnimationFrame(animate);  
+        ctx.globalAlpha = 1;
+      }
 
-  // simple throttle utility  
-  function throttle(fn, wait) {  
-    let time = Date.now();  
-    return function() {  
-      if ((time + wait - Date.now()) < 0) {  
-        fn();  
-        time = Date.now();  
-      }  
-    }  
-  }  
-}
+      requestAnimationFrame(animate);
+    }
 
-  </script>  
+    resetStars();
+    requestAnimationFrame(animate);
+
+    // simple throttle utility
+    function throttle(fn, wait) {
+      let time = Date.now();
+      return function() {
+        if ((time + wait - Date.now()) < 0) {
+          fn();
+          time = Date.now();
+        }
+      }
+    }
+  }
+</script>
 </body>  
 </html>
