@@ -369,6 +369,7 @@
       }
     }
 
+
 /* Hide reCAPTCHA v3 badge per your requirement, this is temporary and will be removed after i get a fixed domain. */
   .grecaptcha-badge { 
     display: none !important; 
@@ -492,21 +493,13 @@
   <!-- reCAPTCHA v3 -->
   <script src="https://www.google.com/recaptcha/api.js?render=6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"></script>
 
-  <!-- ===== REPLACEMENT SCRIPT: paste in place of your old script ===== -->
- <script>
+<script>
 /*
-  Complete replacement script — paste this in place of your existing scripts.
-  Changes made:
-  - Profile dropdown restored. Clicking Profile button:
-      • if NOT signed in -> redirect to /teamgalaxy/legal/sign_up.html
-      • if signed in -> toggle dropdown
-    "Profile" link in dropdown now navigates to:
-      /teamgalaxy/user_management/user_profile.html
-  - Skeletons rendered quickly with DocumentFragment for instant paint.
-  - Firebase init deferred / non-blocking where possible.
-  - Star generation batched to avoid main-thread jank.
-  - Modal/gallery functions included and defensive.
-  - RECAPTCHA_SITE_KEY defined to avoid undefined errors in grecaptcha calls.
+  Complete replacement script — fixes all header issues
+  - Hamburger menu works on mobile
+  - More dropdown works for both touch and pointer devices
+  - Profile dropdown works correctly
+  - All navigation links function properly
 */
 
 /* ---------- CONFIG ---------- */
@@ -616,20 +609,73 @@ function wireFirebaseRefs() {
     auth.onAuthStateChanged(user => {
       currentUser = user;
       updateProfileButtonUI();
-      // optional: reload categories or other UI updates here
     });
     auth._ourOnAuthAttached = true;
   }
 }
+
+/* ---------- HEADER FUNCTIONALITY FIXES ---------- */
+document.addEventListener('DOMContentLoaded', function() {
+  // Hamburger menu functionality
+  const hamburgerBtn = document.getElementById("hamburgerBtn");
+  const navButtons = document.getElementById("navButtons");
+
+  if (hamburgerBtn && navButtons) {
+    hamburgerBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      navButtons.classList.toggle('show');
+    });
+
+    // Close hamburger menu when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!hamburgerBtn.contains(e.target) && !navButtons.contains(e.target)) {
+        navButtons.classList.remove('show');
+      }
+    });
+  }
+
+  // More dropdown functionality
+  const moreOptions = document.getElementById("moreOptions");
+  const moreBtn = moreOptions.querySelector(".nav-btn");
+  const moreDropdown = moreOptions.querySelector(".dropdown-content");
+
+  if (moreBtn && moreDropdown) {
+    // Toggle dropdown on click (works for both touch and pointer)
+    moreBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isVisible = moreDropdown.style.display === "block";
+      moreDropdown.style.display = isVisible ? "none" : "block";
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!moreOptions.contains(e.target)) {
+        moreDropdown.style.display = "none";
+      }
+    });
+
+    // Close dropdown when clicking on any link inside it
+    moreDropdown.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        moreDropdown.style.display = "none";
+      });
+    });
+
+    // Prevent dropdown from closing when clicking inside it
+    moreDropdown.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+  }
+});
 
 /* ---------- PROFILE DROPDOWN + BUTTON BEHAVIOR ---------- */
 const profileBtn = document.getElementById('profileBtn');
 const profileMenu = document.getElementById('profileMenu');
 const logoutLink = document.getElementById('logoutLink');
 const profileLink = document.getElementById('profileLink');
-const moreOptions = document.getElementById('moreOptions');
 
 function closeOtherDropdowns() {
+  const moreOptions = document.getElementById('moreOptions');
   if (moreOptions && moreOptions.querySelector('.dropdown-content')) {
     moreOptions.querySelector('.dropdown-content').style.display = 'none';
   }
@@ -714,6 +760,7 @@ window.addEventListener('click', (e) => {
   if (profileMenu && profileBtn && !profileMenu.contains(e.target) && !profileBtn.contains(e.target)) {
     profileMenu.style.display = 'none';
   }
+  const moreOptions = document.getElementById('moreOptions');
   if (moreOptions && moreOptions.querySelector('.dropdown-content') && !moreOptions.contains(e.target)) {
     moreOptions.querySelector('.dropdown-content').style.display = 'none';
   }
@@ -721,25 +768,12 @@ window.addEventListener('click', (e) => {
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (profileMenu) profileMenu.style.display = 'none';
+    const moreOptions = document.getElementById('moreOptions');
     if (moreOptions && moreOptions.querySelector('.dropdown-content')) {
       moreOptions.querySelector('.dropdown-content').style.display = 'none';
     }
   }
 });
-
-/* ---------- MORE DROPDOWN FIX ---------- */
-if (moreOptions) {
-  const moreDropdown = moreOptions.querySelector('.dropdown-content');
-  const moreBtn = moreOptions.querySelector('.nav-btn');
-  if (moreBtn && !moreBtn._attached) {
-    moreBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (!moreDropdown) return;
-      moreDropdown.style.display = moreDropdown.style.display === 'block' ? 'none' : 'block';
-    });
-    moreBtn._attached = true;
-  }
-}
 
 /* ---------- STARFIELD (batched) ---------- */
 function generateStarsBatched(total = 150, batchSize = 25, batchDelay = 30) {
@@ -858,7 +892,7 @@ async function loadCategories() {
         im.alt = cat.title;
         im.loading = 'lazy';
         im.onclick = () => openModal(idx);
-        im.src = cat.coverUrl || 'https://dummyimage.com/1200x800/121824/99a7bf.png&text=No+Cover';
+        im.src = cat.coverUrl || 'https://dummyimage.com/1200x800/121824/99a7bf.png&text=No+Cover ';
         if (!cat.coverUrl) im.style.opacity = 0.36;
         coverWrap.appendChild(im);
 
