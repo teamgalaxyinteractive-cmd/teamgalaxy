@@ -577,8 +577,7 @@
       </div>
     </div>
   </footer>
-
-  <script>
+<script>
     // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
@@ -615,33 +614,57 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Hamburger menu functionality
-    const hamburgerBtn = document.getElementById("hamburgerBtn");
-    const navButtons = document.getElementById("navButtons");
+    // DOM Content Loaded to ensure elements exist
+    document.addEventListener('DOMContentLoaded', function() {
+      // ===== Hamburger Menu Fix =====
+      const hamburgerBtn = document.getElementById("hamburgerBtn");
+      const navButtons = document.getElementById("navButtons");
 
-    hamburgerBtn.addEventListener('click', function() {
-      navButtons.classList.toggle('show');
-    });
+      if (hamburgerBtn && navButtons) {
+        hamburgerBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          navButtons.classList.toggle('show');
+        });
 
-    // Close hamburger menu if clicked outside
-    window.addEventListener("click", function(event) {
-      if (!hamburgerBtn.contains(event.target) && !navButtons.contains(event.target)) {
-        navButtons.classList.remove('show');
+        // Close hamburger menu when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!hamburgerBtn.contains(e.target) && !navButtons.contains(e.target)) {
+            navButtons.classList.remove('show');
+          }
+        });
       }
-    });
 
-    // More Options dropdown functionality
-    const moreOptions = document.getElementById("moreOptions");
-    const moreDropdown = moreOptions.querySelector(".dropdown-content");
+      // ===== More Dropdown Fix (Works for both touch and pointer) =====
+      const moreOptions = document.getElementById("moreOptions");
+      const moreBtn = moreOptions.querySelector(".nav-btn");
+      const moreDropdown = moreOptions.querySelector(".dropdown-content");
 
-    moreOptions.querySelector(".nav-btn").addEventListener("click", (e) => {
-      e.stopPropagation();
-      moreDropdown.style.display = moreDropdown.style.display === "block" ? "none" : "block";
-    });
+      if (moreBtn && moreDropdown) {
+        // Toggle dropdown on click (works for both touch and pointer)
+        moreBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const isVisible = moreDropdown.style.display === "block";
+          moreDropdown.style.display = isVisible ? "none" : "block";
+        });
 
-    window.addEventListener("click", (event) => {
-      if (!moreOptions.contains(event.target)) {
-        moreDropdown.style.display = "none";
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!moreOptions.contains(e.target)) {
+            moreDropdown.style.display = "none";
+          }
+        });
+
+        // Close dropdown when clicking on any link inside it
+        moreDropdown.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', () => {
+            moreDropdown.style.display = "none";
+          });
+        });
+
+        // Prevent dropdown from closing when clicking inside it
+        moreDropdown.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
       }
     });
 
@@ -654,7 +677,8 @@
     profileBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       // close hamburger if open
-      navButtons.classList.remove('show');
+      const navButtons = document.getElementById('navButtons');
+      if (navButtons) navButtons.classList.remove('show');
 
       // If not signed in, redirect to sign-up immediately
       if (!auth.currentUser) {
@@ -699,9 +723,9 @@
       // if user is signed in go to profile, else redirect to sign up
       if (!auth.currentUser) {
         window.location.href = '/teamgalaxy/legal/sign_up.html';
-      } else {
-        window.location.href = path;
+        return;
       }
+      window.location.href = path;
     }
 
     // Wire up logout and profile click handlers once
