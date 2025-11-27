@@ -802,7 +802,7 @@
   const playFullBtn = document.createElement('button');
   playFullBtn.className = 'play-full-btn';
   playFullBtn.innerHTML = `<i class="fa-solid fa-rocket"></i><span>Play Full Game</span>`;
-  playFullBtn.addEventListener('click', () => { window.location.href = '/game/full_game.html'; });
+  playFullBtn.addEventListener('click', () => { window.location.href = '/teamgalaxy/game/full_game.html'; });
   playCard.appendChild(playFullBtn);
 
   /* -------------------------
@@ -1227,7 +1227,7 @@
         clientTs: new Date().toISOString()
       };
       await setDoc(ref, payload, { merge: true });
-      alert('Saved to cloud (including name, slug, photoUrl).');
+      alert('Saved to cloud.');
     }catch(e){ console.error('save fail', e); alert('Save failed.'); }
   }
 
