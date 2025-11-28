@@ -10,7 +10,6 @@
       --primary-bg: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
       --card-bg: rgba(25, 25, 35, 0.9);
       --glass-border: 1px solid rgba(255,255,255,0.1);
-      --hover-glow: 0 0 24px rgba(0,212,255,0.35);
       --panel-bg: #1e1e1e;
       --muted: rgba(255,255,255,0.75);
       --accent: linear-gradient(45deg,#00d4ff,#0077ff);
@@ -27,7 +26,7 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background:var(--primary-bg); color:#fff; padding:20px; line-height:1.5;
       position: relative;
-      overflow-x: hidden;
+      overflow-x: hidden; /* ensure no horizontal page scroll */
     }
 
     /* Stars Background */
@@ -41,54 +40,14 @@
       z-index: 0;
     }
 
-    .star {
-      position: absolute;
-      background-color: white;
-      border-radius: 50%;
-      animation: twinkle var(--duration, 3s) infinite ease-in-out;
-    }
-
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.2; }
-      50% { opacity: 1; }
-    }
+    .star { position: absolute; background-color: white; border-radius: 50%; animation: twinkle var(--duration,3s) infinite ease-in-out; }
+    @keyframes twinkle { 0%,100%{opacity:0.2} 50%{opacity:1} }
 
     /* Loading Screen */
-    .loading-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(15, 12, 41, 0.95);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      transition: opacity 0.5s ease;
-    }
-
-    .loading-spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid rgba(255,255,255,0.1);
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 20px;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .loading-text {
-      font-size: 1.2rem;
-      color: var(--primary);
-      text-align: center;
-    }
+    .loading-screen { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(15,12,41,0.95); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:1000; transition:opacity .5s ease; }
+    .loading-spinner{ width:50px;height:50px;border:4px solid rgba(255,255,255,0.1);border-top:4px solid var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px;}
+    @keyframes spin {0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+    .loading-text{ font-size:1.2rem;color:var(--primary); text-align:center; }
 
     .container{max-width:1200px;margin:0 auto;position:relative;z-index:10}
     .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
@@ -117,34 +76,55 @@
     .image-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
     .action-btn{background:rgba(255,255,255,0.03);border:var(--glass-border);padding:6px 8px;border-radius:8px;color:#fff;cursor:pointer}
 
-    .public-pill{
-      display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.04);
-      cursor:pointer;font-weight:600;font-size:13px;
-      user-select:none;
-    }
+    .public-pill{ display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.04); cursor:pointer;font-weight:600;font-size:13px; user-select:none; }
     .public-pill.private{ background: var(--private-bg); color: #d6e2ff; }
     .public-pill.public{ background: var(--public-bg); color: #dfffdc; border-color: rgba(74,222,128,0.25); }
 
-    .hidden {
-      display: none !important;
-    }
-
-    .back-btn {
-      background: rgba(255,255,255,0.1);
-      border: none;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-
-    .back-btn:hover {
-      background: rgba(0, 212, 255, 0.3);
-    }
-
+    .hidden { display: none !important; }
+    .back-btn { background: rgba(255,255,255,0.1); border: none; color: white; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-size: 1rem; transition: all 0.3s ease; }
+    .back-btn:hover { background: rgba(0, 212, 255, 0.3); }
     .notice { margin-top:8px;font-size:13px;color:var(--muted); }
+
+    /* ----------------------------
+       Console Panel styling (restored + no horiz scroll)
+       ---------------------------- */
+    #console-panel{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      height:260px;
+      background:var(--panel-bg);
+      color:#d4d4d4;
+      font-family:Consolas,monospace;
+      z-index:99999;
+      display:flex;
+      flex-direction:column;
+      border-top:2px solid #262626;
+      overflow: hidden; /* prevent console causing page horizontal scroll */
+      box-shadow: 0 -6px 24px rgba(0,0,0,0.6);
+    }
+    #console-header{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#222;border-bottom:1px solid #2a2a2a;flex:0 0 auto}
+    #console-header .title{font-weight:700;color:#fff;margin-right:auto}
+    #console-controls{display:flex;gap:8px;align-items:center}
+    #console-controls button, #console-controls select{background:#2b2b2b;color:#fff;border:0;padding:6px 8px;border-radius:6px;cursor:pointer}
+    #console-body{display:flex;flex:1;gap:12px;overflow:hidden;min-height:0} /* min-height:0 so flex children can scroll */
+    #console-content{flex:1;padding:10px;overflow:auto;border-right:1px solid #2a2a2a;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-size:13px}
+    #console-sidebar{width:320px;padding:10px;background:#181818;overflow:auto}
+    .log-entry{padding:6px 4px;border-bottom:1px dashed rgba(255,255,255,0.03);font-size:13px}
+    .log-ts{color:#9aa7d6;margin-right:6px;font-size:11px}
+    .field-list{margin-top:8px;font-size:13px;color:#cfd8ff}
+    .small-muted{font-size:12px;color:#9aa}
+
+    /* make sure very long tokens / urls wrap instead of forcing horiz scroll */
+    #console-content a, #console-content span { word-break: break-word; overflow-wrap: anywhere; }
+
+    /* responsive fix: console panel smaller on small screens */
+    @media (max-width:720px){
+      #console-sidebar{display:none}
+      #console-panel{height:280px}
+    }
+
   </style>
 </head>
 <body>
@@ -182,7 +162,6 @@
     <div class="controls">
       <div class="upload-section">
         <div class="file-input-wrapper" title="Click to select images or drag & drop">
-          <!-- enforce max 5 via JS; keep multiple attribute for UX -->
           <input type="file" id="imageUpload" class="file-input" accept="image/*" multiple>
           <span><i class="fas fa-cloud-upload-alt"></i> Select images (max 5)</span>
         </div>
@@ -208,7 +187,7 @@
     <div id="portfolioGallery" class="gallery"></div>
   </div>
 
-  <!-- Console Panel (kept as provided; not modified) -->
+  <!-- Console Panel -->
   <div id="console-panel" aria-live="polite">
     <div id="console-header">
       <div class="title">Debug Console</div>
@@ -264,7 +243,6 @@
     let currentFilter = 'all';
     const logs = [];
 
-    // simple safe escape
     function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'<').replace(/>/g,'>'); }
 
     window.consolePanelLog = function(message, level='log'){
@@ -284,7 +262,6 @@
       } catch (e) { /* ignore UI errors */ }
     };
 
-    // wire native console to panel (but keep originals)
     const orig = {log:console.log, info:console.info, warn:console.warn, error:console.error};
     console.log = function(...a){ orig.log.apply(console,a); window.consolePanelLog(a.join(' '),'log'); };
     console.info = function(...a){ orig.info.apply(console,a); window.consolePanelLog(a.join(' '),'info'); };
@@ -301,7 +278,6 @@
     };
     levelSelect.onchange = function(){ currentFilter = this.value; content.innerHTML = ''; logs.forEach(e => { if (currentFilter==='all' || e.level===currentFilter) window.consolePanelLog(e.message,e.level); }); };
 
-    // keyboard toggle
     document.addEventListener('keydown', (ev) => { if(ev.ctrlKey && ev.key === '`') toggleBtn.click(); });
 
   })();
@@ -309,8 +285,6 @@
 
   <script>
   /***** App code (uses consolePanelLog safely) *****/
-
-  // Config (same one you provided)
   const CLOUDFLARE_WORKER_URL = 'https://portfolio-dropbox-handler.teamgalaxy-interactive.workers.dev/';
   const firebaseConfig = {
     apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
@@ -326,7 +300,6 @@
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // small helper to log into both native console and the panel
   function appLog(msg, level='info'){
     if(level === 'error') console.error(msg);
     else if(level === 'warning') console.warn(msg);
@@ -335,15 +308,12 @@
     if(window.consolePanelLog) window.consolePanelLog(msg, level==='success' ? 'success' : level);
   }
 
-  // Track accessed fields globally
   const accessedFields = new Set();
   let lastAttemptedFields = [];
-
   function recordAccess(fields, note){
     fields = Array.from(fields || []);
     lastAttemptedFields = fields;
     fields.forEach(f => accessedFields.add(f));
-    // update sidebar UI
     const elFields = document.getElementById('sidebar-fields');
     elFields.textContent = Array.from(accessedFields).sort().join(', ') || '—';
     const elLast = document.getElementById('sidebar-last');
@@ -351,7 +321,6 @@
     appLog(`[FIELDS] ${note || 'access'} → ${fields.join(', ')}`, 'info');
   }
 
-  // Update auth UI
   async function updateAuthUI(user){
     const badge = document.getElementById('authBadge');
     const btnSignOut = document.getElementById('btnSignOut');
@@ -369,13 +338,8 @@
       return;
     }
 
-    // force refresh token to get up-to-date claims
     let idRes = null;
-    try {
-      idRes = await user.getIdTokenResult(true);
-    } catch (e) {
-      appLog('getIdTokenResult failed: ' + e.message, 'error');
-    }
+    try { idRes = await user.getIdTokenResult(true); } catch(e){ appLog('getIdTokenResult failed: ' + e.message, 'error'); }
 
     badge.textContent = user.email || user.uid;
     document.getElementById('btnSignIn').style.display = 'none';
@@ -385,43 +349,31 @@
     appLog(`Auth state: ${user.email || 'unknown email'} | UID: ${user.uid}`, 'info');
     if(idRes && idRes.claims) appLog(`Token claims: ${JSON.stringify(idRes.claims)}`, 'info');
 
-    // record that we read request.auth.* fields (client tries to use email + uid)
     recordAccess(['ownerUid','u.email','u.uid','idToken.claims'], 'auth check');
   }
 
-  // Sign in/out
   async function signInWithGoogle(){
     const provider = new firebase.auth.GoogleAuthProvider();
     try {
       const result = await auth.signInWithPopup(provider);
       appLog('Signed in as: ' + (result.user && result.user.email), 'success');
       await updateAuthUI(result.user);
-    } catch (e) {
-      appLog('Sign-in failed: ' + e.message, 'error');
-    }
+    } catch (e) { appLog('Sign-in failed: ' + e.message, 'error'); }
   }
   async function signOut(){
-    try {
-      await auth.signOut();
-      appLog('Signed out', 'info');
-      updateAuthUI(null);
-    } catch (e) {
-      appLog('Sign-out failed: ' + e.message, 'error');
-    }
+    try { await auth.signOut(); appLog('Signed out', 'info'); updateAuthUI(null); }
+    catch (e) { appLog('Sign-out failed: ' + e.message, 'error'); }
   }
-
   document.getElementById('btnSignIn').addEventListener('click', signInWithGoogle);
   document.getElementById('btnSignOut').addEventListener('click', signOut);
 
-  // File previews & max-5 enforcement
+  // Upload + preview (max 5)
   const MAX_UPLOAD = 5;
   const inputEl = document.getElementById('imageUpload');
   const preview = document.getElementById('previewContainer');
-  const uploadNotice = document.getElementById('uploadNotice');
   inputEl.addEventListener('change', handleFileSelect);
 
   function trimToMaxFiles(fileList){
-    // fileList is FileList; create DataTransfer to build a trimmed FileList
     const dt = new DataTransfer();
     const arr = Array.from(fileList).slice(0, MAX_UPLOAD);
     arr.forEach(f => dt.items.add(f));
@@ -433,18 +385,15 @@
     preview.innerHTML = '';
     if(files.length === 0){
       document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload to Portfolio';
-      uploadNotice.textContent = `Please select up to ${MAX_UPLOAD} images at once.`;
+      document.getElementById('uploadNotice').textContent = `Please select up to ${MAX_UPLOAD} images at once.`;
       return;
     }
-
     let finalFiles = files;
     if(files.length > MAX_UPLOAD){
       alert(`You selected ${files.length} files. Only the first ${MAX_UPLOAD} will be used.`);
       finalFiles = trimToMaxFiles(files);
-      // replace the input's files with trimmed list
       inputEl.files = finalFiles;
     }
-
     document.getElementById('uploadBtn').innerHTML = `<i class="fas fa-upload"></i> Upload ${finalFiles.length} File(s)`;
     appLog(`${finalFiles.length} file(s) selected: ${Array.from(finalFiles).map(f=>f.name).join(', ')}`, 'info');
 
@@ -460,36 +409,25 @@
       r.readAsDataURL(file);
     });
 
-    uploadNotice.textContent = `Ready to upload ${finalFiles.length} file(s). Maximum allowed is ${MAX_UPLOAD}.`;
+    document.getElementById('uploadNotice').textContent = `Ready to upload ${finalFiles.length} file(s). Maximum allowed is ${MAX_UPLOAD}.`;
   }
 
-  // Upload flow
   document.getElementById('uploadBtn').addEventListener('click', handleUpload);
   async function handleUpload(){
     const input = document.getElementById('imageUpload');
     const files = input.files || [];
     if(files.length === 0){ alert('Select images first'); return; }
-    if(files.length > MAX_UPLOAD){
-      alert(`Please select up to ${MAX_UPLOAD} files. You currently have ${files.length}.`);
-      return;
-    }
+    if(files.length > MAX_UPLOAD){ alert(`Please select up to ${MAX_UPLOAD} files.`); return; }
 
-    // ensure user is signed in (if you are relying on ownerUid)
     const user = auth.currentUser;
     if(!user){ if(!confirm('You are not signed in. Continue without ownerUid? (recommended: sign in)')) return; }
 
     document.getElementById('loadingIndicator').style.display = 'inline-block';
     const arr = Array.from(files);
 
-    // staggered uploads
     const results = await Promise.allSettled(arr.map((file, i)=> new Promise((resolve, reject)=>{
       setTimeout(async ()=>{
-        try {
-          await uploadToCloudflareWorker(file, user);
-          resolve(true);
-        } catch (e) {
-          reject(e);
-        }
+        try { await uploadToCloudflareWorker(file, user); resolve(true); } catch (e) { reject(e); }
       }, i * 700);
     })));
 
@@ -502,26 +440,21 @@
     document.getElementById('uploadNotice').textContent = `Please select up to ${MAX_UPLOAD} images at once.`;
   }
 
-  // Upload to worker then add metadata to Firestore (client path)
   async function uploadToCloudflareWorker(file, user){
     const category = document.getElementById('categoryFilter').value || 'uncategorized';
     const form = new FormData();
     form.append('file', file);
     form.append('category', category);
-    form.append('title', file.name.replace(/\.[^/.]+$/,''));   
+    form.append('title', file.name.replace(/\.[^/.]+$/,''));
     form.append('description', `Uploaded ${file.name}`);
     form.append('isPublic', 'false');
 
     appLog(`Uploading ${file.name} to worker...`, 'info');
     const resp = await fetch(`${CLOUDFLARE_WORKER_URL.replace(/\/$/,'')}/api/upload`, { method:'POST', body: form, mode:'cors' });
-    if(!resp.ok){
-      const txt = await resp.text();
-      throw new Error(`Upload HTTP ${resp.status}: ${txt.substring(0,200)}`);
-    }
+    if(!resp.ok){ const txt = await resp.text(); throw new Error(`Upload HTTP ${resp.status}: ${txt.substring(0,200)}`); }
     const res = await resp.json();
     if(!res.success) throw new Error(res.error || 'Upload failed');
 
-    // Build itemData - note fields we will attempt to write
     const itemData = {
       ownerUid: user ? user.uid : null,
       fileName: res.fileName || file.name,
@@ -538,10 +471,8 @@
       meta: { dimensions: null }
     };
 
-    // Log which fields we are about to write
     recordAccess(Object.keys(itemData), 'create portfolioItems');
 
-    // Add to Firestore (client write)
     try {
       const docRef = await db.collection('portfolioItems').add(itemData);
       appLog(`Saved metadata doc ${docRef.id}`, 'success');
@@ -553,7 +484,40 @@
     }
   }
 
-  // Load items (reads from Firestore; record fields present)
+  // --- Image loading robustness: preloader + retries ---
+  async function ensureImageLoaded(url, imgElement, maxRetries = 3, timeoutMs = 8000){
+    if(!url) { imgElement.src = ''; return; }
+    // if image already loaded, exit
+    if(imgElement.complete && imgElement.naturalWidth > 1) return;
+    let attempt = 0;
+    while(attempt < maxRetries){
+      attempt++;
+      try {
+        await new Promise((resolve, reject) => {
+          const loader = new Image();
+          let timedOut = false;
+          const t = setTimeout(()=>{ timedOut = true; loader.src = ''; reject(new Error('timeout')); }, timeoutMs);
+          loader.onload = () => { if(timedOut) return; clearTimeout(t); resolve(); };
+          loader.onerror = (e) => { if(timedOut) return; clearTimeout(t); reject(new Error('error')); };
+          // start load (cache will help)
+          loader.src = url;
+        });
+        // if loaded, assign to element (only replace src if different)
+        if(imgElement.src !== url){
+          imgElement.src = url;
+        }
+        return; // success
+      } catch (e) {
+        appLog(`Image load attempt ${attempt} failed for ${url}`, 'warning');
+        // small backoff before retry
+        await new Promise(r => setTimeout(r, 200 * attempt));
+      }
+    }
+    appLog(`Image failed to load after ${maxRetries} attempts: ${url}`, 'error');
+    // leave imgElement.src as-is (placeholder) or clear if you prefer
+  }
+
+  // Load items
   async function loadPortfolioItems(){
     try {
       appLog('Loading portfolio items...', 'info');
@@ -565,7 +529,6 @@
         items.push({ id: doc.id, ...data });
         Object.keys(data||{}).forEach(k => foundFields.add(k));
       });
-      // record read fields
       recordAccess(Array.from(foundFields), 'read portfolioItems (fields present)');
       const gallery = document.getElementById('portfolioGallery');
       gallery.innerHTML = '';
@@ -577,7 +540,6 @@
     }
   }
 
-  // Add to gallery
   function addToGallery(item){
     const g = document.getElementById('portfolioGallery');
     const card = document.createElement('div');
@@ -586,13 +548,13 @@
     card.dataset.category = item.category || 'uncategorized';
     card.dataset.isPublic = item.isPublic ? 'true' : 'false';
 
-    // Public pill representation
     const isPublic = !!item.isPublic;
     const pillClass = isPublic ? 'public' : 'private';
     const pillLabel = isPublic ? `<i class="fas fa-eye"></i> Public` : `<i class="fas fa-eye-slash"></i> Private`;
 
+    // Use loading="eager" to prefer immediate load
     card.innerHTML = `
-      <img class="image-preview" src="${escapeHtml(item.dropboxUrl||'')}" alt="${escapeHtml(item.title||item.originalName||'')}">
+      <img class="image-preview" loading="eager" src="" data-src="${escapeHtml(item.dropboxUrl||'')}" alt="${escapeHtml(item.title||item.originalName||'')}" />
       <div class="image-info">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
           <div class="image-title">${escapeHtml(item.title||item.originalName||'Untitled')}</div>
@@ -610,47 +572,48 @@
     `;
     g.appendChild(card);
 
-    // load natural dims
     const img = card.querySelector('.image-preview');
-    img.addEventListener('load', async ()=>{
-      try {
-        const w = img.naturalWidth, h = img.naturalHeight;
-        if(!item.meta || !item.meta.dimensions){
-          // record attempted update fields
-          recordAccess(['meta.dimensions','lastModified'], 'update dimensions after image load');
-          // try to update DB (best-effort)
-          try { await db.collection('portfolioItems').doc(item.id).update({ 'meta.dimensions': { width: w, height: h }, lastModified: new Date() }); appLog(`Updated dimensions for ${item.id}`, 'info'); }
-          catch(e){ appLog('Failed to update dims: ' + e.message, 'warning'); }
+    const src = img.getAttribute('data-src') || '';
+
+    // Force load via preloader (ensures load even under fast scroll)
+    // Set a small timeout to allow DOM paint first
+    setTimeout(()=> {
+      // set decoding to synchronous preference to improve immediate painting (browser may ignore)
+      try { img.decoding = 'sync'; } catch(e){}
+      ensureImageLoaded(src, img, 3, 8000).then(()=> {
+        // when loaded, record meta update if needed
+        if(img.naturalWidth && img.naturalHeight && (!item.meta || !item.meta.dimensions)){
+          recordAccess(['meta.dimensions','lastModified'], 'update dimensions after forced image load');
+          db.collection('portfolioItems').doc(item.id).update({ 'meta.dimensions': { width: img.naturalWidth, height: img.naturalHeight }, lastModified: new Date() })
+            .then(()=> appLog(`Updated dimensions for ${item.id}`, 'info'))
+            .catch(e=> appLog('Failed to update dims: ' + e.message, 'warning'));
         }
-      } catch(e){}
-    });
+      }).catch(()=>{ /* already logged inside */ });
+    }, 60);
+
     img.addEventListener('error', ()=>{ img.src = ''; });
 
-    // update stats
     updateStats();
   }
 
-  // Toggle public inline (updates DB and UI)
+  // Toggle public inline
   async function togglePublicStatusInline(ev, itemId){
     ev.stopPropagation();
     const pill = ev.currentTarget;
     const current = pill.getAttribute('data-public') === 'true';
     const newState = !current;
 
-    // record attempted fields
     recordAccess(['isPublic','lastModified'], `update portfolioItems/${itemId}`);
 
     try {
       await db.collection('portfolioItems').doc(itemId).update({ isPublic: newState, lastModified: new Date() });
       appLog(`Toggled isPublic:${newState} for ${itemId}`, 'success');
 
-      // Update the pill UI in-place
       pill.setAttribute('data-public', newState ? 'true' : 'false');
       pill.classList.toggle('public', newState);
       pill.classList.toggle('private', !newState);
       pill.innerHTML = newState ? `<i class="fas fa-eye"></i> Public` : `<i class="fas fa-eye-slash"></i> Private`;
 
-      // update dataset on parent card so updateStats can read it
       const card = document.querySelector(`[data-id="${itemId}"]`);
       if(card) card.dataset.isPublic = newState ? 'true' : 'false';
       updateStats();
@@ -660,48 +623,28 @@
     }
   }
 
-  // Helpers
-  function formatFileSize(bytes){
-    if(!bytes && bytes !== 0) return '0 Bytes';
-    const k = 1024; const sizes = ['Bytes','KB','MB','GB'];
-    const i = bytes === 0 ? 0 : Math.floor(Math.log(bytes)/Math.log(k));
-    return (bytes/Math.pow(k,i)).toFixed(2) + ' ' + sizes[i];
-  }
-  async function copyToClipboard(text){
-    try { await navigator.clipboard.writeText(text||''); alert('Copied'); appLog('Copied to clipboard', 'success'); } catch(e){ appLog('Copy fail: '+e.message, 'error'); }
-  }
+  function formatFileSize(bytes){ if(!bytes && bytes !== 0) return '0 Bytes'; const k=1024; const sizes=['Bytes','KB','MB','GB']; const i = bytes === 0 ? 0 : Math.floor(Math.log(bytes)/Math.log(k)); return (bytes/Math.pow(k,i)).toFixed(2) + ' ' + sizes[i]; }
+  async function copyToClipboard(text){ try { await navigator.clipboard.writeText(text||''); alert('Copied'); appLog('Copied to clipboard', 'success'); } catch(e){ appLog('Copy fail: '+e.message, 'error'); } }
   function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-  // Update stats
   function updateStats(){
     const cards = document.querySelectorAll('.image-card');
     document.getElementById('totalImages').textContent = cards.length;
     document.getElementById('publicImages').textContent = Array.from(cards).filter(c => c.dataset.isPublic === 'true').length;
-    // storage naive: sum fileSize in displayed meta text
     let totMB = 0;
     cards.forEach(c => {
       const meta = c.querySelector('.image-meta')?.textContent || '';
       const m = meta.match(/Size:\s*([\d.]+)\s*(MB|KB|GB|Bytes)/i);
-      if(m){
-        const num = parseFloat(m[1]); const unit = m[2].toUpperCase();
-        if(unit === 'MB') totMB += num;
-        else if(unit === 'KB') totMB += num/1024;
-        else if(unit === 'GB') totMB += num*1024;
-        else if(unit === 'BYTES') totMB += num/(1024*1024);
-      }
+      if(m){ const num = parseFloat(m[1]); const unit = m[2].toUpperCase(); if(unit === 'MB') totMB += num; else if(unit === 'KB') totMB += num/1024; else if(unit === 'GB') totMB += num*1024; else if(unit === 'BYTES') totMB += num/(1024*1024); }
     });
     document.getElementById('storageUsed').textContent = `${totMB.toFixed(2)} MB`;
   }
 
-  // Auth state observer
   auth.onAuthStateChanged(async (u) => {
     await updateAuthUI(u);
-    // after auth change, reload items (to check read permissions)
-    try { await loadPortfolioItems(); }
-    catch(e){ appLog('loadPortfolioItems failed after auth change: ' + e.message, 'warning'); }
+    try { await loadPortfolioItems(); } catch(e){ appLog('loadPortfolioItems failed after auth change: ' + e.message, 'warning'); }
   });
 
-  // Admin verification function
   async function checkAdminAccess() {
     try {
       const user = await new Promise((resolve, reject) => {
@@ -709,25 +652,12 @@
           if (user) {
             try {
               const adminQuery = await db.collection('admin').where('gmail', '==', user.email).limit(1).get();
-              if (!adminQuery.empty) {
-                unsubscribe();
-                resolve(user);
-              } else {
-                unsubscribe();
-                throw new Error('Not an admin');
-              }
-            } catch (error) {
-              unsubscribe();
-              throw error;
-            }
-          } else {
-            unsubscribe();
-            throw new Error('Not signed in');
-          }
+              if (!adminQuery.empty) { unsubscribe(); resolve(user); } else { unsubscribe(); throw new Error('Not an admin'); }
+            } catch (error) { unsubscribe(); throw error; }
+          } else { unsubscribe(); throw new Error('Not signed in'); }
         });
       });
 
-      // Show main content after admin verification
       setTimeout(() => {
         document.getElementById('loadingScreen').style.opacity = '0';
         setTimeout(() => {
@@ -739,48 +669,26 @@
     } catch (error) {
       console.error('Admin access error:', error);
       document.getElementById('loadingScreen').querySelector('.loading-text').textContent = 'Access denied. Redirecting...';
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 2000);
+      setTimeout(() => { window.location.href = 'index.html'; }, 2000);
     }
   }
 
-  // Create stars background
   function createStars() {
     const starsContainer = document.getElementById('stars');
     const starCount = 150;
-
     for (let i = 0; i < starCount; i++) {
-      const star = document.createElement('div');
-      star.classList.add('star');
-
-      const x = Math.random() * 100;
-      const y = Math.random() * 100;
-      star.style.left = `${x}%`;
-      star.style.top = `${y}%`;
-
-      const size = Math.random() * 3 + 1;
-      star.style.width = `${size}px`;
-      star.style.height = `${size}px`;
-
-      const duration = Math.random() * 5 + 2;
-      star.style.setProperty('--duration', `${duration}s`);
-
+      const star = document.createElement('div'); star.classList.add('star');
+      const x = Math.random() * 100; const y = Math.random() * 100;
+      star.style.left = `${x}%`; star.style.top = `${y}%`;
+      const size = Math.random() * 3 + 1; star.style.width = `${size}px`; star.style.height = `${size}px`;
+      const duration = Math.random() * 5 + 2; star.style.setProperty('--duration', `${duration}s`);
       starsContainer.appendChild(star);
     }
   }
 
-  // Go back function
-  function goBack() {
-    window.location.href = '../admin_panel.html';
-  }
+  function goBack() { window.location.href = '../admin_panel.html'; }
 
-  // Initial load
-  (function init(){
-    appLog('App init', 'info');
-    createStars();
-    checkAdminAccess();
-  })();
+  (function init(){ appLog('App init', 'info'); createStars(); checkAdminAccess(); })();
   </script>
 </body>
 </html>
