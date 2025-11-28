@@ -209,658 +209,559 @@
   <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore-compat.js"></script>
 
   <script>
-/***** Full app script: console panel + firebase + upload + blob-preload + admin check *****/
+  /***** Console Panel Core (initialize first) *****/
+  (function(){
+    if(window.consolePanelInitialized) return;
+    window.consolePanelInitialized = true;
 
-/* ---------------- Console Panel Core (initialize first) ---------------- */
-(function(){
-  if(window.consolePanelInitialized) return;
-  window.consolePanelInitialized = true;
+    const content = document.getElementById('console-content');
+    const clearBtn = document.getElementById('clear-console');
+    const toggleBtn = document.getElementById('toggle-console');
+    const downloadBtn = document.getElementById('download-console');
+    const levelSelect = document.getElementById('console-level');
+    const panel = document.getElementById('console-panel');
 
-  const content = document.getElementById('console-content');
-  const clearBtn = document.getElementById('clear-console');
-  const toggleBtn = document.getElementById('toggle-console');
-  const downloadBtn = document.getElementById('download-console');
-  const levelSelect = document.getElementById('console-level');
-  const panel = document.getElementById('console-panel');
+    let isVisible = true;
+    let currentFilter = 'all';
+    const logs = [];
 
-  let isVisible = true;
-  let currentFilter = 'all';
-  const logs = [];
+    function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'<').replace(/>/g,'>'); }
 
-  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-  window.consolePanelLog = function(message, level='log'){
-    try {
-      const ts = new Date();
-      const msg = (typeof message === 'string') ? message : JSON.stringify(message,null,2);
-      const entry = { ts: ts.toISOString(), level, message: msg };
-      logs.push(entry);
-
-      if (currentFilter !== 'all' && currentFilter !== level) return;
-      const div = document.createElement('div');
-      div.className = 'log-entry';
-      const time = ts.toLocaleTimeString();
-      div.innerHTML = `<span class="log-ts">[${time}]</span><strong class="log-level-${level}">${level.toUpperCase()}</strong>: <span style="color:#ddd">${esc(msg)}</span>`;
-      content.appendChild(div);
-      content.scrollTop = content.scrollHeight;
-    } catch (e) { /* ignore UI errors */ }
-  };
-
-  // keep native console also working
-  const orig = {log:console.log, info:console.info, warn:console.warn, error:console.error};
-  console.log = function(...a){ orig.log.apply(console,a); window.consolePanelLog(a.join(' '),'log'); };
-  console.info = function(...a){ orig.info.apply(console,a); window.consolePanelLog(a.join(' '),'info'); };
-  console.warn = function(...a){ orig.warn.apply(console,a); window.consolePanelLog(a.join(' '),'warning'); };
-  console.error = function(...a){ orig.error.apply(console,a); window.consolePanelLog(a.join(' '),'error'); };
-
-  clearBtn.onclick = () => { content.innerHTML = ''; logs.length = 0; };
-  toggleBtn.onclick = () => { isVisible = !isVisible; panel.style.display = isVisible ? 'flex' : 'none'; toggleBtn.textContent = isVisible ? 'Hide' : 'Show'; };
-  downloadBtn.onclick = () => {
-    const blob = new Blob([JSON.stringify(logs,null,2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `console-logs-${new Date().toISOString()}.json`; a.click();
-    setTimeout(()=>URL.revokeObjectURL(url),3000);
-  };
-  levelSelect.onchange = function(){ currentFilter = this.value; content.innerHTML = ''; logs.forEach(e => { if (currentFilter==='all' || e.level===currentFilter) window.consolePanelLog(e.message,e.level); }); };
-
-  // keyboard toggle
-  document.addEventListener('keydown', (ev) => { if(ev.ctrlKey && ev.key === '`') toggleBtn.click(); });
-
-})();
-
-/* ---------------- Firebase init ---------------- */
-const CLOUDFLARE_WORKER_URL = 'https://portfolio-dropbox-handler.teamgalaxy-interactive.workers.dev/';
-const firebaseConfig = {
-  apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
-  authDomain: "teamgalaxy-77344.firebaseapp.com",
-  projectId: "teamgalaxy-77344",
-  storageBucket: "teamgalaxy-77344.firebasestorage.app",
-  messagingSenderId: "770256225320",
-  appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
-  measurementId: "G-6C2W9NSNCH"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-/* ---------------- Logging helper & access tracking ---------------- */
-function appLog(msg, level='info'){
-  if(level === 'error') console.error(msg);
-  else if(level === 'warning') console.warn(msg);
-  else if(level === 'success') console.info(msg);
-  else console.log(msg);
-  if(window.consolePanelLog) window.consolePanelLog(msg, level==='success' ? 'success' : level);
-}
-
-// Track accessed fields globally
-const accessedFields = new Set();
-let lastAttemptedFields = [];
-function recordAccess(fields, note){
-  fields = Array.from(fields || []);
-  lastAttemptedFields = fields;
-  fields.forEach(f => accessedFields.add(f));
-  const elFields = document.getElementById('sidebar-fields');
-  if(elFields) elFields.textContent = Array.from(accessedFields).sort().join(', ') || '—';
-  const elLast = document.getElementById('sidebar-last');
-  if(elLast) elLast.textContent = (note ? note + ' | ' : '') + (fields.length ? fields.join(', ') : '—');
-  appLog(`[FIELDS] ${note || 'access'} → ${fields.join(', ')}`, 'info');
-}
-
-/* ---------------- Auth UI ---------------- */
-async function updateAuthUI(user){
-  const badge = document.getElementById('authBadge');
-  const btnSignOut = document.getElementById('btnSignOut');
-  const btnSignIn = document.getElementById('btnSignIn');
-  const sidebarEmail = document.getElementById('sidebar-email');
-  const sidebarUid = document.getElementById('sidebar-uid');
-
-  if(!user){
-    if(badge) badge.textContent = 'Not signed in';
-    if(sidebarEmail) sidebarEmail.textContent = '—';
-    if(sidebarUid) sidebarUid.textContent = '—';
-    if(btnSignIn) btnSignIn.style.display = 'inline-block';
-    if(btnSignOut) btnSignOut.style.display = 'none';
-    appLog('No user signed in', 'warning');
-    return;
-  }
-
-  let idRes = null;
-  try { idRes = await user.getIdTokenResult(true); } catch(e){ appLog('getIdTokenResult failed: ' + e.message, 'error'); }
-
-  if(badge) badge.textContent = user.email || user.uid;
-  if(document.getElementById('btnSignIn')) document.getElementById('btnSignIn').style.display = 'none';
-  if(document.getElementById('btnSignOut')) document.getElementById('btnSignOut').style.display = 'inline-block';
-  if(sidebarEmail) sidebarEmail.textContent = user.email || '—';
-  if(sidebarUid) sidebarUid.textContent = user.uid || '—';
-  appLog(`Auth state: ${user.email || 'unknown email'} | UID: ${user.uid}`, 'info');
-  if(idRes && idRes.claims) appLog(`Token claims: ${JSON.stringify(idRes.claims)}`, 'info');
-
-  // record that we read request.auth.* fields (client tries to use email + uid)
-  recordAccess(['ownerUid','u.email','u.uid','idToken.claims'], 'auth check');
-}
-
-/* ---------- Sign-in/out handlers ---------- */
-async function signInWithGoogle(){
-  const provider = new firebase.auth.GoogleAuthProvider();
-  try {
-    const result = await auth.signInWithPopup(provider);
-    appLog('Signed in as: ' + (result.user && result.user.email), 'success');
-    await updateAuthUI(result.user);
-  } catch (e) { appLog('Sign-in failed: ' + e.message, 'error'); }
-}
-async function signOut(){
-  try { await auth.signOut(); appLog('Signed out', 'info'); updateAuthUI(null); }
-  catch (e) { appLog('Sign-out failed: ' + e.message, 'error'); }
-}
-document.getElementById('btnSignIn').addEventListener('click', signInWithGoogle);
-document.getElementById('btnSignOut').addEventListener('click', signOut);
-
-/* ----------------- Upload + preview (max 5) ----------------- */
-const MAX_UPLOAD = 5;
-const inputEl = document.getElementById('imageUpload');
-const preview = document.getElementById('previewContainer');
-inputEl.addEventListener('change', handleFileSelect);
-
-function trimToMaxFiles(fileList){
-  const dt = new DataTransfer();
-  const arr = Array.from(fileList).slice(0, MAX_UPLOAD);
-  arr.forEach(f => dt.items.add(f));
-  return dt.files;
-}
-
-function handleFileSelect(ev){
-  const files = ev.target.files || [];
-  preview.innerHTML = '';
-  if(files.length === 0){
-    if(document.getElementById('uploadBtn')) document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload to Portfolio';
-    if(document.getElementById('uploadNotice')) document.getElementById('uploadNotice').textContent = `Please select up to ${MAX_UPLOAD} images at once.`;
-    return;
-  }
-  let finalFiles = files;
-  if(files.length > MAX_UPLOAD){
-    alert(`You selected ${files.length} files. Only the first ${MAX_UPLOAD} will be used.`);
-    finalFiles = trimToMaxFiles(files);
-    inputEl.files = finalFiles;
-  }
-  if(document.getElementById('uploadBtn')) document.getElementById('uploadBtn').innerHTML = `<i class="fas fa-upload"></i> Upload ${finalFiles.length} File(s)`;
-  appLog(`${finalFiles.length} file(s) selected: ${Array.from(finalFiles).map(f=>f.name).join(', ')}`, 'info');
-
-  Array.from(finalFiles).forEach(file=>{
-    if(!file.type.startsWith('image/')) return;
-    const r = new FileReader();
-    r.onload = (e)=>{
-      const d = document.createElement('div');
-      d.className = 'preview-item';
-      d.innerHTML = `<img src="${e.target.result}" alt="${file.name}"><div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);color:#fff;padding:2px;font-size:10px;text-align:center">${file.name}</div>`;
-      preview.appendChild(d);
-    };
-    r.readAsDataURL(file);
-  });
-
-  if(document.getElementById('uploadNotice')) document.getElementById('uploadNotice').textContent = `Ready to upload ${finalFiles.length} file(s). Maximum allowed is ${MAX_UPLOAD}.`;
-}
-
-document.getElementById('uploadBtn').addEventListener('click', handleUpload);
-
-async function handleUpload(){
-  const input = document.getElementById('imageUpload');
-  const files = input.files || [];
-  if(files.length === 0){ alert('Select images first'); return; }
-  if(files.length > MAX_UPLOAD){ alert(`Please select up to ${MAX_UPLOAD} files.`); return; }
-
-  const user = auth.currentUser;
-  if(!user){ if(!confirm('You are not signed in. Continue without ownerUid? (recommended: sign in)')) return; }
-
-  if(document.getElementById('loadingIndicator')) document.getElementById('loadingIndicator').style.display = 'inline-block';
-  const arr = Array.from(files);
-
-  const results = await Promise.allSettled(arr.map((file, i)=> new Promise((resolve, reject)=>{
-    setTimeout(async ()=>{
-      try { await uploadToCloudflareWorker(file, user); resolve(true); } catch (e) { reject(e); }
-    }, i * 700);
-  })));
-
-  const failed = results.filter(r=>r.status==='rejected');
-  if(failed.length) appLog(`${failed.length} upload(s) failed`, 'error');
-  else appLog('All uploads done', 'success');
-
-  if(document.getElementById('loadingIndicator')) document.getElementById('loadingIndicator').style.display = 'none';
-  input.value = ''; if(preview) preview.innerHTML = ''; if(document.getElementById('uploadBtn')) document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload to Portfolio';
-  if(document.getElementById('uploadNotice')) document.getElementById('uploadNotice').textContent = `Please select up to ${MAX_UPLOAD} images at once.`;
-}
-
-/* ----------------- Upload to worker + metadata ----------------- */
-async function uploadToCloudflareWorker(file, user){
-  const category = document.getElementById('categoryFilter').value || 'uncategorized';
-  const form = new FormData();
-  form.append('file', file);
-  form.append('category', category);
-  form.append('title', file.name.replace(/\.[^/.]+$/,''));
-  form.append('description', `Uploaded ${file.name}`);
-  form.append('isPublic', 'false');
-
-  appLog(`Uploading ${file.name} to worker...`, 'info');
-  const resp = await fetch(`${CLOUDFLARE_WORKER_URL.replace(/\/$/,'')}/api/upload`, { method:'POST', body: form, mode:'cors' });
-  if(!resp.ok){ const txt = await resp.text(); throw new Error(`Upload HTTP ${resp.status}: ${txt.substring(0,200)}`); }
-  const res = await resp.json();
-  if(!res.success) throw new Error(res.error || 'Upload failed');
-
-  const itemData = {
-    ownerUid: user ? user.uid : null,
-    fileName: res.fileName || file.name,
-    originalName: file.name,
-    fileSize: res.fileSize || file.size || 0,
-    fileType: res.fileType || file.type,
-    dropboxUrl: res.dropboxUrl || res.url || '',
-    uploadDate: new Date(),
-    lastModified: new Date(),
-    category,
-    title: file.name.replace(/\.[^/.]+$/,''),
-    description: `Uploaded ${file.name}`,
-    isPublic: false,
-    meta: { dimensions: null }
-  };
-
-  recordAccess(Object.keys(itemData), 'create portfolioItems');
-
-  try {
-    const docRef = await db.collection('portfolioItems').add(itemData);
-    appLog(`Saved metadata doc ${docRef.id}`, 'success');
-    // Add to gallery immediately (preload will be managed by main fetch flow next time)
-    addToGalleryImmediate({ id: docRef.id, ...itemData });
-    updateStats();
-  } catch (e) {
-    appLog(`Failed to save metadata: ${e.message}`, 'error');
-    throw e;
-  }
-}
-
-/* ---------------- Blob-preload strategy (fetch -> Blob -> objectURL) ----------------
-   Purpose: force stable rendering even under fast scrolling by assigning object: URLs created from blobs.
-   This keeps the resource in browser memory and avoids re-request/unload issues.
-------------------------------------------------------------------------- */
-
-// Global cache: maps remote URL -> objectURL
-const urlToObjectUrl = new Map();
-
-// Config
-const PRELOAD_MAX_RETRIES = 7;       // more retries for reliability
-const PRELOAD_TIMEOUT_MS = 9000;     // per-attempt timeout
-const PRELOAD_CONCURRENCY = 6;       // concurrency
-
-function timeout(ms){ return new Promise(res => setTimeout(res, ms)); }
-
-async function fetchBlobWithTimeout(url, timeoutMs) {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const resp = await fetch(url, { signal: controller.signal, credentials: 'omit' });
-    clearTimeout(id);
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const blob = await resp.blob();
-    return blob;
-  } catch (err) {
-    clearTimeout(id);
-    throw err;
-  }
-}
-
-async function preloadWithRetriesToBlob(url, maxRetries = PRELOAD_MAX_RETRIES, cb = ()=>{}) {
-  if (!url) return { ok: false, error: 'empty-url' };
-  // if already cached, return immediately
-  if (urlToObjectUrl.has(url)) return { ok: true, objectUrl: urlToObjectUrl.get(url), cached: true };
-  let attempt = 0;
-  while (attempt < maxRetries) {
-    attempt++;
-    try {
-      cb({ url, attempt, status: 'fetching' });
-      const blob = await fetchBlobWithTimeout(url, PRELOAD_TIMEOUT_MS);
-      // create object URL and cache it
-      const objectUrl = URL.createObjectURL(blob);
-      urlToObjectUrl.set(url, objectUrl);
-      cb({ url, attempt, status: 'done', objectUrl });
-      return { ok: true, objectUrl, attempt };
-    } catch (err) {
-      cb({ url, attempt, status: 'error', reason: err.message || String(err) });
-      await timeout(200 * attempt); // backoff
-    }
-  }
-  cb({ url, attempt: maxRetries, status: 'exhausted' });
-  return { ok: false, attempt: maxRetries };
-}
-
-async function preloadAllToObjectUrls(urls, progressCb = ()=>{}) {
-  const results = new Array(urls.length);
-  let index = 0;
-  let completed = 0;
-  let failed = 0;
-  progressCb({ total: urls.length, completed, failed });
-
-  const worker = async () => {
-    while (true) {
-      const i = index++;
-      if (i >= urls.length) break;
-      const url = urls[i];
-      const res = await preloadWithRetriesToBlob(url, PRELOAD_MAX_RETRIES, ({attempt, status, reason}) => {
-        progressCb({ total: urls.length, index: i, attempt, status, reason, completed, failed });
-      });
-      results[i] = res;
-      completed++;
-      if (!res.ok) failed++;
-      progressCb({ total: urls.length, completed, failed });
-    }
-  };
-
-  const workers = Array.from({length: Math.min(PRELOAD_CONCURRENCY, urls.length)}, () => worker());
-  await Promise.all(workers);
-  return results; // array aligned with urls; each item: {ok, objectUrl?, attempt}
-}
-
-// Assign object URLs to <img> elements
-function assignObjectUrlsToImgs(){
-  const cards = document.querySelectorAll('.image-card');
-  cards.forEach(card => {
-    const img = card.querySelector('.image-preview');
-    if(!img) return;
-    const remote = img.getAttribute('data-src') || '';
-    const obj = urlToObjectUrl.get(remote);
-    if (obj) {
+    window.consolePanelLog = function(message, level='log'){
       try {
-        // encourage immediate paint
-        try { img.decoding = 'sync'; } catch(e){}
-        img.setAttribute('fetchpriority', 'high');
-        img.loading = 'eager';
-        img.src = obj;
-        img.setAttribute('data-loaded', 'true');
-      } catch(e) {
-        console.warn('assignObjectUrlsToImgs error', e);
-      }
-    } else {
-      img.src = ''; // placeholder
-      img.setAttribute('data-loaded', 'false');
+        const ts = new Date();
+        const msg = (typeof message === 'string') ? message : JSON.stringify(message,null,2);
+        const entry = { ts: ts.toISOString(), level, message: msg };
+        logs.push(entry);
+
+        if (currentFilter !== 'all' && currentFilter !== level) return;
+        const div = document.createElement('div');
+        div.className = 'log-entry';
+        const time = ts.toLocaleTimeString();
+        div.innerHTML = `<span class="log-ts">[${time}]</span><strong class="log-level-${level}">${level.toUpperCase()}</strong>: <span style="color:#ddd">${esc(msg)}</span>`;
+        content.appendChild(div);
+        content.scrollTop = content.scrollHeight;
+      } catch (e) { /* ignore UI errors */ }
+    };
+
+    const orig = {log:console.log, info:console.info, warn:console.warn, error:console.error};
+    console.log = function(...a){ orig.log.apply(console,a); window.consolePanelLog(a.join(' '),'log'); };
+    console.info = function(...a){ orig.info.apply(console,a); window.consolePanelLog(a.join(' '),'info'); };
+    console.warn = function(...a){ orig.warn.apply(console,a); window.consolePanelLog(a.join(' '),'warning'); };
+    console.error = function(...a){ orig.error.apply(console,a); window.consolePanelLog(a.join(' '),'error'); };
+
+    clearBtn.onclick = () => { content.innerHTML = ''; logs.length = 0; };
+    toggleBtn.onclick = () => { isVisible = !isVisible; panel.style.display = isVisible ? 'flex' : 'none'; toggleBtn.textContent = isVisible ? 'Hide' : 'Show'; };
+    downloadBtn.onclick = () => {
+      const blob = new Blob([JSON.stringify(logs,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `console-logs-${new Date().toISOString()}.json`; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),3000);
+    };
+    levelSelect.onchange = function(){ currentFilter = this.value; content.innerHTML = ''; logs.forEach(e => { if (currentFilter==='all' || e.level===currentFilter) window.consolePanelLog(e.message,e.level); }); };
+
+    document.addEventListener('keydown', (ev) => { if(ev.ctrlKey && ev.key === '`') toggleBtn.click(); });
+  })();
+  </script>
+
+  <script>
+  /***** App code (uses consolePanelLog safely) *****/
+  const CLOUDFLARE_WORKER_URL = 'https://portfolio-dropbox-handler.teamgalaxy-interactive.workers.dev/';
+  const firebaseConfig = {
+    apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+    authDomain: "teamgalaxy-77344.firebaseapp.com",
+    projectId: "teamgalaxy-77344",
+    storageBucket: "teamgalaxy-77344.firebasestorage.app",
+    messagingSenderId: "770256225320",
+    appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+    measurementId: "G-6C2W9NSNCH"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  function appLog(msg, level='info'){
+    if(level === 'error') console.error(msg);
+    else if(level === 'warning') console.warn(msg);
+    else if(level === 'success') console.info(msg);
+    else console.log(msg);
+    if(window.consolePanelLog) window.consolePanelLog(msg, level==='success' ? 'success' : level);
+  }
+
+  const accessedFields = new Set();
+  let lastAttemptedFields = [];
+  function recordAccess(fields, note){
+    fields = Array.from(fields || []);
+    lastAttemptedFields = fields;
+    fields.forEach(f => accessedFields.add(f));
+    const elFields = document.getElementById('sidebar-fields');
+    elFields.textContent = Array.from(accessedFields).sort().join(', ') || '—';
+    const elLast = document.getElementById('sidebar-last');
+    elLast.textContent = (note ? note + ' | ' : '') + (fields.length ? fields.join(', ') : '—');
+    appLog(`[FIELDS] ${note || 'access'} → ${fields.join(', ')}`, 'info');
+  }
+
+  async function updateAuthUI(user){
+    const badge = document.getElementById('authBadge');
+    const btnSignOut = document.getElementById('btnSignOut');
+    const btnSignIn = document.getElementById('btnSignIn');
+    const sidebarEmail = document.getElementById('sidebar-email');
+    const sidebarUid = document.getElementById('sidebar-uid');
+
+    if(!user){
+      badge.textContent = 'Not signed in';
+      sidebarEmail.textContent = '—';
+      sidebarUid.textContent = '—';
+      btnSignIn.style.display = 'inline-block';
+      btnSignOut.style.display = 'none';
+      appLog('No user signed in', 'warning');
+      return;
     }
-  });
-}
 
-// Revoke object URLs on unload to free memory
-window.addEventListener('beforeunload', () => {
-  urlToObjectUrl.forEach((objUrl, remote) => {
-    try { URL.revokeObjectURL(objUrl); } catch(e) {}
-  });
-  urlToObjectUrl.clear();
-});
+    let idRes = null;
+    try { idRes = await user.getIdTokenResult(true); } catch(e){ appLog('getIdTokenResult failed: ' + e.message, 'error'); }
 
-/* ----------------- Gallery rendering + preload orchestration ----------------- */
+    badge.textContent = user.email || user.uid;
+    document.getElementById('btnSignIn').style.display = 'none';
+    document.getElementById('btnSignOut').style.display = 'inline-block';
+    sidebarEmail.textContent = user.email || '—';
+    sidebarUid.textContent = user.uid || '—';
+    appLog(`Auth state: ${user.email || 'unknown email'} | UID: ${user.uid}`, 'info');
+    if(idRes && idRes.claims) appLog(`Token claims: ${JSON.stringify(idRes.claims)}`, 'info');
 
-// Add card to gallery used when adding after upload (immediate)
-function addToGalleryImmediate(item){
-  const g = document.getElementById('portfolioGallery');
-  if(!g) return;
-  const card = document.createElement('div');
-  card.className = 'image-card';
-  card.dataset.id = item.id;
-  card.dataset.category = item.category || 'uncategorized';
-  card.dataset.isPublic = item.isPublic ? 'true' : 'false';
+    recordAccess(['ownerUid','u.email','u.uid','idToken.claims'], 'auth check');
+  }
 
-  const isPublic = !!item.isPublic;
-  const pillClass = isPublic ? 'public' : 'private';
-  const pillLabel = isPublic ? `<i class="fas fa-eye"></i> Public` : `<i class="fas fa-eye-slash"></i> Private`;
+  async function signInWithGoogle(){
+    const provider = new firebase.auth.GoogleAuthProvider();
+    try {
+      const result = await auth.signInWithPopup(provider);
+      appLog('Signed in as: ' + (result.user && result.user.email), 'success');
+      await updateAuthUI(result.user);
+    } catch (e) { appLog('Sign-in failed: ' + e.message, 'error'); }
+  }
+  async function signOut(){
+    try { await auth.signOut(); appLog('Signed out', 'info'); updateAuthUI(null); }
+    catch (e) { appLog('Sign-out failed: ' + e.message, 'error'); }
+  }
+  document.getElementById('btnSignIn').addEventListener('click', signInWithGoogle);
+  document.getElementById('btnSignOut').addEventListener('click', signOut);
 
-  card.innerHTML = `
-    <img class="image-preview" loading="eager" src="${escapeHtml(item.dropboxUrl||'')}" alt="${escapeHtml(item.title||item.originalName||'')}" />
-    <div class="image-info">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
-        <div class="image-title">${escapeHtml(item.title||item.originalName||'Untitled')}</div>
-        <div>
-          <span class="public-pill ${pillClass}" data-id="${item.id}" data-public="${isPublic ? 'true' : 'false'}" onclick="togglePublicStatusInline(event, '${item.id}')">
-            ${pillLabel}
-          </span>
-        </div>
-      </div>
-      <div class="image-meta">Size: ${formatFileSize(item.fileSize||0)} | ${item.meta?.dimensions ? item.meta.dimensions.width + '×' + item.meta.dimensions.height : 'Unknown dims'}</div>
-      <div class="image-actions">
-        <button class="action-btn" onclick="copyToClipboard('${item.dropboxUrl||''}')"><i class="fas fa-copy"></i> Copy URL</button>
-      </div>
-    </div>
-  `;
-  g.prepend(card);
-  updateStats();
-}
+  // Upload + preview (max 5)
+  const MAX_UPLOAD = 5;
+  const inputEl = document.getElementById('imageUpload');
+  const preview = document.getElementById('previewContainer');
+  inputEl.addEventListener('change', handleFileSelect);
 
-// Add card placeholder used during preload sequence (data-src set)
-function addToGalleryPreload(item){
-  const g = document.getElementById('portfolioGallery');
-  if(!g) return;
-  const card = document.createElement('div');
-  card.className = 'image-card';
-  card.dataset.id = item.id;
-  card.dataset.category = item.category || 'uncategorized';
-  card.dataset.isPublic = item.isPublic ? 'true' : 'false';
+  function trimToMaxFiles(fileList){
+    const dt = new DataTransfer();
+    const arr = Array.from(fileList).slice(0, MAX_UPLOAD);
+    arr.forEach(f => dt.items.add(f));
+    return dt.files;
+  }
 
-  const isPublic = !!item.isPublic;
-  const pillClass = isPublic ? 'public' : 'private';
-  const pillLabel = isPublic ? `<i class="fas fa-eye"></i> Public` : `<i class="fas fa-eye-slash"></i> Private`;
+  function handleFileSelect(ev){
+    const files = ev.target.files || [];
+    preview.innerHTML = '';
+    if(files.length === 0){
+      document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload to Portfolio';
+      document.getElementById('uploadNotice').textContent = `Please select up to ${MAX_UPLOAD} images at once.`;
+      return;
+    }
+    let finalFiles = files;
+    if(files.length > MAX_UPLOAD){
+      alert(`You selected ${files.length} files. Only the first ${MAX_UPLOAD} will be used.`);
+      finalFiles = trimToMaxFiles(files);
+      inputEl.files = finalFiles;
+    }
+    document.getElementById('uploadBtn').innerHTML = `<i class="fas fa-upload"></i> Upload ${finalFiles.length} File(s)`;
+    appLog(`${finalFiles.length} file(s) selected: ${Array.from(finalFiles).map(f=>f.name).join(', ')}`, 'info');
 
-  card.innerHTML = `
-    <img class="image-preview" loading="eager" src="" data-src="${escapeHtml(item.dropboxUrl||'')}" alt="${escapeHtml(item.title||item.originalName||'')}" />
-    <div class="image-info">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
-        <div class="image-title">${escapeHtml(item.title||item.originalName||'Untitled')}</div>
-        <div>
-          <span class="public-pill ${pillClass}" data-id="${item.id}" data-public="${isPublic ? 'true' : 'false'}" onclick="togglePublicStatusInline(event, '${item.id}')">
-            ${pillLabel}
-          </span>
-        </div>
-      </div>
-      <div class="image-meta">Size: ${formatFileSize(item.fileSize||0)} | ${item.meta?.dimensions ? item.meta.dimensions.width + '×' + item.meta.dimensions.height : 'Unknown dims'}</div>
-      <div class="image-actions">
-        <button class="action-btn" onclick="copyToClipboard('${item.dropboxUrl||''}')"><i class="fas fa-copy"></i> Copy URL</button>
-      </div>
-    </div>
-  `;
-  g.appendChild(card);
-}
-
-/* ---------------- Orchestrator: load items from Firestore then preload blobs ---------------- */
-async function loadPortfolioItemsAndPreload(){
-  try {
-    appLog('Loading portfolio items (for preload)...', 'info');
-    // show loading progress UI
-    const progressWrap = document.getElementById('loadingProgressWrap');
-    if(progressWrap) progressWrap.style.display = 'block';
-    const loadingTitle = document.getElementById('loadingTitle');
-    const loadingSub = document.getElementById('loadingSub');
-    if(loadingTitle) loadingTitle.textContent = 'Preparing portfolio images...';
-    if(loadingSub) loadingSub.textContent = 'We will load all images before showing the gallery. This improves UX during fast scroll.';
-
-    const snap = await db.collection('portfolioItems').orderBy('uploadDate','desc').get();
-    const items = [];
-    const foundFields = new Set();
-    snap.forEach(doc => {
-      const data = doc.data();
-      items.push({ id: doc.id, ...data });
-      Object.keys(data||{}).forEach(k => foundFields.add(k));
+    Array.from(finalFiles).forEach(file=>{
+      if(!file.type.startsWith('image/')) return;
+      const r = new FileReader();
+      r.onload = (e)=>{
+        const d = document.createElement('div');
+        d.className = 'preview-item';
+        d.innerHTML = `<img src="${e.target.result}" alt="${file.name}"><div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);color:#fff;padding:2px;font-size:10px;text-align:center">${file.name}</div>`;
+        preview.appendChild(d);
+      };
+      r.readAsDataURL(file);
     });
-    recordAccess(Array.from(foundFields), 'read portfolioItems (fields present)');
-    appLog(`Fetched ${items.length} items`, 'info');
 
-    // Build gallery placeholders
-    const gallery = document.getElementById('portfolioGallery');
-    if(gallery) gallery.innerHTML = '';
-    const urls = items.map(it => it.dropboxUrl || '');
-    items.forEach(it => addToGalleryPreload(it));
+    document.getElementById('uploadNotice').textContent = `Ready to upload ${finalFiles.length} file(s). Maximum allowed is ${MAX_UPLOAD}.`;
+  }
 
-    // progress updater
-    function progressCb({ total, completed = 0, failed = 0, index = null, attempt = null, status = null, reason = null }){
-      const percent = total ? Math.round((completed/total)*100) : 0;
-      const countEl = document.getElementById('loadingCount');
-      const pctEl = document.getElementById('loadingPercent');
-      const bar = document.getElementById('loadingBar');
-      const detail = document.getElementById('loadingDetail');
-      if(countEl) countEl.textContent = `${completed} / ${total}`;
-      if(pctEl) pctEl.textContent = `${percent}%`;
-      if(bar) bar.style.width = `${percent}%`;
-      if(index !== null && status){
-        if(detail) detail.textContent = `Item ${index+1}/${total} — attempt ${attempt} — ${status}${reason ? ' ('+reason+')' : ''}`;
-      } else {
-        if(detail) detail.textContent = `Completed ${completed} / ${total} — failed ${failed}`;
+  document.getElementById('uploadBtn').addEventListener('click', handleUpload);
+  async function handleUpload(){
+    const input = document.getElementById('imageUpload');
+    const files = input.files || [];
+    if(files.length === 0){ alert('Select images first'); return; }
+    if(files.length > MAX_UPLOAD){ alert(`Please select up to ${MAX_UPLOAD} files.`); return; }
+
+    const user = auth.currentUser;
+    if(!user){ if(!confirm('You are not signed in. Continue without ownerUid? (recommended: sign in)')) return; }
+
+    document.getElementById('loadingIndicator').style.display = 'inline-block';
+    const arr = Array.from(files);
+
+    const results = await Promise.allSettled(arr.map((file, i)=> new Promise((resolve, reject)=>{
+      setTimeout(async ()=>{
+        try { await uploadToCloudflareWorker(file, user); resolve(true); } catch (e) { reject(e); }
+      }, i * 700);
+    })));
+
+    const failed = results.filter(r=>r.status==='rejected');
+    if(failed.length) appLog(`${failed.length} upload(s) failed`, 'error');
+    else appLog('All uploads done', 'success');
+
+    document.getElementById('loadingIndicator').style.display = 'none';
+    input.value = ''; document.getElementById('previewContainer').innerHTML = ''; document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload to Portfolio';
+    document.getElementById('uploadNotice').textContent = `Please select up to ${MAX_UPLOAD} images at once.`;
+  }
+
+  async function uploadToCloudflareWorker(file, user){
+    const category = document.getElementById('categoryFilter').value || 'uncategorized';
+    const form = new FormData();
+    form.append('file', file);
+    form.append('category', category);
+    form.append('title', file.name.replace(/\.[^/.]+$/,''));
+    form.append('description', `Uploaded ${file.name}`);
+    form.append('isPublic', 'false');
+
+    appLog(`Uploading ${file.name} to worker...`, 'info');
+    const resp = await fetch(`${CLOUDFLARE_WORKER_URL.replace(/\/$/,'')}/api/upload`, { method:'POST', body: form, mode:'cors' });
+    if(!resp.ok){ const txt = await resp.text(); throw new Error(`Upload HTTP ${resp.status}: ${txt.substring(0,200)}`); }
+    const res = await resp.json();
+    if(!res.success) throw new Error(res.error || 'Upload failed');
+
+    const itemData = {
+      ownerUid: user ? user.uid : null,
+      fileName: res.fileName || file.name,
+      originalName: file.name,
+      fileSize: res.fileSize || file.size || 0,
+      fileType: res.fileType || file.type,
+      dropboxUrl: res.dropboxUrl || res.url || '',
+      uploadDate: new Date(),
+      lastModified: new Date(),
+      category,
+      title: file.name.replace(/\.[^/.]+$/,''),
+      description: `Uploaded ${file.name}`,
+      isPublic: false,
+      meta: { dimensions: null }
+    };
+
+    recordAccess(Object.keys(itemData), 'create portfolioItems');
+
+    try {
+      const docRef = await db.collection('portfolioItems').add(itemData);
+      appLog(`Saved metadata doc ${docRef.id}`, 'success');
+      addToGallery({ id: docRef.id, ...itemData });
+      updateStats();
+    } catch (e) {
+      appLog(`Failed to save metadata: ${e.message}`, 'error');
+      throw e;
+    }
+  }
+
+  // ---- Preloader with concurrency and retries ----
+  const PRELOAD_MAX_RETRIES = 5;
+  const PRELOAD_TIMEOUT_MS = 8000;
+  const PRELOAD_CONCURRENCY = 6;
+
+  function timeoutPromise(ms){ return new Promise((r)=>setTimeout(r, ms)); }
+
+  function preloadImageOnce(url, timeoutMs = PRELOAD_TIMEOUT_MS){
+    return new Promise((resolve, reject) => {
+      if(!url) return reject(new Error('no-url'));
+      const loader = new Image();
+      let done = false;
+      const t = setTimeout(()=>{ if(done) return; done = true; loader.src=''; reject(new Error('timeout')); }, timeoutMs);
+      loader.onload = () => { if(done) return; done = true; clearTimeout(t); resolve(url); };
+      loader.onerror = (e) => { if(done) return; done = true; clearTimeout(t); reject(new Error('error')); };
+      loader.src = url;
+    });
+  }
+
+  async function preloadWithRetries(url, maxRetries = PRELOAD_MAX_RETRIES, detailCallback = ()=>{}){
+    let attempt = 0;
+    while(attempt < maxRetries){
+      attempt++;
+      try {
+        detailCallback({ attempt, status: 'trying' });
+        await preloadImageOnce(url, PRELOAD_TIMEOUT_MS);
+        detailCallback({ attempt, status: 'loaded' });
+        return { ok: true, attempt };
+      } catch (e) {
+        detailCallback({ attempt, status: 'failed', error: e.message });
+        await timeoutPromise(150 * attempt); // small backoff
       }
     }
+    detailCallback({ attempt: maxRetries, status: 'exhausted' });
+    return { ok: false, attempt: maxRetries };
+  }
 
-    // Preload all remote URLs to object URLs
-    const preloadResults = await preloadAllToObjectUrls(urls, progressCb);
-    appLog(`Preload completed: ${preloadResults.filter(r=>r.ok).length} success, ${preloadResults.filter(r=>!r.ok).length} failed`, 'info');
+  // Preload list of URLs with limited concurrency
+  async function preloadAll(urls, progressCb){
+    const results = new Array(urls.length);
+    let index = 0;
+    let completed = 0;
+    let failedCount = 0;
 
-    // Assign object URLs to DOM imgs
-    assignObjectUrlsToImgs();
+    progressCb({ total: urls.length, completed, failed: failedCount });
 
-    // Try update dims for loaded images
-    const cards = document.querySelectorAll('.image-card');
-    cards.forEach(card => {
-      const img = card.querySelector('.image-preview');
-      const id = card.dataset.id;
-      if(!img) return;
-      if(img.getAttribute('data-loaded') === 'true'){
-        if(img.naturalWidth && img.naturalHeight){
-          recordAccess(['meta.dimensions','lastModified'], 'update dims after preload');
-          db.collection('portfolioItems').doc(id).update({ 'meta.dimensions': { width: img.naturalWidth, height: img.naturalHeight }, lastModified: new Date() })
-            .then(()=> appLog(`Updated dimensions for ${id}`, 'info'))
-            .catch(e=> appLog('Failed to update dims: ' + e.message, 'warning'));
+    const workers = new Array(Math.min(PRELOAD_CONCURRENCY, urls.length)).fill(null).map(async ()=>{
+      while(true){
+        const i = index++;
+        if(i >= urls.length) break;
+        const url = urls[i];
+        const res = await preloadWithRetries(url, PRELOAD_MAX_RETRIES, ({ attempt, status, error })=>{
+          // invoke progress callback with current attempt detail for this URL
+          progressCb({ total: urls.length, index: i, attempt, status, error, completed, failed: failedCount });
+        });
+        results[i] = res;
+        completed++;
+        if(!res.ok) failedCount++;
+        progressCb({ total: urls.length, completed, failed: failedCount });
+      }
+    });
+    await Promise.all(workers);
+    return results;
+  }
+
+  // Load items then preload images before revealing UI
+  async function loadPortfolioItemsAndPreload(){
+    try {
+      appLog('Loading portfolio items (for preload)...', 'info');
+      // show loading progress UI
+      document.getElementById('loadingProgressWrap').style.display = 'block';
+      document.getElementById('loadingTitle').textContent = 'Preparing portfolio images...';
+      document.getElementById('loadingSub').textContent = 'We will load all images before showing the gallery. This improves UX during fast scroll.';
+      const snap = await db.collection('portfolioItems').orderBy('uploadDate','desc').get();
+      const items = [];
+      const foundFields = new Set();
+      snap.forEach(doc => {
+        const data = doc.data();
+        items.push({ id: doc.id, ...data });
+        Object.keys(data||{}).forEach(k => foundFields.add(k));
+      });
+      recordAccess(Array.from(foundFields), 'read portfolioItems (fields present)');
+      appLog(`Fetched ${items.length} items`, 'info');
+
+      // Build gallery cards with imgs that will be populated after preload
+      const gallery = document.getElementById('portfolioGallery');
+      gallery.innerHTML = '';
+      const urls = items.map(it => it.dropboxUrl || '');
+      items.forEach(it => addToGalleryPreload(it)); // adds card with data-src but not src yet
+
+      // progress updater
+      function progressCb({ total, completed = 0, failed = 0, index = null, attempt = null, status = null, error = null }){
+        const percent = total ? Math.round((completed/total)*100) : 0;
+        document.getElementById('loadingCount').textContent = `${completed} / ${total}`;
+        document.getElementById('loadingPercent').textContent = `${percent}%`;
+        document.getElementById('loadingBar').style.width = `${percent}%`;
+        if(index !== null && status){
+          document.getElementById('loadingDetail').textContent = `Item ${index+1}/${total} — attempt ${attempt} — ${status}${error ? ' ('+error+')' : ''}`;
         } else {
-          setTimeout(()=> {
-            if(img.naturalWidth && img.naturalHeight){
-              recordAccess(['meta.dimensions','lastModified'], 'update dims after preload (deferred)');
-              db.collection('portfolioItems').doc(id).update({ 'meta.dimensions': { width: img.naturalWidth, height: img.naturalHeight }, lastModified: new Date() })
-                .then(()=> appLog(`Updated dimensions for ${id}`, 'info'))
-                .catch(e=> appLog('Failed to update dims: ' + e.message, 'warning'));
-            }
-          }, 300);
+          document.getElementById('loadingDetail').textContent = `Completed ${completed} / ${total} — failed ${failed}`;
         }
       }
-    });
 
-    // done preloading — update UI and stats then hide loading screen
-    updateStats();
-    appLog('All images attempted — hiding loading screen', 'info');
-    hideLoadingScreenAndShowMain();
-  } catch (e) {
-    appLog('Error in loadPortfolioItemsAndPreload: ' + e.message, 'error');
-    // fallback: show UI to prevent infinite block
-    hideLoadingScreenAndShowMain();
-  }
-}
+      // Preload all URLs
+      const preloadResults = await preloadAll(urls, progressCb);
+      appLog(`Preload completed: ${preloadResults.filter(r=>r.ok).length} success, ${preloadResults.filter(r=>!r.ok).length} failed`, 'info');
 
-/* ---------------- hide loading screen and reveal main ---------------- */
-function hideLoadingScreenAndShowMain(){
-  try {
-    const loading = document.getElementById('loadingScreen');
-    if(loading) loading.style.opacity = '0';
-    setTimeout(()=> {
-      if(loading) loading.classList.add('hidden');
-      const main = document.getElementById('mainContainer');
-      if(main) main.style.display = 'block';
-    }, 300);
-  } catch(e){ console.error(e); const main = document.getElementById('mainContainer'); if(main) main.style.display = 'block'; }
-}
-
-/* ---------------- small helpers ---------------- */
-function formatFileSize(bytes){ if(!bytes && bytes !== 0) return '0 Bytes'; const k=1024; const sizes=['Bytes','KB','MB','GB']; const i = bytes === 0 ? 0 : Math.floor(Math.log(bytes)/Math.log(k)); return (bytes/Math.pow(k,i)).toFixed(2) + ' ' + sizes[i]; }
-async function copyToClipboard(text){ try { await navigator.clipboard.writeText(text||''); alert('Copied'); appLog('Copied to clipboard', 'success'); } catch(e){ appLog('Copy fail: '+e.message, 'error'); } }
-function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-/* ---------------- update stats ---------------- */
-function updateStats(){
-  const cards = document.querySelectorAll('.image-card');
-  const totalEl = document.getElementById('totalImages');
-  const publicEl = document.getElementById('publicImages');
-  const storageEl = document.getElementById('storageUsed');
-  if(totalEl) totalEl.textContent = cards.length;
-  if(publicEl) publicEl.textContent = Array.from(cards).filter(c => c.dataset.isPublic === 'true').length;
-  let totMB = 0;
-  cards.forEach(c => {
-    const meta = c.querySelector('.image-meta')?.textContent || '';
-    const m = meta.match(/Size:\s*([\d.]+)\s*(MB|KB|GB|Bytes)/i);
-    if(m){ const num = parseFloat(m[1]); const unit = m[2].toUpperCase(); if(unit === 'MB') totMB += num; else if(unit === 'KB') totMB += num/1024; else if(unit === 'GB') totMB += num*1024; else if(unit === 'BYTES') totMB += num/(1024*1024); }
-  });
-  if(storageEl) storageEl.textContent = `${totMB.toFixed(2)} MB`;
-}
-
-/* ---------------- Toggle public inline ---------------- */
-async function togglePublicStatusInline(ev, itemId){
-  ev.stopPropagation();
-  const pill = ev.currentTarget;
-  const current = pill.getAttribute('data-public') === 'true';
-  const newState = !current;
-
-  recordAccess(['isPublic','lastModified'], `update portfolioItems/${itemId}`);
-
-  try {
-    await db.collection('portfolioItems').doc(itemId).update({ isPublic: newState, lastModified: new Date() });
-    appLog(`Toggled isPublic:${newState} for ${itemId}`, 'success');
-
-    pill.setAttribute('data-public', newState ? 'true' : 'false');
-    pill.classList.toggle('public', newState);
-    pill.classList.toggle('private', !newState);
-    pill.innerHTML = newState ? `<i class="fas fa-eye"></i> Public` : `<i class="fas fa-eye-slash"></i> Private`;
-
-    const card = document.querySelector(`[data-id="${itemId}"]`);
-    if(card) card.dataset.isPublic = newState ? 'true' : 'false';
-    updateStats();
-  } catch (e) {
-    appLog('Toggle failed: ' + e.message, 'error');
-    alert('Could not change public status: ' + e.message);
-  }
-}
-
-/* ---------------- Admin verification + orchestrator start ---------------- */
-async function checkAdminAccessAndLoad(){
-  try {
-    const user = await new Promise((resolve, reject) => {
-      const unsubscribe = auth.onAuthStateChanged(async (user) => {
-        if (user) {
-          try {
-            const adminQuery = await db.collection('admin').where('gmail', '==', user.email).limit(1).get();
-            if (!adminQuery.empty) { unsubscribe(); resolve(user); } else { unsubscribe(); throw new Error('Not an admin'); }
-          } catch (error) { unsubscribe(); throw error; }
-        } else { unsubscribe(); throw new Error('Not signed in'); }
+      // Now assign successfully loaded src to img elements (and mark failed ones)
+      const cards = document.querySelectorAll('.image-card');
+      cards.forEach((card, idx) => {
+        const img = card.querySelector('.image-preview');
+        const url = img.getAttribute('data-src') || '';
+        const res = preloadResults[idx] || { ok: false };
+        if(res.ok){
+          img.src = url;
+          img.setAttribute('data-loaded', 'true');
+        } else {
+          // mark broken placeholder — keep src blank or set to a small placeholder
+          img.src = ''; // browser will show CSS background
+          img.setAttribute('data-loaded', 'false');
+        }
       });
+
+      // attempt to update dims for those loaded
+      cards.forEach(card => {
+        const img = card.querySelector('.image-preview');
+        const id = card.dataset.id;
+        if(img.getAttribute('data-loaded') === 'true'){
+          if(img.naturalWidth && img.naturalHeight){
+            recordAccess(['meta.dimensions','lastModified'], 'update dims after preload');
+            db.collection('portfolioItems').doc(id).update({ 'meta.dimensions': { width: img.naturalWidth, height: img.naturalHeight }, lastModified: new Date() })
+              .then(()=> appLog(`Updated dimensions for ${id}`, 'info'))
+              .catch(e=> appLog('Failed to update dims: ' + e.message, 'warning'));
+          } else {
+            // if not yet available in DOM (rare), wait a tick
+            setTimeout(()=> {
+              if(img.naturalWidth && img.naturalHeight){
+                recordAccess(['meta.dimensions','lastModified'], 'update dims after preload (deferred)');
+                db.collection('portfolioItems').doc(id).update({ 'meta.dimensions': { width: img.naturalWidth, height: img.naturalHeight }, lastModified: new Date() })
+                  .then(()=> appLog(`Updated dimensions for ${id}`, 'info'))
+                  .catch(e=> appLog('Failed to update dims: ' + e.message, 'warning'));
+              }
+            }, 300);
+          }
+        }
+      });
+
+      // done preloading — update UI and stats then hide loading screen
+      updateStats();
+      appLog('All images attempted — hiding loading screen', 'info');
+      hideLoadingScreenAndShowMain();
+    } catch (e) {
+      appLog('Error in loadPortfolioItemsAndPreload: ' + e.message, 'error');
+      // fall back to showing UI anyway so user isn't stuck forever
+      hideLoadingScreenAndShowMain();
+    }
+  }
+
+  // Add card but do not set src; set data-src so preload will handle it
+  function addToGalleryPreload(item){
+    const g = document.getElementById('portfolioGallery');
+    const card = document.createElement('div');
+    card.className = 'image-card';
+    card.dataset.id = item.id;
+    card.dataset.category = item.category || 'uncategorized';
+    card.dataset.isPublic = item.isPublic ? 'true' : 'false';
+
+    const isPublic = !!item.isPublic;
+    const pillClass = isPublic ? 'public' : 'private';
+    const pillLabel = isPublic ? `<i class="fas fa-eye"></i> Public` : `<i class="fas fa-eye-slash"></i> Private`;
+
+    card.innerHTML = `
+      <img class="image-preview" loading="eager" src="" data-src="${escapeHtml(item.dropboxUrl||'')}" alt="${escapeHtml(item.title||item.originalName||'')}" />
+      <div class="image-info">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div class="image-title">${escapeHtml(item.title||item.originalName||'Untitled')}</div>
+          <div>
+            <span class="public-pill ${pillClass}" data-id="${item.id}" data-public="${isPublic ? 'true' : 'false'}" onclick="togglePublicStatusInline(event, '${item.id}')">
+              ${pillLabel}
+            </span>
+          </div>
+        </div>
+        <div class="image-meta">Size: ${formatFileSize(item.fileSize||0)} | ${item.meta?.dimensions ? item.meta.dimensions.width + '×' + item.meta.dimensions.height : 'Unknown dims'}</div>
+        <div class="image-actions">
+          <button class="action-btn" onclick="copyToClipboard('${item.dropboxUrl||''}')"><i class="fas fa-copy"></i> Copy URL</button>
+        </div>
+      </div>
+    `;
+    g.appendChild(card);
+  }
+
+  // Called when preload done (or fallback)
+  function hideLoadingScreenAndShowMain(){
+    try {
+      document.getElementById('loadingScreen').style.opacity = '0';
+      setTimeout(()=> {
+        document.getElementById('loadingScreen').classList.add('hidden');
+        document.getElementById('mainContainer').style.display = 'block';
+      }, 300);
+    } catch(e){ console.error(e); document.getElementById('mainContainer').style.display = 'block'; }
+  }
+
+  // The rest of functions re-used from earlier (togglePublic, stats, etc.)
+
+  // Toggle public inline
+  async function togglePublicStatusInline(ev, itemId){
+    ev.stopPropagation();
+    const pill = ev.currentTarget;
+    const current = pill.getAttribute('data-public') === 'true';
+    const newState = !current;
+
+    recordAccess(['isPublic','lastModified'], `update portfolioItems/${itemId}`);
+
+    try {
+      await db.collection('portfolioItems').doc(itemId).update({ isPublic: newState, lastModified: new Date() });
+      appLog(`Toggled isPublic:${newState} for ${itemId}`, 'success');
+
+      pill.setAttribute('data-public', newState ? 'true' : 'false');
+      pill.classList.toggle('public', newState);
+      pill.classList.toggle('private', !newState);
+      pill.innerHTML = newState ? `<i class="fas fa-eye"></i> Public` : `<i class="fas fa-eye-slash"></i> Private`;
+
+      const card = document.querySelector(`[data-id="${itemId}"]`);
+      if(card) card.dataset.isPublic = newState ? 'true' : 'false';
+      updateStats();
+    } catch (e) {
+      appLog('Toggle failed: ' + e.message, 'error');
+      alert('Could not change public status: ' + e.message);
+    }
+  }
+
+  function formatFileSize(bytes){ if(!bytes && bytes !== 0) return '0 Bytes'; const k=1024; const sizes=['Bytes','KB','MB','GB']; const i = bytes === 0 ? 0 : Math.floor(Math.log(bytes)/Math.log(k)); return (bytes/Math.pow(k,i)).toFixed(2) + ' ' + sizes[i]; }
+  async function copyToClipboard(text){ try { await navigator.clipboard.writeText(text||''); alert('Copied'); appLog('Copied to clipboard', 'success'); } catch(e){ appLog('Copy fail: '+e.message, 'error'); } }
+  function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function updateStats(){
+    const cards = document.querySelectorAll('.image-card');
+    document.getElementById('totalImages').textContent = cards.length;
+    document.getElementById('publicImages').textContent = Array.from(cards).filter(c => c.dataset.isPublic === 'true').length;
+    let totMB = 0;
+    cards.forEach(c => {
+      const meta = c.querySelector('.image-meta')?.textContent || '';
+      const m = meta.match(/Size:\s*([\d.]+)\s*(MB|KB|GB|Bytes)/i);
+      if(m){ const num = parseFloat(m[1]); const unit = m[2].toUpperCase(); if(unit === 'MB') totMB += num; else if(unit === 'KB') totMB += num/1024; else if(unit === 'GB') totMB += num*1024; else if(unit === 'BYTES') totMB += num/(1024*1024); }
     });
-
-    // admin ok -> begin loading items + preload
-    const loadingTitle = document.getElementById('loadingTitle');
-    const loadingSub = document.getElementById('loadingSub');
-    if(loadingTitle) loadingTitle.textContent = 'Admin verified — loading images';
-    if(loadingSub) loadingSub.textContent = `Hello ${user.email}. Loading portfolio images now...`;
-    await loadPortfolioItemsAndPreload();
-
-  } catch (error) {
-    console.error('Admin access error:', error);
-    const loadingTitle = document.getElementById('loadingTitle');
-    const loadingSub = document.getElementById('loadingSub');
-    if(loadingTitle) loadingTitle.textContent = 'Access denied.';
-    if(loadingSub) loadingSub.textContent = 'Redirecting...';
-    setTimeout(() => { window.location.href = 'index.html'; }, 1600);
+    document.getElementById('storageUsed').textContent = `${totMB.toFixed(2)} MB`;
   }
-}
 
-/* ---------------- Create stars + init ---------------- */
-function createStars() {
-  const starsContainer = document.getElementById('stars');
-  const starCount = 150;
-  for (let i = 0; i < starCount; i++) {
-    const star = document.createElement('div'); star.classList.add('star');
-    const x = Math.random() * 100; const y = Math.random() * 100;
-    star.style.left = `${x}%`; star.style.top = `${y}%`;
-    const size = Math.random() * 3 + 1; star.style.width = `${size}px`; star.style.height = `${size}px`;
-    const duration = Math.random() * 5 + 2; star.style.setProperty('--duration', `${duration}s`);
-    starsContainer.appendChild(star);
+  // Auth state & admin check flow:
+  auth.onAuthStateChanged(async (u) => {
+    await updateAuthUI(u);
+    // do NOT automatically show UI here — wait for admin check + preload
+  });
+
+  async function checkAdminAccessAndLoad(){
+    try {
+      const user = await new Promise((resolve, reject) => {
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
+          if (user) {
+            try {
+              const adminQuery = await db.collection('admin').where('gmail', '==', user.email).limit(1).get();
+              if (!adminQuery.empty) { unsubscribe(); resolve(user); } else { unsubscribe(); throw new Error('Not an admin'); }
+            } catch (error) { unsubscribe(); throw error; }
+          } else { unsubscribe(); throw new Error('Not signed in'); }
+        });
+      });
+
+      // admin ok -> begin loading items + preload
+      document.getElementById('loadingTitle').textContent = 'Admin verified — loading images';
+      document.getElementById('loadingSub').textContent = `Hello ${user.email}. Loading portfolio images now...`;
+      await loadPortfolioItemsAndPreload();
+
+    } catch (error) {
+      console.error('Admin access error:', error);
+      document.getElementById('loadingTitle').textContent = 'Access denied.';
+      document.getElementById('loadingSub').textContent = 'Redirecting...';
+      setTimeout(() => { window.location.href = 'index.html'; }, 1600);
+    }
   }
-}
 
-function goBack() { window.location.href = '../admin_panel.html'; }
+  // Create stars background
+  function createStars() {
+    const starsContainer = document.getElementById('stars');
+    const starCount = 150;
+    for (let i = 0; i < starCount; i++) {
+      const star = document.createElement('div'); star.classList.add('star');
+      const x = Math.random() * 100; const y = Math.random() * 100;
+      star.style.left = `${x}%`; star.style.top = `${y}%`;
+      const size = Math.random() * 3 + 1; star.style.width = `${size}px`; star.style.height = `${size}px`;
+      const duration = Math.random() * 5 + 2; star.style.setProperty('--duration', `${duration}s`);
+      starsContainer.appendChild(star);
+    }
+  }
 
-(function init(){ appLog('App init', 'info'); createStars(); checkAdminAccessAndLoad(); })();
-</script>
+  function goBack() { window.location.href = '../admin_panel.html'; }
+
+  (function init(){ appLog('App init', 'info'); createStars(); checkAdminAccessAndLoad(); })();
+  </script>
 </body>
 </html>
