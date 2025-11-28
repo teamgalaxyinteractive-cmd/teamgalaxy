@@ -14,38 +14,14 @@
       --muted: rgba(255,255,255,0.75);
       --accent: linear-gradient(45deg,#00d4ff,#0077ff);
       --primary: #00d4ff;
-      --success: #4ade80;
-      --warning: #fbbf24;
-      --error: #f87171;
-      --private-bg: rgba(255,255,255,0.06);
-      --public-bg: rgba(74, 222, 128, 0.15);
     }
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%}
     body{
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background:var(--primary-bg); color:#fff; padding:20px; line-height:1.5;
-      position: relative;
-      overflow-x: hidden;
+      position: relative; overflow-x: hidden;
     }
-
-    /* Stars Background */
-    .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
-    .star { position: absolute; background-color: white; border-radius: 50%; animation: twinkle var(--duration,3s) infinite ease-in-out; }
-    @keyframes twinkle { 0%,100%{opacity:0.2} 50%{opacity:1} }
-
-    /* Loading Screen (real) */
-    .loading-screen {
-      position: fixed; top:0; left:0; width:100%; height:100%;
-      background: rgba(8,7,20,0.95); display:flex; flex-direction:column; align-items:center; justify-content:center;
-      z-index:2000; transition:opacity .3s ease; gap:12px;
-    }
-    .loading-spinner{ width:64px;height:64px;border:6px solid rgba(255,255,255,0.06);border-top:6px solid var(--primary);border-radius:50%;animation:spin 1s linear infinite;}
-    @keyframes spin {0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-    .loading-title{ font-size:1.25rem; color:var(--primary); font-weight:700; }
-    .loading-sub{ color:#d7eaff; font-size:0.95rem; opacity:0.9; }
-    .loading-progress{ width:360px; max-width:90%; background:rgba(255,255,255,0.04); border-radius:12px; padding:6px; border:1px solid rgba(255,255,255,0.03); }
-    .loading-bar { height:10px; background:linear-gradient(90deg,#00d4ff,#0077ff); width:0%; border-radius:8px; transition:width 300ms linear; }
 
     .container{max-width:1200px;margin:0 auto;position:relative;z-index:10}
     .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
@@ -74,39 +50,41 @@
     .image-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
     .action-btn{background:rgba(255,255,255,0.03);border:var(--glass-border);padding:6px 8px;border-radius:8px;color:#fff;cursor:pointer}
 
-    .public-pill{ display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.04); cursor:pointer;font-weight:600;font-size:13px; user-select:none; }
-    .public-pill.private{ background: var(--private-bg); color: #d6e2ff; }
-    .public-pill.public{ background: var(--public-bg); color: #dfffdc; border-color: rgba(74,222,128,0.25); }
+    .pagination { display:flex; gap:8px; align-items:center; justify-content:center; margin-top:16px; flex-wrap:wrap }
+    .page-btn { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.04); color:#fff; padding:8px 10px; border-radius:8px; cursor:pointer; }
+    .page-btn.active { background: linear-gradient(45deg,#00d4ff,#0077ff); color:#000; font-weight:700; }
 
-    .hidden { display: none !important; }
-    .back-btn { background: rgba(255,255,255,0.1); border: none; color: white; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-size: 1rem; transition: all 0.3s ease; }
-    .back-btn:hover { background: rgba(0, 212, 255, 0.3); }
-    .notice { margin-top:8px;font-size:13px;color:var(--muted); }
+    /* Loading Screen */
+    .loading-screen { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(8,7,20,0.95); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2000; gap:12px; }
+    .loading-spinner{ width:64px;height:64px;border:6px solid rgba(255,255,255,0.06);border-top:6px solid var(--primary);border-radius:50%;animation:spin 1s linear infinite;}
+    @keyframes spin {0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+    .loading-title{ font-size:1.25rem; color:var(--primary); font-weight:700; }
+    .loading-sub{ color:#d7eaff; font-size:0.95rem; opacity:0.9; }
+    .loading-progress{ width:360px; max-width:90%; background:rgba(255,255,255,0.04); border-radius:12px; padding:6px; border:1px solid rgba(255,255,255,0.03); }
+    .loading-bar { height:10px; background:linear-gradient(90deg,#00d4ff,#0077ff); width:0%; border-radius:8px; transition:width 300ms linear; }
 
-    /* Console Panel styling restored + no horiz scroll */
+    /* Console Panel restored */
     #console-panel{ position:fixed; left:0; right:0; bottom:0; height:260px; background:var(--panel-bg); color:#d4d4d4; font-family:Consolas,monospace; z-index:99999; display:flex; flex-direction:column; border-top:2px solid #262626; overflow: hidden; box-shadow: 0 -6px 24px rgba(0,0,0,0.6); }
     #console-header{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#222;border-bottom:1px solid #2a2a2a;flex:0 0 auto}
-    #console-header .title{font-weight:700;color:#fff;margin-right:auto}
     #console-controls{display:flex;gap:8px;align-items:center}
     #console-controls button, #console-controls select{background:#2b2b2b;color:#fff;border:0;padding:6px 8px;border-radius:6px;cursor:pointer}
     #console-body{display:flex;flex:1;gap:12px;overflow:hidden;min-height:0}
     #console-content{flex:1;padding:10px;overflow:auto;border-right:1px solid #2a2a2a;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-size:13px}
     #console-sidebar{width:320px;padding:10px;background:#181818;overflow:auto}
     .log-entry{padding:6px 4px;border-bottom:1px dashed rgba(255,255,255,0.03);font-size:13px}
-    .log-ts{color:#9aa7d6;margin-right:6px;font-size:11px}
-    .field-list{margin-top:8px;font-size:13px;color:#cfd8ff}
     .small-muted{font-size:12px;color:#9aa}
+
+    .hidden { display: none !important; }
 
     @media (max-width:720px){ #console-sidebar{display:none} #console-panel{height:280px} }
   </style>
 </head>
 <body>
-  <!-- Loading Screen -->
   <div class="loading-screen" id="loadingScreen">
     <div class="loading-spinner"></div>
     <div class="loading-title" id="loadingTitle">Verifying admin access...</div>
-    <div class="loading-sub" id="loadingSub">Please wait — preparing your portfolio.</div>
-    <div class="loading-progress" style="display:none" id="loadingProgressWrap">
+    <div class="loading-sub" id="loadingSub">Preparing your portfolio...</div>
+    <div class="loading-progress" id="loadingProgressWrap" style="display:none">
       <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
         <div id="loadingCount">0 / 0</div>
         <div id="loadingPercent">0%</div>
@@ -116,18 +94,12 @@
     </div>
   </div>
 
-  <!-- Stars Background -->
-  <div class="stars" id="stars"></div>
-
   <div class="container" id="mainContainer" style="display:none">
     <div class="header">
       <div class="title">
-        <button class="back-btn" onclick="goBack()">
-          <i class="fas fa-arrow-left"></i>
-        </button>
+        <button class="page-btn back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
         <h1><i class="fas fa-rocket"></i> TeamGalaxy Portfolio Manager</h1>
       </div>
-
       <div class="auth-area">
         <div id="authBadge" class="auth-badge">Not signed in</div>
         <button id="btnSignIn" class="auth-btn">Sign in (Google)</button>
@@ -149,7 +121,7 @@
         </div>
         <button id="uploadBtn" class="upload-btn"><i class="fas fa-upload"></i> Upload to Portfolio</button>
         <div id="previewContainer" class="preview-container"></div>
-        <div id="uploadNotice" class="notice">Please select up to <strong>5 images</strong> at once.</div>
+        <div id="uploadNotice" class="small-muted">Please select up to <strong>5 images</strong> at once.</div>
       </div>
 
       <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
@@ -167,6 +139,8 @@
     <div id="loadingIndicator" style="display:none;margin-top:12px"><i class="fas fa-spinner fa-spin"></i> Uploading…</div>
 
     <div id="portfolioGallery" class="gallery"></div>
+
+    <div id="pagination" class="pagination"></div>
   </div>
 
   <!-- Console Panel -->
@@ -191,10 +165,7 @@
         <div id="sidebar-uid" style="margin-bottom:12px;color:#dff1ff">—</div>
 
         <div style="margin-top:8px"><strong>Fields accessed (aggregated)</strong></div>
-        <div id="sidebar-fields" class="field-list">—</div>
-
-        <div style="margin-top:12px"><strong>Last attempted fields</strong></div>
-        <div id="sidebar-last" style="font-size:13px;color:#cfd8ff">—</div>
+        <div id="sidebar-fields" class="small-muted">—</div>
 
         <div style="margin-top:12px" class="small-muted">Shortcuts: Ctrl + ` to toggle panel</div>
       </div>
@@ -209,31 +180,26 @@
   <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore-compat.js"></script>
 
   <script>
-  /***** Console Panel Core (initialize first) *****/
+  /* Console Panel Core (restored) */
   (function(){
     if(window.consolePanelInitialized) return;
     window.consolePanelInitialized = true;
-
     const content = document.getElementById('console-content');
     const clearBtn = document.getElementById('clear-console');
     const toggleBtn = document.getElementById('toggle-console');
     const downloadBtn = document.getElementById('download-console');
     const levelSelect = document.getElementById('console-level');
     const panel = document.getElementById('console-panel');
-
     let isVisible = true;
     let currentFilter = 'all';
     const logs = [];
-
     function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'<').replace(/>/g,'>'); }
-
     window.consolePanelLog = function(message, level='log'){
       try {
         const ts = new Date();
         const msg = (typeof message === 'string') ? message : JSON.stringify(message,null,2);
         const entry = { ts: ts.toISOString(), level, message: msg };
         logs.push(entry);
-
         if (currentFilter !== 'all' && currentFilter !== level) return;
         const div = document.createElement('div');
         div.className = 'log-entry';
@@ -241,31 +207,23 @@
         div.innerHTML = `<span class="log-ts">[${time}]</span><strong class="log-level-${level}">${level.toUpperCase()}</strong>: <span style="color:#ddd">${esc(msg)}</span>`;
         content.appendChild(div);
         content.scrollTop = content.scrollHeight;
-      } catch (e) { /* ignore UI errors */ }
+      } catch (e) {}
     };
-
     const orig = {log:console.log, info:console.info, warn:console.warn, error:console.error};
     console.log = function(...a){ orig.log.apply(console,a); window.consolePanelLog(a.join(' '),'log'); };
     console.info = function(...a){ orig.info.apply(console,a); window.consolePanelLog(a.join(' '),'info'); };
     console.warn = function(...a){ orig.warn.apply(console,a); window.consolePanelLog(a.join(' '),'warning'); };
     console.error = function(...a){ orig.error.apply(console,a); window.consolePanelLog(a.join(' '),'error'); };
-
     clearBtn.onclick = () => { content.innerHTML = ''; logs.length = 0; };
     toggleBtn.onclick = () => { isVisible = !isVisible; panel.style.display = isVisible ? 'flex' : 'none'; toggleBtn.textContent = isVisible ? 'Hide' : 'Show'; };
-    downloadBtn.onclick = () => {
-      const blob = new Blob([JSON.stringify(logs,null,2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = `console-logs-${new Date().toISOString()}.json`; a.click();
-      setTimeout(()=>URL.revokeObjectURL(url),3000);
-    };
+    downloadBtn.onclick = () => { const blob = new Blob([JSON.stringify(logs,null,2)], {type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `console-logs-${new Date().toISOString()}.json`; a.click(); setTimeout(()=>URL.revokeObjectURL(url),3000); };
     levelSelect.onchange = function(){ currentFilter = this.value; content.innerHTML = ''; logs.forEach(e => { if (currentFilter==='all' || e.level===currentFilter) window.consolePanelLog(e.message,e.level); }); };
-
     document.addEventListener('keydown', (ev) => { if(ev.ctrlKey && ev.key === '`') toggleBtn.click(); });
   })();
   </script>
 
   <script>
-  /***** App code (uses consolePanelLog safely) *****/
+  // App code
   const CLOUDFLARE_WORKER_URL = 'https://portfolio-dropbox-handler.teamgalaxy-interactive.workers.dev/';
   const firebaseConfig = {
     apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
@@ -276,7 +234,6 @@
     appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
     measurementId: "G-6C2W9NSNCH"
   };
-
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
@@ -289,136 +246,69 @@
     if(window.consolePanelLog) window.consolePanelLog(msg, level==='success' ? 'success' : level);
   }
 
+  // Track fields
   const accessedFields = new Set();
-  let lastAttemptedFields = [];
   function recordAccess(fields, note){
     fields = Array.from(fields || []);
-    lastAttemptedFields = fields;
     fields.forEach(f => accessedFields.add(f));
-    const elFields = document.getElementById('sidebar-fields');
-    elFields.textContent = Array.from(accessedFields).sort().join(', ') || '—';
-    const elLast = document.getElementById('sidebar-last');
-    elLast.textContent = (note ? note + ' | ' : '') + (fields.length ? fields.join(', ') : '—');
+    document.getElementById('sidebar-fields').textContent = Array.from(accessedFields).sort().join(', ') || '—';
+    document.getElementById('sidebar-uid') && (document.getElementById('sidebar-uid').textContent = document.getElementById('sidebar-uid').textContent || '—');
     appLog(`[FIELDS] ${note || 'access'} → ${fields.join(', ')}`, 'info');
   }
 
+  // Auth UI
   async function updateAuthUI(user){
     const badge = document.getElementById('authBadge');
-    const btnSignOut = document.getElementById('btnSignOut');
-    const btnSignIn = document.getElementById('btnSignIn');
     const sidebarEmail = document.getElementById('sidebar-email');
     const sidebarUid = document.getElementById('sidebar-uid');
-
-    if(!user){
-      badge.textContent = 'Not signed in';
-      sidebarEmail.textContent = '—';
-      sidebarUid.textContent = '—';
-      btnSignIn.style.display = 'inline-block';
-      btnSignOut.style.display = 'none';
-      appLog('No user signed in', 'warning');
-      return;
-    }
-
-    let idRes = null;
-    try { idRes = await user.getIdTokenResult(true); } catch(e){ appLog('getIdTokenResult failed: ' + e.message, 'error'); }
-
+    if(!user){ badge.textContent='Not signed in'; sidebarEmail.textContent='—'; sidebarUid.textContent='—'; document.getElementById('btnSignIn').style.display='inline-block'; document.getElementById('btnSignOut').style.display='none'; appLog('No user signed in','warning'); return; }
+    try { const idRes = await user.getIdTokenResult(true); } catch(e){ appLog('getIdTokenResult failed: '+e.message,'error'); }
     badge.textContent = user.email || user.uid;
-    document.getElementById('btnSignIn').style.display = 'none';
-    document.getElementById('btnSignOut').style.display = 'inline-block';
     sidebarEmail.textContent = user.email || '—';
     sidebarUid.textContent = user.uid || '—';
-    appLog(`Auth state: ${user.email || 'unknown email'} | UID: ${user.uid}`, 'info');
-    if(idRes && idRes.claims) appLog(`Token claims: ${JSON.stringify(idRes.claims)}`, 'info');
-
+    document.getElementById('btnSignIn').style.display='none';
+    document.getElementById('btnSignOut').style.display='inline-block';
+    appLog(`Auth: ${user.email || user.uid}`,'info');
     recordAccess(['ownerUid','u.email','u.uid','idToken.claims'], 'auth check');
   }
+  document.getElementById('btnSignIn').addEventListener('click', async ()=>{ const provider = new firebase.auth.GoogleAuthProvider(); try { const res = await auth.signInWithPopup(provider); await updateAuthUI(res.user); appLog('Signed in: '+res.user.email,'success'); } catch(e){ appLog('Sign-in failed: '+e.message,'error'); }});
+  document.getElementById('btnSignOut').addEventListener('click', async ()=>{ try { await auth.signOut(); updateAuthUI(null); appLog('Signed out','info'); } catch(e){ appLog('Sign-out failed: '+e.message,'error'); }});
 
-  async function signInWithGoogle(){
-    const provider = new firebase.auth.GoogleAuthProvider();
-    try {
-      const result = await auth.signInWithPopup(provider);
-      appLog('Signed in as: ' + (result.user && result.user.email), 'success');
-      await updateAuthUI(result.user);
-    } catch (e) { appLog('Sign-in failed: ' + e.message, 'error'); }
-  }
-  async function signOut(){
-    try { await auth.signOut(); appLog('Signed out', 'info'); updateAuthUI(null); }
-    catch (e) { appLog('Sign-out failed: ' + e.message, 'error'); }
-  }
-  document.getElementById('btnSignIn').addEventListener('click', signInWithGoogle);
-  document.getElementById('btnSignOut').addEventListener('click', signOut);
-
-  // Upload + preview (max 5)
+  // Upload changes: include filderId = null
   const MAX_UPLOAD = 5;
   const inputEl = document.getElementById('imageUpload');
   const preview = document.getElementById('previewContainer');
   inputEl.addEventListener('change', handleFileSelect);
-
-  function trimToMaxFiles(fileList){
-    const dt = new DataTransfer();
-    const arr = Array.from(fileList).slice(0, MAX_UPLOAD);
-    arr.forEach(f => dt.items.add(f));
-    return dt.files;
-  }
-
+  function trimToMaxFiles(fileList){ const dt = new DataTransfer(); Array.from(fileList).slice(0,MAX_UPLOAD).forEach(f=>dt.items.add(f)); return dt.files; }
   function handleFileSelect(ev){
     const files = ev.target.files || [];
     preview.innerHTML = '';
-    if(files.length === 0){
-      document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload to Portfolio';
-      document.getElementById('uploadNotice').textContent = `Please select up to ${MAX_UPLOAD} images at once.`;
-      return;
-    }
+    if(files.length === 0){ document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload to Portfolio'; return; }
     let finalFiles = files;
-    if(files.length > MAX_UPLOAD){
-      alert(`You selected ${files.length} files. Only the first ${MAX_UPLOAD} will be used.`);
-      finalFiles = trimToMaxFiles(files);
-      inputEl.files = finalFiles;
-    }
+    if(files.length > MAX_UPLOAD){ alert(`You selected ${files.length} files. Only first ${MAX_UPLOAD} will be used.`); finalFiles = trimToMaxFiles(files); inputEl.files = finalFiles; }
     document.getElementById('uploadBtn').innerHTML = `<i class="fas fa-upload"></i> Upload ${finalFiles.length} File(s)`;
-    appLog(`${finalFiles.length} file(s) selected: ${Array.from(finalFiles).map(f=>f.name).join(', ')}`, 'info');
-
-    Array.from(finalFiles).forEach(file=>{
+    Array.from(finalFiles).forEach(file => {
       if(!file.type.startsWith('image/')) return;
       const r = new FileReader();
-      r.onload = (e)=>{
-        const d = document.createElement('div');
-        d.className = 'preview-item';
-        d.innerHTML = `<img src="${e.target.result}" alt="${file.name}"><div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);color:#fff;padding:2px;font-size:10px;text-align:center">${file.name}</div>`;
-        preview.appendChild(d);
-      };
+      r.onload = (e)=>{ const d=document.createElement('div'); d.className='preview-item'; d.innerHTML=`<img src="${e.target.result}" alt="${file.name}"><div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.6);color:#fff;padding:2px;font-size:10px;text-align:center">${file.name}</div>`; preview.appendChild(d); };
       r.readAsDataURL(file);
     });
-
-    document.getElementById('uploadNotice').textContent = `Ready to upload ${finalFiles.length} file(s). Maximum allowed is ${MAX_UPLOAD}.`;
   }
 
   document.getElementById('uploadBtn').addEventListener('click', handleUpload);
   async function handleUpload(){
-    const input = document.getElementById('imageUpload');
-    const files = input.files || [];
+    const files = inputEl.files || [];
     if(files.length === 0){ alert('Select images first'); return; }
     if(files.length > MAX_UPLOAD){ alert(`Please select up to ${MAX_UPLOAD} files.`); return; }
-
     const user = auth.currentUser;
     if(!user){ if(!confirm('You are not signed in. Continue without ownerUid? (recommended: sign in)')) return; }
-
     document.getElementById('loadingIndicator').style.display = 'inline-block';
     const arr = Array.from(files);
-
-    const results = await Promise.allSettled(arr.map((file, i)=> new Promise((resolve, reject)=>{
-      setTimeout(async ()=>{
-        try { await uploadToCloudflareWorker(file, user); resolve(true); } catch (e) { reject(e); }
-      }, i * 700);
-    })));
-
+    const results = await Promise.allSettled(arr.map((file,i)=> new Promise((resolve,reject)=>{ setTimeout(async ()=>{ try { await uploadToCloudflareWorker(file,user); resolve(true); } catch(e){ reject(e); } }, i*700); })));
     const failed = results.filter(r=>r.status==='rejected');
-    if(failed.length) appLog(`${failed.length} upload(s) failed`, 'error');
-    else appLog('All uploads done', 'success');
-
-    document.getElementById('loadingIndicator').style.display = 'none';
-    input.value = ''; document.getElementById('previewContainer').innerHTML = ''; document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload to Portfolio';
-    document.getElementById('uploadNotice').textContent = `Please select up to ${MAX_UPLOAD} images at once.`;
+    if(failed.length) appLog(`${failed.length} upload(s) failed`,'error'); else appLog('All uploads done','success');
+    document.getElementById('loadingIndicator').style.display='none';
+    inputEl.value=''; preview.innerHTML=''; document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload to Portfolio';
   }
 
   async function uploadToCloudflareWorker(file, user){
@@ -430,14 +320,16 @@
     form.append('description', `Uploaded ${file.name}`);
     form.append('isPublic', 'false');
 
-    appLog(`Uploading ${file.name} to worker...`, 'info');
+    appLog(`Uploading ${file.name}...`,'info');
     const resp = await fetch(`${CLOUDFLARE_WORKER_URL.replace(/\/$/,'')}/api/upload`, { method:'POST', body: form, mode:'cors' });
     if(!resp.ok){ const txt = await resp.text(); throw new Error(`Upload HTTP ${resp.status}: ${txt.substring(0,200)}`); }
     const res = await resp.json();
     if(!res.success) throw new Error(res.error || 'Upload failed');
 
+    // add filderId = null to metadata
     const itemData = {
       ownerUid: user ? user.uid : null,
+      filderId: null,
       fileName: res.fileName || file.name,
       originalName: file.name,
       fileSize: res.fileSize || file.size || 0,
@@ -452,316 +344,219 @@
       meta: { dimensions: null }
     };
 
-    recordAccess(Object.keys(itemData), 'create portfolioItems');
-
-    try {
-      const docRef = await db.collection('portfolioItems').add(itemData);
-      appLog(`Saved metadata doc ${docRef.id}`, 'success');
-      addToGallery({ id: docRef.id, ...itemData });
-      updateStats();
-    } catch (e) {
-      appLog(`Failed to save metadata: ${e.message}`, 'error');
-      throw e;
-    }
+    recordAccess(Object.keys(itemData), 'create portfolioItems (upload)');
+    try { const docRef = await db.collection('portfolioItems').add(itemData); appLog(`Saved metadata ${docRef.id}`,'success'); } catch(e){ appLog('Failed to save metadata: '+e.message,'error'); throw e; }
   }
 
-  // ---- Preloader with concurrency and retries ----
-  const PRELOAD_MAX_RETRIES = 5;
-  const PRELOAD_TIMEOUT_MS = 8000;
-  const PRELOAD_CONCURRENCY = 6;
+  // ---------------- Pagination + Preload (slow retries) ----------------
+  const PAGE_SIZE = 12;
+  let allItems = []; // metadata array
+  let currentPage = 1;
+  const PRELOAD_MAX_RETRIES = 6;
+  const PRELOAD_TIMEOUT_MS = 10000; // 10s per attempt
+  const PRELOAD_CONCURRENCY = 2; // slow and steady
+  const PRELOAD_BACKOFF_BASE = 300; // ms multiplier
 
-  function timeoutPromise(ms){ return new Promise((r)=>setTimeout(r, ms)); }
+  function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
-  function preloadImageOnce(url, timeoutMs = PRELOAD_TIMEOUT_MS){
-    return new Promise((resolve, reject) => {
+  function preloadOnce(url, timeoutMs=PRELOAD_TIMEOUT_MS){
+    return new Promise((resolve,reject)=>{
       if(!url) return reject(new Error('no-url'));
-      const loader = new Image();
-      let done = false;
-      const t = setTimeout(()=>{ if(done) return; done = true; loader.src=''; reject(new Error('timeout')); }, timeoutMs);
-      loader.onload = () => { if(done) return; done = true; clearTimeout(t); resolve(url); };
-      loader.onerror = (e) => { if(done) return; done = true; clearTimeout(t); reject(new Error('error')); };
-      loader.src = url;
+      const img = new Image();
+      let done=false;
+      const t = setTimeout(()=>{ if(done) return; done=true; img.src=''; reject(new Error('timeout')); }, timeoutMs);
+      img.onload = ()=>{ if(done) return; done=true; clearTimeout(t); resolve(); };
+      img.onerror = ()=>{ if(done) return; done=true; clearTimeout(t); reject(new Error('error')); };
+      img.src = url;
     });
   }
 
-  async function preloadWithRetries(url, maxRetries = PRELOAD_MAX_RETRIES, detailCallback = ()=>{}){
+  async function preloadWithRetries(url, idx, progressCb){
     let attempt = 0;
-    while(attempt < maxRetries){
+    while(attempt < PRELOAD_MAX_RETRIES){
       attempt++;
       try {
-        detailCallback({ attempt, status: 'trying' });
-        await preloadImageOnce(url, PRELOAD_TIMEOUT_MS);
-        detailCallback({ attempt, status: 'loaded' });
-        return { ok: true, attempt };
-      } catch (e) {
-        detailCallback({ attempt, status: 'failed', error: e.message });
-        await timeoutPromise(150 * attempt); // small backoff
+        progressCb && progressCb({ idx, attempt, status:'trying' });
+        await preloadOnce(url);
+        progressCb && progressCb({ idx, attempt, status:'loaded' });
+        return { ok:true, attempt };
+      } catch(e){
+        progressCb && progressCb({ idx, attempt, status:'failed', error: e.message });
+        await sleep(PRELOAD_BACKOFF_BASE * attempt);
       }
     }
-    detailCallback({ attempt: maxRetries, status: 'exhausted' });
-    return { ok: false, attempt: maxRetries };
+    progressCb && progressCb({ idx, attempt: PRELOAD_MAX_RETRIES, status:'exhausted' });
+    return { ok:false, attempt: PRELOAD_MAX_RETRIES };
   }
 
-  // Preload list of URLs with limited concurrency
-  async function preloadAll(urls, progressCb){
-    const results = new Array(urls.length);
-    let index = 0;
-    let completed = 0;
-    let failedCount = 0;
-
-    progressCb({ total: urls.length, completed, failed: failedCount });
-
-    const workers = new Array(Math.min(PRELOAD_CONCURRENCY, urls.length)).fill(null).map(async ()=>{
+  async function preloadPage(itemsForPage, progressCb){
+    const results = new Array(itemsForPage.length);
+    let iIndex = 0;
+    const workers = new Array(Math.min(PRELOAD_CONCURRENCY, itemsForPage.length)).fill(null).map(async ()=>{
       while(true){
-        const i = index++;
-        if(i >= urls.length) break;
-        const url = urls[i];
-        const res = await preloadWithRetries(url, PRELOAD_MAX_RETRIES, ({ attempt, status, error })=>{
-          // invoke progress callback with current attempt detail for this URL
-          progressCb({ total: urls.length, index: i, attempt, status, error, completed, failed: failedCount });
-        });
+        const i = iIndex++;
+        if(i >= itemsForPage.length) break;
+        const url = itemsForPage[i].dropboxUrl || '';
+        const res = await preloadWithRetries(url, i, progressCb);
         results[i] = res;
-        completed++;
-        if(!res.ok) failedCount++;
-        progressCb({ total: urls.length, completed, failed: failedCount });
       }
     });
     await Promise.all(workers);
     return results;
   }
 
-  // Load items then preload images before revealing UI
-  async function loadPortfolioItemsAndPreload(){
-    try {
-      appLog('Loading portfolio items (for preload)...', 'info');
-      // show loading progress UI
-      document.getElementById('loadingProgressWrap').style.display = 'block';
-      document.getElementById('loadingTitle').textContent = 'Preparing portfolio images...';
-      document.getElementById('loadingSub').textContent = 'We will load all images before showing the gallery. This improves UX during fast scroll.';
-      const snap = await db.collection('portfolioItems').orderBy('uploadDate','desc').get();
-      const items = [];
-      const foundFields = new Set();
-      snap.forEach(doc => {
-        const data = doc.data();
-        items.push({ id: doc.id, ...data });
-        Object.keys(data||{}).forEach(k => foundFields.add(k));
-      });
-      recordAccess(Array.from(foundFields), 'read portfolioItems (fields present)');
-      appLog(`Fetched ${items.length} items`, 'info');
+  // Renders a page skeleton then preloads that page's images; hides loading screen after first page done
+  async function renderPage(pageNum, options={showProgress:true}){
+    currentPage = pageNum;
+    const gallery = document.getElementById('portfolioGallery');
+    gallery.innerHTML = '';
+    const start = (pageNum - 1) * PAGE_SIZE;
+    const pageItems = allItems.slice(start, start + PAGE_SIZE);
 
-      // Build gallery cards with imgs that will be populated after preload
-      const gallery = document.getElementById('portfolioGallery');
-      gallery.innerHTML = '';
-      const urls = items.map(it => it.dropboxUrl || '');
-      items.forEach(it => addToGalleryPreload(it)); // adds card with data-src but not src yet
-
-      // progress updater
-      function progressCb({ total, completed = 0, failed = 0, index = null, attempt = null, status = null, error = null }){
-        const percent = total ? Math.round((completed/total)*100) : 0;
-        document.getElementById('loadingCount').textContent = `${completed} / ${total}`;
-        document.getElementById('loadingPercent').textContent = `${percent}%`;
-        document.getElementById('loadingBar').style.width = `${percent}%`;
-        if(index !== null && status){
-          document.getElementById('loadingDetail').textContent = `Item ${index+1}/${total} — attempt ${attempt} — ${status}${error ? ' ('+error+')' : ''}`;
-        } else {
-          document.getElementById('loadingDetail').textContent = `Completed ${completed} / ${total} — failed ${failed}`;
-        }
-      }
-
-      // Preload all URLs
-      const preloadResults = await preloadAll(urls, progressCb);
-      appLog(`Preload completed: ${preloadResults.filter(r=>r.ok).length} success, ${preloadResults.filter(r=>!r.ok).length} failed`, 'info');
-
-      // Now assign successfully loaded src to img elements (and mark failed ones)
-      const cards = document.querySelectorAll('.image-card');
-      cards.forEach((card, idx) => {
-        const img = card.querySelector('.image-preview');
-        const url = img.getAttribute('data-src') || '';
-        const res = preloadResults[idx] || { ok: false };
-        if(res.ok){
-          img.src = url;
-          img.setAttribute('data-loaded', 'true');
-        } else {
-          // mark broken placeholder — keep src blank or set to a small placeholder
-          img.src = ''; // browser will show CSS background
-          img.setAttribute('data-loaded', 'false');
-        }
-      });
-
-      // attempt to update dims for those loaded
-      cards.forEach(card => {
-        const img = card.querySelector('.image-preview');
-        const id = card.dataset.id;
-        if(img.getAttribute('data-loaded') === 'true'){
-          if(img.naturalWidth && img.naturalHeight){
-            recordAccess(['meta.dimensions','lastModified'], 'update dims after preload');
-            db.collection('portfolioItems').doc(id).update({ 'meta.dimensions': { width: img.naturalWidth, height: img.naturalHeight }, lastModified: new Date() })
-              .then(()=> appLog(`Updated dimensions for ${id}`, 'info'))
-              .catch(e=> appLog('Failed to update dims: ' + e.message, 'warning'));
-          } else {
-            // if not yet available in DOM (rare), wait a tick
-            setTimeout(()=> {
-              if(img.naturalWidth && img.naturalHeight){
-                recordAccess(['meta.dimensions','lastModified'], 'update dims after preload (deferred)');
-                db.collection('portfolioItems').doc(id).update({ 'meta.dimensions': { width: img.naturalWidth, height: img.naturalHeight }, lastModified: new Date() })
-                  .then(()=> appLog(`Updated dimensions for ${id}`, 'info'))
-                  .catch(e=> appLog('Failed to update dims: ' + e.message, 'warning'));
-              }
-            }, 300);
-          }
-        }
-      });
-
-      // done preloading — update UI and stats then hide loading screen
-      updateStats();
-      appLog('All images attempted — hiding loading screen', 'info');
-      hideLoadingScreenAndShowMain();
-    } catch (e) {
-      appLog('Error in loadPortfolioItemsAndPreload: ' + e.message, 'error');
-      // fall back to showing UI anyway so user isn't stuck forever
-      hideLoadingScreenAndShowMain();
-    }
-  }
-
-  // Add card but do not set src; set data-src so preload will handle it
-  function addToGalleryPreload(item){
-    const g = document.getElementById('portfolioGallery');
-    const card = document.createElement('div');
-    card.className = 'image-card';
-    card.dataset.id = item.id;
-    card.dataset.category = item.category || 'uncategorized';
-    card.dataset.isPublic = item.isPublic ? 'true' : 'false';
-
-    const isPublic = !!item.isPublic;
-    const pillClass = isPublic ? 'public' : 'private';
-    const pillLabel = isPublic ? `<i class="fas fa-eye"></i> Public` : `<i class="fas fa-eye-slash"></i> Private`;
-
-    card.innerHTML = `
-      <img class="image-preview" loading="eager" src="" data-src="${escapeHtml(item.dropboxUrl||'')}" alt="${escapeHtml(item.title||item.originalName||'')}" />
-      <div class="image-info">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
-          <div class="image-title">${escapeHtml(item.title||item.originalName||'Untitled')}</div>
-          <div>
-            <span class="public-pill ${pillClass}" data-id="${item.id}" data-public="${isPublic ? 'true' : 'false'}" onclick="togglePublicStatusInline(event, '${item.id}')">
-              ${pillLabel}
-            </span>
-          </div>
+    // show skeleton cards with data-src
+    pageItems.forEach(it => {
+      const card = document.createElement('div');
+      card.className = 'image-card';
+      card.dataset.id = it.id;
+      card.dataset.isPublic = it.isPublic ? 'true' : 'false';
+      card.innerHTML = `
+        <img class="image-preview" loading="eager" src="" data-src="${escapeHtml(it.dropboxUrl||'')}" alt="${escapeHtml(it.title||it.originalName||'')}">
+        <div class="image-info">
+          <div class="image-title">${escapeHtml(it.title||it.originalName||'Untitled')}</div>
+          <div class="image-meta">Size: ${formatFileSize(it.fileSize||0)} | ${it.meta?.dimensions ? it.meta.dimensions.width + '×' + it.meta.dimensions.height : 'Unknown dims'}</div>
+          <div class="image-actions"><button class="action-btn" onclick="copyToClipboard('${it.dropboxUrl||''}')"><i class="fas fa-copy"></i> Copy URL</button></div>
         </div>
-        <div class="image-meta">Size: ${formatFileSize(item.fileSize||0)} | ${item.meta?.dimensions ? item.meta.dimensions.width + '×' + item.meta.dimensions.height : 'Unknown dims'}</div>
-        <div class="image-actions">
-          <button class="action-btn" onclick="copyToClipboard('${item.dropboxUrl||''}')"><i class="fas fa-copy"></i> Copy URL</button>
-        </div>
-      </div>
-    `;
-    g.appendChild(card);
-  }
-
-  // Called when preload done (or fallback)
-  function hideLoadingScreenAndShowMain(){
-    try {
-      document.getElementById('loadingScreen').style.opacity = '0';
-      setTimeout(()=> {
-        document.getElementById('loadingScreen').classList.add('hidden');
-        document.getElementById('mainContainer').style.display = 'block';
-      }, 300);
-    } catch(e){ console.error(e); document.getElementById('mainContainer').style.display = 'block'; }
-  }
-
-  // The rest of functions re-used from earlier (togglePublic, stats, etc.)
-
-  // Toggle public inline
-  async function togglePublicStatusInline(ev, itemId){
-    ev.stopPropagation();
-    const pill = ev.currentTarget;
-    const current = pill.getAttribute('data-public') === 'true';
-    const newState = !current;
-
-    recordAccess(['isPublic','lastModified'], `update portfolioItems/${itemId}`);
-
-    try {
-      await db.collection('portfolioItems').doc(itemId).update({ isPublic: newState, lastModified: new Date() });
-      appLog(`Toggled isPublic:${newState} for ${itemId}`, 'success');
-
-      pill.setAttribute('data-public', newState ? 'true' : 'false');
-      pill.classList.toggle('public', newState);
-      pill.classList.toggle('private', !newState);
-      pill.innerHTML = newState ? `<i class="fas fa-eye"></i> Public` : `<i class="fas fa-eye-slash"></i> Private`;
-
-      const card = document.querySelector(`[data-id="${itemId}"]`);
-      if(card) card.dataset.isPublic = newState ? 'true' : 'false';
-      updateStats();
-    } catch (e) {
-      appLog('Toggle failed: ' + e.message, 'error');
-      alert('Could not change public status: ' + e.message);
-    }
-  }
-
-  function formatFileSize(bytes){ if(!bytes && bytes !== 0) return '0 Bytes'; const k=1024; const sizes=['Bytes','KB','MB','GB']; const i = bytes === 0 ? 0 : Math.floor(Math.log(bytes)/Math.log(k)); return (bytes/Math.pow(k,i)).toFixed(2) + ' ' + sizes[i]; }
-  async function copyToClipboard(text){ try { await navigator.clipboard.writeText(text||''); alert('Copied'); appLog('Copied to clipboard', 'success'); } catch(e){ appLog('Copy fail: '+e.message, 'error'); } }
-  function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-  function updateStats(){
-    const cards = document.querySelectorAll('.image-card');
-    document.getElementById('totalImages').textContent = cards.length;
-    document.getElementById('publicImages').textContent = Array.from(cards).filter(c => c.dataset.isPublic === 'true').length;
-    let totMB = 0;
-    cards.forEach(c => {
-      const meta = c.querySelector('.image-meta')?.textContent || '';
-      const m = meta.match(/Size:\s*([\d.]+)\s*(MB|KB|GB|Bytes)/i);
-      if(m){ const num = parseFloat(m[1]); const unit = m[2].toUpperCase(); if(unit === 'MB') totMB += num; else if(unit === 'KB') totMB += num/1024; else if(unit === 'GB') totMB += num*1024; else if(unit === 'BYTES') totMB += num/(1024*1024); }
+      `;
+      gallery.appendChild(card);
     });
+
+    // Setup progress UI for page preload
+    if(options.showProgress){
+      document.getElementById('loadingProgressWrap').style.display = 'block';
+      document.getElementById('loadingCount').textContent = `0 / ${pageItems.length}`;
+      document.getElementById('loadingPercent').textContent = `0%`;
+      document.getElementById('loadingBar').style.width = `0%`;
+      document.getElementById('loadingDetail').textContent = `Loading page ${pageNum} images...`;
+    } else {
+      document.getElementById('loadingProgressWrap').style.display = 'none';
+    }
+
+    // Preload page images (slow & steady)
+    const results = await preloadPage(pageItems, ({ idx, attempt, status, error })=>{
+      const completed = results.filter(r=>r && r.ok).length;
+      const failed = results.filter(r=>r && !r.ok).length;
+      const total = pageItems.length;
+      const percent = Math.round(((completed + failed) / total) * 100);
+      document.getElementById('loadingCount').textContent = `${completed + failed} / ${total}`;
+      document.getElementById('loadingPercent').textContent = `${percent}%`;
+      document.getElementById('loadingBar').style.width = `${percent}%`;
+      document.getElementById('loadingDetail').textContent = `Item ${idx+1}/${total} — attempt ${attempt} — ${status}${error ? ' ('+error+')' : ''}`;
+    });
+
+    // assign loaded srcs and mark failed
+    const cards = document.querySelectorAll('.image-card');
+    cards.forEach((card, idx) => {
+      const img = card.querySelector('.image-preview');
+      const url = img.getAttribute('data-src') || '';
+      const res = results[idx] || { ok:false };
+      if(res.ok) img.src = url;
+      else img.src = ''; // leave placeholder
+    });
+
+    // hide progress for subsequent pages
+    document.getElementById('loadingProgressWrap').style.display = 'none';
+    updateStats();
+    renderPagination();
+
+    // if initial page (first load) then hide main loading screen now
+    if(document.getElementById('mainContainer').style.display === 'none'){
+      hideLoadingScreenAndShowMain();
+    }
+  }
+
+  function renderPagination(){
+    const total = allItems.length;
+    const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    const container = document.getElementById('pagination');
+    container.innerHTML = '';
+    const prev = document.createElement('button'); prev.className='page-btn'; prev.textContent='Prev'; prev.disabled = currentPage===1; prev.onclick = ()=>{ if(currentPage>1) renderPage(currentPage-1); };
+    container.appendChild(prev);
+    for(let p=1;p<=pages;p++){
+      const b = document.createElement('button');
+      b.className = 'page-btn' + (p===currentPage ? ' active' : '');
+      b.textContent = p;
+      b.onclick = ()=>{ if(p!==currentPage) renderPage(p); };
+      container.appendChild(b);
+    }
+    const next = document.createElement('button'); next.className='page-btn'; next.textContent='Next'; next.disabled = currentPage===pages; next.onclick = ()=>{ if(currentPage<pages) renderPage(currentPage+1); };
+    container.appendChild(next);
+  }
+
+  function hideLoadingScreenAndShowMain(){
+    document.getElementById('loadingScreen').style.opacity = '0';
+    setTimeout(()=>{ document.getElementById('loadingScreen').classList.add('hidden'); document.getElementById('mainContainer').style.display='block'; }, 300);
+  }
+
+  // Load all metadata first (so we can paginate) but preload only pages on demand
+  async function loadAllMetadataThenShow(){
+    try {
+      appLog('Fetching all portfolio metadata...','info');
+      document.getElementById('loadingTitle').textContent = 'Verifying admin and fetching metadata...';
+      const snap = await db.collection('portfolioItems').orderBy('uploadDate','desc').get();
+      allItems = [];
+      const foundFields = new Set();
+      snap.forEach(doc => { const d=doc.data(); allItems.push({ id: doc.id, ...d }); Object.keys(d||{}).forEach(k=>foundFields.add(k)); });
+      recordAccess(Array.from(foundFields), 'read portfolioItems (metadata)');
+      document.getElementById('totalImages').textContent = allItems.length;
+      appLog(`Fetched ${allItems.length} items metadata`,'info');
+      // render first page (will preload its images); loading screen hides after first page preloaded
+      await renderPage(1, { showProgress: true });
+    } catch(e){
+      appLog('Failed fetching metadata: '+e.message,'error');
+      hideLoadingScreenAndShowMain();
+    }
+  }
+
+  // Stats and helpers
+  function updateStats(){
+    document.getElementById('totalImages').textContent = allItems.length;
+    const publicCount = allItems.filter(i => i.isPublic).length;
+    document.getElementById('publicImages').textContent = publicCount;
+    let totMB = 0;
+    allItems.forEach(i => { const fs = i.fileSize || 0; totMB += (fs/1024/1024); });
     document.getElementById('storageUsed').textContent = `${totMB.toFixed(2)} MB`;
   }
+  function formatFileSize(bytes){ if(!bytes && bytes!==0) return '0 Bytes'; const k=1024; const sizes=['Bytes','KB','MB','GB']; const i = bytes===0?0:Math.floor(Math.log(bytes)/Math.log(k)); return (bytes/Math.pow(k,i)).toFixed(2)+' '+sizes[i]; }
+  async function copyToClipboard(text){ try { await navigator.clipboard.writeText(text||''); alert('Copied'); appLog('Copied to clipboard','success'); } catch(e){ appLog('Copy fail: '+e.message,'error'); } }
+  function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-  // Auth state & admin check flow:
-  auth.onAuthStateChanged(async (u) => {
-    await updateAuthUI(u);
-    // do NOT automatically show UI here — wait for admin check + preload
-  });
-
-  async function checkAdminAccessAndLoad(){
+  // Admin check -> metadata load -> first page preload -> show UI
+  async function checkAdminAccessAndStart(){
     try {
-      const user = await new Promise((resolve, reject) => {
-        const unsubscribe = auth.onAuthStateChanged(async (user) => {
-          if (user) {
+      const user = await new Promise((resolve,reject)=>{
+        const unsubscribe = auth.onAuthStateChanged(async (user)=>{
+          if(user){
             try {
-              const adminQuery = await db.collection('admin').where('gmail', '==', user.email).limit(1).get();
-              if (!adminQuery.empty) { unsubscribe(); resolve(user); } else { unsubscribe(); throw new Error('Not an admin'); }
-            } catch (error) { unsubscribe(); throw error; }
+              const adminQuery = await db.collection('admin').where('gmail','==',user.email).limit(1).get();
+              if(!adminQuery.empty){ unsubscribe(); resolve(user); } else { unsubscribe(); throw new Error('Not an admin'); }
+            } catch(err){ unsubscribe(); throw err; }
           } else { unsubscribe(); throw new Error('Not signed in'); }
         });
       });
-
-      // admin ok -> begin loading items + preload
-      document.getElementById('loadingTitle').textContent = 'Admin verified — loading images';
-      document.getElementById('loadingSub').textContent = `Hello ${user.email}. Loading portfolio images now...`;
-      await loadPortfolioItemsAndPreload();
-
-    } catch (error) {
-      console.error('Admin access error:', error);
-      document.getElementById('loadingTitle').textContent = 'Access denied.';
+      document.getElementById('loadingTitle').textContent = 'Admin verified — loading metadata';
+      document.getElementById('loadingSub').textContent = `Hello ${user.email}. Loading portfolio...`;
+      await updateAuthUI(user);
+      await loadAllMetadataThenShow();
+    } catch(e){
+      console.error('Admin error', e);
+      document.getElementById('loadingTitle').textContent = 'Access denied';
       document.getElementById('loadingSub').textContent = 'Redirecting...';
-      setTimeout(() => { window.location.href = 'index.html'; }, 1600);
+      setTimeout(()=>window.location.href='index.html', 1600);
     }
   }
 
-  // Create stars background
-  function createStars() {
-    const starsContainer = document.getElementById('stars');
-    const starCount = 150;
-    for (let i = 0; i < starCount; i++) {
-      const star = document.createElement('div'); star.classList.add('star');
-      const x = Math.random() * 100; const y = Math.random() * 100;
-      star.style.left = `${x}%`; star.style.top = `${y}%`;
-      const size = Math.random() * 3 + 1; star.style.width = `${size}px`; star.style.height = `${size}px`;
-      const duration = Math.random() * 5 + 2; star.style.setProperty('--duration', `${duration}s`);
-      starsContainer.appendChild(star);
-    }
-  }
-
-  function goBack() { window.location.href = '../admin_panel.html'; }
-
-  (function init(){ appLog('App init', 'info'); createStars(); checkAdminAccessAndLoad(); })();
+  // init
+  (function init(){ appLog('App init','info'); checkAdminAccessAndStart(); })();
   </script>
 </body>
 </html>
