@@ -26,28 +26,26 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background:var(--primary-bg); color:#fff; padding:20px; line-height:1.5;
       position: relative;
-      overflow-x: hidden; /* ensure no horizontal page scroll */
+      overflow-x: hidden;
     }
 
     /* Stars Background */
-    .stars {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-
+    .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
     .star { position: absolute; background-color: white; border-radius: 50%; animation: twinkle var(--duration,3s) infinite ease-in-out; }
     @keyframes twinkle { 0%,100%{opacity:0.2} 50%{opacity:1} }
 
-    /* Loading Screen */
-    .loading-screen { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(15,12,41,0.95); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:1000; transition:opacity .5s ease; }
-    .loading-spinner{ width:50px;height:50px;border:4px solid rgba(255,255,255,0.1);border-top:4px solid var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px;}
+    /* Loading Screen (real) */
+    .loading-screen {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(8,7,20,0.95); display:flex; flex-direction:column; align-items:center; justify-content:center;
+      z-index:2000; transition:opacity .3s ease; gap:12px;
+    }
+    .loading-spinner{ width:64px;height:64px;border:6px solid rgba(255,255,255,0.06);border-top:6px solid var(--primary);border-radius:50%;animation:spin 1s linear infinite;}
     @keyframes spin {0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-    .loading-text{ font-size:1.2rem;color:var(--primary); text-align:center; }
+    .loading-title{ font-size:1.25rem; color:var(--primary); font-weight:700; }
+    .loading-sub{ color:#d7eaff; font-size:0.95rem; opacity:0.9; }
+    .loading-progress{ width:360px; max-width:90%; background:rgba(255,255,255,0.04); border-radius:12px; padding:6px; border:1px solid rgba(255,255,255,0.03); }
+    .loading-bar { height:10px; background:linear-gradient(90deg,#00d4ff,#0077ff); width:0%; border-radius:8px; transition:width 300ms linear; }
 
     .container{max-width:1200px;margin:0 auto;position:relative;z-index:10}
     .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
@@ -85,30 +83,13 @@
     .back-btn:hover { background: rgba(0, 212, 255, 0.3); }
     .notice { margin-top:8px;font-size:13px;color:var(--muted); }
 
-    /* ----------------------------
-       Console Panel styling (restored + no horiz scroll)
-       ---------------------------- */
-    #console-panel{
-      position:fixed;
-      left:0;
-      right:0;
-      bottom:0;
-      height:260px;
-      background:var(--panel-bg);
-      color:#d4d4d4;
-      font-family:Consolas,monospace;
-      z-index:99999;
-      display:flex;
-      flex-direction:column;
-      border-top:2px solid #262626;
-      overflow: hidden; /* prevent console causing page horizontal scroll */
-      box-shadow: 0 -6px 24px rgba(0,0,0,0.6);
-    }
+    /* Console Panel styling restored + no horiz scroll */
+    #console-panel{ position:fixed; left:0; right:0; bottom:0; height:260px; background:var(--panel-bg); color:#d4d4d4; font-family:Consolas,monospace; z-index:99999; display:flex; flex-direction:column; border-top:2px solid #262626; overflow: hidden; box-shadow: 0 -6px 24px rgba(0,0,0,0.6); }
     #console-header{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#222;border-bottom:1px solid #2a2a2a;flex:0 0 auto}
     #console-header .title{font-weight:700;color:#fff;margin-right:auto}
     #console-controls{display:flex;gap:8px;align-items:center}
     #console-controls button, #console-controls select{background:#2b2b2b;color:#fff;border:0;padding:6px 8px;border-radius:6px;cursor:pointer}
-    #console-body{display:flex;flex:1;gap:12px;overflow:hidden;min-height:0} /* min-height:0 so flex children can scroll */
+    #console-body{display:flex;flex:1;gap:12px;overflow:hidden;min-height:0}
     #console-content{flex:1;padding:10px;overflow:auto;border-right:1px solid #2a2a2a;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;font-size:13px}
     #console-sidebar{width:320px;padding:10px;background:#181818;overflow:auto}
     .log-entry{padding:6px 4px;border-bottom:1px dashed rgba(255,255,255,0.03);font-size:13px}
@@ -116,22 +97,23 @@
     .field-list{margin-top:8px;font-size:13px;color:#cfd8ff}
     .small-muted{font-size:12px;color:#9aa}
 
-    /* make sure very long tokens / urls wrap instead of forcing horiz scroll */
-    #console-content a, #console-content span { word-break: break-word; overflow-wrap: anywhere; }
-
-    /* responsive fix: console panel smaller on small screens */
-    @media (max-width:720px){
-      #console-sidebar{display:none}
-      #console-panel{height:280px}
-    }
-
+    @media (max-width:720px){ #console-sidebar{display:none} #console-panel{height:280px} }
   </style>
 </head>
 <body>
   <!-- Loading Screen -->
   <div class="loading-screen" id="loadingScreen">
     <div class="loading-spinner"></div>
-    <div class="loading-text">Verifying admin access...</div>
+    <div class="loading-title" id="loadingTitle">Verifying admin access...</div>
+    <div class="loading-sub" id="loadingSub">Please wait — preparing your portfolio.</div>
+    <div class="loading-progress" style="display:none" id="loadingProgressWrap">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
+        <div id="loadingCount">0 / 0</div>
+        <div id="loadingPercent">0%</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);padding:6px;border-radius:8px"><div class="loading-bar" id="loadingBar" style="width:0%"></div></div>
+      <div style="margin-top:6px;font-size:12px;color:#d4e8ff" id="loadingDetail">Starting...</div>
+    </div>
   </div>
 
   <!-- Stars Background -->
@@ -279,7 +261,6 @@
     levelSelect.onchange = function(){ currentFilter = this.value; content.innerHTML = ''; logs.forEach(e => { if (currentFilter==='all' || e.level===currentFilter) window.consolePanelLog(e.message,e.level); }); };
 
     document.addEventListener('keydown', (ev) => { if(ev.ctrlKey && ev.key === '`') toggleBtn.click(); });
-
   })();
   </script>
 
@@ -484,43 +465,79 @@
     }
   }
 
-  // --- Image loading robustness: preloader + retries ---
-  async function ensureImageLoaded(url, imgElement, maxRetries = 3, timeoutMs = 8000){
-    if(!url) { imgElement.src = ''; return; }
-    // if image already loaded, exit
-    if(imgElement.complete && imgElement.naturalWidth > 1) return;
+  // ---- Preloader with concurrency and retries ----
+  const PRELOAD_MAX_RETRIES = 5;
+  const PRELOAD_TIMEOUT_MS = 8000;
+  const PRELOAD_CONCURRENCY = 6;
+
+  function timeoutPromise(ms){ return new Promise((r)=>setTimeout(r, ms)); }
+
+  function preloadImageOnce(url, timeoutMs = PRELOAD_TIMEOUT_MS){
+    return new Promise((resolve, reject) => {
+      if(!url) return reject(new Error('no-url'));
+      const loader = new Image();
+      let done = false;
+      const t = setTimeout(()=>{ if(done) return; done = true; loader.src=''; reject(new Error('timeout')); }, timeoutMs);
+      loader.onload = () => { if(done) return; done = true; clearTimeout(t); resolve(url); };
+      loader.onerror = (e) => { if(done) return; done = true; clearTimeout(t); reject(new Error('error')); };
+      loader.src = url;
+    });
+  }
+
+  async function preloadWithRetries(url, maxRetries = PRELOAD_MAX_RETRIES, detailCallback = ()=>{}){
     let attempt = 0;
     while(attempt < maxRetries){
       attempt++;
       try {
-        await new Promise((resolve, reject) => {
-          const loader = new Image();
-          let timedOut = false;
-          const t = setTimeout(()=>{ timedOut = true; loader.src = ''; reject(new Error('timeout')); }, timeoutMs);
-          loader.onload = () => { if(timedOut) return; clearTimeout(t); resolve(); };
-          loader.onerror = (e) => { if(timedOut) return; clearTimeout(t); reject(new Error('error')); };
-          // start load (cache will help)
-          loader.src = url;
-        });
-        // if loaded, assign to element (only replace src if different)
-        if(imgElement.src !== url){
-          imgElement.src = url;
-        }
-        return; // success
+        detailCallback({ attempt, status: 'trying' });
+        await preloadImageOnce(url, PRELOAD_TIMEOUT_MS);
+        detailCallback({ attempt, status: 'loaded' });
+        return { ok: true, attempt };
       } catch (e) {
-        appLog(`Image load attempt ${attempt} failed for ${url}`, 'warning');
-        // small backoff before retry
-        await new Promise(r => setTimeout(r, 200 * attempt));
+        detailCallback({ attempt, status: 'failed', error: e.message });
+        await timeoutPromise(150 * attempt); // small backoff
       }
     }
-    appLog(`Image failed to load after ${maxRetries} attempts: ${url}`, 'error');
-    // leave imgElement.src as-is (placeholder) or clear if you prefer
+    detailCallback({ attempt: maxRetries, status: 'exhausted' });
+    return { ok: false, attempt: maxRetries };
   }
 
-  // Load items
-  async function loadPortfolioItems(){
+  // Preload list of URLs with limited concurrency
+  async function preloadAll(urls, progressCb){
+    const results = new Array(urls.length);
+    let index = 0;
+    let completed = 0;
+    let failedCount = 0;
+
+    progressCb({ total: urls.length, completed, failed: failedCount });
+
+    const workers = new Array(Math.min(PRELOAD_CONCURRENCY, urls.length)).fill(null).map(async ()=>{
+      while(true){
+        const i = index++;
+        if(i >= urls.length) break;
+        const url = urls[i];
+        const res = await preloadWithRetries(url, PRELOAD_MAX_RETRIES, ({ attempt, status, error })=>{
+          // invoke progress callback with current attempt detail for this URL
+          progressCb({ total: urls.length, index: i, attempt, status, error, completed, failed: failedCount });
+        });
+        results[i] = res;
+        completed++;
+        if(!res.ok) failedCount++;
+        progressCb({ total: urls.length, completed, failed: failedCount });
+      }
+    });
+    await Promise.all(workers);
+    return results;
+  }
+
+  // Load items then preload images before revealing UI
+  async function loadPortfolioItemsAndPreload(){
     try {
-      appLog('Loading portfolio items...', 'info');
+      appLog('Loading portfolio items (for preload)...', 'info');
+      // show loading progress UI
+      document.getElementById('loadingProgressWrap').style.display = 'block';
+      document.getElementById('loadingTitle').textContent = 'Preparing portfolio images...';
+      document.getElementById('loadingSub').textContent = 'We will load all images before showing the gallery. This improves UX during fast scroll.';
       const snap = await db.collection('portfolioItems').orderBy('uploadDate','desc').get();
       const items = [];
       const foundFields = new Set();
@@ -530,17 +547,84 @@
         Object.keys(data||{}).forEach(k => foundFields.add(k));
       });
       recordAccess(Array.from(foundFields), 'read portfolioItems (fields present)');
+      appLog(`Fetched ${items.length} items`, 'info');
+
+      // Build gallery cards with imgs that will be populated after preload
       const gallery = document.getElementById('portfolioGallery');
       gallery.innerHTML = '';
-      items.forEach(it => addToGallery(it));
+      const urls = items.map(it => it.dropboxUrl || '');
+      items.forEach(it => addToGalleryPreload(it)); // adds card with data-src but not src yet
+
+      // progress updater
+      function progressCb({ total, completed = 0, failed = 0, index = null, attempt = null, status = null, error = null }){
+        const percent = total ? Math.round((completed/total)*100) : 0;
+        document.getElementById('loadingCount').textContent = `${completed} / ${total}`;
+        document.getElementById('loadingPercent').textContent = `${percent}%`;
+        document.getElementById('loadingBar').style.width = `${percent}%`;
+        if(index !== null && status){
+          document.getElementById('loadingDetail').textContent = `Item ${index+1}/${total} — attempt ${attempt} — ${status}${error ? ' ('+error+')' : ''}`;
+        } else {
+          document.getElementById('loadingDetail').textContent = `Completed ${completed} / ${total} — failed ${failed}`;
+        }
+      }
+
+      // Preload all URLs
+      const preloadResults = await preloadAll(urls, progressCb);
+      appLog(`Preload completed: ${preloadResults.filter(r=>r.ok).length} success, ${preloadResults.filter(r=>!r.ok).length} failed`, 'info');
+
+      // Now assign successfully loaded src to img elements (and mark failed ones)
+      const cards = document.querySelectorAll('.image-card');
+      cards.forEach((card, idx) => {
+        const img = card.querySelector('.image-preview');
+        const url = img.getAttribute('data-src') || '';
+        const res = preloadResults[idx] || { ok: false };
+        if(res.ok){
+          img.src = url;
+          img.setAttribute('data-loaded', 'true');
+        } else {
+          // mark broken placeholder — keep src blank or set to a small placeholder
+          img.src = ''; // browser will show CSS background
+          img.setAttribute('data-loaded', 'false');
+        }
+      });
+
+      // attempt to update dims for those loaded
+      cards.forEach(card => {
+        const img = card.querySelector('.image-preview');
+        const id = card.dataset.id;
+        if(img.getAttribute('data-loaded') === 'true'){
+          if(img.naturalWidth && img.naturalHeight){
+            recordAccess(['meta.dimensions','lastModified'], 'update dims after preload');
+            db.collection('portfolioItems').doc(id).update({ 'meta.dimensions': { width: img.naturalWidth, height: img.naturalHeight }, lastModified: new Date() })
+              .then(()=> appLog(`Updated dimensions for ${id}`, 'info'))
+              .catch(e=> appLog('Failed to update dims: ' + e.message, 'warning'));
+          } else {
+            // if not yet available in DOM (rare), wait a tick
+            setTimeout(()=> {
+              if(img.naturalWidth && img.naturalHeight){
+                recordAccess(['meta.dimensions','lastModified'], 'update dims after preload (deferred)');
+                db.collection('portfolioItems').doc(id).update({ 'meta.dimensions': { width: img.naturalWidth, height: img.naturalHeight }, lastModified: new Date() })
+                  .then(()=> appLog(`Updated dimensions for ${id}`, 'info'))
+                  .catch(e=> appLog('Failed to update dims: ' + e.message, 'warning'));
+              }
+            }, 300);
+          }
+        }
+      });
+
+      // done preloading — update UI and stats then hide loading screen
       updateStats();
-      appLog(`Loaded ${items.length} items`, 'info');
+      appLog('All images attempted — hiding loading screen', 'info');
+      hideLoadingScreenAndShowMain();
     } catch (e) {
-      appLog('Load failed: ' + e.message, 'error');
+      appLog('Error in loadPortfolioItemsAndPreload: ' + e.message, 'error');
+      // fall back to showing UI anyway so user isn't stuck forever
+      hideLoadingScreenAndShowMain();
     }
   }
 
-  function addToGallery(item){
+  // Add card but do not set src; set data-src so preload will handle it
+  function addToGalleryPreload(item){
     const g = document.getElementById('portfolioGallery');
     const card = document.createElement('div');
     card.className = 'image-card';
@@ -552,7 +636,6 @@
     const pillClass = isPublic ? 'public' : 'private';
     const pillLabel = isPublic ? `<i class="fas fa-eye"></i> Public` : `<i class="fas fa-eye-slash"></i> Private`;
 
-    // Use loading="eager" to prefer immediate load
     card.innerHTML = `
       <img class="image-preview" loading="eager" src="" data-src="${escapeHtml(item.dropboxUrl||'')}" alt="${escapeHtml(item.title||item.originalName||'')}" />
       <div class="image-info">
@@ -571,30 +654,20 @@
       </div>
     `;
     g.appendChild(card);
-
-    const img = card.querySelector('.image-preview');
-    const src = img.getAttribute('data-src') || '';
-
-    // Force load via preloader (ensures load even under fast scroll)
-    // Set a small timeout to allow DOM paint first
-    setTimeout(()=> {
-      // set decoding to synchronous preference to improve immediate painting (browser may ignore)
-      try { img.decoding = 'sync'; } catch(e){}
-      ensureImageLoaded(src, img, 3, 8000).then(()=> {
-        // when loaded, record meta update if needed
-        if(img.naturalWidth && img.naturalHeight && (!item.meta || !item.meta.dimensions)){
-          recordAccess(['meta.dimensions','lastModified'], 'update dimensions after forced image load');
-          db.collection('portfolioItems').doc(item.id).update({ 'meta.dimensions': { width: img.naturalWidth, height: img.naturalHeight }, lastModified: new Date() })
-            .then(()=> appLog(`Updated dimensions for ${item.id}`, 'info'))
-            .catch(e=> appLog('Failed to update dims: ' + e.message, 'warning'));
-        }
-      }).catch(()=>{ /* already logged inside */ });
-    }, 60);
-
-    img.addEventListener('error', ()=>{ img.src = ''; });
-
-    updateStats();
   }
+
+  // Called when preload done (or fallback)
+  function hideLoadingScreenAndShowMain(){
+    try {
+      document.getElementById('loadingScreen').style.opacity = '0';
+      setTimeout(()=> {
+        document.getElementById('loadingScreen').classList.add('hidden');
+        document.getElementById('mainContainer').style.display = 'block';
+      }, 300);
+    } catch(e){ console.error(e); document.getElementById('mainContainer').style.display = 'block'; }
+  }
+
+  // The rest of functions re-used from earlier (togglePublic, stats, etc.)
 
   // Toggle public inline
   async function togglePublicStatusInline(ev, itemId){
@@ -640,12 +713,13 @@
     document.getElementById('storageUsed').textContent = `${totMB.toFixed(2)} MB`;
   }
 
+  // Auth state & admin check flow:
   auth.onAuthStateChanged(async (u) => {
     await updateAuthUI(u);
-    try { await loadPortfolioItems(); } catch(e){ appLog('loadPortfolioItems failed after auth change: ' + e.message, 'warning'); }
+    // do NOT automatically show UI here — wait for admin check + preload
   });
 
-  async function checkAdminAccess() {
+  async function checkAdminAccessAndLoad(){
     try {
       const user = await new Promise((resolve, reject) => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -658,21 +732,20 @@
         });
       });
 
-      setTimeout(() => {
-        document.getElementById('loadingScreen').style.opacity = '0';
-        setTimeout(() => {
-          document.getElementById('loadingScreen').classList.add('hidden');
-          document.getElementById('mainContainer').style.display = 'block';
-        }, 500);
-      }, 1500);
+      // admin ok -> begin loading items + preload
+      document.getElementById('loadingTitle').textContent = 'Admin verified — loading images';
+      document.getElementById('loadingSub').textContent = `Hello ${user.email}. Loading portfolio images now...`;
+      await loadPortfolioItemsAndPreload();
 
     } catch (error) {
       console.error('Admin access error:', error);
-      document.getElementById('loadingScreen').querySelector('.loading-text').textContent = 'Access denied. Redirecting...';
-      setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+      document.getElementById('loadingTitle').textContent = 'Access denied.';
+      document.getElementById('loadingSub').textContent = 'Redirecting...';
+      setTimeout(() => { window.location.href = 'index.html'; }, 1600);
     }
   }
 
+  // Create stars background
   function createStars() {
     const starsContainer = document.getElementById('stars');
     const starCount = 150;
@@ -688,7 +761,7 @@
 
   function goBack() { window.location.href = '../admin_panel.html'; }
 
-  (function init(){ appLog('App init', 'info'); createStars(); checkAdminAccess(); })();
+  (function init(){ appLog('App init', 'info'); createStars(); checkAdminAccessAndLoad(); })();
   </script>
 </body>
 </html>
