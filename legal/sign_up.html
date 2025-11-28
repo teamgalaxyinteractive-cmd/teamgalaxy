@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sign Up - TeamGalaxy</title>
   <!-- Firebase App, App Check, and services (compat) -->
   <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js"></script>
@@ -11,578 +11,159 @@
   <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore-compat.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
+    /* Page layout: center container when possible, allow scrolling when content larger than viewport */
+    html, body {
+      height: 100%;
+    }
     body {
       background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
       color: #e0e0e0;
       display: flex;
-      justify-content: center;
-      align-items: center;
+      align-items: center;           /* center vertically */
+      justify-content: center;       /* center horizontally */
       min-height: 100vh;
-      padding: 20px;
+      padding: 24px;
       position: relative;
-      overflow: hidden;
+      overflow: auto;                /* allow vertical scrolling when necessary */
     }
 
     /* Star Background */
-    #stars {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: -1;
-    }
+    #stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+    .star { position: absolute; background-color: white; border-radius: 50%; animation: twinkle var(--duration, 5s) infinite ease-in-out; }
+    @keyframes twinkle { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
 
-    .star {
-      position: absolute;
-      background-color: white;
-      border-radius: 50%;
-      animation: twinkle var(--duration, 5s) infinite ease-in-out;
-    }
-
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.2; }
-      50% { opacity: 1; }
-    }
-
-
+    /* Container fixed-size + responsive */
     .container {
       width: 100%;
-      max-width: 500px;
-      background: rgba(30, 30, 46, 0.9); /* Slightly transparent for star effect */
+      max-width: 520px;
+      background: rgba(30, 30, 46, 0.92);
       border-radius: 16px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.5);
       overflow: hidden;
       position: relative;
-      z-index: 1; /* Ensure container is above stars */
+      z-index: 1;
+      margin: 20px;                 /* breathing room when centered */
     }
 
-    .header {
-      background: linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%);
-      padding: 30px 20px;
-      text-align: center;
-      color: white;
-    }
-
-    .logo {
-      width: 90px;
-      height: 90px;
-      margin: 0 auto 15px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .logo img {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .header h1 {
-      font-size: 28px;
-      margin-bottom: 8px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-
-    .header p {
-      font-size: 16px;
-      opacity: 0.9;
-    }
-
-    .content {
-      padding: 30px;
-    }
-
-    .card {
-      background: #2d2d44;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    .card-title {
-      font-size: 20px;
-      color: #8e44ad;
-      margin-bottom: 15px;
-      font-weight: 600;
-    }
-
-    .terms-group {
-      display: flex;
-      align-items: flex-start;
-      margin: 25px 0;
-    }
-
-    .terms-group input {
-      margin-top: 3px;
-      margin-right: 10px;
-      accent-color: #8e44ad;
-    }
-
-    .terms-group label {
-      color: #bdc3c7;
-      line-height: 1.5;
-      font-size: 15px;
-    }
-
-    .terms-group a {
-      color: #8e44ad;
-      text-decoration: none;
-      font-weight: 600;
-      position: relative;
-    }
-
-    .terms-group a:hover {
-      text-decoration: underline;
-    }
-
-    .google-btn {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #2d2d44;
-      color: #e0e0e0;
-      font-size: 16px;
-      font-weight: 600;
-      padding: 14px 20px;
-      border: 1px solid #4a4a6a;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .google-btn img {
-      margin-right: 12px;
-      width: 20px;
-      height: 20px;
-    }
-
-    .google-btn:hover {
-      background-color: #3a3a5a;
-      border-color: #6a6a8a;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .google-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .signed-in-view {
-      display: none;
-      margin-top: 20px;
-      animation: fadeIn 0.5s ease-in-out;
-    }
-
-    .welcome-card {
-      background: linear-gradient(to right, #3a1c71, #4a00e0);
-      border: 1px solid #6a5acd;
-      border-radius: 12px;
-      padding: 25px;
-      margin-bottom: 25px;
-    }
-
-    .welcome-card h2 {
-      font-size: 24px;
-      color: #ffffff;
-      margin-bottom: 15px;
-    }
-
-    .user-info {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-top: 20px;
-    }
-
-    .info-item {
-      background: #2d2d44;
-      border-radius: 8px;
-      padding: 15px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      transition: transform 0.3s;
-    }
-
-    .info-item:hover {
-      transform: translateY(-3px);
-    }
-
-    .info-label {
-      font-size: 13px;
-      color: #95a5a6;
-      margin-bottom: 5px;
-    }
-
-    .info-value {
-      font-size: 16px;
-      font-weight: 600;
-      color: #8e44ad;
-    }
-
-    .actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 25px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      flex: 1;
-      min-width: 140px;
-      background: #8e44ad;
-      color: white;
-      padding: 14px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 600;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .btn i {
-      margin-right: 8px;
-    }
-
-    .btn:hover {
-      background: #7d3c98;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(142, 68, 173, 0.4);
-    }
-
-    .btn-outline {
-      background: transparent;
-      border: 2px solid #8e44ad;
-      color: #8e44ad;
-    }
-
-    .btn-outline:hover {
-      background: rgba(142, 68, 173, 0.1);
-    }
-
-    footer {
-      margin-top: 30px;
-      text-align: center;
-      font-size: 14px;
-      color: #95a5a6;
-      padding-top: 20px;
-      border-top: 1px solid #4a4a6a;
-    }
-
-    footer a {
-      color: #8e44ad;
-      text-decoration: none;
-      margin: 0 5px;
-      font-weight: 600;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .success-message {
-      background: #2d2d44;
-      color: #8e44ad;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      animation: fadeIn 0.5s ease-in-out;
-      border: 1px solid #8e44ad;
-    }
-
-    .success-message i {
-      margin-right: 10px;
-      font-size: 20px;
-    }
-
-    .saved-accounts {
-      margin: 20px 0;
-      padding: 15px;
-      background-color: #2d2d44;
-      border-radius: 10px;
-      border: 1px solid #4a4a6a;
-      animation: slideIn 0.4s ease-out;
-    }
-
-    .saved-accounts h3 {
-      font-size: 18px;
-      margin-bottom: 15px;
-      color: #8e44ad;
-      display: flex;
-      align-items: center;
-    }
-
-    .saved-accounts h3 i {
-      margin-right: 10px;
-    }
-
-    .accounts-list {
-      margin-top: 10px;
-    }
-
-    .account-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px;
-      background: #3a3a5a;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      transition: transform 0.2s;
-    }
-
-    .account-item:hover {
-      transform: translateX(5px);
-    }
-
-    .account-email {
-      font-size: 14px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: #e0e0e0;
-    }
-
-    .account-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .account-btn {
-      padding: 6px 12px;
-      border-radius: 5px;
-      font-size: 13px;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-    }
-
-    .use-btn {
-      background: #8e44ad;
-      color: white;
-    }
-
-    .use-btn:hover {
-      background: #7d3c98;
-    }
-
-    .remove-btn {
-      background: #3a3a5a;
-      color: #e0e0e0;
-      border: 1px solid #4a4a6a;
-    }
-
-    .remove-btn:hover {
-      background: #4a4a6a;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @media (max-width: 480px) {
-      .content {
-        padding: 20px 15px;
-      }
-
-      .user-info {
-        grid-template-columns: 1fr;
-      }
-
-      .actions {
-        flex-direction: column;
-      }
-
-      .btn {
-        width: 100%;
-      }
-
-      .account-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
-
-      .account-actions {
-        width: 100%;
-        justify-content: flex-end;
-      }
-    }
-
-    .console-panel {
-      background: #1e1e1e;
-      color: #d4d4d4;
-      border-radius: 8px;
-      padding: 15px;
-      margin-top: 20px;
-      font-family: monospace;
-      font-size: 14px;
-      max-height: 200px;
-      overflow-y: auto;
-      display: none;
-    }
-
-    .console-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      color: #9cdcfe;
-    }
-
-    .console-toggle {
-      background: none;
-      border: none;
-      color: #9cdcfe;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .console-line {
-      margin-bottom: 5px;
-    }
-
-    .console-error {
-      color: #f48771;
-    }
-
-    .console-success {
-      color: #6a9955;
-    }
-
-    .console-warning {
-      color: #dcdcaa;
-    }
-
-    .console-info {
-      color: #9cdcfe;
-    }
-
-    #consolePanel, .console-panel {
-      display: none !important;
+    .header { background: linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%); padding: 28px 20px; text-align: center; color: white; }
+    .logo { width: 90px; height: 90px; margin: 0 auto 12px; background: rgba(255,255,255,0.06); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
+    .logo img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; }
+
+    .header h1 { font-size: 26px; margin-bottom: 6px; font-weight:700; letter-spacing:0.4px; }
+    .header p { font-size: 14px; opacity: 0.95; margin-top: 4px; }
+
+    .content { padding: 26px; }
+
+    .card { background: #2d2d44; border-radius: 12px; padding: 18px; margin-bottom: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.25); transition: transform 0.25s, box-shadow 0.25s; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.28); }
+    .card-title { font-size:18px; color:#8e44ad; margin-bottom:12px; font-weight:600; }
+
+    .terms-group { display:flex; align-items:flex-start; margin:18px 0; }
+    .terms-group input { margin-top:3px; margin-right:10px; accent-color:#8e44ad; }
+    .terms-group label { color:#d1d6db; line-height:1.45; font-size:14px; }
+
+    .google-btn { width:100%; display:flex; align-items:center; justify-content:center; background-color:#2d2d44; color:#e0e0e0; font-size:15px; font-weight:700; padding:12px 18px; border:1px solid #48476a; border-radius:8px; cursor:pointer; transition:all 0.22s; box-shadow: 0 6px 16px rgba(0,0,0,0.25); }
+    .google-btn img { margin-right:10px; width:20px; height:20px; }
+    .google-btn:disabled { opacity:0.55; cursor:not-allowed; transform:none; box-shadow: 0 3px 8px rgba(0,0,0,0.18); }
+
+    .signed-in-view { display:none; margin-top:16px; animation:fadeIn 0.35s ease-in-out; }
+
+    .welcome-card { background: linear-gradient(to right,#3a1c71,#4a00e0); border:1px solid #6a5acd; border-radius:12px; padding:18px; margin-bottom:18px; }
+    .welcome-card h2 { font-size:20px; color:#fff; margin-bottom:8px; }
+
+    .user-info { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+    .info-item { background:#2d2d44; border-radius:8px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
+    .info-label { font-size:12px; color:#aeb6bd; margin-bottom:6px; }
+    .info-value { font-size:15px; font-weight:700; color:#8e44ad; }
+
+    .actions { display:flex; gap:12px; margin-top:18px; flex-wrap:wrap; }
+    .btn { flex:1; min-width:140px; background:#8e44ad; color:white; padding:12px; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+    .btn-outline { background:transparent; border:2px solid #8e44ad; color:#8e44ad; }
+    .btn i { margin-right:8px; }
+
+    footer { margin-top:12px; text-align:center; font-size:13px; color:#b9c0c8; padding:14px 8px 18px; border-top:1px solid rgba(74,68,112,0.18); }
+    footer a { color:#8e44ad; text-decoration:none; margin: 0 8px; font-weight:600; transition:opacity 0.18s; }
+    footer a:hover { text-decoration:underline; opacity:0.95; }
+
+    .success-message { background:#2d2d44; color:#8e44ad; padding:12px; border-radius:8px; margin-bottom:16px; display:flex; align-items:center; animation:fadeIn 0.3s; border:1px solid rgba(142,68,173,0.25); }
+    .success-message i { margin-right:8px; font-size:18px; }
+
+    .saved-accounts { margin:14px 0; padding:12px; background-color:#2d2d44; border-radius:10px; border:1px solid #48476a; }
+    .accounts-list { margin-top:8px; }
+    .account-item { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#3a3a5a; border-radius:8px; margin-bottom:8px; box-shadow:0 2px 6px rgba(0,0,0,0.18); transition:transform 0.18s; }
+    .account-email { font-size:13px; overflow:hidden; text-overflow:ellipsis; color:#e6e6e6; }
+    .account-actions { display:flex; gap:8px; }
+
+    @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+
+    @media (max-width:480px) {
+      .content { padding:18px; }
+      .user-info { grid-template-columns:1fr; }
+      .actions { flex-direction:column; }
+      .btn { width:100%; }
+      .account-item { flex-direction:column; align-items:flex-start; gap:10px; }
+      .account-actions { width:100%; justify-content:flex-end; }
     }
   </style>
 </head>
 <body>
   <div id="stars"></div>
-  <div class="container">
+
+  <div class="container" role="main" aria-labelledby="site-title">
     <div class="header">
-      <div class="logo">
-        <img src="https://dl.dropboxusercontent.com/scl/fi/ywpxewaiksobd3rq8gtak/image-3.png?rlkey=11yfipsfrn7km7wjigqzibemj&st=j03fxxcj&dl=0" alt="TeamGalaxy Logo">
+      <div class="logo" aria-hidden="true">
+        <img src="https://dl.dropboxusercontent.com/scl/fi/ywpxewaiksobd3rq8gtak/image-3.png?rlkey=11yfipsfrn7km7wjigqzibemj&st=j03fxxcj&dl=0" alt="TeamGalaxy Logo" />
       </div>
-      <h1>TeamGalaxy</h1>
+      <h1 id="site-title">TeamGalaxy</h1>
       <p>Exploring the Future, Together!</p>
     </div>
 
     <div class="content">
-      <!-- Success Message -->
       <div class="success-message" id="success-message" style="display: none;">
         <i class="fas fa-check-circle"></i>
-        <div>
-          <strong>Account created successfully!</strong> Welcome to TeamGalaxy.
-        </div>
+        <div><strong>Account created successfully!</strong> Welcome to TeamGalaxy.</div>
       </div>
 
-      <!-- Signup Form -->
       <div id="signup-form">
-        <!-- Saved Accounts Section -->
         <div class="saved-accounts" id="saved-accounts" style="display: none;">
-          <h3><i class="fas fa-user-circle"></i> Saved Accounts</h3>
+          <h3 style="color:#e6d9ff; font-size:15px; margin-bottom:8px;"><i class="fas fa-user-circle"></i> Saved Accounts</h3>
           <div class="accounts-list" id="accounts-list"></div>
         </div>
 
         <div class="card">
           <h2 class="card-title">Create Your Account</h2>
-          <p>Join thousands of explorers who are building the future with TeamGalaxy.</p>
+          <p style="color:#cbd3db; font-size:14px; margin-bottom:12px;">Join thousands of explorers who are building the future with TeamGalaxy.</p>
 
           <div class="terms-group">
-            <input type="checkbox" id="terms-checkbox">
+            <input type="checkbox" id="terms-checkbox" />
             <label for="terms-checkbox">
-              I accept the <a href="terms_and_conditions.html" target="_blank">Terms & Conditions</a> & <a href="privacy_policy.html" target="_blank">Privacy Policy</a>
+              I accept the <a href="terms_and_conditions.html" target="_blank" rel="noopener">Terms & Conditions</a> &amp; <a href="privacy_policy.html" target="_blank" rel="noopener">Privacy Policy</a>
             </label>
           </div>
 
           <button id="googleSignInButton" class="google-btn" disabled>
-            <img src="https://img.icons8.com/color/24/google-logo.png" alt="Google Icon">
+            <img src="https://img.icons8.com/color/24/google-logo.png" alt="Google Icon" />
             Sign Up with Google
           </button>
         </div>
 
         <div class="card">
           <h2 class="card-title">What You Get</h2>
-          <ul style="list-style: none; padding-left: 10px;">
-            <li style="margin-bottom: 12px; display: flex;">
-              <i class="fas fa-check-circle" style="color: #8e44ad; margin-right: 10px; margin-top: 4px;"></i>
-              <span>Access to exclusive community features</span>
-            </li>
-            <li style="margin-bottom: 12px; display: flex;">
-              <i class="fas fa-check-circle" style="color: #8e44ad; margin-right: 10px; margin-top: 4px;"></i>
-              <span>Member profile on our platform</span>
-            </li>
-            <li style="margin-bottom: 12px; display: flex;">
-              <i class="fas fa-check-circle" style="color: #8e44ad; margin-right: 10px; margin-top: 4px;"></i>
-              <span>Join our mission to explore new horizons</span>
-            </li>
-            <li style="display: flex;">
-              <i class="fas fa-check-circle" style="color: #8e44ad; margin-right: 10px; margin-top: 4px;"></i>
-              <span>Never-expiring membership</span>
-            </li>
+          <ul style="list-style:none; padding-left:8px; color:#d9dfe6;">
+            <li style="margin-bottom:10px; display:flex; align-items:flex-start;"><i class="fas fa-check-circle" style="color:#8e44ad; margin-right:10px; margin-top:3px;"></i><span>Access to exclusive community features</span></li>
+            <li style="margin-bottom:10px; display:flex; align-items:flex-start;"><i class="fas fa-check-circle" style="color:#8e44ad; margin-right:10px; margin-top:3px;"></i><span>Member profile on our platform</span></li>
+            <li style="margin-bottom:10px; display:flex; align-items:flex-start;"><i class="fas fa-check-circle" style="color:#8e44ad; margin-right:10px; margin-top:3px;"></i><span>Join our mission to explore new horizons</span></li>
+            <li style="display:flex; align-items:flex-start;"><i class="fas fa-check-circle" style="color:#8e44ad; margin-right:10px; margin-top:3px;"></i><span>Never-expiring membership</span></li>
           </ul>
         </div>
       </div>
 
-      <!-- Signed-In View (Followers/Following removed from UI per request) -->
       <div class="signed-in-view" id="signed-in-view" style="display:none;">
         <div class="welcome-card">
           <h2>Welcome to TeamGalaxy, <span id="display-name"></span>!</h2>
-          <p>Your account has been successfully created with TeamGalaxy. You are now part of our mission.</p>
+          <p style="color:#e6e6ff; font-size:13px;">Your account has been successfully created with TeamGalaxy. You are now part of our mission.</p>
 
           <div class="user-info">
             <div class="info-item">
@@ -593,34 +174,18 @@
               <div class="info-label">Posts</div>
               <div class="info-value" id="info-posts">0</div>
             </div>
-            <!-- followers/following intentionally not shown in frontend -->
           </div>
         </div>
 
         <div class="actions">
-          <button class="btn" id="go-profile-btn">
-            <i class="fas fa-tachometer-alt"></i> Go to Dashboard
-          </button>
-          <button class="btn btn-outline" id="switch-account-btn">
-            <i class="fas fa-exchange-alt"></i> Switch Account
-          </button>
-          <button class="btn btn-outline" id="signout-btn">
-            <i class="fas fa-sign-out-alt"></i> Sign Out
-          </button>
+          <button class="btn" id="go-profile-btn"><i class="fas fa-tachometer-alt"></i> Go to Dashboard</button>
+          <button class="btn btn-outline" id="switch-account-btn"><i class="fas fa-exchange-alt"></i> Switch Account</button>
+          <button class="btn btn-outline" id="signout-btn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
         </div>
-      </div>
-
-      <!-- Console Panel -->
-      <div class="console-panel" id="console-panel" style="display:block;">
-        <div class="console-header">
-          <span>Firestore Operations Console</span>
-          <button class="console-toggle" id="console-toggle">Hide</button>
-        </div>
-        <div id="console-content" style="max-height:200px; overflow:auto;"></div>
       </div>
 
       <footer>
-        <p>© 2025 TeamGalaxy | <a href="terms_and_conditions.html">Terms</a> | <a href="privacy_policy.html">Privacy</a> | <a href="#">Support</a></p>
+        <p>© 2025 TeamGalaxy | <a href="terms_and_conditions.html" target="_blank" rel="noopener">Terms</a> | <a href="privacy_policy.html" target="_blank" rel="noopener">Privacy</a> | <a href="#" rel="noopener">Support</a></p>
       </footer>
     </div>
   </div>
@@ -644,26 +209,21 @@
       if (!firebase.apps || !firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
       } else {
-        console.log('Firebase already initialized.');
+        console.debug('Firebase already initialized.');
       }
     }
 
-    // Activate App Check - SINGLE INITIALIZATION (compat style kept)
     try {
-      // compat activate may differ; this keeps your previous approach
-      firebase.appCheck().activate(
-        '6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx',
-        true // isTokenAutoRefreshEnabled
-      );
+      firebase.appCheck().activate('6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx', true);
     } catch (e) {
-      console.warn('AppCheck init issue (safe to ignore if AppCheck not required):', e);
+      console.debug('AppCheck init issue (safe to ignore if AppCheck not required):', e);
     }
 
     const auth = firebase.auth();
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    // DOM Elements (only those still present)
+    // DOM Elements
     const termsCheckbox = document.getElementById('terms-checkbox');
     const googleSignInBtn = document.getElementById('googleSignInButton');
     const signedInView = document.getElementById('signed-in-view');
@@ -677,40 +237,19 @@
     const infoPosts = document.getElementById('info-posts');
     const savedAccountsSection = document.getElementById('saved-accounts');
     const accountsList = document.getElementById('accounts-list');
-    const consolePanel = document.getElementById('console-panel');
-    const consoleContent = document.getElementById('console-content');
-    const consoleToggle = document.getElementById('console-toggle');
 
+    // NO-OP visible console logger (keeps code calls safe but nothing is shown in UI)
     function logToConsole(message, type = 'info') {
-      if (!consoleContent) return;
-      const logLine = document.createElement('div');
-      logLine.className = `console-line console-${type}`;
-      logLine.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
-      consoleContent.appendChild(logLine);
-      consoleContent.scrollTop = consoleContent.scrollHeight;
-      consolePanel.style.display = 'block';
+      // intentionally empty — UI console removed per request
+      // use browser console for debug if needed: console.debug(`[${type}] ${message}`);
     }
 
-    consoleToggle.addEventListener('click', () => {
-      if (consolePanel.style.display === 'none') {
-        consolePanel.style.display = 'block';
-        consoleToggle.textContent = 'Hide';
-      } else {
-        consolePanel.style.display = 'none';
-        consoleToggle.textContent = 'Show';
-      }
-    });
-
-    // Enable Google button only when terms accepted
     termsCheckbox.addEventListener('change', () => {
       googleSignInBtn.disabled = !termsCheckbox.checked;
-      logToConsole(`Terms accepted: ${termsCheckbox.checked}`, 'info');
     });
 
-    // Saved Accounts helpers (unchanged)
     function loadSavedAccounts() {
       const data = localStorage.getItem('savedAccounts');
-      logToConsole(`Loading saved accounts from localStorage`, 'info');
       return data ? JSON.parse(data) : [];
     }
     function saveAccounts(arr) { localStorage.setItem('savedAccounts', JSON.stringify(arr)); }
@@ -720,7 +259,6 @@
       if (!accounts.includes(email)) {
         accounts.push(email);
         saveAccounts(accounts);
-        logToConsole(`Added account: ${email}`, 'success');
       }
       renderSavedAccounts();
     }
@@ -728,7 +266,6 @@
       let accounts = loadSavedAccounts();
       accounts = accounts.filter(e => e !== email);
       saveAccounts(accounts);
-      logToConsole(`Removed account: ${email}`, 'warning');
       renderSavedAccounts();
     }
     function renderSavedAccounts() {
@@ -750,17 +287,24 @@
         actionsDiv.className = 'account-actions';
         const useBtn = document.createElement('button');
         useBtn.className = 'account-btn use-btn';
+        useBtn.style.padding = '8px 10px';
+        useBtn.style.borderRadius = '6px';
+        useBtn.style.background = '#8e44ad';
+        useBtn.style.color = '#fff';
         useBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Use';
         useBtn.addEventListener('click', () => {
           if (!termsCheckbox.checked) {
             alert("Please accept Terms & Conditions first.");
-            logToConsole('Sign in attempt without accepting terms', 'error');
             return;
           }
           signInWithGoogle();
         });
         const removeBtn = document.createElement('button');
         removeBtn.className = 'account-btn remove-btn';
+        removeBtn.style.padding = '8px 10px';
+        removeBtn.style.borderRadius = '6px';
+        removeBtn.style.background = '#3a3a5a';
+        removeBtn.style.color = '#fff';
         removeBtn.innerHTML = '<i class="fas fa-times"></i> Remove';
         removeBtn.addEventListener('click', () => {
           removeSavedAccount(email);
@@ -774,18 +318,18 @@
     }
 
     function generateRandomId() {
-      return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      return Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12);
     }
 
     // Stars
     function createStars() {
       const starsContainer = document.getElementById('stars');
       if (!starsContainer) return;
-      const starCount = 150;
+      const starCount = 110;
       for (let i = 0; i < starCount; i++) {
         const star = document.createElement('div');
         star.classList.add('star');
-        const size = Math.random() * 1.5 + 0.5;
+        const size = Math.random() * 1.6 + 0.4;
         star.style.width = `${size}px`;
         star.style.height = `${size}px`;
         star.style.left = `${Math.random() * 100}%`;
@@ -797,36 +341,72 @@
       }
     }
 
-    // Load user private/profile data and update UI (fixes join date + posts not showing)
+    // Load user private/profile data and update UI
     async function loadUserData(uid) {
       if (!uid) return;
       try {
         const userPrivateRef = db.collection('usersPrivate').doc(uid);
         const snap = await userPrivateRef.get();
         if (!snap.exists) {
-          logToConsole('No userPrivate doc found for uid: ' + uid, 'warning');
-          // keep defaults
           infoJoinDate.textContent = '-';
           infoPosts.textContent = '0';
           return;
         }
         const data = snap.data();
-        // joinDate may be a Firestore Timestamp
         if (data.joinDate && data.joinDate.toDate) {
           infoJoinDate.textContent = data.joinDate.toDate().toLocaleDateString();
         } else if (data.joinDate) {
-          // fallback if stored as ISO string
           infoJoinDate.textContent = new Date(data.joinDate).toLocaleDateString();
         } else {
           infoJoinDate.textContent = '-';
         }
-        // posts count - prefer publicPostCount field
         const postsCount = (data.publicPostCount != null) ? data.publicPostCount : 0;
         infoPosts.textContent = String(postsCount);
-        logToConsole('Loaded userPrivate data for ' + uid, 'success');
       } catch (err) {
-        console.error('loadUserData error', err);
-        logToConsole('Failed to load user data: ' + (err.message || err), 'error');
+        console.debug('loadUserData error', err);
+      }
+    }
+
+    // Ensure public profile has uid; if usersPrivate.slug missing create it
+    async function ensurePublicProfileUid(uid, userInfoFromAuth = {}) {
+      if (!uid) return;
+      try {
+        const userPrivateRef = db.collection('usersPrivate').doc(uid);
+        const userPrivateSnap = await userPrivateRef.get();
+        let slug = null;
+        if (userPrivateSnap.exists) {
+          const data = userPrivateSnap.data();
+          slug = data.slug || null;
+        }
+        if (!slug) {
+          slug = generateRandomId();
+          await userPrivateRef.set({ slug: slug }, { merge: true });
+        }
+        const publicProfileRef = db.collection('publicProfiles').doc(slug);
+        const publicSnap = await publicProfileRef.get();
+        const now = firebase.firestore.Timestamp.now();
+        if (!publicSnap.exists) {
+          await publicProfileRef.set({
+            name: userInfoFromAuth.displayName || '',
+            bio: '',
+            joinDate: now,
+            profilePhotoUrl: userInfoFromAuth.photoURL || '',
+            slug: slug,
+            publicPostCount: 0,
+            followersCount: 0,
+            followingCount: 0,
+            visibility: false,
+            verified: false,
+            uid: uid
+          });
+        } else {
+          const pData = publicSnap.data();
+          if (!pData.uid) {
+            await publicProfileRef.update({ uid: uid });
+          }
+        }
+      } catch (err) {
+        console.debug('ensurePublicProfileUid error', err);
       }
     }
 
@@ -834,21 +414,17 @@
     async function signInWithGoogle() {
       if (!termsCheckbox.checked) {
         alert("Please accept Terms & Conditions and Privacy Policy first.");
-        logToConsole('Sign in attempt without accepting terms', 'error');
         return;
       }
-      logToConsole('Starting Google sign-in process...', 'info');
       try {
         const result = await auth.signInWithPopup(provider);
         const user = result.user;
         if (!user) throw new Error('No user object returned from sign-in.');
         const userPrivateRef = db.collection('usersPrivate').doc(user.uid);
-        logToConsole(`User signed in: ${user.email} (${user.uid})`, 'success');
         const now = firebase.firestore.Timestamp.now();
 
         const userPrivateDoc = await userPrivateRef.get();
         if (!userPrivateDoc.exists) {
-          logToConsole('Creating new user private document...', 'info');
           const slug = generateRandomId();
           await userPrivateRef.set({
             email: user.email,
@@ -880,37 +456,31 @@
             verified: false,
             uid: user.uid
           });
-          // update UI (formatting join date nicely)
           displayNameEl.textContent = user.displayName || 'User';
           infoJoinDate.textContent = new Date().toLocaleDateString();
           infoPosts.textContent = '0';
           successMessage.style.display = 'flex';
-          logToConsole('New user created & onboarded', 'success');
         } else {
-          // existing user - update lastLogin and load existing fields
           await userPrivateRef.update({ lastLogin: now }).catch(()=>{});
           await loadUserData(user.uid);
           displayNameEl.textContent = user.displayName || 'User';
           successMessage.style.display = 'none';
-          logToConsole('Existing user updated and loaded', 'info');
         }
 
-        // Add to saved accounts and update UI
+        await ensurePublicProfileUid(user.uid, { displayName: user.displayName, photoURL: user.photoURL });
+
         addSavedAccount(user.email);
         signupForm.style.display = 'none';
         signedInView.style.display = 'block';
         savedAccountsSection.style.display = 'none';
       } catch (error) {
         console.error("Sign-in error:", error);
-        logToConsole(`Sign-in failed: ${error.message || error}`, 'error');
         alert("Sign-in failed: " + (error.message || error));
       }
     }
 
-    // Attach signInWithGoogle to button
     googleSignInBtn.addEventListener('click', signInWithGoogle);
 
-    // Sign out button
     signoutBtn.addEventListener('click', () => {
       auth.signOut().then(() => {
         signedInView.style.display = 'none';
@@ -919,18 +489,15 @@
         termsCheckbox.checked = false;
         googleSignInBtn.disabled = true;
         renderSavedAccounts();
-        // reset small UI pieces
         displayNameEl.textContent = '';
         infoJoinDate.textContent = '-';
         infoPosts.textContent = '0';
-        logToConsole('User signed out', 'info');
       }).catch(error => {
-        logToConsole(`Sign-out failed: ${error.message}`, 'error');
+        console.error("Sign-out failed:", error);
         alert("Sign-out failed: " + error.message);
       });
     });
 
-    // Switch account
     switchAccountBtn.addEventListener('click', () => {
       auth.signOut().then(() => {
         signedInView.style.display = 'none';
@@ -942,59 +509,50 @@
         displayNameEl.textContent = '';
         infoJoinDate.textContent = '-';
         infoPosts.textContent = '0';
-        logToConsole('Switching accounts', 'info');
       });
     });
 
-    // Go to dashboard — uses the path you requested
     goProfileBtn.addEventListener('click', () => {
-      logToConsole('Opening dashboard (requested path) ...', 'info');
       const user = auth.currentUser;
       if (user) {
-        // open in new tab/window safely
         window.open('/teamgalaxy/index.html', '_blank', 'noopener,noreferrer');
       } else {
         alert("Please sign in first to access your dashboard.");
-        logToConsole('Dashboard open attempted while not signed in', 'error');
       }
     });
 
-    // Auth state handling — now also loads user data (fixes join date + posts)
+    // Auth state handling
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         signupForm.style.display = 'none';
         signedInView.style.display = 'block';
         displayNameEl.textContent = user.displayName || 'User';
         savedAccountsSection.style.display = 'none';
-        logToConsole(`User authenticated: ${user.email}`, 'success');
-        await loadUserData(user.uid); // <-- crucial fix
+        await loadUserData(user.uid);
+        await ensurePublicProfileUid(user.uid, { displayName: user.displayName, photoURL: user.photoURL });
       } else {
         renderSavedAccounts();
         signupForm.style.display = 'block';
         signedInView.style.display = 'none';
-        logToConsole('No user authenticated', 'info');
       }
     });
 
-    // Small hover animations (kept)
+    // Small hover animations
     const buttons = document.querySelectorAll('.btn, .google-btn, .account-btn');
     buttons.forEach(button => {
       button.addEventListener('mouseenter', () => {
         button.style.transform = 'translateY(-2px)';
-        button.style.boxShadow = '0 5px 15px rgba(0, 0, 0, 0.3)';
+        button.style.boxShadow = '0 8px 20px rgba(0,0,0,0.28)';
       });
       button.addEventListener('mouseleave', () => {
         button.style.transform = 'translateY(0)';
-        button.style.boxShadow = '0 3px 8px rgba(0, 0, 0, 0.2)';
+        button.style.boxShadow = 'none';
       });
     });
 
     // Init
     renderSavedAccounts();
     createStars();
-    logToConsole('Application initialized', 'success');
-    logToConsole('Firebase connected successfully', 'success');
-    logToConsole('Waiting for user interaction...', 'info');
   </script>
 </body>
 </html>
