@@ -25,7 +25,7 @@
     }
     *{box-sizing:border-box}
     body{font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;margin:0;padding:20px;background:var(--primary-bg);color:var(--text);min-height:100vh;position:relative;overflow-x:hidden}
-    
+
     /* Stars Background */
     .stars {
       position: fixed;
@@ -48,7 +48,7 @@
       0%, 100% { opacity: 0.2; }
       50% { opacity: 1; }
     }
-    
+
     /* Loading Screen */
     .loading-screen {
       position: fixed;
@@ -85,7 +85,7 @@
       color: var(--primary);
       text-align: center;
     }
-    
+
     .container{max-width:1200px;margin:0 auto;position:relative;z-index:10}
     .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid var(--border)}
     h1{margin:0;background:var(--accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -94,12 +94,10 @@
     .btn-primary{background:linear-gradient(45deg,var(--primary),var(--secondary));color:#fff}
     .btn-secondary{background:rgba(255,255,255,0.1);color:#fff}
     .folders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;margin-bottom:30px}
-    .folder-card{background:var(--card-bg);border-radius:12px;padding:16px;box-shadow:0 4px 15px rgba(0,0,0,0.06);transition:all .18s;cursor:pointer;border:2px solid transparent}
-    .folder-card:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(0, 212, 255, 0.2);border-color:rgba(0, 212, 255, 0.3)}
+    .folder-card{background:var(--card-bg);border-radius:12px;padding:16px;box-shadow:0 4px 15px rgba(0,0,0,0.06);transition:all .18s;cursor:pointer;border:2px solid transparent;position:relative}
     .folder-title{font-size:1.1rem;color:var(--primary);margin-bottom:6px}
     .folder-images{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
     .folder-image{width:100%;height:80px;object-fit:cover;border-radius:6px}
-    .items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px}
     .item-card{background:var(--card-bg);border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.06);position:relative}
     .item-image{width:100%;height:200px;object-fit:cover;border-bottom:1px solid var(--border)}
     .item-info{padding:12px}
@@ -130,11 +128,11 @@
     .small-muted{font-size:12px;color:#9aa}
     .auth-controls{display:flex;gap:8px;margin-top:8px}
     .small-btn{padding:6px 8px;border-radius:6px;border:0;background:rgba(255,255,255,0.1);color:#fff;cursor:pointer}
-    
+
     .hidden {
       display: none !important;
     }
-    
+
     .back-btn {
       background: rgba(255,255,255,0.1);
       border: none;
@@ -149,6 +147,11 @@
     .back-btn:hover {
       background: rgba(0, 212, 255, 0.3);
     }
+
+    /* small overlay controls for folder images */
+    .img-wrap{position:relative}
+    .make-first-btn{position:absolute;right:6px;top:6px;background:rgba(0,0,0,0.6);color:#fff;border:0;padding:4px 6px;border-radius:6px;font-size:11px;cursor:pointer}
+    .primary-badge{position:absolute;left:6px;top:6px;background:#00d4ff;color:#012;border-radius:6px;padding:3px 6px;font-size:11px}
   </style>
 </head>
 <body>
@@ -157,7 +160,7 @@
     <div class="loading-spinner"></div>
     <div class="loading-text">Verifying admin access...</div>
   </div>
-  
+
   <!-- Stars Background -->
   <div class="stars" id="stars"></div>
 
@@ -212,6 +215,10 @@
             <option value="false">No</option>
           </select>
         </div>
+        <div class="form-group">
+          <label for="folderOrder">Folder Order (numeric)</label>
+          <input type="number" id="folderOrder" min="0" placeholder="0 — lower values show earlier">
+        </div>
         <button type="submit" class="btn btn-primary">Save Folder</button>
       </form>
     </div>
@@ -226,6 +233,9 @@
         <div class="form-group">
           <label for="assignFolder">Select Folder</label>
           <select id="assignFolder"><option value="">No Folder</option></select>
+        </div>
+        <div class="form-group">
+          <label><input type="checkbox" id="assignPrimary"> Make this image the primary (first) image in folder</label>
         </div>
         <button type="submit" class="btn btn-primary">Assign Item</button>
       </form>
@@ -309,7 +319,7 @@
       let currentFilter = 'all';
       const logs = [];
 
-      function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'<').replace(/>/g,'>'); }
+      function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
       window.consolePanelLog = function(message, level='log'){
         try {
@@ -420,7 +430,7 @@
       const i = Math.floor(Math.log(Math.max(bytes,1))/Math.log(k));
       return (bytes/Math.pow(k,i)).toFixed(2)+' '+sizes[i];
     }
-    function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'<').replace(/>/g,'>'); }
+    function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
     // Update auth sidebar UI when auth state changes
     async function updateAuthSidebar(user){
@@ -545,7 +555,9 @@
       folderCard.className = 'folder-card';
       folderCard.dataset.id = folder.id;
 
-      const images = folder.images || [];
+      // ensure images sorted by order (orderBy or order)
+      const images = (folder.images || []).slice().sort((a,b)=> (a.orderBy || a.order || 0) - (b.orderBy || b.order || 0));
+
       folderCard.innerHTML = `
         <div class="folder-title">${escapeHtml(folder.title || 'Untitled')}</div>
         <div class="folder-description">${escapeHtml(folder.description || 'No description')}</div>
@@ -565,14 +577,28 @@
       actions.appendChild(editBtn); actions.appendChild(delBtn);
       folderCard.appendChild(actions);
 
-      // images preview
+      // images preview (sorted)
       if(images.length > 0){
         const imgsWrap = document.createElement('div');
         imgsWrap.className = 'folder-images';
         images.slice(0,8).forEach(img => {
+          const wrap = document.createElement('div'); wrap.className='img-wrap';
+          wrap.style.position='relative';
+
           const i = document.createElement('img'); i.className='folder-image'; i.src = img.url; i.alt = img.title || '';
           i.onerror = () => { i.src = ''; };
-          imgsWrap.appendChild(i);
+          wrap.appendChild(i);
+
+          // primary badge if order 0
+          if((img.orderBy || img.order || 0) === 0){
+            const badge = document.createElement('div'); badge.className='primary-badge'; badge.textContent='Primary'; wrap.appendChild(badge);
+          }
+
+          const makeFirst = document.createElement('button'); makeFirst.className='make-first-btn'; makeFirst.textContent='Make first';
+          makeFirst.addEventListener('click', (e)=>{ e.stopPropagation(); setPrimaryImage(folder.id, img.id); });
+          wrap.appendChild(makeFirst);
+
+          imgsWrap.appendChild(wrap);
         });
         if(images.length>8){
           const more = document.createElement('div'); more.style.cssText='text-align:center;color:var(--muted);font-size:0.8rem'; more.textContent = `+${images.length-8} more`;
@@ -590,6 +616,30 @@
       delBtn.addEventListener('click', (e)=>{ e.stopPropagation(); deleteFolder(folder.id); });
 
       foldersGrid.appendChild(folderCard);
+    }
+
+    // set chosen image as primary by reindexing images array
+    async function setPrimaryImage(folderId, imageId){
+      try {
+        recordAccess(['images'], `setPrimaryImage portfolioFolders/${folderId}`);
+        const ref = db.collection('portfolioFolders').doc(folderId);
+        const doc = await ref.get(); if(!doc.exists) throw new Error('Folder not found');
+        const imgs = (doc.data().images || []).slice();
+        // find index
+        const idx = imgs.findIndex(i=>i.id===imageId);
+        if(idx === -1) return alert('Image not found in folder');
+        const selected = imgs.splice(idx,1)[0];
+        // increment all existing orderBy by 1
+        imgs.forEach(i=> i.orderBy = (i.orderBy || i.order || 0) + 1);
+        selected.orderBy = 0;
+        imgs.unshift(selected);
+        await ref.update({ images: imgs, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+        consolePanelLog('Set primary image', 'success');
+        await loadFolders();
+      } catch (err){
+        consolePanelLog('Error setting primary image: ' + (err.code ? `${err.code} — ${err.message}` : err.message), 'error');
+        alert('Could not set primary image. See console.');
+      }
     }
 
     // Render item card
@@ -655,9 +705,9 @@
     }
 
     // modal helpers
-    function showFolderModal(){ document.getElementById('folderModalTitle').textContent='Add New Folder'; folderForm.reset(); folderForm.removeAttribute('data-folder-id'); folderModal.style.display='block'; }
+    function showFolderModal(){ document.getElementById('folderModalTitle').textContent='Add New Folder'; folderForm.reset(); folderForm.removeAttribute('data-folder-id'); document.getElementById('folderOrder').value=''; folderModal.style.display='block'; }
     function closeFolderModal(){ folderModal.style.display='none'; }
-    function assignItem(itemId){ currentItemToAssign = itemId; populateFolderDropdown(); assignModal.style.display='block'; }
+    function assignItem(itemId){ currentItemToAssign = itemId; populateFolderDropdown(); document.getElementById('assignPrimary').checked = false; assignModal.style.display='block'; }
     function closeAssignModal(){ assignModal.style.display='none'; currentItemToAssign=null; }
     function editItem(itemId){
       const it = items.find(i=>i.id===itemId); if(!it) return;
@@ -675,6 +725,7 @@
       document.getElementById('folderTitle').value = folder.title || '';
       document.getElementById('folderDescription').value = folder.description || '';
       document.getElementById('folderPublic').value = folder.isPublic ? 'true' : 'false';
+      document.getElementById('folderOrder').value = (folder.folderOrder != null) ? folder.folderOrder : '';
       folderForm.setAttribute('data-folder-id', folderId);
       folderModal.style.display = 'block';
     }
@@ -715,12 +766,14 @@
     folderForm.addEventListener('submit', async (e)=>{
       e.preventDefault();
       const folderId = folderForm.getAttribute('data-folder-id');
+      const orderVal = document.getElementById('folderOrder').value;
       const data = {
         title: document.getElementById('folderTitle').value,
         description: document.getElementById('folderDescription').value,
         isPublic: document.getElementById('folderPublic').value === 'true',
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       };
+      if(orderVal !== '') data.folderOrder = parseInt(orderVal,10);
       try {
         if(folderId){
           recordAccess(Object.keys(data), `update portfolioFolders/${folderId}`);
@@ -728,7 +781,8 @@
           consolePanelLog('Folder updated', 'success');
         } else {
           data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-          data.folderOrder = (folders.length || 0);
+          // if not supplied, set to end
+          data.folderOrder = (data.folderOrder != null) ? data.folderOrder : (folders.length || 0);
           recordAccess(Object.keys(data), 'create portfolioFolders');
           await db.collection('portfolioFolders').add(data);
           consolePanelLog('Folder created', 'success');
@@ -745,6 +799,7 @@
       e.preventDefault();
       if(!currentItemToAssign) return;
       const selectedFolderId = document.getElementById('assignFolder').value || null;
+      const makePrimary = document.getElementById('assignPrimary').checked;
       const item = items.find(i=>i.id===currentItemToAssign);
       if(!item) return;
       try {
@@ -758,7 +813,15 @@
           const folderRef = db.collection('portfolioFolders').doc(selectedFolderId);
           const folderDoc = await folderRef.get();
           const folderImages = folderDoc.exists ? (folderDoc.data().images || []) : [];
-          folderImages.push({ id: item.id, url: item.dropboxUrl, title: item.title, orderBy: folderImages.length });
+
+          if(makePrimary){
+            // increment existing orders
+            folderImages.forEach(img => { img.orderBy = (img.orderBy || img.order || 0) + 1; });
+            folderImages.unshift({ id: item.id, url: item.dropboxUrl, title: item.title, orderBy: 0 });
+          } else {
+            const nextOrder = (folderImages.length > 0) ? Math.max(...folderImages.map(i=> (i.orderBy||i.order||0))) + 1 : 0;
+            folderImages.push({ id: item.id, url: item.dropboxUrl, title: item.title, orderBy: nextOrder });
+          }
           batch.update(folderRef, { images: folderImages });
         }
 
@@ -766,9 +829,9 @@
           const oldRef = db.collection('portfolioFolders').doc(item.folderId);
           const oldDoc = await oldRef.get();
           if(oldDoc.exists){
-            const oldImgs = oldDoc.data().images || [];
-            const filtered = oldImgs.filter(img => img.id !== item.id);
-            batch.update(oldRef, { images: filtered });
+            let oldImgs = oldDoc.data().images || [];
+            oldImgs = oldImgs.filter(img => img.id !== item.id).map((img,idx)=> { img.orderBy = idx; return img; });
+            batch.update(oldRef, { images: oldImgs });
           }
         }
 
@@ -872,23 +935,23 @@
     function createStars() {
       const starsContainer = document.getElementById('stars');
       const starCount = 150;
-      
+
       for (let i = 0; i < starCount; i++) {
         const star = document.createElement('div');
         star.classList.add('star');
-        
+
         const x = Math.random() * 100;
         const y = Math.random() * 100;
         star.style.left = `${x}%`;
         star.style.top = `${y}%`;
-        
+
         const size = Math.random() * 3 + 1;
         star.style.width = `${size}px`;
         star.style.height = `${size}px`;
-        
+
         const duration = Math.random() * 5 + 2;
         star.style.setProperty('--duration', `${duration}s`);
-        
+
         starsContainer.appendChild(star);
       }
     }
@@ -905,7 +968,7 @@
     };
 
     // expose some funcs for debugging if needed
-    window._tg = { loadFolders, loadItems, ensureFolderIdField, recordAccess, deleteItem };
+    window._tg = { loadFolders, loadItems, ensureFolderIdField, recordAccess, deleteItem, setPrimaryImage };
   </script>
 </body>
 </html>
