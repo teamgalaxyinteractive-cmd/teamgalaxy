@@ -94,10 +94,12 @@
     .btn-primary{background:linear-gradient(45deg,var(--primary),var(--secondary));color:#fff}
     .btn-secondary{background:rgba(255,255,255,0.1);color:#fff}
     .folders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;margin-bottom:30px}
-    .folder-card{background:var(--card-bg);border-radius:12px;padding:16px;box-shadow:0 4px 15px rgba(0,0,0,0.06);transition:all .18s;cursor:pointer;border:2px solid transparent;position:relative}
+    .folder-card{background:var(--card-bg);border-radius:12px;padding:16px;box-shadow:0 4px 15px rgba(0,0,0,0.06);transition:all .18s;cursor:pointer;border:2px solid transparent}
+    .folder-card:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(0, 212, 255, 0.2);border-color:rgba(0, 212, 255, 0.3)}
     .folder-title{font-size:1.1rem;color:var(--primary);margin-bottom:6px}
     .folder-images{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
     .folder-image{width:100%;height:80px;object-fit:cover;border-radius:6px}
+    .items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px}
     .item-card{background:var(--card-bg);border-radius:12px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.06);position:relative}
     .item-image{width:100%;height:200px;object-fit:cover;border-bottom:1px solid var(--border)}
     .item-info{padding:12px}
@@ -319,7 +321,7 @@
       let currentFilter = 'all';
       const logs = [];
 
-      function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+      function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'<').replace(/>/g,'>'); }
 
       window.consolePanelLog = function(message, level='log'){
         try {
@@ -430,7 +432,7 @@
       const i = Math.floor(Math.log(Math.max(bytes,1))/Math.log(k));
       return (bytes/Math.pow(k,i)).toFixed(2)+' '+sizes[i];
     }
-    function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'<').replace(/>/g,'>'); }
 
     // Update auth sidebar UI when auth state changes
     async function updateAuthSidebar(user){
@@ -555,8 +557,8 @@
       folderCard.className = 'folder-card';
       folderCard.dataset.id = folder.id;
 
-      // ensure images sorted by order (orderBy or order)
-      const images = (folder.images || []).slice().sort((a,b)=> (a.orderBy || a.order || 0) - (b.orderBy || b.order || 0));
+      const images = folder.images || [];
+      const sortedImages = images.slice().sort((a,b)=> (a.orderBy || a.order || 0) - (b.orderBy || b.order || 0));
 
       folderCard.innerHTML = `
         <div class="folder-title">${escapeHtml(folder.title || 'Untitled')}</div>
@@ -577,31 +579,34 @@
       actions.appendChild(editBtn); actions.appendChild(delBtn);
       folderCard.appendChild(actions);
 
-      // images preview (sorted)
-      if(images.length > 0){
+      // images preview
+      if(sortedImages.length > 0){
         const imgsWrap = document.createElement('div');
         imgsWrap.className = 'folder-images';
-        images.slice(0,8).forEach(img => {
-          const wrap = document.createElement('div'); wrap.className='img-wrap';
-          wrap.style.position='relative';
+        sortedImages.slice(0,8).forEach((img, idx) => {
+          const iWrap = document.createElement('div'); iWrap.className='img-wrap';
+          iWrap.style.position='relative';
 
           const i = document.createElement('img'); i.className='folder-image'; i.src = img.url; i.alt = img.title || '';
           i.onerror = () => { i.src = ''; };
-          wrap.appendChild(i);
+          iWrap.appendChild(i);
 
           // primary badge if order 0
           if((img.orderBy || img.order || 0) === 0){
-            const badge = document.createElement('div'); badge.className='primary-badge'; badge.textContent='Primary'; wrap.appendChild(badge);
+            const badge = document.createElement('div'); badge.className='primary-badge'; badge.textContent='Primary'; iWrap.appendChild(badge);
           }
 
           const makeFirst = document.createElement('button'); makeFirst.className='make-first-btn'; makeFirst.textContent='Make first';
-          makeFirst.addEventListener('click', (e)=>{ e.stopPropagation(); setPrimaryImage(folder.id, img.id); });
-          wrap.appendChild(makeFirst);
+          // use data attributes to avoid closure/id mismatch
+          makeFirst.dataset.folderId = folder.id;
+          makeFirst.dataset.imageId = img.id || img.url || idx;
+          makeFirst.addEventListener('click', (e)=>{ e.stopPropagation(); setPrimaryImage(makeFirst.dataset.folderId, makeFirst.dataset.imageId); });
+          iWrap.appendChild(makeFirst);
 
-          imgsWrap.appendChild(wrap);
+          imgsWrap.appendChild(iWrap);
         });
-        if(images.length>8){
-          const more = document.createElement('div'); more.style.cssText='text-align:center;color:var(--muted);font-size:0.8rem'; more.textContent = `+${images.length-8} more`;
+        if(sortedImages.length>8){
+          const more = document.createElement('div'); more.style.cssText='text-align:center;color:var(--muted);font-size:0.8rem'; more.textContent = `+${sortedImages.length-8} more`;
           imgsWrap.appendChild(more);
         }
         folderCard.appendChild(imgsWrap);
@@ -619,20 +624,25 @@
     }
 
     // set chosen image as primary by reindexing images array
-    async function setPrimaryImage(folderId, imageId){
+    async function setPrimaryImage(folderId, imageIdentifier){
       try {
         recordAccess(['images'], `setPrimaryImage portfolioFolders/${folderId}`);
         const ref = db.collection('portfolioFolders').doc(folderId);
         const doc = await ref.get(); if(!doc.exists) throw new Error('Folder not found');
         const imgs = (doc.data().images || []).slice();
-        // find index
-        const idx = imgs.findIndex(i=>i.id===imageId);
-        if(idx === -1) return alert('Image not found in folder');
+
+        // try to find by id, then url, then fallback to index
+        let idx = imgs.findIndex(i=> (i.id && String(i.id) === String(imageIdentifier)) );
+        if(idx === -1) idx = imgs.findIndex(i=> (i.url && i.url === imageIdentifier));
+        if(idx === -1 && !isNaN(Number(imageIdentifier))) idx = Number(imageIdentifier);
+        if(idx < 0 || idx >= imgs.length) return alert('Image not found in folder');
+
         const selected = imgs.splice(idx,1)[0];
-        // increment all existing orderBy by 1
+        // bump others
         imgs.forEach(i=> i.orderBy = (i.orderBy || i.order || 0) + 1);
         selected.orderBy = 0;
         imgs.unshift(selected);
+
         await ref.update({ images: imgs, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
         consolePanelLog('Set primary image', 'success');
         await loadFolders();
@@ -766,13 +776,13 @@
     folderForm.addEventListener('submit', async (e)=>{
       e.preventDefault();
       const folderId = folderForm.getAttribute('data-folder-id');
-      const orderVal = document.getElementById('folderOrder').value;
       const data = {
         title: document.getElementById('folderTitle').value,
         description: document.getElementById('folderDescription').value,
         isPublic: document.getElementById('folderPublic').value === 'true',
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       };
+      const orderVal = document.getElementById('folderOrder').value;
       if(orderVal !== '') data.folderOrder = parseInt(orderVal,10);
       try {
         if(folderId){
@@ -781,7 +791,6 @@
           consolePanelLog('Folder updated', 'success');
         } else {
           data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-          // if not supplied, set to end
           data.folderOrder = (data.folderOrder != null) ? data.folderOrder : (folders.length || 0);
           recordAccess(Object.keys(data), 'create portfolioFolders');
           await db.collection('portfolioFolders').add(data);
@@ -815,7 +824,6 @@
           const folderImages = folderDoc.exists ? (folderDoc.data().images || []) : [];
 
           if(makePrimary){
-            // increment existing orders
             folderImages.forEach(img => { img.orderBy = (img.orderBy || img.order || 0) + 1; });
             folderImages.unshift({ id: item.id, url: item.dropboxUrl, title: item.title, orderBy: 0 });
           } else {
@@ -829,9 +837,9 @@
           const oldRef = db.collection('portfolioFolders').doc(item.folderId);
           const oldDoc = await oldRef.get();
           if(oldDoc.exists){
-            let oldImgs = oldDoc.data().images || [];
-            oldImgs = oldImgs.filter(img => img.id !== item.id).map((img,idx)=> { img.orderBy = idx; return img; });
-            batch.update(oldRef, { images: oldImgs });
+            const oldImgs = oldDoc.data().images || [];
+            const filtered = oldImgs.filter(img => img.id !== item.id);
+            batch.update(oldRef, { images: filtered });
           }
         }
 
