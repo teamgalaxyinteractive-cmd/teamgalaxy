@@ -64,6 +64,25 @@
     .loading-progress{ width:360px; max-width:90%; background:rgba(255,255,255,0.04); border-radius:12px; padding:6px; border:1px solid rgba(255,255,255,0.03); }
     .loading-bar { height:10px; background:linear-gradient(90deg,#00d4ff,#0077ff); width:0%; border-radius:8px; transition:width 300ms linear; }
 
+    /* Page spinner overlay (shown during page switching/preload) */
+    .page-spinner {
+      position: absolute;
+      left: 50%;
+      top: 48%;
+      transform: translate(-50%, -50%);
+      z-index: 50;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:8px;
+      background: rgba(10,10,15,0.6);
+      padding:14px 18px;
+      border-radius:12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    }
+    .page-spinner .small { color:#d7eaff; font-size:13px; }
+    .page-spinner .mini-spinner { width:36px; height:36px; border:4px solid rgba(255,255,255,0.06); border-top:4px solid var(--primary); border-radius:50%; animation:spin 1s linear infinite; }
+
     /* Console Panel restored */
     #console-panel{ position:fixed; left:0; right:0; bottom:0; height:260px; background:var(--panel-bg); color:#d4d4d4; font-family:Consolas,monospace; z-index:99999; display:flex; flex-direction:column; border-top:2px solid #262626; overflow: hidden; box-shadow: 0 -6px 24px rgba(0,0,0,0.6); }
     #console-header{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#222;border-bottom:1px solid #2a2a2a;flex:0 0 auto}
@@ -95,7 +114,7 @@
     </div>
   </div>
 
-  <div class="container" id="mainContainer" style="display:none">
+  <div class="container" id="mainContainer" style="display:none; position:relative;">
     <div class="header">
       <div class="title">
         <button class="page-btn back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i></button>
@@ -142,6 +161,12 @@
     <div id="portfolioGallery" class="gallery" aria-live="polite"></div>
 
     <div id="pagination" class="pagination"></div>
+
+    <!-- Page spinner overlay (shown while switching pages) -->
+    <div id="pageSpinner" class="page-spinner hidden" aria-hidden="true">
+      <div class="mini-spinner"></div>
+      <div class="small">Loading page… please wait</div>
+    </div>
   </div>
 
   <!-- Console Panel -->
@@ -236,7 +261,7 @@
   </script>
 
   <script>
-  /***** App code (final) *****/
+  /***** App code (folderId + page spinner) *****/
   const CLOUDFLARE_WORKER_URL = 'https://portfolio-dropbox-handler.teamgalaxy-interactive.workers.dev/';
   const firebaseConfig = {
     apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
@@ -296,7 +321,7 @@
   document.getElementById('btnSignIn').addEventListener('click', async ()=>{ const provider = new firebase.auth.GoogleAuthProvider(); try { const res = await auth.signInWithPopup(provider); await updateAuthUI(res.user); appLog('Signed in: '+res.user.email,'success'); } catch(e){ appLog('Sign-in failed: '+e.message,'error'); }});
   document.getElementById('btnSignOut').addEventListener('click', async ()=>{ try { await auth.signOut(); updateAuthUI(null); appLog('Signed out','info'); } catch(e){ appLog('Sign-out failed: '+e.message,'error'); }});
 
-  // Upload + preview (max 5) and include filderId = null
+  // Upload + preview (max 5) and include folderId = null
   const MAX_UPLOAD = 5;
   const inputEl = document.getElementById('imageUpload');
   const preview = document.getElementById('previewContainer');
@@ -331,7 +356,7 @@
     if(failed.length) appLog(`${failed.length} upload(s) failed`,'error'); else appLog('All uploads done','success');
     document.getElementById('loadingIndicator').style.display='none';
     inputEl.value=''; preview.innerHTML=''; document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload to Portfolio';
-    // refresh metadata & show current page (keeps currentPage sensible)
+    // refresh metadata & show current page
     await loadAllMetadataThenShow();
   }
 
@@ -350,7 +375,7 @@
     const res = await resp.json();
     if(!res.success) throw new Error(res.error || 'Upload failed');
 
-    // add filderId = null to metadata
+    // add folderId = null to metadata
     const itemData = {
       ownerUid: user ? user.uid : null,
       folderId: null,
@@ -473,10 +498,18 @@
     });
   }
 
+  function showPageSpinner(show){
+    const sp = document.getElementById('pageSpinner');
+    if(!sp) return;
+    if(show){ sp.classList.remove('hidden'); sp.setAttribute('aria-hidden','false'); }
+    else { sp.classList.add('hidden'); sp.setAttribute('aria-hidden','true'); }
+  }
+
   async function renderPage(pageNum, options = { showProgress: true }) {
     currentPage = pageNum;
     const gallery = document.getElementById('portfolioGallery');
     gallery.style.display = 'none'; // hide gallery so no placeholders are visible
+    showPageSpinner(true); // show spinner overlay during preload
     const start = (pageNum - 1) * PAGE_SIZE;
     const pageItems = allItems.slice(start, start + PAGE_SIZE);
 
@@ -546,17 +579,17 @@
     });
 
     // Small delay to allow browsers to actually paint the images when gallery is shown
-    // (this helps prevent flicker)
     await sleep(120);
 
     // Enable pagination & show gallery
     setPaginationDisabled(false);
     document.getElementById('loadingProgressWrap').style.display = 'none';
+    showPageSpinner(false);
     gallery.style.display = 'grid'; // show grid now that images assigned
     updateStats();
     renderPagination();
 
-    // If this was first load (main hidden), hide main loading screen now
+    // If this was first load (main hidden), hide the global loading screen now
     if (document.getElementById('mainContainer').style.display === 'none') {
       hideLoadingScreenAndShowMain();
     }
