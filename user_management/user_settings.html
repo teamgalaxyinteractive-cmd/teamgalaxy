@@ -120,6 +120,15 @@
           <input type="text" id="slugInput" class="form-input" placeholder="Enter your username slug (e.g., john_doe)">
         </div>
 
+        <!-- visibility control for publicProfiles -->
+        <div class="form-group">
+          <label class="form-label">Public profile</label>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" id="visibilityCheckbox" />
+            <label for="visibilityCheckbox" style="font-size:.95rem;color:#cfd7ff;">Make my profile public</label>
+          </div>
+        </div>
+
         <!-- hidden managed field -->
         <div class="form-group" style="display:none;">
           <label class="form-label">Profile Photo URL</label>
@@ -223,7 +232,7 @@
     // imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, updateDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
     // config
     const firebaseConfig = {
@@ -507,7 +516,7 @@
         if (modalCloseBtn) modalCloseBtn.addEventListener('click', ()=> { if (editorModal) { editorModal.classList.remove('show'); editorModal.setAttribute('aria-hidden','true'); } });
         if (cancelModalBtn) cancelModalBtn.addEventListener('click', ()=> { if (editorModal) { editorModal.classList.remove('show'); editorModal.setAttribute('aria-hidden','true'); } });
 
-        // save other profile fields
+        // save other profile fields (now updates usersPrivate AND publicProfiles)
         async function updateProfile() {
           try {
             if (!currentUser) return;
@@ -515,16 +524,34 @@
             const slug = (slugInput?.value || '').trim();
             const photoUrl = (photoUrlInput?.value || '').trim();
             const bio = (bioInput?.value || '').trim();
+            const visibilityCheckbox = document.getElementById('visibilityCheckbox');
+            const visibility = !!(visibilityCheckbox && visibilityCheckbox.checked);
+
             if (!name || !slug) { safeShowStatus('Name and slug are required.', 'error'); return; }
             if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving...'; }
-            const docRef = doc(db, 'usersPrivate', currentUser.uid);
-            await updateDoc(docRef, {
-              name, slug,
+
+            // Update usersPrivate (doc id = uid)
+            const privateRef = doc(db, 'usersPrivate', currentUser.uid);
+            await updateDoc(privateRef, {
+              name,
+              slug,
               profilePhotoUrl: photoUrl || null,
               bio,
               termsAccepted: true,
-              termsTimestamp: serverTimestamp()
+              termsTimestamp: serverTimestamp(),
+              updatedAt: serverTimestamp()
             });
+
+            // Update publicProfiles (doc id = uid) — create/merge if doesn't exist
+            const publicRef = doc(db, 'publicProfiles', currentUser.uid);
+            await setDoc(publicRef, {
+              name,
+              slug,
+              bio,
+              visibility,
+              updatedAt: serverTimestamp()
+            }, { merge: true });
+
             if (photoUrl) currentPhoto.src = photoUrl;
             safeShowStatus('Profile updated successfully!', 'success');
           } catch (err) {
@@ -534,7 +561,7 @@
         }
         if (settingsForm) settingsForm.addEventListener('submit', (e)=>{ e.preventDefault(); updateProfile(); });
 
-        // load user profile
+        // load user profile (extended to read publicProfiles.visibility)
         async function loadProfile(uid) {
           try {
             const docRef = doc(db, 'usersPrivate', uid);
@@ -547,6 +574,20 @@
             if (photoUrlInput) photoUrlInput.value = data.profilePhotoUrl || '';
             if (bioInput) bioInput.value = data.bio || '';
             profilePhotoLocked = !!data.profilePhotoLocked;
+
+            // get visibility from publicProfiles (defaults false if missing)
+            try {
+              const publicRef = doc(db, 'publicProfiles', uid);
+              const publicSnap = await getDoc(publicRef);
+              const vis = publicSnap.exists() ? !!publicSnap.data().visibility : false;
+              const visibilityCheckbox = document.getElementById('visibilityCheckbox');
+              if (visibilityCheckbox) visibilityCheckbox.checked = vis;
+            } catch(e) {
+              console.warn('Could not load publicProfiles visibility', e);
+              const visibilityCheckbox = document.getElementById('visibilityCheckbox');
+              if (visibilityCheckbox) visibilityCheckbox.checked = false;
+            }
+
             if (profilePhotoLocked && oneTimeNote) { oneTimeNote.textContent = 'Profile photo is locked — you cannot change it again.'; oneTimeNote.style.color = '#ffc9c9'; }
             else if (oneTimeNote) { oneTimeNote.textContent = 'Click your profile photo to open the upload modal. You can change only once.'; oneTimeNote.style.color = '#a0a0d0'; }
           } catch(e){ console.error('loadProfile error', e); safeShowStatus('Error loading profile', 'error'); }
