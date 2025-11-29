@@ -13,28 +13,23 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
-    /* Page layout: center container when possible, allow scrolling when content larger than viewport */
-    html, body {
-      height: 100%;
-    }
+    html, body { height: 100%; }
     body {
       background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
       color: #e0e0e0;
       display: flex;
-      align-items: center;           /* center vertically */
-      justify-content: center;       /* center horizontally */
+      align-items: center;
+      justify-content: center;
       min-height: 100vh;
       padding: 24px;
       position: relative;
-      overflow: auto;                /* allow vertical scrolling when necessary */
+      overflow: auto;
     }
 
-    /* Star Background */
     #stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
     .star { position: absolute; background-color: white; border-radius: 50%; animation: twinkle var(--duration, 5s) infinite ease-in-out; }
     @keyframes twinkle { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
 
-    /* Container fixed-size + responsive */
     .container {
       width: 100%;
       max-width: 520px;
@@ -44,7 +39,7 @@
       overflow: hidden;
       position: relative;
       z-index: 1;
-      margin: 20px;                 /* breathing room when centered */
+      margin: 20px;
     }
 
     .header { background: linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%); padding: 28px 20px; text-align: center; color: white; }
@@ -109,7 +104,7 @@
   </style>
 </head>
 <body>
-  <div id="stars"></div>
+  <div id="stars" aria-hidden="true"></div>
 
   <div class="container" role="main" aria-labelledby="site-title">
     <div class="header">
@@ -238,10 +233,11 @@
     const savedAccountsSection = document.getElementById('saved-accounts');
     const accountsList = document.getElementById('accounts-list');
 
-    // NO-OP visible console logger (keeps code calls safe but nothing is shown in UI)
+    // NO-OP visible console logger (UI console removed)
     function logToConsole(message, type = 'info') {
-      // intentionally empty — UI console removed per request
-      // use browser console for debug if needed: console.debug(`[${type}] ${message}`);
+      // intentionally empty — nothing shown to users
+      // use console.debug when developer needs to debug locally:
+      // console.debug(`[${type}] ${message}`);
     }
 
     termsCheckbox.addEventListener('change', () => {
@@ -367,7 +363,11 @@
       }
     }
 
-    // Ensure public profile has uid; if usersPrivate.slug missing create it
+    /**
+     * Ensure publicProfiles uses uid as document id.
+     * If usersPrivate has a slug and there's an existing publicProfiles doc with that slug,
+     * merge its data into publicProfiles/{uid} and mark the old slug-doc with migratedToUid.
+     */
     async function ensurePublicProfileUid(uid, userInfoFromAuth = {}) {
       if (!uid) return;
       try {
@@ -378,33 +378,66 @@
           const data = userPrivateSnap.data();
           slug = data.slug || null;
         }
-        if (!slug) {
-          slug = generateRandomId();
-          await userPrivateRef.set({ slug: slug }, { merge: true });
+
+        const uidProfileRef = db.collection('publicProfiles').doc(uid);
+        const uidSnap = await uidProfileRef.get();
+
+        // If a profile keyed by uid already exists, ensure uid field is correct and slug exists
+        if (uidSnap.exists) {
+          const existing = uidSnap.data();
+          const updates = {};
+          if (!existing.uid) updates.uid = uid;
+          if (slug && !existing.slug) updates.slug = slug;
+          if (Object.keys(updates).length) {
+            await uidProfileRef.set(updates, { merge: true });
+          }
+          return;
         }
-        const publicProfileRef = db.collection('publicProfiles').doc(slug);
-        const publicSnap = await publicProfileRef.get();
-        const now = firebase.firestore.Timestamp.now();
-        if (!publicSnap.exists) {
-          await publicProfileRef.set({
-            name: userInfoFromAuth.displayName || '',
-            bio: '',
-            joinDate: now,
-            profilePhotoUrl: userInfoFromAuth.photoURL || '',
-            slug: slug,
-            publicPostCount: 0,
-            followersCount: 0,
-            followingCount: 0,
-            visibility: false,
-            verified: false,
-            uid: uid
-          });
-        } else {
-          const pData = publicSnap.data();
-          if (!pData.uid) {
-            await publicProfileRef.update({ uid: uid });
+
+        // If uid-based profile missing, create it.
+        // But first try to find an old slug-based doc to merge (if slug present)
+        let mergedData = {
+          name: userInfoFromAuth.displayName || '',
+          bio: '',
+          joinDate: firebase.firestore.Timestamp.now(),
+          profilePhotoUrl: userInfoFromAuth.photoURL || '',
+          slug: slug || '',
+          publicPostCount: 0,
+          followersCount: 0,
+          followingCount: 0,
+          visibility: false,
+          verified: false,
+          uid: uid
+        };
+
+        if (slug) {
+          const slugDocRef = db.collection('publicProfiles').doc(slug);
+          const slugSnap = await slugDocRef.get();
+          if (slugSnap.exists) {
+            const sData = slugSnap.data();
+            // Merge relevant fields from slug doc into uid doc (prefer slugDoc values)
+            mergedData = {
+              name: sData.name || mergedData.name,
+              bio: sData.bio || mergedData.bio,
+              joinDate: sData.joinDate || mergedData.joinDate,
+              profilePhotoUrl: sData.profilePhotoUrl || mergedData.profilePhotoUrl,
+              slug: sData.slug || mergedData.slug,
+              publicPostCount: (sData.publicPostCount != null) ? sData.publicPostCount : mergedData.publicPostCount,
+              followersCount: (sData.followersCount != null) ? sData.followersCount : mergedData.followersCount,
+              followingCount: (sData.followingCount != null) ? sData.followingCount : mergedData.followingCount,
+              visibility: (sData.visibility != null) ? sData.visibility : mergedData.visibility,
+              verified: (sData.verified != null) ? sData.verified : mergedData.verified,
+              uid: uid
+            };
+            // create uid doc and mark old slug doc as migrated
+            await uidProfileRef.set(mergedData);
+            await slugDocRef.set({ migratedToUid: uid }, { merge: true });
+            return;
           }
         }
+
+        // No slug doc found (or slug missing) — simply create uid-based profile
+        await uidProfileRef.set(mergedData);
       } catch (err) {
         console.debug('ensurePublicProfileUid error', err);
       }
@@ -442,8 +475,10 @@
             termsTimestamp: now
           });
           await userPrivateRef.collection('settings').doc('default').set({});
-          const publicProfileRef = db.collection('publicProfiles').doc(slug);
-          await publicProfileRef.set({
+
+          // Now create publicProfiles document using UID as the document id
+          const uidProfileRef = db.collection('publicProfiles').doc(user.uid);
+          await uidProfileRef.set({
             name: user.displayName || '',
             bio: '',
             joinDate: now,
@@ -456,6 +491,7 @@
             verified: false,
             uid: user.uid
           });
+
           displayNameEl.textContent = user.displayName || 'User';
           infoJoinDate.textContent = new Date().toLocaleDateString();
           infoPosts.textContent = '0';
@@ -467,6 +503,7 @@
           successMessage.style.display = 'none';
         }
 
+        // Ensure publicProfiles/{uid} exists and is linked
         await ensurePublicProfileUid(user.uid, { displayName: user.displayName, photoURL: user.photoURL });
 
         addSavedAccount(user.email);
