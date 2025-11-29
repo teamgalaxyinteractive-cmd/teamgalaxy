@@ -4,103 +4,58 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sign Up - TeamGalaxy</title>
-  <!-- Firebase App, App Check, and services (compat) -->
   <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-check-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore-compat.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-
-    html, body { height: 100%; }
+    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    html,body { height:100%; }
     body {
-      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-      color: #e0e0e0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
-      position: relative;
-      overflow: auto;
+      background: linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#24243e 100%);
+      color:#e0e0e0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+      padding:24px;
+      position:relative;
+      overflow:auto;
     }
-
-    #stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
-    .star { position: absolute; background-color: white; border-radius: 50%; animation: twinkle var(--duration, 5s) infinite ease-in-out; }
-    @keyframes twinkle { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
-
-    .container {
-      width: 100%;
-      max-width: 520px;
-      background: rgba(30, 30, 46, 0.92);
-      border-radius: 16px;
-      box-shadow: 0 18px 40px rgba(0,0,0,0.5);
-      overflow: hidden;
-      position: relative;
-      z-index: 1;
-      margin: 20px;
-    }
-
-    .header { background: linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%); padding: 28px 20px; text-align: center; color: white; }
-    .logo { width: 90px; height: 90px; margin: 0 auto 12px; background: rgba(255,255,255,0.06); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
-    .logo img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; }
-
-    .header h1 { font-size: 26px; margin-bottom: 6px; font-weight:700; letter-spacing:0.4px; }
-    .header p { font-size: 14px; opacity: 0.95; margin-top: 4px; }
-
-    .content { padding: 26px; }
-
-    .card { background: #2d2d44; border-radius: 12px; padding: 18px; margin-bottom: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.25); transition: transform 0.25s, box-shadow 0.25s; }
-    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.28); }
-    .card-title { font-size:18px; color:#8e44ad; margin-bottom:12px; font-weight:600; }
-
-    .terms-group { display:flex; align-items:flex-start; margin:18px 0; }
-    .terms-group input { margin-top:3px; margin-right:10px; accent-color:#8e44ad; }
-    .terms-group label { color:#d1d6db; line-height:1.45; font-size:14px; }
-
-    .google-btn { width:100%; display:flex; align-items:center; justify-content:center; background-color:#2d2d44; color:#e0e0e0; font-size:15px; font-weight:700; padding:12px 18px; border:1px solid #48476a; border-radius:8px; cursor:pointer; transition:all 0.22s; box-shadow: 0 6px 16px rgba(0,0,0,0.25); }
-    .google-btn img { margin-right:10px; width:20px; height:20px; }
-    .google-btn:disabled { opacity:0.55; cursor:not-allowed; transform:none; box-shadow: 0 3px 8px rgba(0,0,0,0.18); }
-
-    .signed-in-view { display:none; margin-top:16px; animation:fadeIn 0.35s ease-in-out; }
-
-    .welcome-card { background: linear-gradient(to right,#3a1c71,#4a00e0); border:1px solid #6a5acd; border-radius:12px; padding:18px; margin-bottom:18px; }
-    .welcome-card h2 { font-size:20px; color:#fff; margin-bottom:8px; }
-
-    .user-info { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
-    .info-item { background:#2d2d44; border-radius:8px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
-    .info-label { font-size:12px; color:#aeb6bd; margin-bottom:6px; }
-    .info-value { font-size:15px; font-weight:700; color:#8e44ad; }
-
-    .actions { display:flex; gap:12px; margin-top:18px; flex-wrap:wrap; }
-    .btn { flex:1; min-width:140px; background:#8e44ad; color:white; padding:12px; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center; }
-    .btn-outline { background:transparent; border:2px solid #8e44ad; color:#8e44ad; }
-    .btn i { margin-right:8px; }
-
-    footer { margin-top:12px; text-align:center; font-size:13px; color:#b9c0c8; padding:14px 8px 18px; border-top:1px solid rgba(74,68,112,0.18); }
-    footer a { color:#8e44ad; text-decoration:none; margin: 0 8px; font-weight:600; transition:opacity 0.18s; }
-    footer a:hover { text-decoration:underline; opacity:0.95; }
-
-    .success-message { background:#2d2d44; color:#8e44ad; padding:12px; border-radius:8px; margin-bottom:16px; display:flex; align-items:center; animation:fadeIn 0.3s; border:1px solid rgba(142,68,173,0.25); }
-    .success-message i { margin-right:8px; font-size:18px; }
-
-    .saved-accounts { margin:14px 0; padding:12px; background-color:#2d2d44; border-radius:10px; border:1px solid #48476a; }
-    .accounts-list { margin-top:8px; }
-    .account-item { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#3a3a5a; border-radius:8px; margin-bottom:8px; box-shadow:0 2px 6px rgba(0,0,0,0.18); transition:transform 0.18s; }
-    .account-email { font-size:13px; overflow:hidden; text-overflow:ellipsis; color:#e6e6e6; }
-    .account-actions { display:flex; gap:8px; }
-
-    @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
-
-    @media (max-width:480px) {
-      .content { padding:18px; }
-      .user-info { grid-template-columns:1fr; }
-      .actions { flex-direction:column; }
-      .btn { width:100%; }
-      .account-item { flex-direction:column; align-items:flex-start; gap:10px; }
-      .account-actions { width:100%; justify-content:flex-end; }
-    }
+    #stars { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:-1; }
+    .star { position:absolute; background-color:white; border-radius:50%; animation: twinkle var(--duration,5s) infinite ease-in-out; }
+    @keyframes twinkle { 0%,100%{opacity:0.2} 50%{opacity:1} }
+    .container { width:100%; max-width:520px; background:rgba(30,30,46,0.92); border-radius:16px; box-shadow:0 18px 40px rgba(0,0,0,0.5); overflow:hidden; position:relative; z-index:1; margin:20px; }
+    .header { background:linear-gradient(135deg,#4a00e0 0%,#8e2de2 100%); padding:28px 20px; text-align:center; color:#fff; }
+    .logo { width:90px; height:90px; margin:0 auto 12px; background:rgba(255,255,255,0.06); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 18px rgba(0,0,0,0.35); }
+    .logo img{ width:70px; height:70px; border-radius:50%; object-fit:cover; }
+    .header h1{ font-size:26px; margin-bottom:6px; font-weight:700; letter-spacing:0.4px; }
+    .header p{ font-size:14px; opacity:0.95; margin-top:4px; }
+    .content{ padding:26px; }
+    .card{ background:#2d2d44; border-radius:12px; padding:18px; margin-bottom:16px; box-shadow:0 6px 18px rgba(0,0,0,0.25); }
+    .card-title{ font-size:18px; color:#8e44ad; margin-bottom:12px; font-weight:600; }
+    .terms-group{ display:flex; align-items:flex-start; margin:18px 0; }
+    .terms-group input{ margin-top:3px; margin-right:10px; accent-color:#8e44ad; }
+    .terms-group label{ color:#d1d6db; line-height:1.45; font-size:14px; }
+    .google-btn{ width:100%; display:flex; align-items:center; justify-content:center; background-color:#2d2d44; color:#e0e0e0; font-size:15px; font-weight:700; padding:12px 18px; border:1px solid #48476a; border-radius:8px; cursor:pointer; }
+    .google-btn img{ margin-right:10px; width:20px; height:20px; }
+    .google-btn:disabled{ opacity:0.55; cursor:not-allowed; }
+    .signed-in-view{ display:none; margin-top:16px; animation:fadeIn .35s ease-in-out; }
+    .welcome-card{ background:linear-gradient(to right,#3a1c71,#4a00e0); border:1px solid #6a5acd; border-radius:12px; padding:18px; margin-bottom:18px; }
+    .user-info{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+    .info-item{ background:#2d2d44; border-radius:8px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,0.2); }
+    .info-label{ font-size:12px; color:#aeb6bd; margin-bottom:6px; }
+    .info-value{ font-size:15px; font-weight:700; color:#8e44ad; }
+    .actions{ display:flex; gap:12px; margin-top:18px; flex-wrap:wrap; }
+    .btn{ flex:1; min-width:140px; background:#8e44ad; color:white; padding:12px; border:none; border-radius:8px; cursor:pointer; font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+    .btn-outline{ background:transparent; border:2px solid #8e44ad; color:#8e44ad; }
+    footer{ margin-top:12px; text-align:center; font-size:13px; color:#b9c0c8; padding:14px 8px 18px; border-top:1px solid rgba(74,68,112,0.18); }
+    footer a{ color:#8e44ad; text-decoration:none; margin:0 8px; font-weight:600; transition:opacity .18s; }
+    footer a:hover{ text-decoration:underline; opacity:.95; }
+    .success-message{ background:#2d2d44; color:#8e44ad; padding:12px; border-radius:8px; margin-bottom:16px; display:flex; align-items:center; animation:fadeIn .3s; border:1px solid rgba(142,68,173,0.25); }
+    @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+    @media (max-width:480px){ .content{ padding:18px } .user-info{ grid-template-columns:1fr } .actions{ flex-direction:column } .btn{ width:100% } }
   </style>
 </head>
 <body>
@@ -116,17 +71,12 @@
     </div>
 
     <div class="content">
-      <div class="success-message" id="success-message" style="display: none;">
+      <div class="success-message" id="success-message" style="display:none;">
         <i class="fas fa-check-circle"></i>
-        <div><strong>Account created successfully!</strong> Welcome to TeamGalaxy.</div>
+        <div style="margin-left:8px;"><strong>Account created successfully!</strong> Welcome to TeamGalaxy.</div>
       </div>
 
       <div id="signup-form">
-        <div class="saved-accounts" id="saved-accounts" style="display: none;">
-          <h3 style="color:#e6d9ff; font-size:15px; margin-bottom:8px;"><i class="fas fa-user-circle"></i> Saved Accounts</h3>
-          <div class="accounts-list" id="accounts-list"></div>
-        </div>
-
         <div class="card">
           <h2 class="card-title">Create Your Account</h2>
           <p style="color:#cbd3db; font-size:14px; margin-bottom:12px;">Join thousands of explorers who are building the future with TeamGalaxy.</p>
@@ -142,16 +92,6 @@
             <img src="https://img.icons8.com/color/24/google-logo.png" alt="Google Icon" />
             Sign Up with Google
           </button>
-        </div>
-
-        <div class="card">
-          <h2 class="card-title">What You Get</h2>
-          <ul style="list-style:none; padding-left:8px; color:#d9dfe6;">
-            <li style="margin-bottom:10px; display:flex; align-items:flex-start;"><i class="fas fa-check-circle" style="color:#8e44ad; margin-right:10px; margin-top:3px;"></i><span>Access to exclusive community features</span></li>
-            <li style="margin-bottom:10px; display:flex; align-items:flex-start;"><i class="fas fa-check-circle" style="color:#8e44ad; margin-right:10px; margin-top:3px;"></i><span>Member profile on our platform</span></li>
-            <li style="margin-bottom:10px; display:flex; align-items:flex-start;"><i class="fas fa-check-circle" style="color:#8e44ad; margin-right:10px; margin-top:3px;"></i><span>Join our mission to explore new horizons</span></li>
-            <li style="display:flex; align-items:flex-start;"><i class="fas fa-check-circle" style="color:#8e44ad; margin-right:10px; margin-top:3px;"></i><span>Never-expiring membership</span></li>
-          </ul>
         </div>
       </div>
 
@@ -186,7 +126,7 @@
   </div>
 
   <script>
-    // Firebase configuration
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
       authDomain: "teamgalaxy-77344.firebaseapp.com",
@@ -197,28 +137,20 @@
       measurementId: "G-6C2W9NSNCH"
     };
 
-    // Initialize Firebase (compat)
     if (!window.firebase) {
-      console.error('Firebase SDK not found. Include compat scripts.');
+      console.error('Firebase SDK not found.');
     } else {
-      if (!firebase.apps || !firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      } else {
-        console.debug('Firebase already initialized.');
-      }
+      if (!firebase.apps || !firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      else console.debug('Firebase already initialized.');
     }
 
-    try {
-      firebase.appCheck().activate('6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx', true);
-    } catch (e) {
-      console.debug('AppCheck init issue (safe to ignore if AppCheck not required):', e);
-    }
+    try { firebase.appCheck().activate('6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx', true); } catch(e){ console.debug('AppCheck init', e); }
 
     const auth = firebase.auth();
     const db = firebase.firestore();
     const provider = new firebase.auth.GoogleAuthProvider();
 
-    // DOM Elements
+    // DOM
     const termsCheckbox = document.getElementById('terms-checkbox');
     const googleSignInBtn = document.getElementById('googleSignInButton');
     const signedInView = document.getElementById('signed-in-view');
@@ -230,243 +162,106 @@
     const goProfileBtn = document.getElementById('go-profile-btn');
     const infoJoinDate = document.getElementById('info-join-date');
     const infoPosts = document.getElementById('info-posts');
-    const savedAccountsSection = document.getElementById('saved-accounts');
-    const accountsList = document.getElementById('accounts-list');
 
-    // NO-OP visible console logger (UI console removed)
-    function logToConsole(message, type = 'info') {
-      // intentionally empty — nothing shown to users
-      // use console.debug when developer needs to debug locally:
-      // console.debug(`[${type}] ${message}`);
-    }
+    // No UI console (no-op)
+    function logToConsole() { /* intentionally empty */ }
 
     termsCheckbox.addEventListener('change', () => {
       googleSignInBtn.disabled = !termsCheckbox.checked;
     });
 
-    function loadSavedAccounts() {
-      const data = localStorage.getItem('savedAccounts');
-      return data ? JSON.parse(data) : [];
-    }
-    function saveAccounts(arr) { localStorage.setItem('savedAccounts', JSON.stringify(arr)); }
-    function addSavedAccount(email) {
-      if (!email) return;
-      const accounts = loadSavedAccounts();
-      if (!accounts.includes(email)) {
-        accounts.push(email);
-        saveAccounts(accounts);
-      }
-      renderSavedAccounts();
-    }
-    function removeSavedAccount(email) {
-      let accounts = loadSavedAccounts();
-      accounts = accounts.filter(e => e !== email);
-      saveAccounts(accounts);
-      renderSavedAccounts();
-    }
-    function renderSavedAccounts() {
-      if (!accountsList || !savedAccountsSection) return;
-      const accounts = loadSavedAccounts();
-      accountsList.innerHTML = '';
-      if (accounts.length === 0) {
-        savedAccountsSection.style.display = 'none';
-        return;
-      }
-      savedAccountsSection.style.display = 'block';
-      accounts.forEach(email => {
-        const accountItem = document.createElement('div');
-        accountItem.className = 'account-item';
-        const emailSpan = document.createElement('span');
-        emailSpan.className = 'account-email';
-        emailSpan.textContent = email;
-        const actionsDiv = document.createElement('div');
-        actionsDiv.className = 'account-actions';
-        const useBtn = document.createElement('button');
-        useBtn.className = 'account-btn use-btn';
-        useBtn.style.padding = '8px 10px';
-        useBtn.style.borderRadius = '6px';
-        useBtn.style.background = '#8e44ad';
-        useBtn.style.color = '#fff';
-        useBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Use';
-        useBtn.addEventListener('click', () => {
-          if (!termsCheckbox.checked) {
-            alert("Please accept Terms & Conditions first.");
-            return;
-          }
-          signInWithGoogle();
-        });
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'account-btn remove-btn';
-        removeBtn.style.padding = '8px 10px';
-        removeBtn.style.borderRadius = '6px';
-        removeBtn.style.background = '#3a3a5a';
-        removeBtn.style.color = '#fff';
-        removeBtn.innerHTML = '<i class="fas fa-times"></i> Remove';
-        removeBtn.addEventListener('click', () => {
-          removeSavedAccount(email);
-        });
-        actionsDiv.appendChild(useBtn);
-        actionsDiv.appendChild(removeBtn);
-        accountItem.appendChild(emailSpan);
-        accountItem.appendChild(actionsDiv);
-        accountsList.appendChild(accountItem);
-      });
-    }
-
     function generateRandomId() {
-      return Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12);
+      return Math.random().toString(36).substring(2,12) + Math.random().toString(36).substring(2,12);
     }
 
-    // Stars
     function createStars() {
       const starsContainer = document.getElementById('stars');
       if (!starsContainer) return;
       const starCount = 110;
-      for (let i = 0; i < starCount; i++) {
+      for (let i=0;i<starCount;i++){
         const star = document.createElement('div');
-        star.classList.add('star');
-        const size = Math.random() * 1.6 + 0.4;
+        star.className = 'star';
+        const size = Math.random()*1.6 + 0.4;
         star.style.width = `${size}px`;
         star.style.height = `${size}px`;
-        star.style.left = `${Math.random() * 100}%`;
-        star.style.top = `${Math.random() * 100}%`;
-        const duration = Math.random() * 5 + 3;
-        star.style.setProperty('--duration', `${duration}s`);
-        star.style.animationDelay = `${Math.random() * 5}s`;
+        star.style.left = `${Math.random()*100}%`;
+        star.style.top = `${Math.random()*100}%`;
+        star.style.setProperty('--duration', `${Math.random()*5 + 3}s`);
+        star.style.animationDelay = `${Math.random()*5}s`;
         starsContainer.appendChild(star);
       }
     }
 
-    // Load user private/profile data and update UI
+    // Load private data
     async function loadUserData(uid) {
       if (!uid) return;
       try {
-        const userPrivateRef = db.collection('usersPrivate').doc(uid);
-        const snap = await userPrivateRef.get();
+        const snap = await db.collection('usersPrivate').doc(uid).get();
         if (!snap.exists) {
           infoJoinDate.textContent = '-';
           infoPosts.textContent = '0';
           return;
         }
         const data = snap.data();
-        if (data.joinDate && data.joinDate.toDate) {
-          infoJoinDate.textContent = data.joinDate.toDate().toLocaleDateString();
-        } else if (data.joinDate) {
-          infoJoinDate.textContent = new Date(data.joinDate).toLocaleDateString();
-        } else {
-          infoJoinDate.textContent = '-';
-        }
-        const postsCount = (data.publicPostCount != null) ? data.publicPostCount : 0;
-        infoPosts.textContent = String(postsCount);
+        if (data.joinDate && data.joinDate.toDate) infoJoinDate.textContent = data.joinDate.toDate().toLocaleDateString();
+        else if (data.joinDate) infoJoinDate.textContent = new Date(data.joinDate).toLocaleDateString();
+        else infoJoinDate.textContent = '-';
+        infoPosts.textContent = String((data.publicPostCount != null) ? data.publicPostCount : 0);
       } catch (err) {
         console.debug('loadUserData error', err);
       }
     }
 
-    /**
-     * Ensure publicProfiles uses uid as document id.
-     * If usersPrivate has a slug and there's an existing publicProfiles doc with that slug,
-     * merge its data into publicProfiles/{uid} and mark the old slug-doc with migratedToUid.
-     */
-    async function ensurePublicProfileUid(uid, userInfoFromAuth = {}) {
+    // Ensure publicProfiles/{uid} exists — no slug, no migration, only create if missing
+    async function ensurePublicProfileByUid(uid, userInfo = {}) {
       if (!uid) return;
       try {
-        const userPrivateRef = db.collection('usersPrivate').doc(uid);
-        const userPrivateSnap = await userPrivateRef.get();
-        let slug = null;
-        if (userPrivateSnap.exists) {
-          const data = userPrivateSnap.data();
-          slug = data.slug || null;
-        }
-
-        const uidProfileRef = db.collection('publicProfiles').doc(uid);
-        const uidSnap = await uidProfileRef.get();
-
-        // If a profile keyed by uid already exists, ensure uid field is correct and slug exists
-        if (uidSnap.exists) {
-          const existing = uidSnap.data();
-          const updates = {};
-          if (!existing.uid) updates.uid = uid;
-          if (slug && !existing.slug) updates.slug = slug;
-          if (Object.keys(updates).length) {
-            await uidProfileRef.set(updates, { merge: true });
-          }
+        const uidRef = db.collection('publicProfiles').doc(uid);
+        const snap = await uidRef.get();
+        if (snap.exists) {
+          // ensure uid field present
+          const existing = snap.data();
+          if (!existing.uid) await uidRef.set({ uid }, { merge: true });
           return;
         }
-
-        // If uid-based profile missing, create it.
-        // But first try to find an old slug-based doc to merge (if slug present)
-        let mergedData = {
-          name: userInfoFromAuth.displayName || '',
+        const now = firebase.firestore.Timestamp.now();
+        await uidRef.set({
+          displayName: userInfo.displayName || '',
           bio: '',
-          joinDate: firebase.firestore.Timestamp.now(),
-          profilePhotoUrl: userInfoFromAuth.photoURL || '',
-          slug: slug || '',
+          joinDate: now,
+          profilePhotoUrl: userInfo.photoURL || '',
           publicPostCount: 0,
           followersCount: 0,
           followingCount: 0,
           visibility: false,
           verified: false,
           uid: uid
-        };
-
-        if (slug) {
-          const slugDocRef = db.collection('publicProfiles').doc(slug);
-          const slugSnap = await slugDocRef.get();
-          if (slugSnap.exists) {
-            const sData = slugSnap.data();
-            // Merge relevant fields from slug doc into uid doc (prefer slugDoc values)
-            mergedData = {
-              name: sData.name || mergedData.name,
-              bio: sData.bio || mergedData.bio,
-              joinDate: sData.joinDate || mergedData.joinDate,
-              profilePhotoUrl: sData.profilePhotoUrl || mergedData.profilePhotoUrl,
-              slug: sData.slug || mergedData.slug,
-              publicPostCount: (sData.publicPostCount != null) ? sData.publicPostCount : mergedData.publicPostCount,
-              followersCount: (sData.followersCount != null) ? sData.followersCount : mergedData.followersCount,
-              followingCount: (sData.followingCount != null) ? sData.followingCount : mergedData.followingCount,
-              visibility: (sData.visibility != null) ? sData.visibility : mergedData.visibility,
-              verified: (sData.verified != null) ? sData.verified : mergedData.verified,
-              uid: uid
-            };
-            // create uid doc and mark old slug doc as migrated
-            await uidProfileRef.set(mergedData);
-            await slugDocRef.set({ migratedToUid: uid }, { merge: true });
-            return;
-          }
-        }
-
-        // No slug doc found (or slug missing) — simply create uid-based profile
-        await uidProfileRef.set(mergedData);
+        });
       } catch (err) {
-        console.debug('ensurePublicProfileUid error', err);
+        console.debug('ensurePublicProfileByUid error', err);
       }
     }
 
-    // Sign-In Handler
+    // Sign-in
     async function signInWithGoogle() {
-      if (!termsCheckbox.checked) {
-        alert("Please accept Terms & Conditions and Privacy Policy first.");
-        return;
-      }
+      if (!termsCheckbox.checked) { alert('Please accept Terms & Conditions and Privacy Policy first.'); return; }
       try {
         const result = await auth.signInWithPopup(provider);
         const user = result.user;
-        if (!user) throw new Error('No user object returned from sign-in.');
+        if (!user) throw new Error('No user returned from sign-in');
         const userPrivateRef = db.collection('usersPrivate').doc(user.uid);
         const now = firebase.firestore.Timestamp.now();
 
-        const userPrivateDoc = await userPrivateRef.get();
-        if (!userPrivateDoc.exists) {
-          const slug = generateRandomId();
+        const userPrivateSnap = await userPrivateRef.get();
+        if (!userPrivateSnap.exists) {
+          // create usersPrivate using "displayName" field (name changed to displayName)
           await userPrivateRef.set({
             email: user.email,
             joinDate: now,
             lastLogin: now,
-            name: user.displayName || '',
+            displayName: user.displayName || '',
             bio: '',
             profilePhotoUrl: user.photoURL || '',
-            slug: slug,
             publicPostCount: 0,
             followersCount: 0,
             followingCount: 0,
@@ -475,15 +270,12 @@
             termsTimestamp: now
           });
           await userPrivateRef.collection('settings').doc('default').set({});
-
-          // Now create publicProfiles document using UID as the document id
-          const uidProfileRef = db.collection('publicProfiles').doc(user.uid);
-          await uidProfileRef.set({
-            name: user.displayName || '',
+          // create publicProfiles/{uid} directly
+          await db.collection('publicProfiles').doc(user.uid).set({
+            displayName: user.displayName || '',
             bio: '',
             joinDate: now,
             profilePhotoUrl: user.photoURL || '',
-            slug: slug,
             publicPostCount: 0,
             followersCount: 0,
             followingCount: 0,
@@ -491,7 +283,6 @@
             verified: false,
             uid: user.uid
           });
-
           displayNameEl.textContent = user.displayName || 'User';
           infoJoinDate.textContent = new Date().toLocaleDateString();
           infoPosts.textContent = '0';
@@ -503,21 +294,21 @@
           successMessage.style.display = 'none';
         }
 
-        // Ensure publicProfiles/{uid} exists and is linked
-        await ensurePublicProfileUid(user.uid, { displayName: user.displayName, photoURL: user.photoURL });
+        // ensure publicProfiles/{uid} exists (no slug)
+        await ensurePublicProfileByUid(user.uid, { displayName: user.displayName, photoURL: user.photoURL });
 
-        addSavedAccount(user.email);
+        // show UI
         signupForm.style.display = 'none';
         signedInView.style.display = 'block';
-        savedAccountsSection.style.display = 'none';
-      } catch (error) {
-        console.error("Sign-in error:", error);
-        alert("Sign-in failed: " + (error.message || error));
+      } catch (err) {
+        console.error('Sign-in error', err);
+        alert('Sign-in failed: ' + (err.message || err));
       }
     }
 
     googleSignInBtn.addEventListener('click', signInWithGoogle);
 
+    // Signout & switch
     signoutBtn.addEventListener('click', () => {
       auth.signOut().then(() => {
         signedInView.style.display = 'none';
@@ -525,14 +316,10 @@
         successMessage.style.display = 'none';
         termsCheckbox.checked = false;
         googleSignInBtn.disabled = true;
-        renderSavedAccounts();
         displayNameEl.textContent = '';
         infoJoinDate.textContent = '-';
         infoPosts.textContent = '0';
-      }).catch(error => {
-        console.error("Sign-out failed:", error);
-        alert("Sign-out failed: " + error.message);
-      });
+      }).catch(err => { console.error('Sign-out failed', err); alert('Sign-out failed: ' + err.message); });
     });
 
     switchAccountBtn.addEventListener('click', () => {
@@ -542,7 +329,6 @@
         successMessage.style.display = 'none';
         termsCheckbox.checked = false;
         googleSignInBtn.disabled = true;
-        renderSavedAccounts();
         displayNameEl.textContent = '';
         infoJoinDate.textContent = '-';
         infoPosts.textContent = '0';
@@ -551,44 +337,32 @@
 
     goProfileBtn.addEventListener('click', () => {
       const user = auth.currentUser;
-      if (user) {
-        window.open('/teamgalaxy/index.html', '_blank', 'noopener,noreferrer');
-      } else {
-        alert("Please sign in first to access your dashboard.");
-      }
+      if (user) window.open('/teamgalaxy/index.html', '_blank', 'noopener,noreferrer');
+      else alert('Please sign in first to access your dashboard.');
     });
 
-    // Auth state handling
+    // Auth state
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         signupForm.style.display = 'none';
         signedInView.style.display = 'block';
         displayNameEl.textContent = user.displayName || 'User';
-        savedAccountsSection.style.display = 'none';
         await loadUserData(user.uid);
-        await ensurePublicProfileUid(user.uid, { displayName: user.displayName, photoURL: user.photoURL });
+        await ensurePublicProfileByUid(user.uid, { displayName: user.displayName, photoURL: user.photoURL });
       } else {
-        renderSavedAccounts();
         signupForm.style.display = 'block';
         signedInView.style.display = 'none';
       }
     });
 
-    // Small hover animations
-    const buttons = document.querySelectorAll('.btn, .google-btn, .account-btn');
-    buttons.forEach(button => {
-      button.addEventListener('mouseenter', () => {
-        button.style.transform = 'translateY(-2px)';
-        button.style.boxShadow = '0 8px 20px rgba(0,0,0,0.28)';
-      });
-      button.addEventListener('mouseleave', () => {
-        button.style.transform = 'translateY(0)';
-        button.style.boxShadow = 'none';
-      });
+    // small hover effects
+    const buttons = document.querySelectorAll('.btn, .google-btn');
+    buttons.forEach(b => {
+      b.addEventListener('mouseenter', () => { b.style.transform = 'translateY(-2px)'; b.style.boxShadow = '0 8px 20px rgba(0,0,0,0.28)'; });
+      b.addEventListener('mouseleave', () => { b.style.transform = 'translateY(0)'; b.style.boxShadow = 'none'; });
     });
 
-    // Init
-    renderSavedAccounts();
+    // init
     createStars();
   </script>
 </body>
