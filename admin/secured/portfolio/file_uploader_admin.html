@@ -52,6 +52,7 @@
 
     .pagination { display:flex; gap:8px; align-items:center; justify-content:center; margin-top:16px; flex-wrap:wrap }
     .page-btn { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.04); color:#fff; padding:8px 10px; border-radius:8px; cursor:pointer; }
+    .page-btn.disabled { opacity:0.5; pointer-events:none; }
     .page-btn.active { background: linear-gradient(45deg,#00d4ff,#0077ff); color:#000; font-weight:700; }
 
     /* Loading Screen */
@@ -138,7 +139,7 @@
 
     <div id="loadingIndicator" style="display:none;margin-top:12px"><i class="fas fa-spinner fa-spin"></i> Uploading…</div>
 
-    <div id="portfolioGallery" class="gallery"></div>
+    <div id="portfolioGallery" class="gallery" aria-live="polite"></div>
 
     <div id="pagination" class="pagination"></div>
   </div>
@@ -235,7 +236,7 @@
   </script>
 
   <script>
-  /***** App code (fixed, complete) *****/
+  /***** App code (final) *****/
   const CLOUDFLARE_WORKER_URL = 'https://portfolio-dropbox-handler.teamgalaxy-interactive.workers.dev/';
   const firebaseConfig = {
     apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
@@ -330,7 +331,7 @@
     if(failed.length) appLog(`${failed.length} upload(s) failed`,'error'); else appLog('All uploads done','success');
     document.getElementById('loadingIndicator').style.display='none';
     inputEl.value=''; preview.innerHTML=''; document.getElementById('uploadBtn').innerHTML = '<i class="fas fa-upload"></i> Upload to Portfolio';
-    // refresh metadata & current page
+    // refresh metadata & show current page (keeps currentPage sensible)
     await loadAllMetadataThenShow();
   }
 
@@ -352,7 +353,7 @@
     // add filderId = null to metadata
     const itemData = {
       ownerUid: user ? user.uid : null,
-      filderId: null,
+      folderId: null,
       fileName: res.fileName || file.name,
       originalName: file.name,
       fileSize: res.fileSize || file.size || 0,
@@ -376,7 +377,6 @@
   let allItems = [];
   let currentPage = 1;
 
-  // Preload settings
   const PRELOAD_MAX_RETRIES = 6;
   const PRELOAD_TIMEOUT_MS = 10000; // 10s
   const PRELOAD_CONCURRENCY = 2; // slow and steady
@@ -384,7 +384,6 @@
 
   function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
-  // Preload a single image once (timeout)
   function preloadOnce(url, timeoutMs = PRELOAD_TIMEOUT_MS){
     return new Promise((resolve, reject) => {
       if(!url) return reject(new Error('no-url'));
@@ -397,7 +396,6 @@
     });
   }
 
-  // retry loader for single url with backoff
   async function preloadWithRetries(url, idx, progressCb){
     let attempt = 0;
     while (attempt < PRELOAD_MAX_RETRIES) {
@@ -416,7 +414,6 @@
     return { ok: false, attempt: PRELOAD_MAX_RETRIES };
   }
 
-  // ---------- Fixed preloadPage + renderPage implementations ----------
   async function preloadPage(itemsForPage, progressCb) {
     const total = itemsForPage.length;
     const results = new Array(total);
@@ -467,14 +464,24 @@
     return results;
   }
 
-  // Render a page: create skeleton cards, call preloadPage; assign srcs after preload results
+  // New: helper to disable/enable pagination UI while preloading
+  function setPaginationDisabled(disabled){
+    const container = document.getElementById('pagination');
+    Array.from(container.querySelectorAll('.page-btn')).forEach(b => {
+      if(disabled) b.classList.add('disabled'); else b.classList.remove('disabled');
+      b.disabled = disabled;
+    });
+  }
+
   async function renderPage(pageNum, options = { showProgress: true }) {
     currentPage = pageNum;
     const gallery = document.getElementById('portfolioGallery');
-    gallery.innerHTML = '';
+    gallery.style.display = 'none'; // hide gallery so no placeholders are visible
     const start = (pageNum - 1) * PAGE_SIZE;
     const pageItems = allItems.slice(start, start + PAGE_SIZE);
 
+    // Build skeleton in a fragment (not attached) so DOM doesn't show placeholders
+    const frag = document.createDocumentFragment();
     pageItems.forEach(it => {
       const card = document.createElement('div');
       card.className = 'image-card';
@@ -488,10 +495,18 @@
           <div class="image-actions"><button class="action-btn" onclick="copyToClipboard('${it.dropboxUrl||''}')"><i class="fas fa-copy"></i> Copy URL</button></div>
         </div>
       `;
-      gallery.appendChild(card);
+      frag.appendChild(card);
     });
 
-    if (options.showProgress) {
+    // Replace gallery content atomically (still hidden)
+    gallery.innerHTML = '';
+    gallery.appendChild(frag);
+
+    // Disable pagination while preloading
+    setPaginationDisabled(true);
+
+    // Show progress overlay
+    if (options.showProgress){
       document.getElementById('loadingProgressWrap').style.display = 'block';
       document.getElementById('loadingCount').textContent = `0 / ${pageItems.length}`;
       document.getElementById('loadingPercent').textContent = `0%`;
@@ -501,6 +516,7 @@
       document.getElementById('loadingProgressWrap').style.display = 'none';
     }
 
+    // Preload page images
     const results = await preloadPage(pageItems, ({ total, index = null, attempt = null, status = null, error = null, completed = 0, failed = 0, finished = false }) => {
       const doneCount = completed + failed;
       const percent = total ? Math.round((doneCount / total) * 100) : 0;
@@ -514,19 +530,33 @@
       }
     });
 
+    // Assign loaded srcs (this happens while gallery still hidden)
     const cards = document.querySelectorAll('.image-card');
     cards.forEach((card, idx) => {
       const img = card.querySelector('.image-preview');
       const url = img.getAttribute('data-src') || '';
       const res = results[idx] || { ok: false };
-      if (res.ok) img.src = url;
-      else img.src = '';
+      if (res.ok) {
+        img.src = url;
+        img.setAttribute('data-loaded', 'true');
+      } else {
+        img.src = ''; // keep as blank so no broken image icon; CSS background remains
+        img.setAttribute('data-loaded', 'false');
+      }
     });
 
+    // Small delay to allow browsers to actually paint the images when gallery is shown
+    // (this helps prevent flicker)
+    await sleep(120);
+
+    // Enable pagination & show gallery
+    setPaginationDisabled(false);
     document.getElementById('loadingProgressWrap').style.display = 'none';
+    gallery.style.display = 'grid'; // show grid now that images assigned
     updateStats();
     renderPagination();
 
+    // If this was first load (main hidden), hide main loading screen now
     if (document.getElementById('mainContainer').style.display === 'none') {
       hideLoadingScreenAndShowMain();
     }
