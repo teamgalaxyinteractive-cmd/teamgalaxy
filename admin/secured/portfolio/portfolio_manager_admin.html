@@ -149,8 +149,7 @@
     .back-btn:hover {
       background: rgba(0, 212, 255, 0.3);
     }
-
-    </style>
+  </style>
 </head>
 <body>
   <!-- Loading Screen -->
@@ -198,7 +197,44 @@
       <span class="close" onclick="closeFolderModal()">&times;</span>
       <h2 id="folderModalTitle">Add New Folder</h2>
       <form id="folderForm">
-        
+        <div class="form-group">
+          <label for="folderTitle">Folder Title</label>
+          <input type="text" id="folderTitle" required>
+        </div>
+        <div class="form-group">
+          <label for="folderDescription">Description</label>
+          <textarea id="folderDescription" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="folderPublic">Public</label>
+          <select id="folderPublic">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
+        <!-- NEW: Folder Order field -->
+        <div class="form-group">
+          <label for="folderOrder">Folder Order (numeric)</label>
+          <input type="number" id="folderOrder" min="0" step="1" placeholder="0">
+          <div class="small-muted" style="margin-top:6px">Lower numbers appear first. Defaults to end of list if left blank.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Folder</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Assign Item Modal -->
+  <div id="assignModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeAssignModal()">&times;</span>
+      <h2>Assign Item to Folder</h2>
+      <form id="assignForm">
+        <div class="form-group">
+          <label for="assignFolder">Select Folder</label>
+          <select id="assignFolder"><option value="">No Folder</option></select>
+        </div>
         <button type="submit" class="btn btn-primary">Assign Item</button>
       </form>
     </div>
@@ -281,7 +317,7 @@
       let currentFilter = 'all';
       const logs = [];
 
-      function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'<').replace(/>/g,'>'); }
+      function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
       window.consolePanelLog = function(message, level='log'){
         try {
@@ -392,25 +428,178 @@
       const i = Math.floor(Math.log(Math.max(bytes,1))/Math.log(k));
       return (bytes/Math.pow(k,i)).toFixed(2)+' '+sizes[i];
     }
-    function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'<').replace(/>/g,'>'); }
+    function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-     && i.url === imageIdentifier));
-        if(idx === -1 && !isNaN(Number(imageIdentifier))) idx = Number(imageIdentifier);
-        if(idx < 0 || idx >= imgs.length) return alert('Image not found in folder');
+    // Update auth sidebar UI when auth state changes
+    async function updateAuthSidebar(user){
+      const emailEl = document.getElementById('sidebar-email');
+      const uidEl = document.getElementById('sidebar-uid');
+      const signinBtn = document.getElementById('signin-btn');
+      const signoutBtn = document.getElementById('signout-btn');
 
-        const selected = imgs.splice(idx,1)[0];
-        // bump others
-        imgs.forEach(i=> i.orderBy = (i.orderBy || i.order || 0) + 1);
-        selected.orderBy = 0;
-        imgs.unshift(selected);
-
-        await ref.update({ images: imgs, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-        consolePanelLog('Set primary image', 'success');
-        await loadFolders();
-      } catch (err){
-        consolePanelLog('Error setting primary image: ' + (err.code ? `${err.code} — ${err.message}` : err.message), 'error');
-        alert('Could not set primary image. See console.');
+      if(!user){
+        emailEl.textContent = '—';
+        uidEl.textContent = '—';
+        signinBtn.style.display = 'inline-block';
+        signoutBtn.style.display = 'none';
+        consolePanelLog('No user signed in', 'warning');
+        // record access of auth fields (read attempt)
+        recordAccess(['request.auth.uid','request.auth.token.email'], 'auth check (no user)');
+        return;
       }
+
+      // refresh token to ensure claims current
+      try {
+        const idRes = await user.getIdTokenResult(true);
+        emailEl.textContent = user.email || '—';
+        uidEl.textContent = user.uid || '—';
+        signinBtn.style.display = 'none';
+        signoutBtn.style.display = 'inline-block';
+        consolePanelLog(`Auth: ${user.email} | UID: ${user.uid}`, 'info');
+        if(idRes && idRes.claims) consolePanelLog('Token claims: ' + JSON.stringify(idRes.claims), 'info');
+      } catch (e){
+        consolePanelLog('getIdTokenResult failed: ' + e.message, 'error');
+        emailEl.textContent = user.email || '—';
+        uidEl.textContent = user.uid || '—';
+      }
+
+      // record that client reads auth fields
+      recordAccess(['request.auth.uid','request.auth.token.email','request.auth.token.admin?'], 'auth read (client)');
+    }
+
+    // Auth state listener
+    auth.onAuthStateChanged(async (u) => {
+      await updateAuthSidebar(u);
+      // after auth changes, reload data to test permission boundaries
+      try { await loadFolders(); await loadItems(currentFolder); }
+      catch(e){ consolePanelLog('Reload after auth change failed: ' + e.message, 'warning'); }
+    });
+
+    /**************** Data operations (with field logging + permission handling) ****************/
+
+    async function init(){
+      consolePanelLog('App init', 'info');
+      await loadFolders();
+      await loadItems();
+    }
+
+    function showLoading(){
+      itemsGrid.innerHTML = '<div class="loading">Loading...</div>';
+    }
+    function hideLoading(){
+      if(itemsGrid.innerHTML.includes('Loading...')) itemsGrid.innerHTML = '';
+    }
+
+    // load folders
+    async function loadFolders(){
+      try {
+        recordAccess(['title','description','images','isPublic','folderOrder'], 'read portfolioFolders');
+        const snap = await db.collection('portfolioFolders').orderBy('folderOrder','asc').get();
+        folders = [];
+        foldersGrid.innerHTML = '';
+        snap.forEach(doc => {
+          const f = { id: doc.id, ...doc.data() };
+          folders.push(f);
+          renderFolder(f);
+        });
+        consolePanelLog(`Loaded ${folders.length} folders`, 'info');
+        populateFolderDropdown(); // keep assign dropdown in sync
+      } catch (err){
+        consolePanelLog('Error loading folders: ' + (err.code ? `${err.code} — ${err.message}` : err.message), 'error');
+        foldersGrid.innerHTML = '<div class="no-items">Error loading folders. Check permissions or console.</div>';
+      }
+    }
+
+    // load items (all, folder, or unassigned)
+    async function loadItems(folderId = null){
+      try {
+        showLoading();
+        // fields expected from items
+        const expectedFields = ['title','originalName','dropboxUrl','fileSize','category','folderId','uploadDate','meta','isPublic'];
+        recordAccess(expectedFields, 'read portfolioItems');
+
+        if(folderId === 'unassigned'){
+          const snap = await db.collection('portfolioItems').get();
+          items = [];
+          itemsGrid.innerHTML = '';
+          snap.forEach(doc => {
+            const data = { id: doc.id, ...doc.data() };
+            if(data.folderId === undefined) data.folderId = null;
+            if(data.folderId === null){ items.push(data); renderItem(data); }
+          });
+          if(items.length === 0) itemsGrid.innerHTML = '<div class="no-items">No unassigned items found.</div>';
+        } else if(folderId){
+          const snap = await db.collection('portfolioItems').where('folderId','==',folderId).orderBy('uploadDate','desc').get();
+          items = []; itemsGrid.innerHTML = '';
+          snap.forEach(doc => { const data = { id: doc.id, ...doc.data() }; if(data.folderId === undefined) data.folderId = null; items.push(data); renderItem(data); });
+          if(items.length === 0) itemsGrid.innerHTML = '<div class="no-items">No items found in this folder.</div>';
+        } else {
+          const snap = await db.collection('portfolioItems').orderBy('uploadDate','desc').get();
+          items = []; itemsGrid.innerHTML = '';
+          snap.forEach(doc => { const data = { id: doc.id, ...doc.data() }; if(data.folderId === undefined) data.folderId = null; items.push(data); renderItem(data); });
+          if(items.length === 0) itemsGrid.innerHTML = '<div class="no-items">No items found.</div>';
+        }
+        hideLoading();
+      } catch (err){
+        hideLoading();
+        consolePanelLog('Error loading items: ' + (err.code ? `${err.code} — ${err.message}` : err.message), 'error');
+        itemsGrid.innerHTML = '<div class="no-items">Error loading items. Check console for details.</div>';
+      }
+    }
+
+    // Render folder card (use event listeners instead of inline onclick)
+    function renderFolder(folder){
+      const folderCard = document.createElement('div');
+      folderCard.className = 'folder-card';
+      folderCard.dataset.id = folder.id;
+
+      const images = folder.images || [];
+      // show order number on title area
+      const orderDisplay = (typeof folder.folderOrder !== 'undefined') ? `<span style="font-size:0.85rem;color:var(--muted);margin-right:8px">#${escapeHtml(String(folder.folderOrder))}</span>` : '';
+
+      folderCard.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div class="folder-title">${orderDisplay}${escapeHtml(folder.title || 'Untitled')}</div>
+            <div class="folder-description">${escapeHtml(folder.description || 'No description')}</div>
+          </div>
+          <div style="text-align:right;color:var(--muted)">${images.length} items<br><small style="color:var(--muted)">${folder.isPublic ? 'Public' : 'Private'}</small></div>
+        </div>
+      `;
+
+      // actions area
+      const actions = document.createElement('div');
+      actions.className = 'folder-actions';
+      const editBtn = document.createElement('button'); editBtn.className='action-btn edit-btn'; editBtn.textContent='Edit';
+      const delBtn = document.createElement('button'); delBtn.className='action-btn delete-btn'; delBtn.textContent='Delete';
+      actions.appendChild(editBtn); actions.appendChild(delBtn);
+      folderCard.appendChild(actions);
+
+      // images preview
+      if(images.length > 0){
+        const imgsWrap = document.createElement('div');
+        imgsWrap.className = 'folder-images';
+        images.slice(0,8).forEach(img => {
+          const i = document.createElement('img'); i.className='folder-image'; i.src = img.url; i.alt = img.title || '';
+          i.onerror = () => { i.src = ''; };
+          imgsWrap.appendChild(i);
+        });
+        if(images.length>8){
+          const more = document.createElement('div'); more.style.cssText='text-align:center;color:var(--muted);font-size:0.8rem'; more.textContent = `+${images.length-8} more`;
+          imgsWrap.appendChild(more);
+        }
+        folderCard.appendChild(imgsWrap);
+      } else {
+        const no = document.createElement('div'); no.style.cssText='text-align:center;color:var(--muted);font-style:italic;margin-top:12px'; no.textContent='No images in folder';
+        folderCard.appendChild(no);
+      }
+
+      // listeners
+      folderCard.addEventListener('click', ()=> selectFolder(folder.id));
+      editBtn.addEventListener('click', (e)=>{ e.stopPropagation(); editFolder(folder.id); });
+      delBtn.addEventListener('click', (e)=>{ e.stopPropagation(); deleteFolder(folder.id); });
+
+      foldersGrid.appendChild(folderCard);
     }
 
     // Render item card
@@ -476,9 +665,9 @@
     }
 
     // modal helpers
-    function showFolderModal(){ document.getElementById('folderModalTitle').textContent='Add New Folder'; folderForm.reset(); folderForm.removeAttribute('data-folder-id'); document.getElementById('folderOrder').value=''; folderModal.style.display='block'; }
+    function showFolderModal(){ document.getElementById('folderModalTitle').textContent='Add New Folder'; folderForm.reset(); folderForm.removeAttribute('data-folder-id'); document.getElementById('folderOrder').value = ''; folderModal.style.display='block'; }
     function closeFolderModal(){ folderModal.style.display='none'; }
-    function assignItem(itemId){ currentItemToAssign = itemId; populateFolderDropdown(); document.getElementById('assignPrimary').checked = false; assignModal.style.display='block'; }
+    function assignItem(itemId){ currentItemToAssign = itemId; populateFolderDropdown(); assignModal.style.display='block'; }
     function closeAssignModal(){ assignModal.style.display='none'; currentItemToAssign=null; }
     function editItem(itemId){
       const it = items.find(i=>i.id===itemId); if(!it) return;
@@ -496,7 +685,8 @@
       document.getElementById('folderTitle').value = folder.title || '';
       document.getElementById('folderDescription').value = folder.description || '';
       document.getElementById('folderPublic').value = folder.isPublic ? 'true' : 'false';
-      document.getElementById('folderOrder').value = (folder.folderOrder != null) ? folder.folderOrder : '';
+      // populate the new order field if present
+      document.getElementById('folderOrder').value = (typeof folder.folderOrder !== 'undefined') ? folder.folderOrder : '';
       folderForm.setAttribute('data-folder-id', folderId);
       folderModal.style.display = 'block';
     }
@@ -537,22 +727,33 @@
     folderForm.addEventListener('submit', async (e)=>{
       e.preventDefault();
       const folderId = folderForm.getAttribute('data-folder-id');
+
+      // read folderOrder input (optional)
+      const rawOrder = document.getElementById('folderOrder').value;
+      const parsedOrder = (rawOrder === '' || rawOrder === null) ? null : parseInt(rawOrder, 10);
+
       const data = {
         title: document.getElementById('folderTitle').value,
         description: document.getElementById('folderDescription').value,
         isPublic: document.getElementById('folderPublic').value === 'true',
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       };
-      const orderVal = document.getElementById('folderOrder').value;
-      if(orderVal !== '') data.folderOrder = parseInt(orderVal,10);
+
       try {
         if(folderId){
-          recordAccess(Object.keys(data), `update portfolioFolders/${folderId}`);
+          // on update, set folderOrder if user provided it (allow explicit null? we treat empty as not changing)
+          if(parsedOrder !== null && !isNaN(parsedOrder)) data.folderOrder = parsedOrder;
+          recordAccess(Object.keys(data).concat(['folderOrder']), `update portfolioFolders/${folderId}`);
           await db.collection('portfolioFolders').doc(folderId).update(data);
           consolePanelLog('Folder updated', 'success');
         } else {
           data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-          data.folderOrder = (data.folderOrder != null) ? data.folderOrder : (folders.length || 0);
+          // if user provided folderOrder use it, otherwise place at end
+          if(parsedOrder !== null && !isNaN(parsedOrder)) {
+            data.folderOrder = parsedOrder;
+          } else {
+            data.folderOrder = (folders.length || 0);
+          }
           recordAccess(Object.keys(data), 'create portfolioFolders');
           await db.collection('portfolioFolders').add(data);
           consolePanelLog('Folder created', 'success');
@@ -569,7 +770,6 @@
       e.preventDefault();
       if(!currentItemToAssign) return;
       const selectedFolderId = document.getElementById('assignFolder').value || null;
-      const makePrimary = document.getElementById('assignPrimary').checked;
       const item = items.find(i=>i.id===currentItemToAssign);
       if(!item) return;
       try {
@@ -583,14 +783,7 @@
           const folderRef = db.collection('portfolioFolders').doc(selectedFolderId);
           const folderDoc = await folderRef.get();
           const folderImages = folderDoc.exists ? (folderDoc.data().images || []) : [];
-
-          if(makePrimary){
-            folderImages.forEach(img => { img.orderBy = (img.orderBy || img.order || 0) + 1; });
-            folderImages.unshift({ id: item.id, url: item.dropboxUrl, title: item.title, orderBy: 0 });
-          } else {
-            const nextOrder = (folderImages.length > 0) ? Math.max(...folderImages.map(i=> (i.orderBy||i.order||0))) + 1 : 0;
-            folderImages.push({ id: item.id, url: item.dropboxUrl, title: item.title, orderBy: nextOrder });
-          }
+          folderImages.push({ id: item.id, url: item.dropboxUrl, title: item.title, orderBy: folderImages.length });
           batch.update(folderRef, { images: folderImages });
         }
 
@@ -737,7 +930,7 @@
     };
 
     // expose some funcs for debugging if needed
-    window._tg = { loadFolders, loadItems, ensureFolderIdField, recordAccess, deleteItem, setPrimaryImage };
+    window._tg = { loadFolders, loadItems, ensureFolderIdField, recordAccess, deleteItem };
   </script>
 </body>
 </html>
