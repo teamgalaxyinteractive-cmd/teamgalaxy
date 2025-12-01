@@ -441,18 +441,19 @@
           console.warn('private doc fetch failed', e);
         }
 
-        // Build message using UID as canonical author reference
-        const msg = {
-          text,
-          authorUid: user.uid,
-          authorName: pd.name || pd.displayName || user.displayName || (user.email ? user.email.split('@')[0] : 'Anonymous'),
-          // note: keep storing authorPhotoUrl for compatibility; rendering will prefer auth photo for current user
-          authorPhotoUrl: pd.profilePhotoUrl || pd.photoUrl || user.photoURL || '',
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          visibility: true,
-          likes: 0,
-          heartsCount: 0
-        };
+// Replace the authorPhotoUrl line in sendMessage() with this:
+const msg = {
+  text,
+  authorUid: user.uid,
+  authorName: pd.name || pd.displayName || user.displayName || (user.email ? user.email.split('@')[0] : 'Anonymous'),
+  // <-- Prefer Google/Firebase auth photoURL first (your request),
+  // fallback to any private-doc overrides only if auth.photoURL is missing.
+  authorPhotoUrl: user.photoURL || pd.profilePhotoUrl || pd.photoUrl || '',
+  timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+  visibility: true,
+  likes: 0,
+  heartsCount: 0
+};
 
         if(replyTo && replyTo.id){
           msg.replyToId = replyTo.id;
