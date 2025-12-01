@@ -155,7 +155,9 @@
     .send-button { padding:.9rem 1.2rem; border-radius:10px; border:none; background:linear-gradient(45deg,#6a5af9,#d66efd); color:white; font-weight:700; cursor:pointer; }
     .send-button:disabled { opacity:.5; cursor:not-allowed; }
 
-    .site-footer { }
+    /* Increased footer height per request */
+    .site-footer { padding: 14px 0; min-height: 84px; }
+
     .site-footer .container-inner { padding: 0; }
     .footer-content {
       width:100%;
@@ -356,8 +358,22 @@
       const header = document.createElement('div'); header.className = 'message-header';
       const avatarWrap = document.createElement('div'); avatarWrap.className = 'avatar';
       const initials = (data.authorName || 'U').charAt(0).toUpperCase();
-      if(data.authorPhotoUrl){
-        const img = document.createElement('img'); img.src = data.authorPhotoUrl; img.alt = (data.authorName || 'Avatar').slice(0,20);
+
+      // NEW: prefer current user's auth photo for messages authored by current user
+      let photoUrlToUse = '';
+      try {
+        const isAuthorCurrentUser = data.authorUid && currentProfile && (data.authorUid === currentProfile.uid);
+        if (isAuthorCurrentUser && currentProfile && currentProfile.photoUrl) {
+          photoUrlToUse = currentProfile.photoUrl;
+        } else if (data.authorPhotoUrl) {
+          photoUrlToUse = data.authorPhotoUrl;
+        } else {
+          photoUrlToUse = '';
+        }
+      } catch(e) { photoUrlToUse = data.authorPhotoUrl || ''; }
+
+      if(photoUrlToUse){
+        const img = document.createElement('img'); img.src = photoUrlToUse; img.alt = (data.authorName || 'Avatar').slice(0,20);
         img.onerror = ()=>{ if(img.parentElement) img.parentElement.removeChild(img); avatarWrap.textContent = initials; };
         avatarWrap.appendChild(img);
       } else { avatarWrap.textContent = initials; }
@@ -430,6 +446,7 @@
           text,
           authorUid: user.uid,
           authorName: pd.name || pd.displayName || user.displayName || (user.email ? user.email.split('@')[0] : 'Anonymous'),
+          // note: keep storing authorPhotoUrl for compatibility; rendering will prefer auth photo for current user
           authorPhotoUrl: pd.profilePhotoUrl || pd.photoUrl || user.photoURL || '',
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
           visibility: true,
