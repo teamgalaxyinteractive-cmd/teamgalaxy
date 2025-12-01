@@ -16,6 +16,18 @@
     .shimmer-layer{ position:fixed; inset:0; z-index:-1; pointer-events:none; background:linear-gradient(120deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.08) 45%, rgba(255,255,255,0.00) 60%); background-size:300% 300%; opacity:0.10; mix-blend-mode:screen; animation:shimmer-move 10s linear infinite; filter:blur(6px); }
     @keyframes shimmer-move { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 
+        /* ---------------------------------- */
+        /* 1. FONT DEFINITION (@font-face Rule) */
+        /* ---------------------------------- */
+        @font-face {
+            font-family: 'Sefa Regular'; 
+            src: url('../assets/fonts/Sefa-Regular.woff2') format('woff2'),
+                 url('../assets/fonts/Sefa-Regular.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap; 
+        }
+
     /* Loading overlay helpers */
     .hidden { display:none !important; }
     .stars-container { position:relative; width:240px; height:240px; }
@@ -67,6 +79,25 @@
     .modal-actions{ margin-top:8px; display:flex; gap:8px; align-items:center; }
     .close-x{ position:absolute; right:18px; top:14px; background:transparent; border:none; color:#ddd; font-size:20px; cursor:pointer; }
     @media (max-width:880px){ .editor-panel{ flex-direction:column; align-items:center; } .editor-canvas{ width:320px; height:320px; } }
+
+    .rocket-text {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #8a7cff;
+      text-align: center;
+      text-shadow: 0 0 15px rgba(138, 124, 255, 0.6);
+      background: linear-gradient(45deg, #8a7cff, #d66efd, #8a7cff);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s linear infinite;
+      font-family: 'Arial Rounded MT Bold', 'Segoe UI', sans-serif;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
   </style>
 </head>
 <body>
@@ -85,7 +116,19 @@
 
   <!-- header -->
   <header class="header">
-    <div class="logo" onclick="location.href='../dashboard.html'">GalaxyWeb</div>
+     <div   
+        class="logo"   
+        onclick="window.location.href='../dashboard.html'"   
+        style="  
+            cursor: pointer;  font-family: 'Sefa Regular', sans-serif;   
+        font-size: 2.5em;   
+        font-weight: bold;  
+        color: #ccf381; /* Neon color */  
+        letter-spacing: 3px;  
+    "  
+>  
+    GalaxyWeb  
+</div>  
     <div class="header-buttons">
       <button class="btn btn-profile">Profile</button>
       <button class="btn btn-logout">Log Out</button>
@@ -166,7 +209,7 @@
           <a href="../about_us.html" style="color:#a0a6d0;text-decoration:none;">About</a>
         </div>
         <div class="rocket-frame" style="margin-top:2rem;padding:1.5rem;border:2px solid #5a4fcf;border-radius:12px;background:rgba(20,20,40,0.5);">
-          <div style="font-size:1.8rem;font-weight:bold;color:#8a7cff;text-align:center;">🚀 ROCKET 🚀</div>
+          <div class="rocket-text" style="font-size:1.8rem;font-weight:bold;color:#8a7cff;text-align:center;">🚀 ROCKET 🚀</div>
         </div>
       </div>
     </div>
