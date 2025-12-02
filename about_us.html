@@ -1326,5 +1326,115 @@
     };
   }
 </script>
+<script>
+(function(){
+  const MOBILE_BREAKPOINT = 900; // px — adjust if you want stricter/looser threshold
+  let overlay = null;
+
+  function createOverlay() {
+    if (overlay) return overlay;
+    overlay = document.createElement('div');
+    overlay.id = 'desktopOnlyOverlay';
+    overlay.innerHTML = `
+      <div class="d-overlay-inner" role="dialog" aria-modal="true" aria-labelledby="dOverlayTitle">
+        <div class="d-overlay-graphic">🖥️</div>
+        <h2 id="dOverlayTitle">Desktop recommended</h2>
+        <p>This page is optimised for desktop for the best experience. Please switch to a desktop view or use a larger device.</p>
+        <div class="d-overlay-actions">
+          <button id="dOverlayContinue" class="d-btn">Continue anyway</button>
+          <button id="dOverlayHelp" class="d-btn d-btn-secondary" title="How to switch to desktop">How to use desktop view</button>
+        </div>
+        <small class="d-overlay-note">Tip: In many mobile browsers you can request "Desktop site" from the browser menu.</small>
+      </div>
+    `;
+    const css = `
+      #desktopOnlyOverlay{ position:fixed; inset:0; z-index:99999; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg, rgba(2,6,12,0.88), rgba(6,12,24,0.92)); color:#fff; font-family:Inter,system-ui,Arial,Helvetica,sans-serif; }
+      #desktopOnlyOverlay .d-overlay-inner{ max-width:520px; width:92%; padding:28px; border-radius:14px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.04); background: linear-gradient(180deg, rgba(8,14,22,0.85), rgba(12,20,36,0.75)); }
+      #desktopOnlyOverlay .d-overlay-graphic{ font-size:44px; margin-bottom:8px; }
+      #desktopOnlyOverlay h2{ margin:6px 0 8px; font-size:1.35rem; color:#f8faff; }
+      #desktopOnlyOverlay p{ margin:0 0 16px; color:#cfeeff; line-height:1.45; }
+      #desktopOnlyOverlay .d-overlay-actions{ display:flex; gap:10px; justify-content:center; margin-bottom:8px; flex-wrap:wrap; }
+      #desktopOnlyOverlay .d-btn{ background: linear-gradient(90deg,#64c2ff,#8ee7ff); color:#022; border:none; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; box-shadow:0 8px 20px rgba(8,24,40,0.45); }
+      #desktopOnlyOverlay .d-btn-secondary{ background:transparent; border:1px solid rgba(255,255,255,0.08); color:#cfeeff; box-shadow:none; padding:9px 12px; }
+      #desktopOnlyOverlay .d-btn:active{ transform:translateY(1px); }
+      #desktopOnlyOverlay .d-overlay-note{ display:block; margin-top:6px; color:#9fd8ff; opacity:0.88; font-size:0.86rem; }
+      @media (min-width:900px){ #desktopOnlyOverlay{ display:none !important; } }
+    `;
+    const style = document.createElement('style');
+    style.textContent = css;
+    overlay.appendChild(style);
+    document.body.appendChild(overlay);
+
+    // prevent scrolling / interaction with underlying page while overlay present
+    document.body.style.overflow = 'hidden';
+    overlay.addEventListener('click', (e) => {
+      // don't close on background click to encourage desktop usage — only "Continue anyway" closes
+      e.stopPropagation();
+    });
+
+    // buttons
+    const btnContinue = document.getElementById('dOverlayContinue');
+    const btnHelp = document.getElementById('dOverlayHelp');
+
+    btnContinue.addEventListener('click', () => {
+      hideOverlay(true);
+    });
+    btnHelp.addEventListener('click', () => {
+      // show quick instructions for popular browsers
+      const helpText = [
+        'Chrome (Android): Menu → Request desktop site',
+        'Safari (iOS): Share → Request Desktop Site (or Long-press reload icon)',
+        'Firefox (Android): Menu → Desktop site'
+      ].join('\\n');
+      // show native alert so it works everywhere
+      alert('How to request desktop site:\\n\\n' + helpText);
+    });
+
+    return overlay;
+  }
+
+  function showOverlay() {
+    if (!overlay) createOverlay();
+    overlay.style.display = 'flex';
+    // lock focus inside overlay for accessibility
+    const firstBtn = document.getElementById('dOverlayContinue');
+    if (firstBtn) firstBtn.focus();
+    document.body.style.touchAction = 'none';
+  }
+
+  function hideOverlay(andRemember=false) {
+    if (!overlay) return;
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+    document.body.style.touchAction = '';
+    // if user chose continue, we let them continue until next resize; no persistent storage used
+  }
+
+  function isHamburgerVisible() {
+    const hb = document.querySelector('.hamburger');
+    if (!hb) return false;
+    const cs = window.getComputedStyle(hb);
+    return cs && cs.display !== 'none' && cs.visibility !== 'hidden' && hb.offsetParent !== null;
+  }
+
+  function checkAndToggleOverlay() {
+    const w = window.innerWidth;
+    const useOverlay = (w < MOBILE_BREAKPOINT) || isHamburgerVisible();
+    if (useOverlay) showOverlay();
+    else hideOverlay();
+  }
+
+  // run on load
+  window.addEventListener('DOMContentLoaded', checkAndToggleOverlay);
+  // respond to resize and orientation
+  window.addEventListener('resize', checkAndToggleOverlay);
+  window.addEventListener('orientationchange', () => { setTimeout(checkAndToggleOverlay, 260); });
+
+  // also check shortly after load in case styles/hamburger are inserted later
+  setTimeout(checkAndToggleOverlay, 700);
+  // and again after 2s for slow CSS/JS
+  setTimeout(checkAndToggleOverlay, 2200);
+})();
+</script>
 </body>
 </html>
