@@ -155,10 +155,6 @@
     .send-button { padding:.9rem 1.2rem; border-radius:10px; border:none; background:linear-gradient(45deg,#6a5af9,#d66efd); color:white; font-weight:700; cursor:pointer; }
     .send-button:disabled { opacity:.5; cursor:not-allowed; }
 
-    /* Increased footer height per request */
-    .site-footer { padding: 14px 0; min-height: 84px; }
-
-    .site-footer .container-inner { padding: 0; }
     .footer-content {
       width:100%;
       display:flex;
@@ -222,6 +218,40 @@
     .dot.d2 { animation-delay: 0.15s; } .dot.d3 { animation-delay:0.3s; }
     @keyframes dotUp { 0%{transform:translateY(0);opacity:0.5;}40%{transform:translateY(-8px);opacity:1;}100%{transform:translateY(0);opacity:0.5;} }
     #loadingOverlay.hidden { display:none !important; }
+
+/* Footer should expand fully with black background */
+.site-footer {
+  width: 100%;
+  background: rgba(10,10,35,0.95);  /* full background */
+  padding: 0; /* we’ll handle padding inside content */
+  box-sizing: border-box;
+}
+
+/* Remove background and fixed padding from inner wrapper */
+.site-footer .container-inner {
+  background: transparent;
+  padding: 0; /* let real footer-content control spacing */
+  width: 100%;
+}
+
+/* Make footer-content decide the height and spacing */
+.footer-content {
+  width: 100%;
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  padding: 1.2rem 1rem;   /* increased padding so height grows properly */
+  box-sizing: border-box;
+}
+
+/* Mobile fix — ensure vertical layout expands naturally */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    padding: 1.2rem 1rem;
+    gap: 1.2rem;
+  }
+}
   </style>
 </head>
 <body>
