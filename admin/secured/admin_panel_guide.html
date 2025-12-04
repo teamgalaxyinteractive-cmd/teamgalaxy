@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -6,93 +6,101 @@
 <title>GalaxyWeb — Admin Panel Guide (Dark Theme)</title>
 <meta name="description" content="Production-ready Admin Panel Guide for GalaxyWeb — Team Galaxy" />
 <style>
-  /* ===== Reset & Base ===== */
+  /* ---------- Variables ---------- */
   :root{
-    --bg:#06070a;
-    --panel:#09101a;
-    --muted:#9fb0c9;
-    --accent:#58a6ff;
-    --accent-2:#7bd389;
-    --danger:#ff7a7a;
-    --glass: rgba(255,255,255,0.03);
+    --bg-0: #03050a;
+    --bg-1: #071427;
+    --panel: rgba(255,255,255,0.03);
+    --glass: rgba(255,255,255,0.02);
+    --muted: #97b6d7;
+    --text: #dfeeff;
+    --accent: linear-gradient(135deg,#4fb0ff 0%, #6be4b6 100%);
+    --accent-solid: #4fb0ff;
+    --accent-2: #7bd389;
+    --danger: #ff7a7a;
     --border: rgba(255,255,255,0.04);
-    --code-bg:#071225;
-    --max-width:1100px;
-    --radius:12px;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Segoe UI Mono", "Helvetica Neue", monospace;
-  }
-  * { box-sizing: border-box; }
-  html,body { height:100%; margin:0; background:linear-gradient(180deg,#04060a 0%, #071426 100%); color:#d6e8ff; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-
-  /* ===== Layout ===== */
-  .wrap { max-width:var(--max-width); margin:28px auto; padding:28px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:18px; border:1px solid var(--border); box-shadow: 0 8px 30px rgba(2,6,23,0.6); }
-  header { display:flex; gap:16px; align-items:center; justify-content:space-between; }
-  .brand { display:flex; gap:12px; align-items:center; }
-  .logo { width:56px; height:56px; border-radius:10px; background:linear-gradient(135deg,#184e9b,#6fb3ff); display:flex; align-items:center; justify-content:center; font-weight:700; color:#08101c; font-size:20px; box-shadow: 0 6px 18px rgba(11,24,40,0.6); }
-  h1.title { margin:0; font-size:20px; color: #cfe6ff; }
-  p.lead { margin:0; color:var(--muted); font-size:13px; }
-
-  /* ===== Top actions ===== */
-  .top-actions { display:flex; gap:12px; align-items:center; }
-  .btn { background:linear-gradient(180deg,var(--accent), #2e7fe8); border:none; color:white; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; box-shadow: 0 6px 14px rgba(29,60,106,0.28); }
-  .btn.ghost { background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted); box-shadow:none; }
-  .btn.small { padding:8px 10px; font-size:13px; border-radius:8px; }
-  .btn.warn { background: linear-gradient(180deg,#ff8f6b,#ff7050); box-shadow: 0 6px 18px rgba(123,36,17,0.25); }
-
-  /* ===== Grid ===== */
-  .grid { display:grid; grid-template-columns: 280px 1fr; gap:18px; margin-top:22px; min-height:420px; }
-  nav.sidebar { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.015)); padding:18px; border-radius:14px; border:1px solid var(--border); height:100%; position:sticky; top:28px; }
-  nav h3 { margin:0 0 12px 0; color:var(--accent); font-size:13px; }
-  .menu { display:flex; flex-direction:column; gap:8px; }
-  .menu button { display:flex; gap:10px; align-items:center; padding:10px; border-radius:10px; background:transparent; color:var(--muted); border:1px solid transparent; text-align:left; width:100%; cursor:pointer; }
-  .menu button.active, .menu button:hover { background: linear-gradient(90deg, rgba(88,166,255,0.06), rgba(123,211,137,0.02)); color:#eaf6ff; border-color: rgba(255,255,255,0.03); }
-  .menu .meta { font-size:12px; color: #99b6d6; margin-top:6px; }
-
-  /* ===== Content Panels ===== */
-  .panel { padding:20px; border-radius:14px; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.007)); border:1px solid var(--border); box-shadow: inset 0 1px 0 rgba(255,255,255,0.01); }
-  .section { margin-bottom:20px; }
-  h2 { margin:0 0 8px 0; color:var(--accent); }
-  h3 { margin:14px 0 6px 0; color:#bfe1ff; font-size:15px; }
-  p, li { color: #cfe6ff; font-size:14px; margin:0 0 10px 0; }
-  ul{ padding-left:20px; margin:6px 0 12px 0; }
-  li { margin-bottom:6px; }
-
-  /* ===== Code / Console blocks ===== */
-  .code { background:var(--code-bg); padding:14px; border-radius:10px; border:1px solid rgba(255,255,255,0.03); font-family:var(--mono); color:#bfe9ff; font-size:13px; white-space:pre-wrap; }
-  .console { background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(255,255,255,0.01)); border-radius:10px; padding:12px; font-family:var(--mono); color:#cfe6ff; font-size:13px; border:1px solid rgba(255,255,255,0.02); box-shadow: inset 0 -6px 24px rgba(0,0,0,0.3); }
-
-  /* ===== Badges & small UI ===== */
-  .badge { padding:6px 10px; border-radius:999px; font-size:12px; background:rgba(255,255,255,0.03); color:var(--muted); border:1px solid rgba(255,255,255,0.02); }
-  .stat-row { display:flex; gap:12px; margin-top:10px; flex-wrap:wrap; }
-  .stat { background:rgba(255,255,255,0.02); padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.02); color:var(--muted); font-size:13px; }
-
-  /* ===== Accordion styles ===== */
-  .accordion { width:100%; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.02); }
-  .acc-item { border-bottom:1px solid rgba(255,255,255,0.02); }
-  .acc-head { display:flex; justify-content:space-between; gap:10px; padding:14px; cursor:pointer; align-items:center; background:transparent; }
-  .acc-head h4 { margin:0; font-size:15px; color:#cfe6ff; }
-  .acc-body { padding:14px; display:none; background: linear-gradient(180deg, rgba(255,255,255,0.005), rgba(255,255,255,0.002)); }
-  .acc-head .muted { color:var(--muted); font-size:13px; }
-
-  /* ===== Responsive ===== */
-  @media (max-width:920px){
-    .grid { grid-template-columns: 1fr; }
-    nav.sidebar { position:relative; top:unset; margin-bottom:12px; }
+    --radius: 14px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Segoe UI Mono", monospace;
+    --sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    --max-w: 1160px;
   }
 
-  /* ===== Footer ===== */
-  footer { margin-top:22px; color:var(--muted); font-size:13px; display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap; }
+  /* ---------- Reset ---------- */
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:
+    radial-gradient(1200px 600px at 10% 10%, rgba(80,120,200,0.06), transparent 5%),
+    linear-gradient(180deg,var(--bg-0), var(--bg-1)); color:var(--text); font-family:var(--sans); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
+  a{color:var(--accent-solid)}
+  a:hover{text-decoration:underline}
 
-  /* ===== Small helper ===== */
-  .muted { color:var(--muted); font-size:13px; }
-  .danger { color:var(--danger); font-weight:600; }
-  .success { color:var(--accent-2); font-weight:600; }
+  /* ---------- Container ---------- */
+  .wrap{max-width:var(--max-w);margin:26px auto;padding:26px;border-radius:18px;background:
+    linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px solid var(--border); box-shadow: 0 10px 40px rgba(2,8,23,0.6);}
 
-  /* ===== Tiny instructions ===== */
-  .note { font-size:13px; color:#bcd8ff; background: rgba(88,166,255,0.02); padding:8px; border-radius:8px; border:1px solid rgba(88,166,255,0.04); }
+  header{display:flex;align-items:center;justify-content:space-between;gap:18px}
+  .brand{display:flex;gap:12px;align-items:center}
+  .logo{
+    width:64px;height:64px;border-radius:12px;background:
+    linear-gradient(135deg,#0f2b59 0%, #2a7fd6 100%);display:flex;align-items:center;justify-content:center;font-weight:800;color:#eaf6ff;font-size:22px;box-shadow:0 8px 30px rgba(11,23,40,0.6)
+  }
+  .title-wrap{line-height:1}
+  h1{margin:0;font-size:20px;color:#e9f7ff}
+  p.lead{margin:0;color:var(--muted);font-size:13px}
 
+  /* ---------- Top buttons ---------- */
+  .top-actions{display:flex;gap:10px;align-items:center}
+  .btn{background:linear-gradient(180deg,var(--accent-solid), #2e7fe8);color:white;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600;box-shadow:0 8px 20px rgba(34,66,120,0.23)}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);box-shadow:none}
+  .btn.small{padding:8px 10px;font-size:13px}
+  .btn.warn{background:linear-gradient(180deg,#ff8568,#ff6a4f)}
+
+  /* ---------- Layout ---------- */
+  .grid{display:grid;grid-template-columns:300px 1fr;gap:20px;margin-top:20px;align-items:start}
+  nav.sidebar{background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.007));padding:18px;border-radius:14px;border:1px solid var(--border);position:sticky;top:26px;height:calc(100vh - 80px)}
+  nav h3{margin:0 0 12px 0;color:var(--accent-solid);font-size:13px}
+  .menu{display:flex;flex-direction:column;gap:8px}
+  .menu button{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:transparent;border:1px solid transparent;color:var(--muted);cursor:pointer;text-align:left;font-size:14px}
+  .menu button:hover{background:rgba(255,255,255,0.018);color:#eaf6ff;border-color:rgba(255,255,255,0.02)}
+  .menu button.active{background:linear-gradient(90deg, rgba(79,176,255,0.06), rgba(123,211,137,0.02));color:#eaf6ff;border-color:rgba(255,255,255,0.03)}
+  .menu .icon{width:14px;height:14px;display:inline-block;opacity:0.9}
+
+  /* ---------- Main panel ---------- */
+  main.panel{padding:20px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid var(--border);min-height:520px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.01)}
+  .section{margin-bottom:22px}
+  h2{margin:0 0 8px 0;color:#cfe8ff;font-size:18px}
+  h3{margin:12px 0 8px 0;color:#bfe1ff;font-size:15px}
+  p,li{color:var(--text);font-size:14px;margin:0 0 10px 0}
+  ul{padding-left:20px;margin:6px 0 12px 0}
+  li{margin-bottom:6px;color:var(--muted)}
+
+  /* ---------- Code / Console ---------- */
+  .code{background:linear-gradient(180deg, rgba(0,0,0,0.18), rgba(255,255,255,0.01));border-radius:10px;padding:12px;font-family:var(--mono);font-size:13px;color:#bfe9ff;border:1px solid rgba(255,255,255,0.03);overflow:auto}
+  .console{background:linear-gradient(180deg, rgba(2,6,20,0.45), rgba(255,255,255,0.01));padding:12px;border-radius:10px;font-family:var(--mono);font-size:13px;color:#cfe6ff;border:1px solid rgba(255,255,255,0.02);box-shadow: inset 0 -6px 24px rgba(0,0,0,0.3)}
+
+  /* ---------- Badges / stats ---------- */
+  .meta{font-size:13px;color:var(--muted);margin-top:12px}
+  .stat-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+  .stat{padding:8px 10px;border-radius:9px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);color:var(--muted);font-size:13px}
+
+  /* ---------- Accordions (for nicer read) ---------- */
+  .accordion{border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.02);background:transparent}
+  .acc-item{border-bottom:1px solid rgba(255,255,255,0.02)}
+  .acc-head{display:flex;align-items:center;justify-content:space-between;padding:12px;cursor:pointer}
+  .acc-head h4{margin:0;font-size:15px;color:var(--text)}
+  .acc-body{padding:12px;background:linear-gradient(180deg, rgba(255,255,255,0.005), rgba(255,255,255,0.002));display:none;color:var(--muted)}
+
+  /* ---------- Small helpers ---------- */
+  .muted{color:var(--muted)}
+  .note{background:rgba(79,176,255,0.03);padding:10px;border-radius:10px;border:1px solid rgba(79,176,255,0.03);color:#dff6ff}
+  .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);font-size:13px;color:var(--muted)}
+  footer{display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid rgba(255,255,255,0.02);color:var(--muted);font-size:13px}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:980px){
+    .grid{grid-template-columns:1fr}
+    nav.sidebar{position:relative;height:auto;top:unset}
+  }
 </style>
 </head>
 <body>
@@ -100,61 +108,87 @@
     <header>
       <div class="brand">
         <div class="logo" aria-hidden="true">GG</div>
-        <div>
-          <h1 class="title" id="main-title">GalaxyWeb — Admin Panel Guide</h1>
+        <div class="title-wrap">
+          <h1 id="main-title">GalaxyWeb — Admin Panel Guide</h1>
           <p class="lead">Production-Ready • Dark Theme • Verified Administrators Only</p>
         </div>
       </div>
 
       <div class="top-actions" aria-hidden="false">
-        <button class="btn small" id="open-print">Print / Export</button>
-        <button class="btn ghost small" id="open-download">Download (README)</button>
-        <button class="btn" id="contact-it">Contact IT</button>
+        <button class="btn small" id="open-print" title="Print or export this guide">Print / Export</button>
+        <button class="btn ghost small" id="open-download" title="Download a README.md">Download README</button>
+        <button class="btn" id="contact-it" title="Contact IT via email">Contact IT</button>
       </div>
     </header>
 
-    <div class="grid" style="margin-top:20px;">
+    <div class="grid" role="group" aria-label="Admin guide layout">
       <nav class="sidebar" aria-label="Admin modules navigation">
         <h3>Modules</h3>
+
         <div class="menu" role="tablist" aria-orientation="vertical">
-          <button class="active" data-panel="panel-overview" role="tab">Overview</button>
-          <button data-panel="panel-access" role="tab">Access System</button>
-          <button data-panel="panel-dashboard" role="tab">Dashboard</button>
-          <button data-panel="panel-userdata" role="tab">User Data</button>
-          <button data-panel="panel-repostatus" role="tab">Repo Status</button>
-          <button data-panel="panel-cards" role="tab">Cards Manager</button>
-          <button data-panel="panel-portfolio" role="tab">Portfolio</button>
-          <button data-panel="panel-licenses" role="tab">Licenses</button>
-          <button data-panel="panel-agreements" role="tab">Agreement Access</button>
+          <button class="active" data-panel="panel-overview" role="tab" aria-controls="panel-overview">
+            <span class="icon">📘</span> Overview
+          </button>
+
+          <button data-panel="panel-access" role="tab" aria-controls="panel-access">
+            <span class="icon">🔒</span> Access System
+          </button>
+
+          <button data-panel="panel-dashboard" role="tab" aria-controls="panel-dashboard">
+            <span class="icon">🏠</span> Dashboard
+          </button>
+
+          <button data-panel="panel-userdata" role="tab" aria-controls="panel-userdata">
+            <span class="icon">👥</span> User Data
+          </button>
+
+          <button data-panel="panel-repostatus" role="tab" aria-controls="panel-repostatus">
+            <span class="icon">📁</span> Repo Status
+          </button>
+
+          <button data-panel="panel-cards" role="tab" aria-controls="panel-cards">
+            <span class="icon">📇</span> Cards Manager
+          </button>
+
+          <button data-panel="panel-portfolio" role="tab" aria-controls="panel-portfolio">
+            <span class="icon">🖼️</span> Portfolio
+          </button>
+
+          <button data-panel="panel-licenses" role="tab" aria-controls="panel-licenses">
+            <span class="icon">📜</span> Licenses
+          </button>
+
+          <button data-panel="panel-agreements" role="tab" aria-controls="panel-agreements">
+            <span class="icon">📝</span> Agreement Access
+          </button>
         </div>
 
-        <div style="margin-top:18px;">
-          <div class="meta">Supabase: <span class="stat">1 GB</span> · Dropbox: <span class="stat">2 GB</span></div>
-          <div class="meta" style="margin-top:8px;">Repo token usage: <span class="stat">Limited — use minimally</span></div>
+        <div style="margin-top:18px">
+          <div class="meta">Supabase: <span class="pill">1 GB</span> · Dropbox: <span class="pill">2 GB</span></div>
+          <div class="meta" style="margin-top:8px">Repo token usage: <span class="pill">Limited — use minimally</span></div>
         </div>
 
-        <div style="margin-top:18px;">
-          <div class="note"><strong>Quick rule:</strong> Unauthorized users are redirected back to verification entry page (no message).</div>
+        <div style="margin-top:14px">
+          <div class="note"><strong>Quick rule:</strong> Unauthorized users are redirected back to the entry verification page (no message).</div>
         </div>
       </nav>
 
-      <main class="panel" id="content" tabindex="0" role="region" aria-live="polite">
-
+      <main class="panel" id="content" tabindex="0" role="region" aria-live="polite" aria-label="Admin guide content">
         <!-- Overview -->
         <section id="panel-overview" class="section" role="tabpanel">
           <h2>Overview</h2>
-          <p>GalaxyWeb Admin Panel is a secure, access-controlled interface for managing site assets, content, and agreements. Only verified admin emails may access the dashboard. This guide outlines behavior, constraints, and operational flows for every module in the admin panel.</p>
+          <p>GalaxyWeb Admin Panel is a secure, access-controlled interface for managing site assets, content, and agreements. Only verified admin emails may access the dashboard. This guide describes module behaviour, constraints, and operational flows.</p>
 
-          <div style="margin-top:12px;">
-            <h3>What’s included in this document</h3>
+          <div style="margin-top:14px">
+            <h3>Included topics</h3>
             <ul>
-              <li>Access rules & verification flow</li>
-              <li>Dashboard navigation & Contact IT</li>
+              <li>Access rules & verification</li>
+              <li>Dashboard & Contact IT</li>
               <li>User Data (read-only)</li>
               <li>Repo Status (read-only file browser)</li>
               <li>Cards Manager (create cards)</li>
               <li>Portfolio (Item Manager & Folder Manager)</li>
-              <li>Licenses & Agreement Access modules</li>
+              <li>Licenses & Agreement Access</li>
             </ul>
           </div>
         </section>
@@ -162,17 +196,16 @@
         <!-- Access system -->
         <section id="panel-access" class="section" style="display:none" role="tabpanel" aria-hidden="true">
           <h2>1. Access System</h2>
-          <p>This system uses an email-based whitelist for admin access. The entry page verifies if the logged-in email belongs to the admin list. If not, the user is silently redirected back to the verification entry page. There is no "access denied" message shown — the UX returns them to the starting verification gate.</p>
+          <p>The system uses an email whitelist for admin access. The entry page verifies the logged-in email — if it is not on the list the user is redirected back to the verification entry page (no message). Every page load re-runs this verification check to maintain integrity.</p>
 
-          <h3>Verification rules</h3>
+          <h3>Rules</h3>
           <ul>
-            <li>On login attempt the system checks the user email against admin whitelist.</li>
-            <li>If allowed, the Dashboard opens.</li>
-            <li>If not allowed, the user is redirected back to entry verification page.</li>
-            <li>Every page load and module navigation re-runs this verification check (continuous validation).</li>
+            <li>Login → email checked against admin whitelist → Dashboard if allowed.</li>
+            <li>If not allowed → redirect to entry verification page automatically.</li>
+            <li>Continuous validation on each module load.</li>
           </ul>
 
-          <h3>Implementation notes (for devs)</h3>
+          <h3>Dev note</h3>
           <div class="code">
 /* PSEUDO
 onPageLoad() {
@@ -180,18 +213,15 @@ onPageLoad() {
     window.location.href = '/entry-verification';
   }
 }
-*/
-          </div>
-
-          <p class="muted">Note: Sessions are not forcibly short-lived. The system uses normal session behavior (no short TTL required by design).</p>
+</div>
         </section>
 
         <!-- Dashboard -->
         <section id="panel-dashboard" class="section" style="display:none" role="tabpanel" aria-hidden="true">
           <h2>2. Dashboard</h2>
-          <p>The Dashboard is the navigation hub. Each module is presented as a tile with a short description and quick metadata (last-checked timestamp, usage hints).</p>
+          <p>The Dashboard is the central navigation hub. Each module tile shows a short description plus quick metadata (last-check timestamp, usage hints).</p>
 
-          <h3>Available tiles / modules</h3>
+          <h3>Modules available</h3>
           <ul>
             <li>USER DATA</li>
             <li>REPO STATUS</li>
@@ -201,14 +231,15 @@ onPageLoad() {
             <li>AGREEMENT ACCESS</li>
           </ul>
 
-          <h3>Contact IT (single central action)</h3>
-          <p>Instead of adding per-page report buttons, the Dashboard contains a single <strong>Contact IT</strong> button which composes an email to <code>squadvertex24official@gmail.com</code>.</p>
+          <h3>Contact IT</h3>
+          <p>There is a single <strong>Contact IT</strong> button on the Dashboard which opens your email client with a minimal template addressed to <code>squadvertex24official@gmail.com</code>. Admins should attach console logs when relevant.</p>
 
           <div class="code">
 Subject: GalaxyWeb Admin Support Request
 
 Message:
 Hello IT Team,
+
 I need assistance with the following:
 
 Module:
@@ -218,189 +249,153 @@ Details:
 Regards,
 &lt;your name&gt;
           </div>
-
-          <p class="muted">The Contact IT button uses a standard <code>mailto:</code> to open the admin's email client with the template above. Admins should attach console logs when needed.</p>
         </section>
 
         <!-- USER DATA -->
         <section id="panel-userdata" class="section" style="display:none" role="tabpanel" aria-hidden="true">
           <h2>3. USER DATA</h2>
-          <p><strong>Purpose:</strong> Read-only monitoring of user data for GDPR and operational oversight.</p>
+          <p><strong>Purpose:</strong> Read-only monitoring of user accounts for GDPR and operations.</p>
 
-          <h3>Displayed fields</h3>
+          <h3>Fields shown</h3>
           <ul>
-            <li><strong>Join Date</strong></li>
-            <li><strong>Last Login</strong></li>
-            <li><strong>Public Posts</strong></li>
-            <li><strong>Slug</strong> (handles as public identifier)</li>
-            <li><strong>Terms Accepted</strong> (boolean)</li>
-            <li><strong>Verified</strong> (admin-only flag)</li>
-            <li><strong>Terms Timestamp</strong></li>
+            <li>Join Date</li>
+            <li>Last Login</li>
+            <li>Public Posts</li>
+            <li>Slug (handle)</li>
+            <li>Terms Accepted (boolean)</li>
+            <li>Verified (admin flag)</li>
+            <li>Terms Timestamp</li>
           </ul>
 
           <h3>Profile images</h3>
-          <p>Only the custom image uploaded by the user via in-app profile is shown (from Supabase). Google account images are not surfaced here. Users are allowed only one profile photo change to limit storage abuse and to reduce potential misuse (e.g., NSFW uploads).</p>
+          <p>Only the one-time custom profile image uploaded by the user (stored in Supabase) is shown. Google profile images are not surfaced here.</p>
 
-          <h3>Permissions & Actions</h3>
-          <ul>
-            <li>Admins cannot edit or delete user records in-panel.</li>
-            <li>For bans, restrictions, or edits admins must email IT with user slug/uid & justification.</li>
-            <li>All edit requests are processed by IT (squadvertex24official@gmail.com).</li>
-          </ul>
+          <h3>Actions</h3>
+          <p>Admins cannot edit or delete user data in-panel. For bans, restrictions, or account edits email IT with the user slug/UID and justification.</p>
         </section>
 
         <!-- REPO STATUS -->
         <section id="panel-repostatus" class="section" style="display:none" role="tabpanel" aria-hidden="true">
           <h2>4. REPO STATUS</h2>
-          <p><strong>Purpose:</strong> Read-only browser for the GitHub repository that powers the site.</p>
+          <p><strong>Purpose:</strong> Read-only browsing of the GitHub repository powering the site.</p>
 
-          <h3>What it shows</h3>
+          <h3>Displayed</h3>
           <ul>
             <li>Repository folder tree</li>
             <li>File contents preview (read-only)</li>
             <li>File sizes & structure</li>
           </ul>
 
-          <h3>What it does NOT show</h3>
+          <h3>Constraints & Guidance</h3>
           <ul>
-            <li>No commit history / no commit metadata (by design)</li>
-            <li>No edit capability</li>
-          </ul>
-
-          <h3>Important constraints</h3>
-          <ul>
-            <li>This module uses API tokens and can be token-costly — recommended for IT use only</li>
-            <li>Admins should limit usage to occasional monitoring only to conserve tokens</li>
-            <li>Use the "Request IT" flow via Dashboard Contact IT if change is required</li>
+            <li>Module consumes API tokens — use minimally; primarily intended for IT.</li>
+            <li>If changes are required, contact IT via the Dashboard Contact IT button.</li>
           </ul>
 
           <div class="code">
-INFRAS:
+Infrastructure:
 - Hosting: GitHub
 - Database: Firebase
 - Portfolio CDN: Dropbox (2 GB quota)
 - Profile images: Supabase (1 GB quota)
           </div>
-
-          <p class="muted">Note: The repo visible here is the authoritative source for website code and server configuration. Admins should not attempt code changes here.</p>
         </section>
 
         <!-- CARDS MANAGER -->
         <section id="panel-cards" class="section" style="display:none" role="tabpanel" aria-hidden="true">
           <h2>5. CARDS MANAGER</h2>
-          <p><strong>Purpose:</strong> Create blog / announcement cards used across GalaxyWeb. Cards are lightweight content pieces — create allowed, edits restricted.</p>
+          <p>Create lightweight content cards used across the site. Creation is permitted; editing existing cards is restricted.</p>
 
-          <h3>Create Card — Fields & Validation</h3>
+          <h3>Fields & limits</h3>
           <ul>
-            <li><strong>Title</strong> — <em>required</em>. Maximum <strong>300 characters</strong>.</li>
-            <li><strong>Description</strong> — <em>optional</em>. Maximum <strong>10,000 characters</strong>.</li>
-            <li><strong>Image URL</strong> — Must be an HTTPS URL from the authorised CDN (Dropbox or Supabase).</li>
+            <li><strong>Title</strong> — required, max <strong>300 characters</strong></li>
+            <li><strong>Description</strong> — optional, max <strong>10,000 characters</strong></li>
+            <li><strong>Image URL</strong> — must be HTTPS from allowed CDN (Dropbox / Supabase)</li>
           </ul>
 
-          <h3>Process</h3>
-          <ol>
-            <li>Upload images through <strong>Portfolio → Item Manager</strong> to get CDN url(s).</li>
-            <li>Open Cards Manager, create new card and paste image URL.</li>
-            <li>Cards list remains view-only after creation; editing/removal requires contacting IT.</li>
-          </ol>
+          <h3>Image flow</h3>
+          <p>Upload images via <strong>Portfolio → Item Manager</strong>. Grab the CDN URL and paste it here.</p>
 
-          <div class="note">Why limits? Large descriptions are supported but we place conservative caps to prevent accidental content bloat; feel free to ask IT before adding extremely long content.</div>
-
+          <div class="note">Cards are view-only after creation. To remove or edit a card, email IT with details.</div>
         </section>
 
         <!-- PORTFOLIO -->
         <section id="panel-portfolio" class="section" style="display:none" role="tabpanel" aria-hidden="true">
           <h2>6. PORTFOLIO</h2>
-          <p>The Portfolio module manages all visual assets for the public portfolio page. It contains two submodules: <strong>Item Manager</strong> (upload pipeline) and <strong>Folder Manager</strong> (organization).</p>
+          <p>All visual assets are managed here. Two submodules: <strong>Item Manager</strong> (upload pipeline) and <strong>Folder Manager</strong> (organisation).</p>
 
           <h3>6.1 Item Manager</h3>
-          <p><strong>Purpose:</strong> Upload images to the Dropbox CDN and register resulting URLs into Firestore.</p>
+          <p><strong>Purpose:</strong> Upload images to Dropbox CDN and register URLs in Firestore.</p>
 
           <h4>Capabilities</h4>
           <ul>
-            <li>Upload up to <strong>5 images per batch</strong> to limit server load</li>
-            <li>Show original preview and file size for each image</li>
-            <li>Calculate and display aggregated storage usage for portfolio space</li>
-            <li>Provide CDN URL after successful upload</li>
-            <li>Pagination for listings</li>
-            <li>Integrated frontend console panel that logs each step</li>
+            <li>Upload up to <strong>5 images per batch</strong></li>
+            <li>Original preview, file size, aggregated storage calculation</li>
+            <li>CDN URL returned after upload</li>
+            <li>Pagination and a frontend console for logs</li>
           </ul>
 
-          <h4>Upload flow (technical)</h4>
+          <h4>Flow</h4>
           <div class="code">
-Frontend -> Cloudflare Worker -> Dropbox upload -> Worker receives Dropbox response & returns CDN URL -> Save CDN URL into Firestore
+Frontend -> Cloudflare Worker -> Dropbox -> Worker returns CDN URL -> Save URL to Firestore
           </div>
 
-          <h4>UI / UX Notes</h4>
+          <h4>Notes</h4>
           <ul>
-            <li>Show network warning if connection is slow or intermittent</li>
-            <li>File limits & allowed formats displayed (e.g., JPG, PNG, WEBP). Max file size enforced by IT (visible in UI)</li>
-            <li>After upload, show "Copy URL" and "View Original" actions</li>
-            <li>Console shows: queued -> uploading -> worker call -> dropbox response -> firestore write</li>
+            <li>Show network warning for slow connections</li>
+            <li>Allowed formats: JPG, PNG, WEBP (max size set by IT)</li>
+            <li>Buttons: Select up to 5 images, Upload to CDN, Copy URL, View original</li>
           </ul>
 
           <h4>Storage quotas</h4>
           <ul>
-            <li>Supabase (profile images): <strong>1 GB</strong> — private</li>
-            <li>Dropbox (portfolio media): <strong>2 GB</strong> — serves portfolio assets</li>
+            <li>Supabase (profile images) — 1 GB (private)</li>
+            <li>Dropbox (portfolio media) — 2 GB (serves portfolio)</li>
           </ul>
 
           <h3>6.2 Folder Manager</h3>
-          <p><strong>Purpose:</strong> Organize uploaded images into folders used by public portfolio page.</p>
+          <p><strong>Purpose:</strong> Organize images into folders for the portfolio page.</p>
 
           <h4>Top controls</h4>
           <ol>
-            <li><strong>Create Folder</strong> — Provide Title, Description, Order, Visibility</li>
-            <li><strong>View Unassigned Images</strong> — See images not assigned to any folder</li>
-            <li><strong>Fix Missing Fields</strong> — Automated metadata fixer for recent uploads (recommended to run once after upload)</li>
+            <li>Create Folder — title, description, order, visibility</li>
+            <li>View Unassigned Images</li>
+            <li>Fix Missing Fields — auto-fill metadata for recent uploads (run once after upload)</li>
           </ol>
 
           <h4>Folder fields</h4>
           <ul>
-            <li><strong>Title</strong> — required</li>
-            <li><strong>Description</strong> — optional</li>
-            <li><strong>Order</strong> — integer (lower appears earlier)</li>
-            <li><strong>Visibility</strong> — Public or Hidden</li>
+            <li>Title — required</li>
+            <li>Description — optional</li>
+            <li>Order — integer (lower = shown earlier)</li>
+            <li>Visibility — Public / Hidden</li>
           </ul>
 
-          <h4>Assignment & interface</h4>
-          <ul>
-            <li>Assign images by checkbox or drag/drop (UI choice)</li>
-            <li>Unassigned images are always visible in the "available" pane</li>
-            <li>Console panel shows assign/unassign events and metadata fixes</li>
-          </ul>
-
-          <div class="note">"Fix Missing Fields" will try to populate empty metadata fields (category, alt text). IT recommends minimal use — use once after batch uploads.</div>
+          <h4>Assignment</h4>
+          <p>Assign by checkbox or drag/drop UI; console logs track assignments and fixes. "Fix Missing Fields" auto-populates basic metadata—use sparingly as recommended by IT.</p>
         </section>
 
         <!-- LICENSES -->
         <section id="panel-licenses" class="section" style="display:none" role="tabpanel" aria-hidden="true">
           <h2>7. LICENSES</h2>
-          <p><strong>Purpose:</strong> Centralised storage for all project licenses and asset rights documentation. IT manages this content and uploads license copies as required.</p>
+          <p><strong>Purpose:</strong> Central repository for asset & dependency licenses. Managed by IT; admins can view and download copies as needed.</p>
 
-          <h3>What you will find here</h3>
+          <h3>Contents</h3>
           <ul>
-            <li>Third-party library licenses</li>
+            <li>Third-party component licenses</li>
             <li>Vendor asset licenses</li>
-            <li>TeamGalaxy internal license documents</li>
-            <li>Copyright and redistribution permissions</li>
+            <li>Internal TeamGalaxy license documents</li>
+            <li>Copyright & redistribution permissions</li>
           </ul>
 
-          <h3>Admin capabilities</h3>
-          <ul>
-            <li>View & download license files</li>
-            <li>No edits in-panel — contact IT for updates or clarifications</li>
-          </ul>
-
-          <p class="muted">The exact contents vary depending on the project status and active assets. Always consult IT for license questions.</p>
+          <p class="muted">If you need clarification on any license, contact IT.</p>
         </section>
 
         <!-- AGREEMENTS -->
         <section id="panel-agreements" class="section" style="display:none" role="tabpanel" aria-hidden="true">
           <h2>8. AGREEMENT ACCESS</h2>
-          <p>This module contains the Administrative Agreement System and the TeamGalaxy Master Administrative Agreement. Administrators must accept the master agreement to maintain access where required.</p>
+          <p>This module contains the Administrative Agreement System (v3.1) and the TeamGalaxy Master Administrative Agreement. Admins must accept the agreement when required to maintain access.</p>
 
-          <h3>Administrative Agreement System</h3>
           <div class="code">
 Administrative Agreement System
 Version 3.1 • Last Updated: November 15, 2025
@@ -416,13 +411,9 @@ Violations may result in immediate access revocation, legal proceedings, and fin
           </div>
 
           <h3>Admin list</h3>
-          <p>The module lists all administrators alongside two state flags:</p>
-          <ul>
-            <li>Verified (yes/no)</li>
-            <li>Master Agreement accepted (yes/no)</li>
-          </ul>
+          <p>Displays: Name, Email, Verified status, Master Agreement acceptance status.</p>
 
-          <h3>TeamGalaxy Master Administrative Agreement (excerpt)</h3>
+          <h3>Master Administrative Agreement (excerpt)</h3>
           <div class="code">
 TeamGalaxy Master Administrative Agreement
 EFFECTIVE DATE: November 15, 2025
@@ -430,109 +421,78 @@ EFFECTIVE DATE: November 15, 2025
 PARTIES: TeamGalaxy Technologies (System Owner) and Authenticated Administrator
 
 1. PERSONAL LIABILITY
-The Administrator acknowledges and accepts sole responsibility for all actions performed using their authenticated credentials. This includes but is not limited to:
-- Data access, modification, or deletion operations
-- User permission management and role assignments
-- Configuration changes to system parameters
-- Security protocol adherence and incident reporting
-
-2. COMPLIANCE OBLIGATIONS
-Administrator warrants compliance with:
-- India Information Technology Act, 2000 (as amended)
-- Relevant data protection regulations including GDPR where applicable
-- Internal TeamGalaxy security policies and procedures
-
-3. AUDIT RIGHTS
-TeamGalaxy Technologies reserves the right to:
-- Conduct unannounced security and compliance audits
-- Review all administrator actions and access logs
-- Revoke access privileges without prior notice for policy violations
-
-4. INDEMNIFICATION
-The Administrator agrees to indemnify and hold harmless TeamGalaxy Technologies, its officers, and affiliates from any claims, damages, or liabilities arising from:
-- Unauthorized data access or disclosure
-- Misuse of administrative privileges
-- Failure to report security incidents within mandated timeframes
-
+...
 5. AGREEMENT ACKNOWLEDGEMENT
-Continued access to administrative systems constitutes acceptance of these terms. This agreement supersedes all prior understandings and may be modified by TeamGalaxy Technologies with written notice.
+Continued access to administrative systems constitutes acceptance of these terms.
           </div>
 
-          <h3>Acceptance</h3>
-          <p>At the bottom of this module in the live admin panel there is an <strong>Accept</strong> button that records the admin’s acceptance. Access to the admin tools may require acceptance per IT policy.</p>
+          <p>Acceptance is recorded when an admin clicks the <strong>Accept</strong> button in the live panel (if required by IT policy).</p>
         </section>
 
         <footer>
-          <div class="muted">IT support: <strong>squadvertex24official@gmail.com</strong></div>
-          <div class="muted">Supabase storage: <strong>1 GB</strong> · Dropbox: <strong>2 GB</strong></div>
+          <div>IT support: <strong>squadvertex24official@gmail.com</strong></div>
+          <div class="muted">Supabase: <strong>1 GB</strong> · Dropbox: <strong>2 GB</strong></div>
         </footer>
-
       </main>
     </div>
   </div>
 
-  <script>
-    // Basic interaction: panel switching
-    (function(){
-      const menuBtns = document.querySelectorAll('.menu button');
-      const panels = document.querySelectorAll('[role="tabpanel"]');
-      function showPanel(id){
-        panels.forEach(p => {
-          if (p.id === id) { p.style.display = ''; p.removeAttribute('aria-hidden'); }
-          else { p.style.display = 'none'; p.setAttribute('aria-hidden','true'); }
-        });
-        menuBtns.forEach(b => b.classList.toggle('active', b.dataset.panel === id));
-        // focus to main content for screenreaders
-        const main = document.getElementById('content');
-        if (main) main.focus();
-      }
-      menuBtns.forEach(btn => {
-        btn.addEventListener('click', () => showPanel(btn.dataset.panel));
+<script>
+  (function(){
+    // Panel switching
+    const menuBtns = document.querySelectorAll('.menu button');
+    const panels = document.querySelectorAll('[role="tabpanel"]');
+    function showPanel(id){
+      panels.forEach(p => {
+        if (p.id === id) { p.style.display = ''; p.removeAttribute('aria-hidden'); }
+        else { p.style.display = 'none'; p.setAttribute('aria-hidden','true'); }
       });
-      // default open overview
-      showPanel('panel-overview');
+      menuBtns.forEach(b => b.classList.toggle('active', b.dataset.panel === id));
+      // focus for accessibility
+      const main = document.getElementById('content');
+      if (main) main.focus();
+    }
+    menuBtns.forEach(btn => btn.addEventListener('click', () => showPanel(btn.dataset.panel)));
+    showPanel('panel-overview');
 
-      // Contact IT - open mailto with template
-      const contactBtn = document.getElementById('contact-it');
-      contactBtn.addEventListener('click', () => {
-        const subj = encodeURIComponent('GalaxyWeb Admin Support Request');
-        const body = encodeURIComponent([
-          'Hello IT Team,',
-          '',
-          'I need assistance with the following:',
-          '',
-          'Module:',
-          'Issue:',
-          'Details:',
-          '',
-          'Regards,',
-          ''
-        ].join('\\n'));
-        window.location.href = 'mailto:squadvertex24official@gmail.com?subject=' + subj + '&body=' + body;
-      });
+    // Contact IT - proper newline body
+    document.getElementById('contact-it').addEventListener('click', () => {
+      const subj = encodeURIComponent('GalaxyWeb Admin Support Request');
+      const bodyText = [
+        'Hello IT Team,',
+        '',
+        'I need assistance with the following:',
+        '',
+        'Module:',
+        'Issue:',
+        'Details:',
+        '',
+        'Regards,',
+        ''
+      ].join('\n');
+      const body = encodeURIComponent(bodyText);
+      window.location.href = 'mailto:squadvertex24official@gmail.com?subject=' + subj + '&body=' + body;
+    });
 
-      // Print / export
-      document.getElementById('open-print').addEventListener('click', () => {
-        window.print();
-      });
+    // Print / Export
+    document.getElementById('open-print').addEventListener('click', () => window.print());
 
-      // Download README (generate markdown on the fly)
-      document.getElementById('open-download').addEventListener('click', () => {
-        const md = generateMarkdown();
-        const blob = new Blob([md], { type: 'text/markdown' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'GALAXYWEB-ADMIN-GUIDE.md';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-      });
+    // Generate and download README.md
+    document.getElementById('open-download').addEventListener('click', () => {
+      const md = generateMarkdown();
+      const blob = new Blob([md], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'GALAXYWEB-ADMIN-GUIDE.md';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
 
-      // Generate markdown function (summary)
-      function generateMarkdown(){
-        const tmpl = `# GalaxyWeb — Admin Panel Guide (Production)
+    function generateMarkdown(){
+      return `# GalaxyWeb — Admin Panel Guide (Production)
 
 ## Overview
 GalaxyWeb Admin Panel is a secure, access-controlled interface for managing site assets, content, and agreements. Only verified admin emails are allowed.
@@ -560,7 +520,6 @@ Fields shown:
 
 ## Repo Status
 - Read-only repo browser: file tree, file contents.
-- No commit history shown.
 - Uses tokens; recommended for IT.
 
 ## Cards Manager
@@ -584,6 +543,7 @@ Subject: GalaxyWeb Admin Support Request
 
 Message:
 Hello IT Team,
+
 I need assistance with the following:
 
 Module:
@@ -592,10 +552,8 @@ Details:
 
 Regards,
 `;
-        return tmpl;
-      }
-
-    })();
-  </script>
+    }
+  })();
+</script>
 </body>
 </html>
