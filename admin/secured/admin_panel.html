@@ -1,400 +1,562 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>TeamGalaxy Admin Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamGalaxy Admin Dashboard</title>
 
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-<style>
-/* -- same styling as before (kept concise here) -- */
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',Tahoma,Arial;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff;padding-bottom:90px;overflow-x:hidden}
-.stars{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
-.star{position:absolute;background:white;border-radius:50%;animation:twinkle var(--duration,3s) infinite ease-in-out}
-@keyframes twinkle{0%,100%{opacity:.2}50%{opacity:1}}
-.loading-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,12,41,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .5s}
-.loading-spinner{width:50px;height:50px;border:4px solid rgba(255,255,255,.1);border-top:4px solid #00d4ff;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}
-@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-.loading-text{font-size:1.2rem;color:#00d4ff;text-align:center}
-.dashboard-container{display:none;padding:20px;max-width:1400px;margin:0 auto;position:relative;z-index:2}
-.header{display:flex;justify-content:space-between;align-items:center;padding:20px 0;margin-bottom:30px;border-bottom:1px solid rgba(255,255,255,.08)}
-.admin-info{display:flex;align-items:center;gap:15px}
-.admin-avatar{width:50px;height:50px;border-radius:50%;background:linear-gradient(45deg,#00d4ff,#0077ff);display:flex;align-items:center;justify-content:center;font-size:1.5rem}
-.admin-details h2{font-size:1.5rem;margin-bottom:5px}
-.admin-details p{color:#a0aec0;font-size:.9rem}
-.header-actions .btn{background:#ff4757;border:none;padding:10px 20px;border-radius:25px;color:white;cursor:pointer}
-.modules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-bottom:30px}
-.module-card{background:rgba(25,25,35,.85);border-radius:15px;padding:20px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.06);transition:all .25s;cursor:pointer;position:relative}
-.module-card:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(0,212,255,.12);border-color:rgba(0,212,255,.18)}
-.module-icon{font-size:2rem;color:#00d4ff;margin-bottom:12px}
-.module-title{font-size:1.1rem;font-weight:700;margin-bottom:8px;color:#fff}
-.module-description{color:#a0aec0;font-size:.9rem;line-height:1.4;margin-bottom:10px}
-.module-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px}
-.badge{display:inline-block;padding:6px 10px;border-radius:999px;font-size:.75rem;font-weight:600;background:rgba(255,255,255,.04);color:#e6eef8;border:1px solid rgba(255,255,255,.03)}
-.badge.warn{background:rgba(255,165,0,.12);color:#ffd19a;border-color:rgba(255,165,0,.08)}
-.badge.conf{background:rgba(255,0,85,.08);color:#ffafc4;border-color:rgba(255,0,85,.06)}
-.badge.normal{background:rgba(255,255,255,.03);color:#dfe7f5;border-color:rgba(255,255,255,.03)}
-.last-access{color:#cfefff;background:rgba(0,212,255,.06);padding:6px 8px;border-radius:8px;font-size:.8rem}
-.sub-modules{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:12px}
-.sub-module{background:rgba(40,40,50,.6);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.04);cursor:pointer}
-.sub-module h4{color:#00d4ff;margin-bottom:6px;font-size:.98rem}
-.sub-module p{color:#a0aec0;font-size:.82rem}
-.stats-section{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:30px}
-.stat-card{background:rgba(25,25,35,.85);padding:18px;border-radius:10px;text-align:center;border:1px solid rgba(255,255,255,.06)}
-.stat-number{font-size:2rem;font-weight:bold;color:#00d4ff;margin-bottom:6px}
-.stat-label{color:#a0aec0;font-size:.9rem}
-.footer{position:fixed;left:0;bottom:0;width:100%;height:70px;background:linear-gradient(90deg,rgba(0,0,0,.5),rgba(0,0,0,.55));display:flex;align-items:center;justify-content:center;gap:12px;z-index:1001;border-top:1px solid rgba(255,255,255,.03);backdrop-filter:blur(6px)}
-.footer .footer-inner{max-width:1200px;width:100%;padding:8px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.btn-primary{background:#00d4ff;color:#05202b;border:none;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer}
-.btn-ghost{background:transparent;color:#cfefff;border:1px solid rgba(255,255,255,.06);padding:10px 12px;border-radius:10px;cursor:pointer}
-@media (max-width:600px){.module-card{padding:14px}.admin-details h2{font-size:1.1rem}.footer{height:86px;padding:10px 0}body{padding-bottom:110px}}
-</style>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+            padding-bottom: 90px; /* footer space */
+        }
+
+        /* Star background animation */
+        .stars {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration, 3s) infinite ease-in-out;
+        }
+        @keyframes twinkle { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+        .loading-screen {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(15,12,41,0.95);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 1000; transition: opacity 0.5s ease;
+        }
+        .loading-spinner {
+            width: 50px; height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
+        .loading-text { font-size: 1.2rem; color: #00d4ff; text-align: center; }
+
+        .dashboard-container { display: none; padding: 20px; max-width: 1400px; margin: 0 auto; position: relative; z-index: 2; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+
+        .admin-info { display:flex; align-items:center; gap:15px; }
+        .admin-avatar { width:50px; height:50px; border-radius:50%; background: linear-gradient(45deg,#00d4ff,#0077ff); display:flex; align-items:center; justify-content:center; font-size:1.5rem; }
+        .admin-details h2 { font-size:1.5rem; margin-bottom:5px; }
+        .admin-details p { color:#a0aec0; font-size:0.9rem; }
+
+        .header-actions .btn { background:#ff4757;border:none;padding:10px 20px;border-radius:25px;color:white;cursor:pointer; }
+
+        .modules-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px; margin-bottom:30px; }
+
+        .module-card { background: rgba(25,25,35,0.85); border-radius:15px; padding:20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.06); transition: all 0.25s ease; cursor: pointer; position: relative; }
+        .module-card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(0,212,255,0.12); border-color: rgba(0,212,255,0.18); }
+
+        .module-icon { font-size:2rem; color:#00d4ff; margin-bottom:12px; }
+        .module-title { font-size:1.1rem; font-weight:700; margin-bottom:8px; color:#fff; }
+        .module-description { color:#a0aec0; font-size:0.9rem; line-height:1.4; margin-bottom:10px; }
+
+        .module-meta { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+        .badge { display:inline-block; padding:6px 10px; border-radius:999px; font-size:0.75rem; font-weight:600; background: rgba(255,255,255,0.04); color:#e6eef8; border:1px solid rgba(255,255,255,0.03); }
+        .badge.warn { background: rgba(255,165,0,0.12); color:#ffd19a; border-color: rgba(255,165,0,0.08); }
+        .badge.conf { background: rgba(255,0,85,0.08); color:#ffafc4; border-color: rgba(255,0,85,0.06); }
+        .badge.normal { background: rgba(255,255,255,0.03); color:#dfe7f5; border-color: rgba(255,255,255,0.03); }
+
+        .last-access { color:#cfefff; background: rgba(0,212,255,0.06); padding:6px 8px; border-radius:8px; font-size:0.8rem; }
+
+        .sub-modules { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-top:12px; }
+        .sub-module { background: rgba(40,40,50,0.6); padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); cursor:pointer; }
+        .sub-module h4 { color:#00d4ff; margin-bottom:6px; font-size:0.98rem; }
+        .sub-module p { color:#a0aec0; font-size:0.82rem; }
+
+        .stats-section { display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:15px; margin-bottom:30px; }
+        .stat-card { background: rgba(25,25,35,0.85); padding:18px; border-radius:10px; text-align:center; border:1px solid rgba(255,255,255,0.06); }
+        .stat-number { font-size:2rem; font-weight:bold; color:#00d4ff; margin-bottom:6px; }
+        .stat-label { color:#a0aec0; font-size:0.9rem; }
+
+        .hidden { display:none !important; }
+
+        /* Footer fixed */
+        .footer { position: fixed; left: 0; bottom: 0; width: 100%; height: 70px; background: linear-gradient(90deg, rgba(0,0,0,0.5), rgba(0,0,0,0.55)); display:flex; align-items:center; justify-content:center; gap:12px; z-index: 1001; border-top: 1px solid rgba(255,255,255,0.03); backdrop-filter: blur(6px); }
+        .footer .footer-inner { max-width:1200px; width:100%; padding:8px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+        .footer .left { display:flex; align-items:center; gap:12px; color:#cfefff; }
+        .footer .actions { display:flex; gap:10px; }
+        .btn-primary { background:#00d4ff; color:#05202b; border:none; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; }
+        .btn-ghost { background:transparent; color:#cfefff; border:1px solid rgba(255,255,255,0.06); padding:10px 12px; border-radius:10px; cursor:pointer; }
+
+        @media (max-width:600px) {
+            .module-card { padding:14px; }
+            .admin-details h2 { font-size:1.1rem; }
+            .footer { height:86px; padding:10px 0; }
+            body { padding-bottom:110px; }
+        }
+    </style>
 </head>
 <body>
-<div class="stars" id="stars"></div>
+    <div class="stars" id="stars"></div>
 
-<!-- Loading -->
-<div class="loading-screen" id="loadingScreen">
-  <div class="loading-spinner"></div>
-  <div class="loading-text">Setting up your environment...</div>
-</div>
-
-<div class="dashboard-container" id="dashboardContainer">
-  <div class="header">
-    <div class="admin-info">
-      <div class="admin-avatar"><i class="fas fa-user-shield"></i></div>
-      <div class="admin-details">
-        <h2 id="adminName">Loading...</h2>
-        <p>System Administrator</p>
-      </div>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Setting up your environment...</div>
     </div>
-    <div class="header-actions">
-      <button class="btn" onclick="logout()" style="background:#ff4757;border:none;padding:10px 20px;border-radius:25px;color:white;cursor:pointer">Logout</button>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container" id="dashboardContainer">
+        <div class="header">
+            <div class="admin-info">
+                <div class="admin-avatar">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="admin-details">
+                    <h2 id="adminName">Loading...</h2>
+                    <p>System Administrator</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn" onclick="logout()" style="background: #ff4757; border: none; padding: 10px 20px; border-radius: 25px; color: white; cursor: pointer;">Logout</button>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-number" id="userCount">0</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="adminCount">0</div>
+                <div class="stat-label">Admins</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="repoCount">0</div>
+                <div class="stat-label">Repositories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="supportTickets">0</div>
+                <div class="stat-label">Support Tickets</div>
+            </div>
+        </div>
+
+        <div class="modules-grid" id="modulesGrid">
+            <!-- USER DATA -->
+            <div class="module-card" onclick="navigateTo('user_data/data_visualizer')">
+                <div class="module-icon"><i class="fas fa-users"></i></div>
+                <h3 class="module-title">USER DATA</h3>
+                <p class="module-description">Manage and view all user information and statistics.</p>
+            </div>
+
+            <!-- ANALYTICS -->
+            <div class="module-card" onclick="navigateTo('analytics')">
+                <div class="module-icon"><i class="fas fa-chart-line"></i></div>
+                <h3 class="module-title">ANALYTICS 🔒</h3>
+                <p class="module-description">View detailed analytics and performance metrics.</p>
+            </div>
+
+            <!-- REPOSITORY STATUS -->
+            <div class="module-card" onclick="navigateTo('repo_analyzer')">
+                <div class="module-icon"><i class="fas fa-database"></i></div>
+                <h3 class="module-title">REPOSITORY STATUS</h3>
+                <p class="module-description">Monitor repository health and status.</p>
+            </div>
+
+            <!-- CARDS MANAGER -->
+            <div class="module-card" onclick="navigateTo('card_manager')">
+                <div class="module-icon"><i class="fas fa-id-card"></i></div>
+                <h3 class="module-title">CARDS MANAGER</h3>
+                <p class="module-description">Manage user cards and profiles.</p>
+            </div>
+
+            <!-- PORTFOLIO with sub-modules -->
+            <div class="module-card">
+                <div class="module-icon"><i class="fas fa-briefcase"></i></div>
+                <h3 class="module-title">PORTFOLIO</h3>
+                <p class="module-description">Manage portfolio items and folders.</p>
+
+                <div class="sub-modules">
+                    <div class="sub-module" onclick="navigateTo('portfolio/file_uploader_admin')">
+                        <h4>ITEM MANAGER</h4>
+                        <p>Manage portfolio items and content</p>
+                    </div>
+                    <div class="sub-module" onclick="navigateTo('portfolio/portfolio_manager_admin')">
+                        <h4>FOLDER MANAGER</h4>
+                        <p>Organize portfolio folders</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LICENSES -->
+            <div class="module-card" onclick="navigateTo('official_licenses')">
+                <div class="module-icon"><i class="fas fa-file-contract"></i></div>
+                <h3 class="module-title">LICENSES</h3>
+                <p class="module-description">Manage user licenses and subscriptions.</p>
+            </div>
+
+            <!-- AGREEMENT ACCESS -->
+            <div class="module-card" onclick="navigateTo('official_agreement')">
+                <div class="module-icon"><i class="fas fa-file-alt"></i></div>
+                <h3 class="module-title">AGREEMENT ACCESS</h3>
+                <p class="module-description">Manage user agreements and permissions.</p>
+            </div>
+
+            <!-- SUPPORT -->
+            <div class="module-card" onclick="navigateTo('support')">
+                <div class="module-icon"><i class="fas fa-headset"></i></div>
+                <h3 class="module-title">SUPPORT 🔒</h3>
+                <p class="module-description">Handle support tickets and user queries.</p>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div class="stats-section">
-    <div class="stat-card"><div class="stat-number" id="userCount">0</div><div class="stat-label">Total Users</div></div>
-    <div class="stat-card"><div class="stat-number" id="adminCount">0</div><div class="stat-label">Admins</div></div>
-    <div class="stat-card"><div class="stat-number" id="repoCount">0</div><div class="stat-label">Repositories</div></div>
-    <div class="stat-card"><div class="stat-number" id="supportTickets">0</div><div class="stat-label">Support Tickets</div></div>
-  </div>
-
-  <div class="modules-grid" id="modulesGrid"></div>
-</div>
-
-<!-- Footer -->
-<div class="footer" aria-hidden="false">
-  <div class="footer-inner">
-    <div style="display:flex;align-items:center;gap:12px;color:#cfefff"><strong>TeamGalaxy Admin</strong><div style="opacity:.8;font-size:.9rem">Quick access:</div></div>
-    <div style="display:flex;gap:10px">
-      <button class="btn-ghost" onclick="window.location.href='admin/secured/admin_panel_guide.html'"><i class="fas fa-book"></i> Admin Panel Guide</button>
-      <button class="btn-primary" onclick="openNativeMail()"><i class="fas fa-envelope"></i> Contact IT</button>
+    <!-- Footer with Admin Panel Guide and Contact IT -->
+    <div class="footer" aria-hidden="false">
+        <div class="footer-inner">
+            <div class="left">
+                <div><strong>TeamGalaxy Admin</strong></div>
+                <div style="opacity:0.8;font-size:0.9rem;">Quick access:</div>
+            </div>
+            <div class="actions">
+                <button class="btn-ghost" onclick="window.location.href='admin/secured/admin_panel_guide.html'"><i class="fas fa-book"></i> Admin Panel Guide</button>
+                <button class="btn-primary" onclick="openNativeMail()"><i class="fas fa-envelope"></i> Contact IT</button>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<script>
-/* === Firebase init === */
-const firebaseConfig = {
-  apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
-  authDomain: "teamgalaxy-77344.firebaseapp.com",
-  projectId: "teamgalaxy-77344",
-  storageBucket: "teamgalaxy-77344.firebasestorage.app",
-  messagingSenderId: "770256225320",
-  appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
-  measurementId: "G-6C2W9NSNCH"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+    <script>
+        // Initialize Firebase with your credentials
+        const firebaseConfig = {
+          apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+          authDomain: "teamgalaxy-77344.firebaseapp.com",
+          projectId: "teamgalaxy-77344",
+          storageBucket: "teamgalaxy-77344.firebasestorage.app",
+          messagingSenderId: "770256225320",
+          appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+          measurementId: "G-6C2W9NSNCH"
+        };
 
-/* === Modules config === */
-const MODULES = [
-  { key:'user_data', title:'USER DATA', description:'Manage and view all user information and statistics.', icon:'fas fa-users', access:'Sensitive', warning:'USER DATA : Confidential', url:'user_data/data_visualizer.html' },
-  { key:'analytics', title:'ANALYTICS 🔒', description:'View detailed analytics and performance metrics.', icon:'fas fa-chart-line', access:'Read-Only', warning:'Uses tokens / strong internet recommended', url:'analytics.html' },
-  { key:'repo_analyzer', title:'REPOSITORY STATUS', description:'Monitor repository health and status.', icon:'fas fa-database', access:'Sensitive', warning:'Mainly IT team', url:'repo_analyzer.html' },
-  { key:'card_manager', title:'CARDS MANAGER', description:'Manage user cards and profiles.', icon:'fas fa-id-card', access:'Create-Only', warning:'CARDS MANAGER: Normal', url:'card_manager.html' },
-  { key:'portfolio', title:'PORTFOLIO', description:'Manage portfolio items and folders.', icon:'fas fa-briefcase', access:'Create-Only', warning:'Strong internet connection recommended', subModules:[
-      { key:'portfolio_items', title:'ITEM MANAGER', desc:'Manage portfolio items and content', url:'portfolio/file_uploader_admin.html' },
-      { key:'portfolio_folders', title:'FOLDER MANAGER', desc:'Organize portfolio folders', url:'portfolio/portfolio_manager_admin.html' }
-    ], url:'portfolio/index.html' },
-  { key:'licenses', title:'LICENSES', description:'Manage user licenses and subscriptions.', icon:'fas fa-file-contract', access:'Sensitive', warning:'Confidential', url:'official_licenses.html' },
-  { key:'agreement', title:'AGREEMENT ACCESS', description:'Manage user agreements and permissions.', icon:'fas fa-file-alt', access:'Sensitive', warning:'Confidential', url:'official_agreement.html' },
-  { key:'support', title:'SUPPORT 🔒', description:'Handle support tickets and user queries.', icon:'fas fa-headset', access:'Create-Only', warning:'Uses tokens / strong internet recommended', url:'support.html' }
-];
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-/* === Utility: best-effort UA parse (small) === */
-function parseUserAgent(ua) {
-  try {
-    const browsers = ['Chrome','Firefox','Safari','Edge','OPR','Opera'];
-    for (let b of browsers) {
-      if (ua.indexOf(b) !== -1) {
-        const re = new RegExp(`${b}[\\/\\s]?([\\d\\.]+)`);
-        const m = ua.match(re);
-        return { browser: b.replace('OPR','Opera'), version: m ? m[1] : null };
-      }
-    }
-  } catch(e) {}
-  return { browser: 'Unknown', version: null };
-}
-
-/* === Render modules === */
-function renderModules(lastAccessMap={}) {
-  const grid = document.getElementById('modulesGrid');
-  grid.innerHTML = '';
-  MODULES.forEach(mod => {
-    const card = document.createElement('div'); card.className='module-card'; card.setAttribute('data-key',mod.key);
-    card.innerHTML = `
-      <div class="module-icon"><i class="${mod.icon}"></i></div>
-      <h3 class="module-title">${mod.title}</h3>
-      <p class="module-description">${mod.description}</p>
-      <div class="module-meta">
-        <div class="badge normal">Access: ${mod.access}</div>
-        <div class="${mod.warning.toLowerCase().includes('confidential') ? 'badge conf' : 'badge warn'}" title="${mod.warning}">${mod.warning}</div>
-        <div class="last-access" id="last_${mod.key}">${ lastAccessMap[mod.key] || 'Last accessed: N/A' }</div>
-      </div>
-    `;
-    if (mod.subModules && mod.subModules.length) {
-      const wrap = document.createElement('div'); wrap.className='sub-modules';
-      mod.subModules.forEach(sm => {
-        const s = document.createElement('div'); s.className='sub-module';
-        s.innerHTML = `<h4>${sm.title}</h4><p>${sm.desc}</p>`;
-        s.onclick = (e)=>{ e.stopPropagation(); openModule(sm.key, sm.url); };
-        wrap.appendChild(s);
-      });
-      card.appendChild(wrap);
-    }
-    card.onclick = ()=> openModule(mod.key, mod.url);
-    grid.appendChild(card);
-  });
-}
-
-/* === Enhanced logging function === */
-async function gatherClientContext() {
-  // basic navigator data
-  const ua = navigator.userAgent || '';
-  const platform = navigator.platform || '';
-  const language = navigator.language || navigator.userLanguage || '';
-  const screenSize = `${window.screen?.width || 0}x${window.screen?.height || 0}`;
-  const timezoneOffset = new Date().getTimezoneOffset(); // minutes
-  const deviceMemory = navigator.deviceMemory || null;
-  const hardwareConcurrency = navigator.hardwareConcurrency || null;
-  const referrer = document.referrer || null;
-  const pageUrl = window.location.href || null;
-
-  // try fetch public ip (best-effort)
-  let clientIp = 'unknown';
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(()=>controller.abort(), 2500); // 2.5s timeout to avoid hanging
-    const resp = await fetch('https://api.ipify.org?format=json', { method:'GET', signal: controller.signal });
-    clearTimeout(timeout);
-    if (resp.ok) {
-      const j = await resp.json();
-      if (j && j.ip) clientIp = j.ip;
-    }
-  } catch(e){
-    // ignore; will store 'unknown'
-  }
-
-  return {
-    clientIp, ua, platform, language, screenSize, timezoneOffset, deviceMemory, hardwareConcurrency, referrer, pageUrl
-  };
-}
-
-/* === Write last access + rich log === */
-async function writeLastAccessAndLog(moduleKey) {
-  try {
-    const user = auth.currentUser;
-    const uid = user ? user.uid : null;
-    const email = user ? user.email : null;
-
-    // try to get admin name if available
-    let displayName = null;
-    try {
-      if (email) {
-        const q = await db.collection('admin').where('gmail','==',email).limit(1).get();
-        if (!q.empty) displayName = q.docs[0].data().name || null;
-      }
-    } catch(e){ console.warn('admin name fetch failed', e); }
-
-    const clientCtx = await gatherClientContext();
-    const parsedUA = parseUserAgent(clientCtx.ua);
-
-    const serverTs = firebase.firestore.FieldValue.serverTimestamp();
-
-    // update module_last_access (merged)
-    await db.collection('module_last_access').doc(moduleKey).set({
-      lastAccessed: serverTs,
-      lastAccessedByUid: uid,
-      lastAccessedByEmail: email,
-      lastAccessedByName: displayName
-    }, { merge:true });
-
-    // append log to module_access_logs with rich client context
-    await db.collection('module_access_logs').add({
-      moduleKey: moduleKey,
-      accessedAt: serverTs,
-      uid: uid,
-      email: email,
-      name: displayName || null,
-      clientIp: clientCtx.clientIp,
-      userAgent: clientCtx.ua,
-      userAgentParsed: parsedUA,
-      platform: clientCtx.platform,
-      language: clientCtx.language,
-      screen: clientCtx.screenSize,
-      timezoneOffsetMinutes: clientCtx.timezoneOffset,
-      deviceMemory: clientCtx.deviceMemory,
-      hardwareConcurrency: clientCtx.hardwareConcurrency,
-      referrer: clientCtx.referrer,
-      pageUrl: clientCtx.pageUrl,
-      raw: { clientContext: clientCtx, extra: { nav: { cookieEnabled: navigator.cookieEnabled } } }
-    });
-
-  } catch (err) {
-    console.error('Logging error for', moduleKey, err);
-  }
-}
-
-/* === Fetch last accesses to show === */
-async function fetchLastAccesses() {
-  const map = {};
-  try {
-    const snap = await db.collection('module_last_access').get();
-    snap.forEach(doc => {
-      const d = doc.data();
-      if (d && d.lastAccessed) {
-        // lastAccessed is a Firestore timestamp
-        const dt = d.lastAccessed.toDate();
-        map[doc.id] = `Last accessed: ${dt.toLocaleString()}`;
-      } else {
-        map[doc.id] = 'Last accessed: N/A';
-      }
-    });
-  } catch(e) {
-    console.error('fetchLastAccesses err', e);
-  }
-  return map;
-}
-
-/* === Open native mail client === */
-function openNativeMail() {
-  // mailto will attempt to open native mail client on device
-  window.location.href = 'mailto:squadvertex24official@gmail.com';
-}
-
-/* === open module flow === */
-async function openModule(moduleKey, moduleUrl) {
-  try {
-    // attempt to log; await to increase chance it's recorded before navigation
-    await writeLastAccessAndLog(moduleKey);
-  } catch(e){
-    console.warn('writeLastAccessAndLog failed', e);
-  }
-  if (moduleUrl && moduleUrl !== '#') {
-    window.location.href = moduleUrl;
-  } else {
-    alert('Module URL not set for ' + moduleKey);
-    loadLastAccessesAndRender();
-  }
-}
-
-/* === load basic stats === */
-async function loadStats() {
-  try {
-    const usersSnapshot = await db.collection('usersPrivate').get();
-    const usersCount = (usersSnapshot && typeof usersSnapshot.size === 'number') ? usersSnapshot.size : 0;
-    document.getElementById('userCount').textContent = usersCount || 0;
-
-    const adminsSnapshot = await db.collection('admin').get();
-    const adminsCount = (adminsSnapshot && typeof adminsSnapshot.size === 'number') ? adminsSnapshot.size : 0;
-    document.getElementById('adminCount').textContent = adminsCount || 0;
-
-    document.getElementById('repoCount').textContent = '1';
-    document.getElementById('supportTickets').textContent = 'N/A';
-  } catch(err) {
-    console.error('loadStats err', err);
-    document.getElementById('userCount').textContent = '0';
-    document.getElementById('adminCount').textContent = '0';
-    document.getElementById('repoCount').textContent = '1';
-    document.getElementById('supportTickets').textContent = 'N/A';
-  }
-}
-
-/* === Auth check with security barrier redirect if not authenticated === */
-async function checkAuth() {
-  try {
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        // verify admin membership
-        const adminQuery = await db.collection('admin').where('gmail','==',user.email).limit(1).get();
-        if (!adminQuery.empty) {
-          const adminDoc = adminQuery.docs[0];
-          const adminData = adminDoc.data();
-
-          setTimeout(async ()=>{
-            document.getElementById('loadingScreen').style.opacity='0';
-            setTimeout(()=>{ document.getElementById('loadingScreen').classList.add('hidden'); document.getElementById('dashboardContainer').style.display='block'; }, 500);
-            document.getElementById('adminName').textContent = adminData.name || user.email;
-            await loadStats();
-            await loadLastAccessesAndRender();
-          }, 1200);
-        } else {
-          // signed in but not admin -> to login (existing flow)
-          window.location.href = 'index.html';
+        // Create star background
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 150;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                star.style.left = `${x}%`; star.style.top = `${y}%`;
+                const size = Math.random() * 3 + 1;
+                star.style.width = `${size}px`; star.style.height = `${size}px`;
+                const duration = Math.random() * 5 + 2;
+                star.style.setProperty('--duration', `${duration}s`);
+                starsContainer.appendChild(star);
+            }
         }
-      } else {
-        // not signed in -> step back to security_barrier.html
-        window.location.href = '../security_barrier.html';
-      }
-    });
-  } catch(e) {
-    console.error('checkAuth err', e);
-    window.location.href = '../security_barrier.html';
-  }
-}
 
-/* === Fetch last-access map and render === */
-async function loadLastAccessesAndRender() {
-  const map = await fetchLastAccesses();
-  renderModules(map);
-}
+        // Utility: best-effort UA parse
+        function parseUserAgent(ua) {
+            try {
+                const browsers = ['Chrome','Firefox','Safari','Edge','OPR','Opera'];
+                for (let b of browsers) {
+                    if (ua.indexOf(b) !== -1) {
+                        const re = new RegExp(`${b}[\\/\\s]?([\\d\\.]+)`);
+                        const m = ua.match(re);
+                        return { browser: b.replace('OPR','Opera'), version: m ? m[1] : null };
+                    }
+                }
+            } catch(e) {}
+            return { browser: 'Unknown', version: null };
+        }
 
-/* === Logout === */
-function logout() {
-  auth.signOut().then(()=> window.location.href='index.html').catch(e=>{ console.error('logout err', e); window.location.href='index.html'; });
-}
+        // Enhanced logging: gather client context
+        async function gatherClientContext() {
+            const ua = navigator.userAgent || '';
+            const platform = navigator.platform || '';
+            const language = navigator.language || navigator.userLanguage || '';
+            const screenSize = `${window.screen?.width || 0}x${window.screen?.height || 0}`;
+            const timezoneOffset = new Date().getTimezoneOffset();
+            const deviceMemory = navigator.deviceMemory || null;
+            const hardwareConcurrency = navigator.hardwareConcurrency || null;
+            const referrer = document.referrer || null;
+            const pageUrl = window.location.href || null;
 
-/* === create stars utility === */
-function createStars() {
-  const starsContainer = document.getElementById('stars');
-  const starCount = 150;
-  for (let i=0;i<starCount;i++){
-    const star = document.createElement('div'); star.className='star';
-    const x = Math.random()*100; const y = Math.random()*100;
-    star.style.left = `${x}%`; star.style.top = `${y}%`;
-    const size = Math.random()*3 + 1; star.style.width = `${size}px`; star.style.height = `${size}px`;
-    const duration = Math.random()*5 + 2; star.style.setProperty('--duration', `${duration}s`);
-    starsContainer.appendChild(star);
-  }
-}
+            // best-effort public IP
+            let clientIp = 'unknown';
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(()=>controller.abort(), 2500);
+                const resp = await fetch('https://api.ipify.org?format=json', { method:'GET', signal: controller.signal });
+                clearTimeout(timeout);
+                if (resp.ok) {
+                    const j = await resp.json();
+                    if (j && j.ip) clientIp = j.ip;
+                }
+            } catch(e) {
+                // ignore
+            }
 
-/* === Init on DOMContentLoaded === */
-document.addEventListener('DOMContentLoaded', ()=>{
-  createStars();
-  checkAuth();
-});
+            return { clientIp, ua, platform, language, screenSize, timezoneOffset, deviceMemory, hardwareConcurrency, referrer, pageUrl };
+        }
 
-/* expose openNativeMail for footer */
-window.openNativeMail = openNativeMail;
-</script>
+        // Write last access and append rich log
+        async function writeLastAccessAndLog(moduleKey) {
+            try {
+                const user = auth.currentUser;
+                const uid = user ? user.uid : null;
+                const email = user ? user.email : null;
+                let displayName = null;
+                try {
+                    if (email) {
+                        const adminQuery = await db.collection('admin').where('gmail', '==', email).limit(1).get();
+                        if (!adminQuery.empty) displayName = adminQuery.docs[0].data().name || null;
+                    }
+                } catch(e) {
+                    console.warn('admin name fetch failed', e);
+                }
+
+                const clientCtx = await gatherClientContext();
+                const parsedUA = parseUserAgent(clientCtx.ua);
+                const serverTs = firebase.firestore.FieldValue.serverTimestamp();
+
+                // Update last-access doc (merged)
+                await db.collection('module_last_access').doc(moduleKey).set({
+                    lastAccessed: serverTs,
+                    lastAccessedByUid: uid,
+                    lastAccessedByEmail: email,
+                    lastAccessedByName: displayName
+                }, { merge: true });
+
+                // Append audit log entry
+                await db.collection('module_access_logs').add({
+                    moduleKey: moduleKey,
+                    accessedAt: serverTs,
+                    uid: uid,
+                    email: email,
+                    name: displayName || null,
+                    clientIp: clientCtx.clientIp,
+                    userAgent: clientCtx.ua,
+                    userAgentParsed: parsedUA,
+                    platform: clientCtx.platform,
+                    language: clientCtx.language,
+                    screen: clientCtx.screenSize,
+                    timezoneOffsetMinutes: clientCtx.timezoneOffset,
+                    deviceMemory: clientCtx.deviceMemory,
+                    hardwareConcurrency: clientCtx.hardwareConcurrency,
+                    referrer: clientCtx.referrer,
+                    pageUrl: clientCtx.pageUrl,
+                    raw: { clientContext: clientCtx }
+                });
+            } catch (err) {
+                console.error('Logging error for', moduleKey, err);
+            }
+        }
+
+        // Fetch last accesses map
+        async function fetchLastAccesses() {
+            const map = {};
+            try {
+                const snapshot = await db.collection('module_last_access').get();
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data && data.lastAccessed) {
+                        const dt = data.lastAccessed.toDate();
+                        map[doc.id] = `Last accessed: ${dt.toLocaleString()}`;
+                    } else {
+                        map[doc.id] = 'Last accessed: N/A';
+                    }
+                });
+            } catch (err) {
+                console.error('Error fetching last accesses', err);
+            }
+            return map;
+        }
+
+        // Navigation function (restored original mapping) but logs access before redirect
+        async function navigateTo(module) {
+            let url = '';
+            switch(module) {
+                case 'user_data/data_visualizer':
+                    url = 'user_data/data_visualizer.html';
+                    break;
+                case 'analytics':
+                    url = 'analytics.html';
+                    break;
+                case 'repo_analyzer':
+                    url = 'repo_analyzer.html';
+                    break;
+                case 'card_manager':
+                    url = 'card_manager.html';
+                    break;
+                case 'items':
+                    url = 'items.html';
+                    break;
+                case 'folders':
+                    url = 'folders.html';
+                    break;
+                case 'licenses':
+                    url = 'licenses.html';
+                    break;
+                case 'agreements':
+                    url = 'agreements.html';
+                    break;
+                case 'support':
+                    url = 'support.html';
+                    break;
+                case 'portfolio/file_uploader_admin':
+                    url = 'portfolio/file_uploader_admin.html';
+                    break;
+                case 'portfolio/portfolio_manager_admin':
+                    url = 'portfolio/portfolio_manager_admin.html';
+                    break;
+                case 'official_licenses':
+                    url = 'official_licenses.html';
+                    break;
+                case 'official_agreement':
+                    url = 'official_agreement.html';
+                    break;
+                default:
+                    url = module + '.html';
+            }
+
+            // Determine module key for logging (simple mapping based on module string)
+            // We'll take the first part before slash or the module string itself
+            const moduleKey = (typeof module === 'string' && module.indexOf('/') !== -1) ? module.split('/')[0] : module;
+
+            try {
+                // write last access and log (await to increase chance it's stored before leaving)
+                await writeLastAccessAndLog(moduleKey);
+            } catch (e) {
+                console.warn('Could not write last access before redirect', e);
+            }
+
+            // redirect (if url is valid)
+            if (url && url !== '#') {
+                window.location.href = url;
+            } else {
+                // fallback behavior from original
+                window.location.href = url;
+            }
+        }
+
+        // Open native mail client via mailto:
+        function openNativeMail() {
+            window.location.href = 'mailto:squadvertex24official@gmail.com';
+        }
+
+        // Logout function
+        function logout() {
+            auth.signOut()
+                .then(() => { window.location.href = 'index.html'; })
+                .catch(error => {
+                    console.error('Logout error:', error);
+                    window.location.href = 'index.html';
+                });
+        }
+
+        // Load statistics (restored original behaviour)
+        async function loadStats() {
+            try {
+                const usersSnapshot = await db.collection('usersPrivate').get();
+                const usersCount = (usersSnapshot && typeof usersSnapshot.size === 'number') ? usersSnapshot.size : (usersSnapshot.docs ? usersSnapshot.docs.length : 0);
+                document.getElementById('userCount').textContent = usersCount || 0;
+
+                const adminsSnapshot = await db.collection('admin').get();
+                const adminsCount = (adminsSnapshot && typeof adminsSnapshot.size === 'number') ? adminsSnapshot.size : (adminsSnapshot.docs ? adminsSnapshot.docs.length : 0);
+                document.getElementById('adminCount').textContent = adminsCount || 0;
+
+                // Repositories - set to 1 as before
+                document.getElementById('repoCount').textContent = '1';
+
+                // Support tickets - show N/A
+                document.getElementById('supportTickets').textContent = 'N/A';
+            } catch (error) {
+                console.error('Stats loading error:', error);
+                document.getElementById('userCount').textContent = '0';
+                document.getElementById('adminCount').textContent = '0';
+                document.getElementById('repoCount').textContent = '1';
+                document.getElementById('supportTickets').textContent = 'N/A';
+            }
+        }
+
+        // Auth check - restored original silent flow, but unauthenticated -> ../security_barrier.html
+        async function checkAuth() {
+            try {
+                auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        // Check if user is admin
+                        const adminQuery = await db.collection('admin').where('gmail', '==', user.email).limit(1).get();
+
+                        if (!adminQuery.empty) {
+                            const adminDoc = adminQuery.docs[0];
+                            const adminData = adminDoc.data();
+
+                            // Show dashboard and hide loading
+                            setTimeout(() => {
+                                document.getElementById('loadingScreen').style.opacity = '0';
+                                setTimeout(async () => {
+                                    document.getElementById('loadingScreen').classList.add('hidden');
+                                    document.getElementById('dashboardContainer').style.display = 'block';
+
+                                    // Set admin name
+                                    document.getElementById('adminName').textContent = adminData.name || user.email;
+
+                                    // Load stats
+                                    await loadStats();
+
+                                    // fetch last accesses and update last-access badges
+                                    const lastAccessMap = await fetchLastAccesses();
+                                    // Update UI labels for each module if present
+                                    Object.keys(lastAccessMap).forEach(k => {
+                                        const el = document.getElementById('last_' + k);
+                                        if (el) el.textContent = lastAccessMap[k];
+                                    });
+                                }, 500);
+                            }, 2000); // Simulate setup time
+                        } else {
+                            // Not an admin - redirect to login (original)
+                            window.location.href = 'index.html';
+                        }
+                    } else {
+                        // Not signed in - redirect to security barrier (one step back)
+                        window.location.href = '../security_barrier.html';
+                    }
+                });
+            } catch (error) {
+                console.error('Auth check error:', error);
+                // Redirect to security barrier on error (safer)
+                window.location.href = '../security_barrier.html';
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            checkAuth();
+        });
+    </script>
 </body>
 </html>
