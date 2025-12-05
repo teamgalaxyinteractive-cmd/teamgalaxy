@@ -716,7 +716,7 @@
         let updated = 0;
         snap.forEach(doc => { const d = doc.data(); if(d.folderId === undefined){ batch.update(doc.ref, { folderId: null }); updated++; } });
         if(updated > 0){ await batch.commit(); alert(`Added folderId=null to ${updated} docs`); await init(); }
-        else alert('All items already have folderId field');
+        else alert('All items already have all necessary fields.');
       } catch (err){
         consolePanelLog('Error fixing folderId fields: ' + (err.code ? `${err.code} — ${err.message}` : err.message), 'error');
         alert('Error fixing fields. See console.');
@@ -888,7 +888,7 @@
         console.error('Admin access error:', error);
         document.getElementById('loadingScreen').querySelector('.loading-text').textContent = 'Access denied. Redirecting...';
         setTimeout(() => {
-          window.location.href = 'index.html';
+          window.location.href = '../admin_panel.html';
         }, 2000);
       }
     }
