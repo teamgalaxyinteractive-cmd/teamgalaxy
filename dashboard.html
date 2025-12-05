@@ -83,7 +83,7 @@
   </script>
 
   <!-- Google Analytics (GA4) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6C2W9NSNCH"></script>
+ <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-6C2W9NSNCH"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
@@ -91,7 +91,7 @@
     gtag('config', 'G-6C2W9NSNCH', {
       page_path: window.location.pathname
     });
-  </script>
+  </script> -->
 
   <!-- Optional: verification tags (uncomment & replace tokens after verifying) -->
   <!-- <meta name="google-site-verification" content="REPLACE_WITH_GOOGLE_TOKEN"> -->
@@ -1665,6 +1665,71 @@
       });
     }
   });
+</script>
+<div id="cookie-banner" class="cookie-banner-hidden">
+    <div class="cookie-content">
+        <p>🍪 TeamGalaxy needs your permission to load analytics cookies.</p>
+        <button id="accept-cookies-btn">Accept & Continue</button>
+    </div>
+</div>
+
+<style>
+   /* ... Pichla wala CSS same rahega ... */
+</style>
+
+<script>
+    // 1. Apna Measurement ID yahan daal
+    const GA_MEASUREMENT_ID = 'G-6C2W9NSNCH'; 
+
+    // 2. Ye function GA4 ko browser mein inject karega
+    function loadGoogleAnalytics() {
+        // Agar pehle se load hai toh wapis load mat karo
+        if (window.dataLayer) return; 
+
+        console.log("🚀 Loading GA4 Tracking...");
+
+        // Script Tag Create karna
+        const script = document.createElement('script');
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+        script.async = true;
+        document.head.appendChild(script);
+
+        // Gtag Initialization
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', GA_MEASUREMENT_ID);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const banner = document.getElementById("cookie-banner");
+        const acceptBtn = document.getElementById("accept-cookies-btn");
+
+        // CHECK: Kya user ne pehle kabhi haan bola hai?
+        if (localStorage.getItem("teamgalaxy_cookie_consent") === "true") {
+            // SCENARIO 1: Purana user hai, permission di hui hai -> GA4 Load karo
+            loadGoogleAnalytics();
+        } else {
+            // SCENARIO 2: Naya user hai ya permission nahi di -> Banner dikhao (GA4 Blocked rahega)
+            setTimeout(() => {
+                banner.classList.remove("cookie-banner-hidden");
+                banner.classList.add("cookie-banner-visible");
+            }, 500);
+        }
+
+        // BUTTON CLICK EVENT
+        acceptBtn.addEventListener("click", function() {
+            // Permission save karo
+            localStorage.setItem("teamgalaxy_cookie_consent", "true");
+            
+            // Banner hatao
+            banner.classList.remove("cookie-banner-visible");
+            banner.classList.add("cookie-banner-hidden");
+
+            // AB GA4 Load karo (Active Consent)
+            loadGoogleAnalytics();
+        });
+    });
 </script>
 </body>
 </html>
