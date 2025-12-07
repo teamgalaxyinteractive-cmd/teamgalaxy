@@ -285,8 +285,7 @@
 
   <header class="site-header" role="banner">
     <div class="container-inner">
-
-        <div   
+         <div   
         class="logo"   
         onclick="window.location.href='dashboard.html'"   
         style="  
@@ -457,7 +456,6 @@
                       .doc(user.uid)
                       .collection('spamEvents');
 
-        // Log the violation event
         await ref.add({
           reason: reason,
           meta: meta || {},
@@ -570,7 +568,6 @@
       spamState.lastMessageRepeatCount = repeatCount;
       messageHistory.push({ ts: now, len, text: trimmed });
 
-      // no need to persist after every allowed message; only on violation / mute change
       return true;
     }
 
@@ -620,12 +617,26 @@
       const actions = document.createElement('div'); actions.className = 'message-actions';
       const replyBtn = document.createElement('button'); replyBtn.className = 'btn-ghost'; replyBtn.type = 'button'; replyBtn.textContent = 'Reply';
       replyBtn.addEventListener('click', ()=> setReplyTo({ id, authorName: data.authorName || 'Anonymous', snippet: snippet(data.text || '') }));
+      actions.appendChild(replyBtn);
+
+      // Delete button – only if current user is the author
+      const isAuthorCurrentUser = data.authorUid && currentProfile && (data.authorUid === currentProfile.uid);
+      if (isAuthorCurrentUser) {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn-ghost';
+        deleteBtn.type = 'button';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.addEventListener('click', () => softDeleteMessage(id));
+        actions.appendChild(deleteBtn);
+      }
+
       const heartBtn = document.createElement('button'); heartBtn.className = 'btn-ghost heart-btn'; heartBtn.type = 'button';
       const heartIcon = document.createElement('span'); heartIcon.innerHTML = userHeartsSet.has(id) ? '❤️' : '🤍';
       const heartCount = document.createElement('span'); heartCount.className = 'heart-count'; heartCount.textContent = (data.heartsCount || 0);
       heartBtn.appendChild(heartIcon); heartBtn.appendChild(heartCount);
       heartBtn.addEventListener('click', async ()=> toggleHeart(id));
-      actions.appendChild(replyBtn); actions.appendChild(heartBtn);
+      actions.appendChild(heartBtn);
+
       card.appendChild(actions);
       return card;
     }
@@ -637,14 +648,46 @@
       if(!snapshot.docs.length){
         messagesArea.innerHTML = '<div style="text-align:center;color:#a0a0d0;padding:2rem;">No messages yet. Say hi 👋</div>';
         hideLoadingOverlay();
+      } else {
+        snapshot.docs.forEach(d => {
+          const el = buildMessageElement(d.data(), d.id);
+          messagesArea.appendChild(el);
+        });
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+        hideLoadingOverlay();
+      }
+    }
+
+    async function softDeleteMessage(messageId) {
+      const user = auth.currentUser;
+      if (!user) {
+        alert('You must be signed in to delete messages.');
         return;
       }
-      snapshot.docs.forEach(d => {
-        const el = buildMessageElement(d.data(), d.id);
-        messagesArea.appendChild(el);
-      });
-      messagesArea.scrollTop = messagesArea.scrollHeight;
-      hideLoadingOverlay();
+      const confirmDelete = window.confirm('Do you really want to delete this message? It will no longer be visible in chat.');
+      if (!confirmDelete) return;
+
+      const msgRef = db.collection('communityMessages').doc(messageId);
+      try {
+        await db.runTransaction(async (tx) => {
+          const snap = await tx.get(msgRef);
+          if (!snap.exists) {
+            throw new Error('Message not found');
+          }
+          const data = snap.data() || {};
+          if (data.authorUid !== user.uid) {
+            throw new Error('You can only delete your own messages.');
+          }
+          tx.update(msgRef, {
+            visibility: false,
+            deletedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            deletedBy: user.uid
+          });
+        });
+      } catch (e) {
+        console.error('softDeleteMessage error', e);
+        alert(e && e.message ? e.message : 'Failed to delete message.');
+      }
     }
 
     async function sendMessage(){
