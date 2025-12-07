@@ -98,8 +98,7 @@
 
   .tg-close { position: absolute; right: 12px; top: 10px; background: transparent; border: none; color: var(--tg-muted); font-size: 1.05rem; cursor: pointer; }
 
-  /* Modal overlay (separate element) */
-  .tg-modal {
+.tg-modal {
     display: none;
     position: fixed;
     inset: 0;
@@ -107,14 +106,17 @@
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background: rgba(6,10,18,0.5);
+    /* Dark black overlay */
+    background: rgba(0, 0, 0, 0.85);
     pointer-events: none;
   }
   .tg-modal[aria-hidden="false"] { display: flex; pointer-events: auto; }
+
   .tg-modal-inner {
     width: 100%;
     max-width: 720px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    /* Solid dark card */
+    background: #050816;
     border-radius: 14px;
     padding: 20px;
     color: var(--tg-text);
