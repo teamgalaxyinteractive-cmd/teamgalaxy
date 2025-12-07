@@ -285,7 +285,7 @@
 
   <header class="site-header" role="banner">
     <div class="container-inner">
-       <div   
+        <div   
         class="logo"   
         onclick="window.location.href='dashboard.html'"   
         style="  
@@ -403,9 +403,140 @@
     const MAX_SNIPPET = 120;
     let latestSnapshotDocs = {};
 
+    // Spam / rate-limit state (per user; partially persisted in usersPrivate.spamControl)
+    let spamState = {
+      violationCount: 0,
+      muteUntil: 0, // ms since epoch
+      lastMessageText: '',
+      lastMessageRepeatCount: 0
+    };
+    let messageHistory = []; // local only: { ts, len, text }
+
     function escapeHtml(s=''){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,"&#039;"); }
-    function formatTime(ts){ if(!ts) return 'Just now'; try{ const d = ts.toDate?ts.toDate():new Date(ts); return d.toLocaleString('en-IN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'}); }catch(e){return 'Just now'} }
+    function formatTime(ts){
+      if(!ts) return 'Just now';
+      try{
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        return d.toLocaleString('en-IN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'short'});
+      }catch(e){return 'Just now'}
+    }
     function snippet(s,n=MAX_SNIPPET){ if(!s) return ''; return s.length>n? s.slice(0,n)+'…': s; }
+
+    function getRemainingMuteMs() {
+      if (!spamState.muteUntil) return 0;
+      const diff = spamState.muteUntil - Date.now();
+      return diff > 0 ? diff : 0;
+    }
+
+    async function persistSpamState() {
+      const user = auth.currentUser;
+      if (!user) return;
+      const payload = {
+        spamControl: {
+          violationCount: spamState.violationCount || 0,
+          muteUntil: spamState.muteUntil ? new Date(spamState.muteUntil) : null,
+          lastMessageText: spamState.lastMessageText || '',
+          lastMessageRepeatCount: spamState.lastMessageRepeatCount || 0,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }
+      };
+      try {
+        await db.collection('usersPrivate').doc(user.uid).set(payload, { merge: true });
+      } catch (e) {
+        console.warn('persistSpamState error', e);
+      }
+    }
+
+    async function handleSpamViolation(reason) {
+      // Exponential backoff penalties: 1st warn, then 1m, 10m, 60m
+      const penalties = [0, 60 * 1000, 10 * 60 * 1000, 60 * 60 * 1000];
+      let vc = spamState.violationCount || 0;
+      vc += 1;
+      spamState.violationCount = vc;
+
+      const idx = Math.min(vc - 1, penalties.length - 1);
+      const muteMs = penalties[idx];
+      if (muteMs > 0) {
+        spamState.muteUntil = Date.now() + muteMs;
+      }
+
+      await persistSpamState();
+
+      if (muteMs === 0) {
+        alert('Warning: Your recent activity looks like spam. Please slow down or you may be temporarily muted.');
+      } else {
+        const seconds = Math.ceil(muteMs / 1000);
+        let msg;
+        if (seconds < 60) {
+          msg = `You have been muted for ${seconds} seconds due to spam-like activity. Please wait before sending more messages.`;
+        } else {
+          const mins = Math.ceil(seconds / 60);
+          msg = `You have been muted for about ${mins} minute(s) due to repeated spam-like activity. Please wait before sending more messages.`;
+        }
+        alert(msg);
+      }
+    }
+
+    // Returns true if message allowed, false if blocked
+    async function checkAndHandleRateLimit(text) {
+      const trimmed = (text || '').trim();
+      if (!trimmed) return false;
+
+      const now = Date.now();
+
+      // Existing mute check
+      const remaining = getRemainingMuteMs();
+      if (remaining > 0) {
+        const secs = Math.ceil(remaining / 1000);
+        const mins = secs >= 60 ? Math.ceil(secs / 60) : 0;
+        if (mins > 0) {
+          alert(`You are temporarily muted. Please wait about ${mins} minute(s) before sending more messages.`);
+        } else {
+          alert(`You are temporarily muted. Please wait ${secs} second(s) before sending more messages.`);
+        }
+        return false;
+      }
+
+      // Clean up history (keep only last 60s)
+      messageHistory = messageHistory.filter(m => now - m.ts <= 60000);
+
+      const len = trimmed.length;
+
+      // 4. Character Flood rule: >500 chars, 2 such msgs in 1 minute
+      const longMsgsLastMin = messageHistory.filter(m => m.len > 500).length;
+      if (len > 500 && longMsgsLastMin >= 1) {
+        await handleSpamViolation('char_flood');
+        alert('Your message is too long and you have already sent a large message recently. Please reduce length to avoid spam.');
+        return false;
+      }
+
+      // 2. Repetition rule: same message 3 times consecutively
+      let repeatCount = 1;
+      if (trimmed && trimmed === spamState.lastMessageText) {
+        repeatCount = (spamState.lastMessageRepeatCount || 1) + 1;
+      }
+      if (repeatCount >= 3) {
+        await handleSpamViolation('repetition');
+        alert('You are sending the same message repeatedly. Please avoid copy-paste spam.');
+        return false;
+      }
+
+      // 1. Velocity / Frequency rule: more than 5 messages in 5 seconds
+      const recent5s = messageHistory.filter(m => now - m.ts <= 5000).length;
+      if (recent5s + 1 > 5) {
+        await handleSpamViolation('velocity');
+        alert('You are sending messages too quickly. Please slow down.');
+        return false;
+      }
+
+      // If we reach here, message is allowed — update local spam counters
+      spamState.lastMessageText = trimmed;
+      spamState.lastMessageRepeatCount = repeatCount;
+      messageHistory.push({ ts: now, len, text: trimmed });
+
+      // no need to persist after every allowed message; only on violation / mute change
+      return true;
+    }
 
     function buildMessageElement(data, id){
       const card = document.createElement('div'); card.className = 'message-card'; card.dataset.docId = id;
@@ -413,7 +544,8 @@
       const avatarWrap = document.createElement('div'); avatarWrap.className = 'avatar';
       const initials = (data.authorName || 'U').charAt(0).toUpperCase();
 
-      // NEW: prefer current user's auth photo for messages authored by current user
+      // Prefer current user's auth/profile photo for their own messages,
+      // fallback to stored authorPhotoUrl for everyone else.
       let photoUrlToUse = '';
       try {
         const isAuthorCurrentUser = data.authorUid && currentProfile && (data.authorUid === currentProfile.uid);
@@ -480,11 +612,18 @@
     }
 
     async function sendMessage(){
-      const text = messageInput.value.trim();
+      const rawText = messageInput.value;
+      const text = rawText.trim();
       if(!text) return;
       sendButton.disabled = true;
       try{
         const user = auth.currentUser; if(!user) throw new Error('Not signed in');
+
+        // Spam & rate-limit checks BEFORE doing any Firestore writes
+        const allowed = await checkAndHandleRateLimit(text);
+        if (!allowed) {
+          return;
+        }
 
         // try to read user's private doc for optional display overrides
         let pd = {};
@@ -495,19 +634,18 @@
           console.warn('private doc fetch failed', e);
         }
 
-// Replace the authorPhotoUrl line in sendMessage() with this:
-const msg = {
-  text,
-  authorUid: user.uid,
-  authorName: pd.name || pd.displayName || user.displayName || (user.email ? user.email.split('@')[0] : 'Anonymous'),
-  // <-- Prefer Google/Firebase auth photoURL first (your request),
-  // fallback to any private-doc overrides only if auth.photoURL is missing.
-  authorPhotoUrl: user.photoURL || pd.profilePhotoUrl || pd.photoUrl || '',
-  timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-  visibility: true,
-  likes: 0,
-  heartsCount: 0
-};
+        // Build message using UID as canonical author reference
+        // IMPORTANT: authorPhotoUrl now prefers Google/Firebase auth photo
+        const msg = {
+          text,
+          authorUid: user.uid,
+          authorName: pd.name || pd.displayName || user.displayName || (user.email ? user.email.split('@')[0] : 'Anonymous'),
+          authorPhotoUrl: user.photoURL || pd.profilePhotoUrl || pd.photoUrl || '',
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          visibility: true,
+          likes: 0,
+          heartsCount: 0
+        };
 
         if(replyTo && replyTo.id){
           msg.replyToId = replyTo.id;
@@ -634,13 +772,32 @@ const msg = {
       try{
         const initial = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
 
-        // try to load private doc (may contain legacy slug or display overrides)
+        // try to load private doc (may contain legacy slug, display overrides, spamControl)
         let pd = {};
         try {
           const privateDoc = await db.collection('usersPrivate').doc(user.uid).get();
           if(privateDoc.exists) pd = privateDoc.data() || {};
         } catch(e) {
           console.warn('private doc fetch err', e);
+        }
+
+        // restore spamControl state if present
+        if (pd.spamControl) {
+          const sc = pd.spamControl || {};
+          spamState.violationCount = sc.violationCount || 0;
+          spamState.lastMessageText = sc.lastMessageText || '';
+          spamState.lastMessageRepeatCount = sc.lastMessageRepeatCount || 0;
+          if (sc.muteUntil) {
+            try {
+              if (sc.muteUntil.toDate) {
+                spamState.muteUntil = sc.muteUntil.toDate().getTime();
+              } else if (typeof sc.muteUntil === 'number') {
+                spamState.muteUntil = sc.muteUntil;
+              }
+            } catch(e) {
+              spamState.muteUntil = 0;
+            }
+          }
         }
 
         // preserve legacy slug if present but DO NOT use it for message routing
