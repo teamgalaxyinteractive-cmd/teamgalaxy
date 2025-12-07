@@ -265,7 +265,7 @@
   }
 }
   </style>
-</head>
+</head>  
 <body>
   <!-- Loading overlay -->
   <div id="loadingOverlay" class="hidden" role="status" aria-live="polite">
@@ -285,6 +285,7 @@
 
   <header class="site-header" role="banner">
     <div class="container-inner">
+
         <div   
         class="logo"   
         onclick="window.location.href='dashboard.html'"   
@@ -297,7 +298,7 @@
     "  
 >  
     GalaxyWeb  
-</div>  
+</div>
       <div class="profile-photo" id="header-avatar" aria-hidden="false">U</div>
     </div>
   </header>
@@ -403,14 +404,15 @@
     const MAX_SNIPPET = 120;
     let latestSnapshotDocs = {};
 
-    // Spam / rate-limit state (per user; partially persisted in usersPrivate.spamControl)
+    // Spam / rate-limit state (per user; persisted in usersPrivate.spamControl)
     let spamState = {
       violationCount: 0,
       muteUntil: 0, // ms since epoch
       lastMessageText: '',
       lastMessageRepeatCount: 0
     };
-    let messageHistory = []; // local only: { ts, len, text }
+    // Local only recent messages (last 60s)
+    let messageHistory = []; // { ts, len, text }
 
     function escapeHtml(s=''){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,"&#039;"); }
     function formatTime(ts){
@@ -447,7 +449,28 @@
       }
     }
 
-    async function handleSpamViolation(reason) {
+    async function logSpamEvent(reason, meta, muteMs, violationIndex) {
+      const user = auth.currentUser;
+      if (!user) return;
+      try {
+        const ref = db.collection('usersPrivate')
+                      .doc(user.uid)
+                      .collection('spamEvents');
+
+        // Log the violation event
+        await ref.add({
+          reason: reason,
+          meta: meta || {},
+          violationIndex: violationIndex,
+          muteMs: muteMs || 0,
+          at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } catch (e) {
+        console.warn('logSpamEvent error', e);
+      }
+    }
+
+    async function handleSpamViolation(reason, meta) {
       // Exponential backoff penalties: 1st warn, then 1m, 10m, 60m
       const penalties = [0, 60 * 1000, 10 * 60 * 1000, 60 * 60 * 1000];
       let vc = spamState.violationCount || 0;
@@ -461,6 +484,7 @@
       }
 
       await persistSpamState();
+      await logSpamEvent(reason, meta, muteMs, vc);
 
       if (muteMs === 0) {
         alert('Warning: Your recent activity looks like spam. Please slow down or you may be temporarily muted.');
@@ -505,7 +529,11 @@
       // 4. Character Flood rule: >500 chars, 2 such msgs in 1 minute
       const longMsgsLastMin = messageHistory.filter(m => m.len > 500).length;
       if (len > 500 && longMsgsLastMin >= 1) {
-        await handleSpamViolation('char_flood');
+        await handleSpamViolation('char_flood', {
+          type: 'char_flood',
+          textLength: len,
+          longMessagesLastMinute: longMsgsLastMin + 1
+        });
         alert('Your message is too long and you have already sent a large message recently. Please reduce length to avoid spam.');
         return false;
       }
@@ -516,7 +544,11 @@
         repeatCount = (spamState.lastMessageRepeatCount || 1) + 1;
       }
       if (repeatCount >= 3) {
-        await handleSpamViolation('repetition');
+        await handleSpamViolation('repetition', {
+          type: 'repetition',
+          textSample: trimmed.slice(0, 200),
+          repeatCount: repeatCount
+        });
         alert('You are sending the same message repeatedly. Please avoid copy-paste spam.');
         return false;
       }
@@ -524,7 +556,11 @@
       // 1. Velocity / Frequency rule: more than 5 messages in 5 seconds
       const recent5s = messageHistory.filter(m => now - m.ts <= 5000).length;
       if (recent5s + 1 > 5) {
-        await handleSpamViolation('velocity');
+        await handleSpamViolation('velocity', {
+          type: 'velocity',
+          messagesLast5sBefore: recent5s,
+          messagesLast5sAfter: recent5s + 1
+        });
         alert('You are sending messages too quickly. Please slow down.');
         return false;
       }
