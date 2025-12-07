@@ -18,13 +18,13 @@
       --text-tertiary: #cbd5e0;
       --text-footer: #a0aec0;
     }
-    
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       line-height: 1.6;
@@ -35,8 +35,8 @@
       position: relative;
       overflow-x: hidden;
     }
-    
-    /* Realistic Star Background Animation */
+
+    /* Star Background */
     .stars {
       position: fixed;
       top: 0;
@@ -46,7 +46,7 @@
       pointer-events: none;
       z-index: -1;
     }
-    
+
     .star {
       position: absolute;
       background-color: white;
@@ -54,12 +54,12 @@
       animation: twinkle var(--duration, 4s) infinite ease-in-out;
       opacity: var(--opacity, 0.8);
     }
-    
+
     @keyframes twinkle {
       0%, 100% { opacity: var(--opacity, 0.8); transform: scale(1); }
       50% { opacity: calc(var(--opacity, 0.8) * 1.5); transform: scale(1.2); }
     }
-    
+
     .container {
       width: 90%;
       max-width: 1000px;
@@ -68,7 +68,7 @@
       position: relative;
       z-index: 1;
     }
-    
+
     header {
       text-align: center;
       padding: 2rem 0;
@@ -76,7 +76,7 @@
       border-bottom: 1px solid rgba(108, 92, 231, 0.3);
       animation: fadeInUp 1s ease-out;
     }
-    
+
     .logo {
       font-size: 2.5rem;
       font-weight: 800;
@@ -86,22 +86,22 @@
       margin-bottom: 0.5rem;
       transition: transform 0.3s ease;
     }
-    
+
     .logo:hover {
       transform: scale(1.05);
     }
-    
+
     .logo i {
       margin-right: 10px;
       animation: pulse 2s infinite;
     }
-    
+
     @keyframes pulse {
       0% { opacity: 0.8; }
       50% { opacity: 1; }
       100% { opacity: 0.8; }
     }
-    
+
     .page-title {
       font-size: 2.8rem;
       margin: 1.5rem 0;
@@ -109,7 +109,7 @@
       text-shadow: 0 2px 10px rgba(0, 206, 201, 0.3);
       animation: fadeInDown 1s ease-out;
     }
-    
+
     .last-updated {
       background: rgba(108, 92, 231, 0.15);
       color: var(--starlight-turquoise);
@@ -120,7 +120,7 @@
       font-weight: 600;
       animation: fadeIn 1.5s ease-out;
     }
-    
+
     .content-card {
       background: rgba(25, 18, 66, 0.7);
       backdrop-filter: blur(10px);
@@ -132,12 +132,12 @@
       animation: slideInUp 1s ease-out;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    
+
     .content-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
     }
-    
+
     h2 {
       color: var(--starlight-turquoise);
       font-size: 1.8rem;
@@ -146,44 +146,44 @@
       border-bottom: 2px solid var(--cosmic-purple);
       transition: color 0.3s ease;
     }
-    
+
     h2:hover {
       color: #00e5e0;
     }
-    
+
     h3 {
       color: var(--cosmic-purple);
       font-size: 1.4rem;
       margin: 1.2rem 0 0.8rem;
       transition: color 0.3s ease;
     }
-    
+
     h3:hover {
       color: #8a7fff;
     }
-    
+
     p {
       margin: 1rem 0;
       color: var(--text-secondary);
       font-size: 1.1rem;
     }
-    
+
     ul {
       padding-left: 1.8rem;
       margin: 1.5rem 0;
     }
-    
+
     li {
       margin-bottom: 0.8rem;
       color: var(--text-tertiary);
       font-size: 1.05rem;
     }
-    
+
     li::marker {
       color: var(--starlight-turquoise);
       font-weight: bold;
     }
-    
+
     .highlight-box {
       background: rgba(0, 206, 201, 0.1);
       border-left: 4px solid var(--starlight-turquoise);
@@ -192,11 +192,15 @@
       border-radius: 0 8px 8px 0;
       transition: background-color 0.3s ease;
     }
-    
+
     .highlight-box:hover {
       background: rgba(0, 206, 201, 0.15);
     }
-    
+
+    .highlight-box strong {
+      color: var(--text-bright);
+    }
+
     footer {
       text-align: center;
       padding: 2rem 0;
@@ -206,33 +210,33 @@
       border-top: 1px solid rgba(0, 206, 201, 0.2);
       animation: fadeInUp 2s ease-out;
     }
-    
+
     .footer-links {
       display: flex;
       justify-content: center;
       gap: 1.5rem;
       margin-top: 1rem;
     }
-    
+
     .footer-links a {
       color: var(--starlight-turquoise);
       text-decoration: none;
       transition: all 0.3s;
       font-weight: 500;
     }
-    
+
     .footer-links a:hover {
       color: var(--cosmic-purple);
       text-shadow: 0 0 10px rgba(108, 92, 231, 0.7);
       transform: scale(1.1);
     }
-    
+
     /* Animations */
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
-    
+
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -243,7 +247,7 @@
         transform: translateY(0);
       }
     }
-    
+
     @keyframes fadeInDown {
       from {
         opacity: 0;
@@ -254,7 +258,7 @@
         transform: translateY(0);
       }
     }
-    
+
     @keyframes slideInUp {
       from {
         opacity: 0;
@@ -265,16 +269,16 @@
         transform: translateY(0);
       }
     }
-    
+
     @media (max-width: 768px) {
       .page-title {
         font-size: 2.2rem;
       }
-      
+
       .content-card {
         padding: 1.8rem;
       }
-      
+
       .footer-links {
         flex-direction: column;
         gap: 0.8rem;
@@ -285,12 +289,12 @@
 <body>
   <!-- Star Background -->
   <div class="stars" id="stars"></div>
-  
+
   <div class="container">
     <header>
       <div class="logo" onclick="window.location.href='../dashboard.html'" style="cursor: pointer;">
-    <img src="https://dl.dropboxusercontent.com/scl/fi/v5d7xte4tksarsdufk4ay/image.png?rlkey=ca8p4jsfcw1pnqr79q8uympso&st=ikst5uy1&dl=0" alt="Team Galaxy Logo" style="height: 130px; width: auto;">
-  </div>
+        <img src="https://dl.dropboxusercontent.com/scl/fi/v5d7xte4tksarsdufk4ay/image.png?rlkey=ca8p4jsfcw1pnqr79q8uympso&st=ikst5uy1&dl=0" alt="Team Galaxy Logo" style="height: 130px; width: auto;">
+      </div>
       <p style="color: var(--text-footer); max-width: 700px; margin: 0 auto;">
         Building the future of gaming communities in the cosmos
       </p>
@@ -298,41 +302,268 @@
 
     <main>
       <h1 class="page-title">Terms of Use</h1>
-      <div class="last-updated">Last Updated: November 11, 2025</div>
-      
+      <div class="last-updated">Last Updated: December 7, 2025</div>
+
       <div class="content-card">
-        <p>This document contains the official Terms of Use for the Galaxy brand, including Team Galaxy, Galaxy Design, and related services (collectively, "Services"). By accessing or using our Services, you agree to comply with these Terms of Use.</p>
-        
-        <h2>1. Community Conduct and Account Responsibility</h2>
-        
-        <h3>1.1. General Conduct:</h3>
-        <p>Be respectful to all members. Harassment, hate speech, and toxic behavior will not be tolerated. Cheating, exploiting, or breaking in-game rules is strictly prohibited. We reserve the right to immediately remove any member or user who violates these rules.</p>
-        
-        <h3>1.2. User Account Responsibility:</h3>
-        <p>You are responsible for maintaining the confidentiality of your account credentials (username, password) and for all activities that occur under your account. You agree to notify Galaxy immediately of any unauthorized use of your account. Galaxy will not be liable for any loss or damage arising from your failure to comply with this security obligation.</p>
-        
-        <h2>2. Intellectual Property and Content</h2>
-        
-        <h3>2.1. Galaxy Property:</h3>
-        <p>All Galaxy-related logos, graphics, designs, source code, and content (excluding User-Generated Content) are the exclusive property of Galaxy Design and may not be used, copied, distributed, or modified without prior written permission.</p>
-        
-        <h3>2.2. User-Generated Content (UGC):</h3>
-        <p>By posting, submitting, or displaying content (including text in the Community Chat, blog comments, posts, images, or media) on our Services, you grant Galaxy a worldwide, non-exclusive, royalty-free, perpetual, and transferable license to use, reproduce, modify, display, and distribute that content solely for the purpose of operating, promoting, and improving the Galaxy Services. You confirm that you own the rights to the UGC or have the necessary permissions to grant this license to Galaxy.</p>
-        
-        <h2>3. Purchases & Merchandise</h2>
-        <p>All sales are final unless otherwise stated by local consumer protection laws. We are not responsible for delays caused by shipping carriers or customs.</p>
-        
-        <h2>4. Disclaimer and Limitation of Liability</h2>
-        <p>Our community and services are provided 'as is' without warranties of any kind. We are not responsible for any direct, indirect, incidental, or consequential damages or losses arising from your use of, or inability to use, our services.</p>
-        
-        <h2>5. Changes to Terms</h2>
-        <p>We may update these Terms from time to time. We will notify you of significant changes by posting the new Terms on our website. Continued use of our services after changes are posted means you accept the updated terms.</p>
-        
-        <h2>6. Governing Law and Dispute Resolution</h2>
-        <p>Any dispute arising from these Terms shall first be resolved through mutual discussion between the parties. If unresolved within 30 days, the dispute shall be governed by the substantive laws of India, without reference to its conflict of laws principles. The parties agree to submit to the non-exclusive jurisdiction of the courts located in Mumbai, India, for the resolution of any legal matter arising from these Terms.</p>
+        <p>
+          These Terms of Use (“Terms”) govern your access to and use of the websites, services,
+          communities, and related features operated under the <strong>Team Galaxy</strong> brand
+          (collectively, the “Services”). By accessing or using the Services, you confirm that you
+          have read, understood, and agreed to be bound by these Terms.
+        </p>
+
+        <div class="highlight-box">
+          <strong>Important:</strong>
+          <p>
+            If you do not agree with these Terms, you should not access or use the Services.
+            Your continued use of the Services means you accept these Terms as updated from time to time.
+          </p>
+        </div>
+
+        <h2>1. Eligibility &amp; Accounts</h2>
+
+        <h3>1.1. Eligibility</h3>
+        <p>
+          You may use the Services only if you are able to form a binding contract under applicable law.
+          If you are under the age where you need parental consent in your country, you must have your
+          parent or legal guardian’s permission to use the Services.
+        </p>
+
+        <h3>1.2. Account Creation &amp; Security</h3>
+        <p>
+          Some parts of the Services may require you to create an account or log in via a third-party
+          platform (for example, a game account, Discord, or other services). You agree to provide
+          accurate and up-to-date information and to keep your login credentials secure.
+        </p>
+        <p>
+          You are responsible for all activity that occurs under your account. If you suspect any
+          unauthorized use of your account, you should notify us as soon as possible at
+          <a href="mailto:info@teamgalaxy.net" style="color: var(--starlight-turquoise); text-decoration: none;">info@teamgalaxy.net</a>.
+        </p>
+
+        <h2>2. Community Conduct &amp; Acceptable Use</h2>
+
+        <h3>2.1. Be Respectful</h3>
+        <p>
+          Our goal is to build a positive, inclusive community. When using any chat, forum, or community
+          features, you agree not to:
+        </p>
+        <ul>
+          <li>Harass, threaten, or intimidate others.</li>
+          <li>Engage in hate speech, discrimination, or abusive behavior.</li>
+          <li>Post content that is obscene, illegal, or intentionally harmful.</li>
+          <li>Spam, advertise aggressively, or flood chats with repetitive content.</li>
+        </ul>
+
+        <h3>2.2. Fair Play &amp; In-Game Rules</h3>
+        <p>
+          Where the Services relate to games or gaming communities, you agree to:
+        </p>
+        <ul>
+          <li>Follow the official rules and terms of the game publisher or platform.</li>
+          <li>Not use cheats, hacks, exploits, or unauthorized third-party tools.</li>
+          <li>Respect other players and not disrupt gameplay experiences.</li>
+        </ul>
+        <p>
+          We may, at our discretion, remove, restrict, or suspend access for users who violate these
+          rules or damage the community experience.
+        </p>
+
+        <h3>2.3. Prohibited Uses</h3>
+        <p>You agree not to use the Services to:</p>
+        <ul>
+          <li>Attempt to gain unauthorized access to any systems, accounts, or data.</li>
+          <li>Reverse engineer, decompile, or attempt to extract source code from our Services except where permitted by law.</li>
+          <li>Upload malware, viruses, or other harmful code.</li>
+          <li>Impersonate any person, brand, or entity without authorization.</li>
+        </ul>
+
+        <h2>3. Intellectual Property</h2>
+
+        <h3>3.1. Our Content</h3>
+        <p>
+          Unless otherwise stated, all logos, graphics, designs, UI elements, text, code, and other
+          content related to the Team Galaxy brand (“Galaxy Content”) are owned or licensed by us and
+          are protected by applicable intellectual property laws.
+        </p>
+        <p>
+          You may not copy, modify, distribute, publicly display, or create derivative works from Galaxy
+          Content without our prior written permission, except as allowed by applicable law.
+        </p>
+
+        <h3>3.2. User-Generated Content</h3>
+        <p>
+          “User-Generated Content” (“UGC”) includes any content you upload, post, or share via the Services
+          (for example, messages, screenshots, suggestions, or media).
+        </p>
+        <p>
+          By submitting UGC, you represent that you have the necessary rights to do so and that your content
+          does not violate any third-party rights or applicable law.
+        </p>
+        <p>
+          You retain ownership of your UGC, but you grant Team Galaxy a worldwide, non-exclusive,
+          royalty-free, sublicensable, and transferable license to use, reproduce, adapt, modify, publish,
+          translate, display, and distribute such content for the purpose of operating, improving, and
+          promoting the Services (for example, showcasing community achievements or highlights).
+        </p>
+
+        <h2>4. Purchases, Digital Items &amp; Merchandise</h2>
+        <p>
+          From time to time, we may offer digital items, in-community perks, or physical merchandise
+          (“Items”) through our Services or via linked platforms.
+        </p>
+
+        <h3>4.1. General Terms</h3>
+        <ul>
+          <li>Prices, availability, and descriptions of Items are subject to change at any time.</li>
+          <li>Taxes, fees, and currency conversion charges may apply, depending on your location and payment provider.</li>
+          <li>You are responsible for ensuring that your payment details are correct and authorized.</li>
+        </ul>
+
+        <h3>4.2. Digital Items &amp; Non-Refund Policy (Unless Required by Law)</h3>
+        <p>
+          Digital content (such as digital perks, roles, or other virtual benefits) may be delivered
+          immediately or within a short processing time once your payment is confirmed.
+        </p>
+        <p>
+          Because digital items are usually non-returnable and may be consumed instantly, all sales are
+          generally <strong>final and non-refundable</strong>, unless a refund is required by applicable
+          consumer protection law or explicitly stated by us in writing.
+        </p>
+
+        <h3>4.3. No Guarantees of Continuity</h3>
+        <p>
+          Any digital perks or benefits linked to specific features, games, or platforms may depend
+          on third-party services or our ongoing operations. We do not guarantee that any particular
+          perk or benefit will remain available forever, and we reserve the right to modify or discontinue
+          them as needed (for example, if a game or external API changes).
+        </p>
+
+        <h2>5. Third-Party Services &amp; Links</h2>
+        <p>
+          Our Services may integrate with or link to third-party platforms such as game publishers,
+          Discord, payment providers, analytics tools, or external websites. These third parties
+          have their own terms and privacy policies, which you should review separately.
+        </p>
+        <p>
+          We do not control and are not responsible for:
+        </p>
+        <ul>
+          <li>The availability, accuracy, or content of third-party services.</li>
+          <li>Any losses or issues arising from your use of those third-party services.</li>
+        </ul>
+        <p>
+          Any reference to third-party games, platforms, or brands is for identification purposes only
+          and does not imply sponsorship, endorsement, or official partnership unless explicitly stated.
+        </p>
+
+        <h2>6. Disclaimers</h2>
+        <p>
+          The Services are provided on an “as is” and “as available” basis. To the maximum extent
+          permitted by law, we do not make any promises or warranties about:
+        </p>
+        <ul>
+          <li>The accuracy, completeness, or reliability of content.</li>
+          <li>Uninterrupted or error-free operation of the Services.</li>
+          <li>Suitability of the Services for any particular purpose.</li>
+        </ul>
+        <p>
+          You use the Services at your own discretion and risk. Nothing in these Terms is intended to
+          exclude or limit any legal rights that cannot be excluded or limited under applicable law.
+        </p>
+
+        <h2>7. Limitation of Liability</h2>
+        <p>
+          To the maximum extent permitted by applicable law, Team Galaxy and its owners, collaborators,
+          and affiliates will not be liable for:
+        </p>
+        <ul>
+          <li>Any indirect, incidental, special, consequential, or punitive damages.</li>
+          <li>Any loss of profits, data, reputation, or goodwill.</li>
+          <li>Any loss or damage resulting from:
+            <ul>
+              <li>Your use of or inability to use the Services,</li>
+              <li>Any unauthorized access to or use of your account or data,</li>
+              <li>Any interruption, suspension, or termination of the Services.</li>
+            </ul>
+          </li>
+        </ul>
+        <p>
+          Where liability cannot be fully excluded, and to the extent permitted by law, our total aggregate
+          liability arising out of or relating to the Services or these Terms will be limited to the amount
+          you have paid directly to us for the relevant part of the Services in the six (6) months preceding
+          the event giving rise to the claim (if any).
+        </p>
+
+        <h2>8. Indemnity</h2>
+        <p>
+          To the extent permitted by law, you agree to indemnify and hold harmless Team Galaxy from and
+          against any claims, damages, liabilities, losses, and expenses (including reasonable legal fees)
+          arising out of or related to:
+        </p>
+        <ul>
+          <li>Your use of the Services;</li>
+          <li>Your violation of these Terms;</li>
+          <li>Your violation of any law or third-party rights.</li>
+        </ul>
+
+        <h2>9. Suspension &amp; Termination</h2>
+        <p>
+          We reserve the right, at our discretion, to suspend or terminate access to the Services (or
+          specific features) at any time, including if we reasonably believe that:
+        </p>
+        <ul>
+          <li>You have violated these Terms or applicable law;</li>
+          <li>Your behavior poses a risk to other users or to the integrity of the Services;</li>
+          <li>We need to do so to comply with legal obligations or technical constraints.</li>
+        </ul>
+        <p>
+          Where reasonable, we will try to provide notice, but we are not obligated to offer prior
+          notice in urgent situations (for example, severe abuse or security risks).
+        </p>
+
+        <h2>10. Changes to the Services &amp; These Terms</h2>
+        <p>
+          We may update or modify the Services from time to time (for example, to add or remove
+          features, improve performance, or adapt to platform/game changes).
+        </p>
+        <p>
+          We may also update these Terms. When we make material changes, we will take reasonable
+          steps to inform you, such as updating the “Last Updated” date at the top of this page or
+          providing a notice within the Services.
+        </p>
+        <p>
+          Your continued use of the Services after any update means that you have read and understood
+          the updated Terms. If you do not agree with the updated Terms, you should stop using the
+          Services.
+        </p>
+
+        <h2>11. Governing Law &amp; Dispute Resolution</h2>
+        <p>
+          These Terms and any dispute arising out of or relating to them or the Services are governed
+          by the substantive laws of <strong>India</strong>, without regard to its conflict of laws rules.
+        </p>
+        <p>
+          Before taking any formal action, both you and Team Galaxy agree to first attempt to resolve
+          any dispute informally in good faith. If a dispute is not resolved within a reasonable time,
+          the parties agree to submit to the non-exclusive jurisdiction of the courts located in
+          <strong>Mumbai, India</strong>.
+        </p>
+        <p>
+          Nothing in this section prevents you from having any rights that you may mandatorily have
+          under applicable law in your own country.
+        </p>
+
+        <h2>12. Contact</h2>
+        <p>
+          If you have any questions about these Terms or the Services, you can contact us at:
+        </p>
+        <ul>
+          <li><strong>Email:</strong> <a href="mailto:info@teamgalaxy.net" style="color: var(--starlight-turquoise); text-decoration: none;">info@teamgalaxy.net</a></li>
+        </ul>
       </div>
     </main>
-    
+
     <footer>
       <p>Team Galaxy © 2025 • Building communities across the cosmos</p>
       <div class="footer-links">
@@ -347,53 +578,42 @@
     // Create realistic star background
     function createStars() {
       const starsContainer = document.getElementById('stars');
-      const starCount = 200; // Number of stars
-      
+      const starCount = 200;
+
       for (let i = 0; i < starCount; i++) {
         const star = document.createElement('div');
         star.classList.add('star');
-        
-        // Random position
+
         const x = Math.random() * 100;
         const y = Math.random() * 100;
-        
-        // Random size (0.5px to 2px)
         const size = Math.random() * 1.5 + 0.5;
-        
-        // Random opacity (0.3 to 1)
         const opacity = Math.random() * 0.7 + 0.3;
-        
-        // Random animation duration (2s to 8s)
         const duration = Math.random() * 6 + 2;
-        
+
         star.style.left = `${x}%`;
         star.style.top = `${y}%`;
         star.style.width = `${size}px`;
         star.style.height = `${size}px`;
         star.style.setProperty('--opacity', opacity);
         star.style.setProperty('--duration', `${duration}s`);
-        
-        // Random delay for twinkling
         star.style.animationDelay = `${Math.random() * 5}s`;
-        
+
         starsContainer.appendChild(star);
       }
     }
-    
-    // Initialize stars when page loads
+
     window.addEventListener('load', createStars);
-    
-    // Add interactive effect: stars follow mouse (subtle effect)
+
+    // Subtle parallax effect for stars
     document.addEventListener('mousemove', (e) => {
       const stars = document.querySelectorAll('.star');
       const x = e.clientX / window.innerWidth;
       const y = e.clientY / window.innerHeight;
-      
+
       stars.forEach((star, index) => {
-        const speed = (index % 10) * 0.01; // Different speeds for different stars
+        const speed = (index % 10) * 0.01;
         const moveX = x * speed * 10;
         const moveY = y * speed * 10;
-        
         star.style.transform = `translate(${moveX}px, ${moveY}px)`;
       });
     });
