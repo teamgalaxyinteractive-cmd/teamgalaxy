@@ -682,7 +682,7 @@
 
       // If not signed in, redirect to sign-up immediately
       if (!auth.currentUser) {
-        window.location.href = "/teamgalaxy/legal/sign_up.html";
+        window.location.href = "/legal/sign_up.html";
         return;
       }
 
@@ -717,12 +717,12 @@
       e && e.preventDefault && e.preventDefault();
       e && e.stopPropagation && e.stopPropagation();
       // prefer the explicit path you requested
-      const path = '/teamgalaxy/user_management/user_profile.html';
+      const path = '/user_management/user_profile.html';
       // hide menu quickly (visual)
       profileMenu.style.display = 'none';
       // if user is signed in go to profile, else redirect to sign up
       if (!auth.currentUser) {
-        window.location.href = '/teamgalaxy/legal/sign_up.html';
+        window.location.href = '/legal/sign_up.html';
         return;
       }
       window.location.href = path;
