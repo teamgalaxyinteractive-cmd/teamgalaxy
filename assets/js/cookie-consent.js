@@ -122,6 +122,17 @@
     color: var(--tg-text);
     box-shadow: var(--tg-shadow);
   }
+
+  /* FORCE TeamGalaxy Cookie Modal to Solid Black */
+  #tg-preferences .tg-modal-inner {
+    background: #000 !important;
+    background-image: none !important;
+  }
+
+  #tg-preferences {
+    background: rgba(0, 0, 0, 0.9) !important;
+  }
+
   .tg-modal h2 { margin: 0 0 8px 0; }
   .tg-modal p { margin: 0 0 12px 0; color: var(--tg-muted); }
 
