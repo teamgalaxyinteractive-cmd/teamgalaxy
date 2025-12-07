@@ -1,25 +1,15 @@
-/*!
- * TeamGalaxy Cookie Consent — Fixed version
- * - Avoids :root leaks (no global CSS variables)
- * - Removes banner from interaction after hide (display:none)
- * - Removes banner from DOM after accept (so nothing blocks page)
- * - Proper modal focus/escape/tab handling
- * - Minimal global side-effects
- *
- * Replace GA_MEASUREMENT_ID with your GA4 id.
- */
 (function () {
   'use strict';
 
   // --------- CONFIG ----------
-  const GA_MEASUREMENT_ID = 'G-6C2W9NSNCH'; // <-- REPLACE
+  const GA_MEASUREMENT_ID = 'G-6C2W9NSNCH'; // tumhara GA4 ID
   const CONSENT_KEY = 'teamgalaxy_cookie_consent_v1';
   const CONSENT_EXP_DAYS = 365;
-  const SHOW_DELAY_MS = 500; // banner show delay after load
-  const HIDE_ANIM_MS = 320; // should match CSS transition
+  const SHOW_DELAY_MS = 500;
+  const HIDE_ANIM_MS = 320;
   // ---------------------------
 
-  // --- Small helpers ---
+  // --- Helpers ---
   function createEl(tag, attrs = {}, children = []) {
     const el = document.createElement(tag);
     for (const k in attrs) {
@@ -42,347 +32,473 @@
 
   // --- CONSENT store ---
   function saveConsent(obj) {
-    obj.timestamp = nowISO();
-    localStorage.setItem(CONSENT_KEY, JSON.stringify(obj));
+    try {
+      obj.timestamp = nowISO();
+      localStorage.setItem(CONSENT_KEY, JSON.stringify(obj));
+    } catch (e) {
+      console.warn('TeamGalaxy cookie: unable to save consent', e);
+    }
   }
   function readConsent() {
-    try { const s = localStorage.getItem(CONSENT_KEY); return s ? JSON.parse(s) : null; }
-    catch (e) { return null; }
+    try {
+      const s = localStorage.getItem(CONSENT_KEY);
+      return s ? JSON.parse(s) : null;
+    } catch (e) {
+      return null;
+    }
   }
-  function removeConsent() { localStorage.removeItem(CONSENT_KEY); }
+  function removeConsent() {
+    try { localStorage.removeItem(CONSENT_KEY); } catch (e) {}
+  }
 
-  // --- Namespaced CSS ---
+  // --- CSS (Banner + Modal, solid backgrounds) ---
   const css = `
-  /* All variables and styles are scoped under .tg-cookie-banner-root to prevent leakage */
-  .tg-cookie-banner-root { --tg-bg: rgba(7,10,20,0.88); --tg-text: #e9f0ff; --tg-muted: #b9c7e0; --tg-accent: #6b4bff; --tg-radius: 12px; --tg-shadow: 0 10px 40px rgba(3,6,23,0.6); }
+  /* Scoped root */
+  .tg-cookie-banner-root { 
+    --tg-bg: #020617;
+    --tg-text: #f9fafb;
+    --tg-muted: #9ca3af;
+    --tg-accent: #3b82f6;
+    --tg-radius: 12px;
+  }
+
+  /* Banner Styles */
   .tg-cookie-banner {
     position: fixed;
     left: 1rem;
     right: 1rem;
     bottom: 1rem;
-    z-index: 14000;
+    z-index: 2147483640;
     display: flex;
     justify-content: center;
-    pointer-events: none; /* outer wrapper doesn't capture events */
+    pointer-events: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
   .tg-cookie-inner {
     width: 100%;
-    max-width: 980px;
-    background: var(--tg-bg);
-    color: var(--tg-text);
+    max-width: 900px;
+    background-color: var(--tg-bg) !important;
+    color: var(--tg-text) !important;
     border-radius: var(--tg-radius);
-    box-shadow: var(--tg-shadow);
-    padding: 14px 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    padding: 16px;
     display: flex;
     gap: 12px;
     align-items: center;
-    pointer-events: auto; /* inner content receives events */
-    transform: translateY(24px) scale(0.995);
+    pointer-events: auto;
+    transform: translateY(24px) scale(0.99);
     opacity: 0;
-    transition: transform 300ms cubic-bezier(.2,.9,.2,1), opacity 300ms;
-    backdrop-filter: blur(6px) saturate(120%);
+    transition: transform 0.3s cubic-bezier(.2,.9,.2,1), opacity 0.3s;
+    border: 1px solid rgba(255,255,255,0.08);
     position: relative;
   }
   .tg-cookie-inner.tg-visible { transform: translateY(0) scale(1); opacity: 1; }
-  .tg-emoji { font-size: 1.8rem; margin-left: 4px; flex: 0 0 auto; }
-  .tg-text-block { flex: 1 1 auto; min-width: 0; }
-  .tg-text-block p { margin: 0; line-height: 1.25; }
-  .tg-title { font-weight: 700; }
-  .tg-sub { color: var(--tg-muted); margin-top: 4px; font-size: 0.92rem; }
 
-  .tg-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; flex: 0 0 auto; }
-  .tg-btn { min-height: 42px; min-width: 44px; padding: 8px 12px; border-radius: 10px; border: none; cursor: pointer; font-weight: 600; font-family: inherit; background: transparent; color: var(--tg-text); transition: transform 150ms ease; }
-  .tg-primary { background: var(--tg-accent); color: white; box-shadow: 0 6px 18px rgba(75,59,255,0.22); }
-  .tg-secondary { background: rgba(255,255,255,0.04); color: var(--tg-text); }
-  .tg-link { background: transparent; color: var(--tg-muted); text-decoration: underline; padding: 7px 10px; border-radius: 8px; }
+  .tg-emoji { font-size: 1.5rem; }
+  .tg-text-block { flex: 1; }
+  .tg-text-block p { margin: 0; line-height: 1.4; font-size: 14px; color: var(--tg-text); }
+  .tg-title { font-weight: 700; margin-bottom: 2px !important; display: block; }
+  .tg-sub { color: var(--tg-muted) !important; font-size: 13px; }
 
-  .tg-close { position: absolute; right: 12px; top: 10px; background: transparent; border: none; color: var(--tg-muted); font-size: 1.05rem; cursor: pointer; }
+  /* Buttons */
+  .tg-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .tg-btn { 
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer; 
+    font-weight: 600;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+  .tg-btn:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+  }
+  .tg-primary {
+    background-color: var(--tg-accent) !important;
+    color: white !important;
+  }
+  .tg-primary:hover { opacity: 0.9; }
+  .tg-secondary {
+    background-color: rgba(255,255,255,0.1) !important;
+    color: white !important;
+  }
+  .tg-secondary:hover { background-color: rgba(255,255,255,0.2) !important; }
+  .tg-link {
+    background: none;
+    color: var(--tg-muted);
+    text-decoration: underline;
+    padding: 5px 10px;
+  }
+  .tg-close {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: none;
+    border: none;
+    color: var(--tg-muted);
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .tg-close:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+  }
 
-.tg-modal {
+  /* MODAL: solid black card + dark overlay */
+  .tg-modal {
     display: none;
     position: fixed;
     inset: 0;
-    z-index: 15000;
+    z-index: 2147483647;
     align-items: center;
     justify-content: center;
     padding: 20px;
-    /* Dark black overlay */
-    background: rgba(0, 0, 0, 0.85);
-    pointer-events: none;
+    background-color: rgba(0,0,0,0.85) !important;
+    backdrop-filter: blur(4px);
   }
-  .tg-modal[aria-hidden="false"] { display: flex; pointer-events: auto; }
+  .tg-modal[aria-hidden="false"] {
+    display: flex;
+    pointer-events: auto;
+  }
 
   .tg-modal-inner {
     width: 100%;
-    max-width: 720px;
-    /* Solid dark card */
-    background: #050816;
+    max-width: 600px;
+    background-color: #020617 !important; /* solid dark */
+    color: #f9fafb !important;
     border-radius: 14px;
-    padding: 20px;
-    color: var(--tg-text);
-    box-shadow: var(--tg-shadow);
+    padding: 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+    border: 1px solid rgba(148,163,184,0.5);
+    position: relative;
   }
 
-  /* FORCE TeamGalaxy Cookie Modal to Solid Black */
-  #tg-preferences .tg-modal-inner {
-    background: #000 !important;
-    background-image: none !important;
+  .tg-modal h2 {
+    margin: 0 0 10px 0;
+    color: #e5e7eb;
+    font-size: 20px;
+  }
+  .tg-modal p {
+    margin: 0 0 20px 0;
+    color: #cbd5e1;
+    font-size: 14px;
+    line-height: 1.5;
   }
 
-  #tg-preferences {
-    background: rgba(0, 0, 0, 0.9) !important;
+  .tg-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(15,23,42,0.9);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  .tg-toggle-row strong {
+    display: block;
+    color: #f9fafb;
+    margin-bottom: 4px;
+  }
+  .tg-toggle-row .desc {
+    color: #9ca3af;
+    font-size: 12px;
   }
 
-  .tg-modal h2 { margin: 0 0 8px 0; }
-  .tg-modal p { margin: 0 0 12px 0; color: var(--tg-muted); }
-
-  .tg-toggle-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px; border-radius:10px; background: rgba(255,255,255,0.02); margin-bottom:12px; }
-  .tg-toggle-row .desc { color: var(--tg-muted); font-size:0.92rem; margin-top:6px; }
-
-  @media (max-width: 740px) {
-    .tg-cookie-inner { flex-direction: column; align-items: stretch; padding: 12px; gap: 10px; }
-    .tg-actions { justify-content: space-between; }
-    .tg-close { right: 8px; top: 6px; }
+  .tg-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
   }
-  @media (prefers-reduced-motion: reduce) { .tg-cookie-inner { transition: none; transform: none; } }
+  .tg-utilities {
+    margin-top: 15px;
+    text-align: center;
+  }
+
+  /* Mobile Tweaks */
+  @media (max-width: 600px) {
+    .tg-cookie-inner {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .tg-actions {
+      width: 100%;
+      justify-content: space-between;
+    }
+    .tg-btn {
+      flex: 1;
+      text-align: center;
+    }
+  }
   `;
 
-  // --- Build DOM (namespaced) ---
+  // --- Build DOM ---
   const wrapper = createEl('div', { class: 'tg-cookie-banner-root' });
   const styleEl = createEl('style', { type: 'text/css', html: css });
-  const banner = createEl('div', { class: 'tg-cookie-banner', id: 'tg-cookie-banner', 'aria-hidden': 'true', role: 'dialog', 'aria-label': 'Cookie consent', 'aria-live': 'polite' });
-  const inner = createEl('div', { class: 'tg-cookie-inner', id: 'tg-cookie-inner' });
 
-  const emoji = createEl('div', { class: 'tg-emoji', html: '🍪' });
-  const textBlock = createEl('div', { class: 'tg-text-block' });
-  const title = createEl('p', { class: 'tg-title', html: '<strong>TeamGalaxy</strong> needs your permission to load analytics cookies.' });
-  const sub = createEl('p', { class: 'tg-sub', html: 'We use cookies to improve your experience. You can accept, reject or manage preferences.' });
-  textBlock.appendChild(title); textBlock.appendChild(sub);
+  // Banner HTML
+  const banner = createEl('div', {
+    class: 'tg-cookie-banner',
+    id: 'tg-cookie-banner',
+    'aria-hidden': 'true',
+    role: 'dialog',
+    'aria-label': 'Cookie consent',
+    'aria-live': 'polite'
+  });
 
-  const actions = createEl('div', { class: 'tg-actions' });
-  const btnAccept = createEl('button', { id: 'tg-accept', class: 'tg-btn tg-primary', type: 'button', html: 'Accept & Continue' });
-  const btnReject = createEl('button', { id: 'tg-reject', class: 'tg-btn tg-secondary', type: 'button', html: 'Reject' });
-  const btnManage = createEl('button', { id: 'tg-manage', class: 'tg-btn tg-link', type: 'button', html: 'Manage preferences' });
-  actions.appendChild(btnAccept); actions.appendChild(btnReject); actions.appendChild(btnManage);
+  banner.innerHTML = `
+    <div class="tg-cookie-inner" id="tg-cookie-inner">
+      <div class="tg-emoji" aria-hidden="true">🍪</div>
+      <div class="tg-text-block">
+        <p class="tg-title">Cookie Consent</p>
+        <p class="tg-sub">TeamGalaxy uses cookies for analytics. Manage your preferences.</p>
+      </div>
+      <div class="tg-actions">
+        <button id="tg-accept" class="tg-btn tg-primary" type="button">Accept</button>
+        <button id="tg-reject" class="tg-btn tg-secondary" type="button">Reject</button>
+        <button id="tg-manage" class="tg-btn tg-link" type="button">Settings</button>
+      </div>
+      <button id="tg-close" class="tg-close" type="button" aria-label="Close cookie banner">&times;</button>
+    </div>
+  `;
 
-  const closeBtn = createEl('button', { id: 'tg-close', class: 'tg-close', 'aria-label': 'Close cookie banner', html: '&times;' });
+  // Modal HTML
+  const modal = createEl('div', {
+    id: 'tg-preferences',
+    class: 'tg-modal',
+    'aria-hidden': 'true',
+    role: 'dialog',
+    'aria-modal': 'true',
+    'aria-labelledby': 'tg-pref-title'
+  });
 
-  inner.appendChild(emoji); inner.appendChild(textBlock); inner.appendChild(actions); inner.appendChild(closeBtn);
-  banner.appendChild(inner);
-  wrapper.appendChild(styleEl); wrapper.appendChild(banner);
+  modal.innerHTML = `
+    <div class="tg-modal-inner">
+      <h2 id="tg-pref-title">Cookie Preferences</h2>
+      <p>Decide which cookies you want to allow.</p>
+      
+      <div class="tg-toggle-row">
+        <div>
+          <strong>Analytics Cookies</strong>
+          <div class="desc">Help us improve TeamGalaxy.</div>
+        </div>
+        <input type="checkbox" id="tg-analytics-toggle" style="width:20px; height:20px;" aria-label="Allow analytics cookies">
+      </div>
 
-  // Modal
-  const modal = createEl('div', { id: 'tg-preferences', class: 'tg-modal', role: 'dialog', 'aria-modal': 'true', 'aria-hidden': 'true', 'aria-labelledby': 'tg-pref-title' });
-  const modalInner = createEl('div', { class: 'tg-modal-inner' });
-  const modalTitle = createEl('h2', { id: 'tg-pref-title', html: 'Cookie Preferences' });
-  const modalP = createEl('p', { html: 'Choose which cookies you allow us to use. Analytics cookies are optional.' });
-  const toggleRow = createEl('div', { class: 'tg-toggle-row' });
-  const toggleLabelWrap = createEl('div', {});
-  const toggleLabel = createEl('div', { html: '<strong>Analytics cookies</strong>' });
-  const toggleDesc = createEl('div', { class: 'desc', html: 'Helps us understand how visitors use the site (optional)' });
-  toggleLabelWrap.appendChild(toggleLabel); toggleLabelWrap.appendChild(toggleDesc);
-  const toggleInput = createEl('input', { id: 'tg-analytics-toggle', type: 'checkbox', name: 'analytics', 'aria-label': 'Allow analytics cookies' });
-  toggleRow.appendChild(toggleLabelWrap); toggleRow.appendChild(toggleInput);
-  const modalActions = createEl('div', { class: 'tg-modal-actions' });
-  const modalSave = createEl('button', { id: 'tg-save-prefs', class: 'tg-btn tg-primary', type: 'button', html: 'Save preferences' });
-  const modalCancel = createEl('button', { id: 'tg-cancel-prefs', class: 'tg-btn tg-secondary', type: 'button', html: 'Cancel' });
-  modalActions.appendChild(modalSave); modalActions.appendChild(modalCancel);
-  const modalUtil = createEl('div', { class: 'tg-utilities' });
-  const clearBtn = createEl('button', { id: 'tg-clear-consent', class: 'tg-btn tg-link', type: 'button', html: 'Remove saved consent' });
-  modalUtil.appendChild(clearBtn);
-  modalInner.appendChild(modalTitle); modalInner.appendChild(modalP); modalInner.appendChild(toggleRow); modalInner.appendChild(modalActions); modalInner.appendChild(modalUtil);
-  modal.appendChild(modalInner);
+      <div class="tg-modal-actions">
+        <button id="tg-save-prefs" class="tg-btn tg-primary" type="button" style="flex:1;">Save Preferences</button>
+        <button id="tg-cancel-prefs" class="tg-btn tg-secondary" type="button" style="flex:1;">Cancel</button>
+      </div>
+      <div class="tg-utilities">
+        <button id="tg-clear-consent" class="tg-btn tg-link" type="button">Reset All Consents</button>
+      </div>
+    </div>
+  `;
 
-  // --- Mount to DOM safely (append at end of body) ---
+  wrapper.appendChild(styleEl);
+  wrapper.appendChild(banner);
+
   function mount() {
     if (!document.head.contains(styleEl)) document.head.appendChild(styleEl);
     if (!document.body.contains(wrapper)) document.body.appendChild(wrapper);
     if (!document.body.contains(modal)) document.body.appendChild(modal);
   }
 
-  // --- GA loader (same behavior) ---
+  // --- GA Loader ---
   let gaLoaded = false;
   function loadGoogleAnalytics() {
-    if (!GA_MEASUREMENT_ID || /^G-XXXXXXXX/.test(GA_MEASUREMENT_ID)) {
-      console.warn('TeamGalaxy Cookie: GA_MEASUREMENT_ID missing or placeholder; skipping GA load.');
-      return;
-    }
+    if (!GA_MEASUREMENT_ID || GA_MEASUREMENT_ID.startsWith('G-XXX')) return;
     if (gaLoaded || window.dataLayer) return;
     gaLoaded = true;
+
     const s = document.createElement('script');
-    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA_MEASUREMENT_ID);
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_MEASUREMENT_ID;
     s.async = true;
     document.head.appendChild(s);
+
     window.dataLayer = window.dataLayer || [];
     function gtag(){ dataLayer.push(arguments); }
     window.gtag = gtag;
     gtag('js', new Date());
     gtag('config', GA_MEASUREMENT_ID, { anonymize_ip: true });
-    console.info('TeamGalaxy Cookie: GA4 loaded');
+    console.log("TeamGalaxy Analytics Loaded 🚀");
   }
 
-  // --- Show/hide with safe removal of interaction ---
-  let hideTimeoutId = null;
+  // --- Banner Logic ---
   function showBanner() {
-    // ensure the element is displayed so it can animate in
-    banner.style.display = ''; // remove inline display:none if set
-    inner.classList.add('tg-visible');
-    banner.setAttribute('aria-hidden', 'false');
-
-    // make sure wrapper doesn't block pointer events globally (only inner is interactive)
-    banner.style.pointerEvents = 'auto';
-    // focus primary after visible to help keyboard users
-    setTimeout(() => { try { btnAccept.focus(); } catch (e) {} }, 260);
+    banner.style.display = 'flex';
+    setTimeout(() => {
+      const inner = document.getElementById('tg-cookie-inner');
+      if (!inner) return;
+      inner.classList.add('tg-visible');
+      banner.setAttribute('aria-hidden', 'false');
+      banner.style.pointerEvents = 'auto';
+    }, 10);
   }
 
-  function hideBanner(removeFromDom = false) {
-    // animate out
-    inner.classList.remove('tg-visible');
+  function hideBanner() {
+    const inner = document.getElementById('tg-cookie-inner');
+    if (inner) inner.classList.remove('tg-visible');
     banner.setAttribute('aria-hidden', 'true');
 
-    // After animation, set display:none so it doesn't intercept any clicks (important fix)
-    if (hideTimeoutId) clearTimeout(hideTimeoutId);
-    hideTimeoutId = setTimeout(() => {
-      // disable pointer events and hide
-      banner.style.pointerEvents = 'none';
+    setTimeout(() => {
       banner.style.display = 'none';
-      if (removeFromDom) {
-        try { if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper); } catch (e) {}
-      }
-    }, HIDE_ANIM_MS + 20);
+      banner.style.pointerEvents = 'none';
+    }, HIDE_ANIM_MS);
   }
 
-  // --- Modal helpers with focus management ---
+  // --- Modal Logic + focus handling ---
+  let prevOverflow = '';
+  let lastFocused = null;
+
+  function getFocusableInModal() {
+    return modal.querySelectorAll(
+      'button, input, [href], select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+  }
+
   function openModal() {
     const consent = readConsent();
-    toggleInput.checked = !!(consent && consent.analytics === true);
+    const toggle = document.getElementById('tg-analytics-toggle');
+    if (toggle) toggle.checked = !!(consent && consent.analytics);
+
+    lastFocused = document.activeElement;
+
     modal.setAttribute('aria-hidden', 'false');
     modal.style.display = 'flex';
-    // prevent background scroll
-    const prevOverflow = document.documentElement.style.overflow;
-    modal._prevOverflow = prevOverflow;
+
+    prevOverflow = document.documentElement.style.overflow;
     document.documentElement.style.overflow = 'hidden';
-    // save last focused
-    modal._prevFocus = document.activeElement;
-    toggleInput.focus();
-    document.addEventListener('keydown', modalKeyHandler);
+
+    const focusables = getFocusableInModal();
+    if (focusables.length) focusables[0].focus();
+
+    document.addEventListener('keydown', handleModalKeydown);
   }
+
   function closeModal() {
     modal.setAttribute('aria-hidden', 'true');
     modal.style.display = 'none';
-    // restore scroll
-    document.documentElement.style.overflow = modal._prevOverflow || '';
-    if (modal._prevFocus && typeof modal._prevFocus.focus === 'function') modal._prevFocus.focus();
-    document.removeEventListener('keydown', modalKeyHandler);
-  }
-  function modalKeyHandler(e) {
-    if (e.key === 'Escape') return closeModal();
-    if (e.key === 'Tab') {
-      const focusable = modal.querySelectorAll('button, input, [href], select, textarea, [tabindex]:not([tabindex="-1"])');
-      if (!focusable.length) return;
-      const first = focusable[0], last = focusable[focusable.length - 1];
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    document.documentElement.style.overflow = prevOverflow || '';
+
+    document.removeEventListener('keydown', handleModalKeydown);
+    if (lastFocused && typeof lastFocused.focus === 'function') {
+      lastFocused.focus();
     }
   }
 
-  // --- Events wiring ---
-  function wireEvents() {
-    // Accept: save, hide, load GA, remove from DOM after animation
-    btnAccept.addEventListener('click', function () {
-      saveConsent({ analytics: true });
-      // animate hide and remove from DOM to prevent further interference
-      hideBanner(true);
-      loadGoogleAnalytics();
-    });
+  function handleModalKeydown(e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      return closeModal();
+    }
+    if (e.key === 'Tab') {
+      const focusables = getFocusableInModal();
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
 
-    // Reject: save, hide (keep in DOM optionally - we remove from interaction)
-    btnReject.addEventListener('click', function () {
-      saveConsent({ analytics: false });
-      hideBanner(true);
-    });
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  }
 
-    // Manage preferences
-    btnManage.addEventListener('click', function () { openModal(); });
+  // --- Init ---
+  function init() {
+    mount();
 
-    // Close — defer: hide for now but keep consent unset (user can be shown again next load)
-    closeBtn.addEventListener('click', function () { hideBanner(false); });
+    const btnAccept  = document.getElementById('tg-accept');
+    const btnReject  = document.getElementById('tg-reject');
+    const btnManage  = document.getElementById('tg-manage');
+    const btnClose   = document.getElementById('tg-close');
+    const btnSave    = document.getElementById('tg-save-prefs');
+    const btnCancel  = document.getElementById('tg-cancel-prefs');
+    const btnClear   = document.getElementById('tg-clear-consent');
 
-    // Modal save/cancel/clear
-    modalSave.addEventListener('click', function () {
-      const allow = !!toggleInput.checked;
-      saveConsent({ analytics: allow });
-      closeModal();
-      hideBanner(true);
-      if (allow) loadGoogleAnalytics();
-    });
-    modalCancel.addEventListener('click', function () { closeModal(); });
-
-    clearBtn.addEventListener('click', function () {
+    // expiry check
+    const c = readConsent();
+    if (c && c.timestamp && daysSince(c.timestamp) > CONSENT_EXP_DAYS) {
       removeConsent();
-      closeModal();
-      // show banner again so user can choose
-      showBanner();
-    });
+    }
 
-    // Click outside modal to close (only when modal is visible)
+    // Banner events
+    if (btnAccept) {
+      btnAccept.onclick = () => {
+        saveConsent({ analytics: true });
+        hideBanner();
+        loadGoogleAnalytics();
+      };
+    }
+    if (btnReject) {
+      btnReject.onclick = () => {
+        saveConsent({ analytics: false });
+        hideBanner();
+      };
+    }
+    if (btnManage) {
+      btnManage.onclick = () => openModal();
+    }
+    if (btnClose) {
+      btnClose.onclick = () => hideBanner();
+    }
+
+    // Modal events
+    if (btnSave) {
+      btnSave.onclick = () => {
+        const toggle = document.getElementById('tg-analytics-toggle');
+        const allow = !!(toggle && toggle.checked);
+        saveConsent({ analytics: allow });
+        closeModal();
+        hideBanner();
+        if (allow) loadGoogleAnalytics();
+      };
+    }
+    if (btnCancel) {
+      btnCancel.onclick = () => closeModal();
+    }
+    if (btnClear) {
+      btnClear.onclick = () => {
+        removeConsent();
+        closeModal();
+        showBanner();
+      };
+    }
+
+    // Click outside modal closes it
     modal.addEventListener('click', function (e) {
       if (e.target === modal) closeModal();
     });
 
-    // keyboard shortcut for dev: ctrl/cmd + c -> open preferences
-    document.addEventListener('keydown', function (e) {
-      if (document.activeElement && ['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') { openModal(); }
-    });
-  }
-
-  // --- Initialization logic ---
-  function checkExpiryAndPossiblyClear() {
-    const c = readConsent();
-    if (!c || !c.timestamp) return;
-    if (daysSince(c.timestamp) > CONSENT_EXP_DAYS) removeConsent();
-  }
-
-  function init() {
-    mount();
-    wireEvents();
-    checkExpiryAndPossiblyClear();
-
-    // Decide initial state
+    // Auto load logic
     const existing = readConsent();
-    if (existing && typeof existing.analytics !== 'undefined') {
-      if (existing.analytics === true) {
+    if (existing) {
+      if (existing.analytics) {
         loadGoogleAnalytics();
       }
-      // no banner shown if explicit choice exists
-      // ensure the wrapper is not visible/interactive
-      banner.style.display = 'none';
-      banner.style.pointerEvents = 'none';
+      // Explicit choice -> don't show banner again
     } else {
-      // show banner after small delay
       setTimeout(showBanner, SHOW_DELAY_MS);
     }
 
-    // Expose small helper API
+    // Small helper API (optional dev)
     window.TeamGalaxyCookies = {
-      openBanner: showBanner,
-      openPreferences: openModal,
       getConsent: readConsent,
       clearConsent: removeConsent,
-      hasAnalyticsConsent: function () { const c = readConsent(); return !!(c && c.analytics === true); }
+      openPreferences: openModal,
+      openBanner: showBanner
     };
   }
 
-  // Mount helper: append wrapper (contains styles + banner) at document end
-  function mount() {
-    // Append style + banner wrapper to body end to minimize interference
-    if (!document.body.contains(wrapper)) document.body.appendChild(wrapper);
-    if (!document.body.contains(modal)) document.body.appendChild(modal);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
-
-  // DOM ready
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
 
 })();
