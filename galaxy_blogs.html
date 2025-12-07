@@ -733,7 +733,7 @@
       try {
         const liveUser = auth.currentUser;
         if (!liveUser) {
-          window.location.href = "/teamgalaxy/legal/sign_up.html";
+          window.location.href = "/legal/sign_up.html";
           return;
         }
         if (!profileMenu) return;
@@ -788,10 +788,10 @@
         e.preventDefault();
         e.stopPropagation();
         if (!auth.currentUser) {
-          window.location.href = "/teamgalaxy/legal/sign_up.html";
+          window.location.href = "/legal/sign_up.html";
           return;
         }
-        window.location.href = "/teamgalaxy/user_management/user_profile.html";
+        window.location.href = "/user_management/user_profile.html";
         if (profileMenu) profileMenu.style.display = "none";
       });
       profileLink._attached = true;
@@ -864,7 +864,7 @@
           card.className = "blog-card";
           card.tabIndex = 0; card.setAttribute("role", "button");
 
-          card.onclick = () => window.location.href = `/teamgalaxy/card_showcase.html?id=${encodeURIComponent(id)}`;
+          card.onclick = () => window.location.href = `/card_showcase.html?id=${encodeURIComponent(id)}`;
           card.onkeydown = (e) => { if (e.key==="Enter") card.click(); };
 
           const img = document.createElement("img");
