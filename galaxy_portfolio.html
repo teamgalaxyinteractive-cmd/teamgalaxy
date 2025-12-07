@@ -707,7 +707,7 @@ function onProfileBtnClick(e) {
   try {
     // if auth not ready or user not signed in, fallback to sign-up
     if (!auth || !auth.currentUser) {
-      window.location.href = "/teamgalaxy/legal/sign_up.html";
+      window.location.href = "/legal/sign_up.html";
       return;
     }
 
@@ -717,7 +717,7 @@ function onProfileBtnClick(e) {
     profileMenu.style.display = isOpen ? 'none' : 'block';
   } catch (err) {
     console.error('onProfileBtnClick error:', err);
-    window.location.href = "/teamgalaxy/legal/sign_up.html";
+    window.location.href = "/legal/sign_up.html";
   }
 }
 
@@ -733,14 +733,14 @@ if (profileLink && !profileLink._attached) {
     e.preventDefault(); e.stopPropagation();
     try {
       if (!auth || !auth.currentUser) {
-        window.location.href = "/teamgalaxy/legal/sign_up.html";
+        window.location.href = "/legal/sign_up.html";
         return;
       }
-      window.location.href = "/teamgalaxy/user_management/user_profile.html";
+      window.location.href = "/user_management/user_profile.html";
       if (profileMenu) profileMenu.style.display = 'none';
     } catch (err) {
       console.warn('profileLink click error', err);
-      window.location.href = "/teamgalaxy/user_management/user_profile.html";
+      window.location.href = "/user_management/user_profile.html";
     }
   });
   profileLink._attached = true;
