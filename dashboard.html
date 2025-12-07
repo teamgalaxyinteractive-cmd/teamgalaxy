@@ -1088,7 +1088,7 @@
       </div>
       <button id="profileBtn" class="profile-btn"><i class="fa-solid fa-user"></i></button>
       <div id="profileMenu" class="dropdown-content" style="right: 30px; display:none;">
-        <a href="/teamgalaxy/user_management/user_profile.html" id="profileLink">Profile</a>
+        <a href="/user_management/user_profile.html" id="profileLink">Profile</a>
         <a href="#" id="logoutLink">Logout</a>
       </div>
     </div>
@@ -1276,8 +1276,8 @@
         const liveUser = auth.currentUser;
         // Redirect path updated per your request
         if (!liveUser) {
-          console.log("Profile clicked while not signed in — redirecting to /teamgalaxy/legal/sign_up.html");
-          window.location.href = "/teamgalaxy/legal/sign_up.html";
+          console.log("Profile clicked while not signed in — redirecting to /legal/sign_up.html");
+          window.location.href = "/legal/sign_up.html";
           return;
         }
         // Signed in -> toggle menu
@@ -1335,13 +1335,13 @@
     // Wire profileLink safely (only once)
     if (profileLink && !profileLink._attached) {
       profileLink.addEventListener("click", (e) => {
-        e.preventDefault(); // लिंक का डिफ़ॉल्ट बर्ताव रोका
+        e.preventDefault(); // 
         e.stopPropagation();
         if (!auth.currentUser) {
-          window.location.href = "/teamgalaxy/legal/sign_up.html";
+          window.location.href = "/legal/sign_up.html";
           return;
         }
-        window.location.href = "/teamgalaxy/user_management/user_profile.html"; 
+        window.location.href = "/user_management/user_profile.html"; 
         if (profileMenu) profileMenu.style.display = "none";
       });
       profileLink._attached = true;
