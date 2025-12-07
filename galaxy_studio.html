@@ -577,6 +577,9 @@
       </div>
     </div>
   </footer>
+
+  <!-- reCaptcha -->
+  <script src="https://www.google.com/recaptcha/api.js?render=6LfJDgcsAAAAABRkg1BC_ni3R8dFSCAXimVRAYOD"></script>
 <script>
     // Firebase config
     const firebaseConfig = {
@@ -601,7 +604,7 @@
     // Activate App Check
     try {
       const appCheckProvider = new firebase.appCheck.ReCaptchaV3Provider(
-        "6Ld395IrAAAAAIvG4gyf0vUJeI_jKOsI9XVn0jUx"
+        "6LfJDgcsAAAAABRkg1BC_ni3R8dFSCAXimVRAYOD"
       );
       firebase.appCheck().activate(appCheckProvider, true);
       console.log(
