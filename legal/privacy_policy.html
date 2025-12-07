@@ -18,13 +18,13 @@
       --text-tertiary: #cbd5e0;
       --text-footer: #a0aec0;
     }
-    
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       line-height: 1.6;
@@ -35,7 +35,7 @@
       position: relative;
       overflow-x: hidden;
     }
-    
+
     .stars {
       position: fixed;
       top: 0;
@@ -45,7 +45,7 @@
       pointer-events: none;
       z-index: -1;
     }
-    
+
     .star {
       position: absolute;
       background-color: white;
@@ -53,12 +53,12 @@
       animation: twinkle var(--duration, 4s) infinite ease-in-out;
       opacity: var(--opacity, 0.8);
     }
-    
+
     @keyframes twinkle {
       0%, 100% { opacity: var(--opacity, 0.8); transform: scale(1); }
       50% { opacity: calc(var(--opacity, 0.8) * 1.5); transform: scale(1.2); }
     }
-    
+
     .container {
       width: 90%;
       max-width: 1000px;
@@ -67,7 +67,7 @@
       position: relative;
       z-index: 1;
     }
-    
+
     header {
       text-align: center;
       padding: 2rem 0;
@@ -75,7 +75,7 @@
       border-bottom: 1px solid rgba(108, 92, 231, 0.3);
       animation: fadeInUp 1s ease-out;
     }
-    
+
     .logo {
       font-size: 2.5rem;
       font-weight: 800;
@@ -85,22 +85,22 @@
       margin-bottom: 0.5rem;
       transition: transform 0.3s ease;
     }
-    
+
     .logo:hover {
       transform: scale(1.05);
     }
-    
+
     .logo i {
       margin-right: 10px;
       animation: pulse 2s infinite;
     }
-    
+
     @keyframes pulse {
       0% { opacity: 0.8; }
       50% { opacity: 1; }
       100% { opacity: 0.8; }
     }
-    
+
     .page-title {
       font-size: 2.8rem;
       margin: 1.5rem 0;
@@ -108,7 +108,7 @@
       text-shadow: 0 2px 10px rgba(0, 206, 201, 0.3);
       animation: fadeInDown 1s ease-out;
     }
-    
+
     .last-updated {
       background: rgba(108, 92, 231, 0.15);
       color: var(--starlight-turquoise);
@@ -119,7 +119,7 @@
       font-weight: 600;
       animation: fadeIn 1.5s ease-out;
     }
-    
+
     .content-card {
       background: rgba(25, 18, 66, 0.7);
       backdrop-filter: blur(10px);
@@ -131,12 +131,12 @@
       animation: slideInUp 1s ease-out;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    
+
     .content-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
     }
-    
+
     h2 {
       color: var(--starlight-turquoise);
       font-size: 1.8rem;
@@ -145,44 +145,44 @@
       border-bottom: 2px solid var(--cosmic-purple);
       transition: color 0.3s ease;
     }
-    
+
     h2:hover {
       color: #00e5e0;
     }
-    
+
     h3 {
       color: var(--cosmic-purple);
       font-size: 1.4rem;
       margin: 1.2rem 0 0.8rem;
       transition: color 0.3s ease;
     }
-    
+
     h3:hover {
       color: #8a7fff;
     }
-    
+
     p {
       margin: 1rem 0;
       color: var(--text-secondary);
       font-size: 1.1rem;
     }
-    
+
     ul {
       padding-left: 1.8rem;
       margin: 1.5rem 0;
     }
-    
+
     li {
       margin-bottom: 0.8rem;
       color: var(--text-tertiary);
       font-size: 1.05rem;
     }
-    
+
     li::marker {
       color: var(--starlight-turquoise);
       font-weight: bold;
     }
-    
+
     .cookie-types {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -190,7 +190,7 @@
       margin: 1.5rem 0;
       animation: fadeIn 1.5s ease-out;
     }
-    
+
     .cookie-card {
       background: rgba(0, 206, 201, 0.08);
       border-radius: 8px;
@@ -198,17 +198,17 @@
       border: 1px solid rgba(0, 206, 201, 0.3);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    
+
     .cookie-card:hover {
       transform: translateY(-3px);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
-    
+
     .cookie-card h4 {
       color: var(--starlight-turquoise);
       margin-bottom: 0.5rem;
     }
-    
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -218,7 +218,7 @@
       overflow: hidden;
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
-    
+
     th, td {
       padding: 1rem;
       text-align: left;
@@ -226,21 +226,21 @@
       color: var(--text-secondary);
       transition: background-color 0.3s ease;
     }
-    
+
     th {
       background: rgba(108, 92, 231, 0.2);
       color: var(--starlight-turquoise);
       font-weight: 600;
     }
-    
+
     tr:last-child td {
       border-bottom: none;
     }
-    
+
     tr:hover {
       background: rgba(0, 206, 201, 0.05);
     }
-    
+
     .highlight-box {
       background: rgba(0, 206, 201, 0.1);
       border-left: 4px solid var(--starlight-turquoise);
@@ -249,19 +249,19 @@
       border-radius: 0 8px 8px 0;
       transition: background-color 0.3s ease;
     }
-    
+
     .highlight-box:hover {
       background: rgba(0, 206, 201, 0.15);
     }
-    
+
     .highlight-box strong {
       color: var(--text-bright);
     }
-    
+
     .highlight-box p {
-      color: var(--text-bright); /* <-- UPDATED for white text */
+      color: var(--text-bright);
     }
-    
+
     footer {
       text-align: center;
       padding: 2rem 0;
@@ -271,32 +271,32 @@
       border-top: 1px solid rgba(0, 206, 201, 0.2);
       animation: fadeInUp 2s ease-out;
     }
-    
+
     .footer-links {
       display: flex;
       justify-content: center;
       gap: 1.5rem;
       margin-top: 1rem;
     }
-    
+
     .footer-links a {
       color: var(--starlight-turquoise);
       text-decoration: none;
       transition: all 0.3s;
       font-weight: 500;
     }
-    
+
     .footer-links a:hover {
       color: var(--cosmic-purple);
       text-shadow: 0 0 10px rgba(108, 92, 231, 0.7);
       transform: scale(1.1);
     }
-    
+
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
-    
+
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -307,7 +307,7 @@
         transform: translateY(0);
       }
     }
-    
+
     @keyframes fadeInDown {
       from {
         opacity: 0;
@@ -318,7 +318,7 @@
         transform: translateY(0);
       }
     }
-    
+
     @keyframes slideInUp {
       from {
         opacity: 0;
@@ -329,7 +329,7 @@
         transform: translateY(0);
       }
     }
-    
+
     @media (max-width: 768px) {
       .page-title {
         font-size: 2.2rem;
@@ -358,25 +358,45 @@
 <body>
   <!-- Star Background -->
   <div class="stars" id="stars"></div>
-  
+
   <div class="container">
     <header>
       <div class="logo" onclick="window.location.href='../dashboard.html'" style="cursor: pointer;">
-    <img src="https://dl.dropboxusercontent.com/scl/fi/v5d7xte4tksarsdufk4ay/image.png?rlkey=ca8p4jsfcw1pnqr79q8uympso&st=ikst5uy1&dl=0" alt="Team Galaxy Logo" style="height: 130px; width: auto;">
-  </div>
+        <img src="https://dl.dropboxusercontent.com/scl/fi/v5d7xte4tksarsdufk4ay/image.png?rlkey=ca8p4jsfcw1pnqr79q8uympso&st=ikst5uy1&dl=0" alt="Team Galaxy Logo" style="height: 130px; width: auto;">
+      </div>
       <p style="color: var(--text-footer); max-width: 700px; margin: 0 auto;">
         Building the future of gaming communities in the cosmos
       </p>
     </header>
 
     <main>
-      <h1 class="page-title">Privacy & Cookie Policy</h1>
-      <div class="last-updated">Last Updated: November 11, 2025</div>
+      <h1 class="page-title">Privacy &amp; Cookie Policy</h1>
+      <div class="last-updated">Last Updated: December 7, 2025</div>
+
       <div class="content-card">
-        <p>This Privacy & Cookie Policy explains how we collect, use, and protect your information when you use Galaxy websites and services. We are committed to protecting your privacy and handling your data in compliance with applicable international and national data protection laws.</p>
-        
-        <h2>1. Information We Collect</h2>
-        <p>We collect information to provide, maintain, and improve our services:</p>
+        <p>
+          This Privacy &amp; Cookie Policy explains how <strong>Team Galaxy</strong> (“we”, “us”, or “our”)
+          collects, uses, stores, and protects your information when you use our websites, services,
+          and community platforms. We take privacy and security seriously and aim to handle your data
+          lawfully, transparently, and with appropriate safeguards.
+        </p>
+
+        <h2>1. Who We Are (Data Controller)</h2>
+        <p>
+          Team Galaxy operates gaming and community-related services, including our website and connected
+          user areas and community features. For the purposes of data protection laws, Team Galaxy is the
+          <strong>data controller</strong> of the personal data collected through our Services.
+        </p>
+        <p>
+          If you have any questions about this Policy or how we process your data, you can contact us at:<br>
+          <strong>Email:</strong> <a href="mailto:info@teamgalaxy.net" style="color: var(--starlight-turquoise); text-decoration: none;">info@teamgalaxy.net</a>
+        </p>
+
+        <h2>2. Information We Collect</h2>
+        <p>
+          We collect information to provide, protect, and improve our Services. The main categories of data are:
+        </p>
+
         <table>
           <thead>
             <tr>
@@ -386,90 +406,231 @@
           </thead>
           <tbody>
             <tr>
-              <td><strong>1.1. Account Data</strong></td>
-              <td>Details you provide when registering, such as your username, email address, and profile preferences.</td>
+              <td><strong>2.1. Account Data</strong></td>
+              <td>
+                Information you provide when registering or updating your profile, such as username,
+                display name, email address, avatar, and profile preferences.
+              </td>
             </tr>
             <tr>
-              <td><strong>1.2. Transaction Data</strong></td>
-              <td>Payment details (processed securely by third-party providers), shipping address, phone number, and purchase history.</td>
+              <td><strong>2.2. Transaction &amp; Order Data</strong></td>
+              <td>
+                Order details, purchase history, and limited payment-related metadata (for example,
+                payment method type and transaction IDs). Actual payment details (such as full card
+                numbers) are processed directly and securely by third-party payment providers; we do
+                <strong>not</strong> store full card numbers on our own servers.
+              </td>
             </tr>
             <tr>
-              <td><strong>1.3. User-Generated Content (UGC)</strong></td>
-              <td>Any content you voluntarily post or upload, including messages in the Community Chat, comments, posts, and submissions.</td>
+              <td><strong>2.3. User-Generated Content (UGC)</strong></td>
+              <td>
+                Content you voluntarily post or upload, including community messages, chat content,
+                comments, posts, feedback, and other contributions in our community features.
+              </td>
             </tr>
             <tr>
-              <td><strong>1.4. Technical &amp; Usage Data</strong></td>
-              <td>Information about your device (browser type, operating system), IP address, general geographic location, and website usage patterns (via analytics).</td>
+              <td><strong>2.4. Technical &amp; Usage Data</strong></td>
+              <td>
+                Device and connection information (browser type, operating system, device identifiers),
+                IP address, general approximate location (e.g., city/country), log data, and usage patterns
+                collected via analytics tools to help us understand and improve how our Services are used.
+              </td>
+            </tr>
+            <tr>
+              <td><strong>2.5. Communication Data</strong></td>
+              <td>
+                Messages and communications you send to us directly (for example, emails or contact requests),
+                as well as metadata such as the time, date, and channel of communication.
+              </td>
             </tr>
           </tbody>
         </table>
-        
-        <h2>2. How We Use Your Information</h2>
-        <p>We use the collected information for the following legitimate purposes:</p>
+
+        <h2>3. How We Use Your Information</h2>
+        <p>We use the information we collect for the following purposes:</p>
         <ul>
-          <li>To provide, personalize, and maintain our services (e.g., loading your profile).</li>
-          <li>To process your orders, complete transactions, and deliver merchandise.</li>
-          <li>To communicate with you about community updates, events, or promotions.</li>
-          <li>To monitor and moderate User-Generated Content for compliance with our Terms of Use (e.g., checking for harassment, hate speech, or spam).</li>
+          <li>To create, manage, and maintain your account and profile.</li>
+          <li>To provide, operate, and personalize our Services and community features.</li>
+          <li>To process orders, provide purchased services, and deliver digital or physical goods (where applicable).</li>
+          <li>To monitor, moderate, and keep our community safe (for example, detecting spam, abuse, or violations of our rules).</li>
+          <li>To improve and optimize our Services, including debugging, analytics, and performance monitoring.</li>
+          <li>To communicate with you about updates, changes, security alerts, or important notices regarding our Services.</li>
+          <li>To respond to your questions and support requests.</li>
+          <li>To comply with legal obligations and enforce our terms and policies.</li>
         </ul>
-        
-        <h2>3. Cookies and Tracking Technologies</h2>
-        <p>Our website uses cookies and similar tracking technologies to enhance user experience and track site performance.</p>
+
+        <h2>4. Legal Bases for Processing (where applicable)</h2>
+        <p>
+          Where data protection law (such as the GDPR in the EEA/UK) applies, we rely on one or more of the following legal bases:
+        </p>
+        <ul>
+          <li><strong>Contract:</strong> Processing is necessary to provide the Services you request (e.g., account creation, order fulfillment, support).</li>
+          <li><strong>Legitimate Interests:</strong> Such as improving Services, preventing abuse, securing our systems, and running analytics in a privacy-respecting way.</li>
+          <li><strong>Consent:</strong> For certain optional features (for example, some cookies or communications), we rely on your consent, which you may withdraw at any time.</li>
+          <li><strong>Legal Obligation:</strong> To comply with applicable laws, regulations, and lawful requests by public authorities.</li>
+        </ul>
+
+        <h2>5. Cookies &amp; Similar Technologies</h2>
+        <p>
+          Our website uses cookies and similar technologies to ensure basic functionality and to help us
+          understand how users interact with our Services.
+        </p>
+
         <div class="cookie-types">
           <div class="cookie-card">
-            <h4>Necessary/Functional Cookies</h4>
-            <p>Essential for core site functionality (e.g., login, security).</p>
+            <h4>Necessary / Functional Cookies</h4>
+            <p>
+              Required for the core operation of the website and security (for example, keeping you logged in,
+              loading essential resources, and protecting against malicious activity).
+            </p>
           </div>
           <div class="cookie-card">
-            <h4>Performance/Analytics Cookies</h4>
-            <p>Used to collect non-personal data on how users interact with the site, helping us improve performance.</p>
+            <h4>Analytics / Performance Cookies</h4>
+            <p>
+              Help us understand how visitors use the site (pages visited, time spent, errors encountered),
+              so we can improve user experience and performance.
+            </p>
           </div>
         </div>
-        
+
         <div class="highlight-box">
-          <strong>Your Consent:</strong>
-          <p>By continuing to use our Services, you consent to the placement of Necessary Cookies. For Performance/Analytics Cookies, you can manage or disable them in your browser settings.</p>
+          <strong>Your Cookie Choices &amp; Consent:</strong>
+          <p>
+            We display a cookie banner to inform you about our use of cookies and, where required by law,
+            to obtain your consent for non-essential cookies (such as certain analytics cookies).
+            You can review or adjust your cookie choices through the banner (when shown) and by changing
+            settings in your browser or device at any time. Disabling certain cookies may affect some
+            functionalities, but essential features will continue to work.
+          </p>
         </div>
-        
-        <h2>4. Data Processing Location and International Transfers</h2>
+
+        <h2>6. Third-Party Services &amp; Data Processors</h2>
+        <p>
+          We work with trusted third-party service providers (data processors) who process personal data
+          on our behalf and only according to our instructions. These currently include, for example:
+        </p>
         <ul>
-          <li><strong>Data Location:</strong> Our primary data processing and storage servers are located outside of the user's country of residence, primarily in the United States (US), utilizing Google's Firebase services.</li>
-          <li><strong>International Transfers:</strong> When you use our Services, your data is transferred to and processed in the US. We take the following measures to ensure adequate protection of data transferred from regions like the European Economic Area (EEA) and the UK:
-            <ul>
-              <li>We rely on Standard Contractual Clauses (SCCs) and other applicable legal mechanisms provided by Google in their Data Processing Terms to ensure your data receives protection equivalent to EU standards.</li>
-              <li>By using our Services, you consent to the transfer of your personal data to the US for the purposes outlined in this policy.</li>
-            </ul>
-          </li>
+          <li><strong>GitHub Pages</strong> – for hosting our website.</li>
+          <li><strong>Firebase (Google)</strong> – for backend infrastructure and certain application services.</li>
+          <li><strong>Supabase</strong> – for database and authentication or other backend services.</li>
+          <li><strong>Dropbox</strong> – as a content delivery and file storage solution for certain assets.</li>
+          <li><strong>Payment Providers</strong> – to securely process payments, where applicable.</li>
+          <li><strong>Analytics Tools</strong> – to help us understand usage trends and improve our Services.</li>
         </ul>
-        
-        <h2>5. Third-Party Services and Data Processors</h2>
-        <p>We use trusted third-party providers who act as Data Processors on our behalf. These include:</p>
+        <p>
+          These providers may process your data according to their own privacy policies in addition to ours.
+          We take reasonable steps to work only with providers that implement appropriate data protection and
+          security measures. We do not sell or rent your personal data to third parties.
+        </p>
+
+        <h2>7. Data Processing Location &amp; International Transfers</h2>
+        <p>
+          Depending on your location and the location of our service providers, your data may be processed
+          and stored in countries other than your country of residence, including in the European Union and
+          the United States.
+        </p>
         <ul>
-          <li><strong>Google Firebase/Cloud Platform:</strong> For hosting, database (Firestore), and backend services.</li>
-          <li><strong>Payment Processors:</strong> To securely handle financial transactions.</li>
-          <li><strong>Shipping Carriers:</strong> To fulfill and track order delivery.</li>
-          <li><strong>Google Analytics:</strong> For site performance tracking.</li>
+          <li>Our hosting, backend, and infrastructure providers (such as GitHub, Google Firebase, Supabase, and Dropbox) may store and process data in their data centers in various regions.</li>
+          <li>Where required by law, these providers may rely on legal mechanisms (for example, Standard Contractual Clauses or equivalent safeguards) to help protect personal data when it is transferred across borders.</li>
         </ul>
-        <p>These third parties process your data according to their own privacy policies and applicable laws.</p>
-        
-        <h2>6. Your Rights</h2>
-        <p>You have the right to:</p>
+        <p>
+          By using our Services, you acknowledge that your information may be transferred and processed in
+          these locations, subject to reasonable safeguards and protections. Nothing in this Policy is meant
+          to reduce or limit any rights you may have under applicable data protection laws.
+        </p>
+
+        <h2>8. Data Retention</h2>
+        <p>
+          We retain personal data only for as long as reasonably necessary to:
+        </p>
         <ul>
-          <li><strong>Access:</strong> Request a copy of the personal data we hold about you.</li>
-          <li><strong>Rectification and Erasure:</strong> Ask us to correct or delete your personal data (the "Right to be Forgotten"), subject to legal obligations.</li>
-          <li><strong>Portability:</strong> Where technically feasible, request your data in a structured, commonly used, and machine-readable format.</li>
-          <li><strong>Restriction:</strong> Request the restriction of processing your personal data in certain circumstances.</li>
+          <li>Provide and maintain our Services;</li>
+          <li>Comply with legal, accounting, or reporting obligations;</li>
+          <li>Resolve disputes and enforce our agreements.</li>
         </ul>
-        <p>You may exercise these rights by contacting us at <strong>legal@teamgalaxy.dev</strong>.</p>
-        
-        <h2>7. Data Security</h2>
+        <p>
+          When data is no longer needed for these purposes, we will either delete it or anonymize it so that
+          it can no longer be linked to you, unless we are legally required to keep it for a longer period.
+        </p>
+
+        <h2>9. Your Rights</h2>
+        <p>
+          Depending on your country or region, you may have some or all of the following rights regarding your personal data:
+        </p>
         <ul>
-          <li>We implement industry-standard security measures (like encryption and secure protocols) to protect your data.</li>
-          <li>However, no online system is 100% secure, so we cannot guarantee absolute security of your data.</li>
+          <li><strong>Access:</strong> Request confirmation of whether we process your personal data and receive a copy.</li>
+          <li><strong>Rectification:</strong> Request correction of inaccurate or incomplete data.</li>
+          <li><strong>Erasure:</strong> Request deletion of your data, subject to legal or legitimate retention grounds.</li>
+          <li><strong>Restriction:</strong> Request that we temporarily or permanently stop processing all or some of your data.</li>
+          <li><strong>Portability:</strong> Request a copy of your data in a structured, commonly used, machine-readable format, where this right applies.</li>
+          <li><strong>Object:</strong> Object to certain types of processing, such as processing based on legitimate interests or for direct marketing.</li>
+          <li><strong>Withdraw Consent:</strong> Where processing is based on your consent, you may withdraw it at any time without affecting the lawfulness of processing carried out before withdrawal.</li>
         </ul>
+        <p>
+          To exercise any of these rights, contact us at
+          <strong><a href="mailto:info@teamgalaxy.net" style="color: var(--starlight-turquoise); text-decoration: none;">info@teamgalaxy.net</a></strong>.
+          We may need to verify your identity before fulfilling your request to help protect your data.
+        </p>
+        <p>
+          In some regions (such as the EEA/UK), you may also have the right to lodge a concern or complaint with
+          your local data protection authority if you believe your rights have been violated. We encourage you
+          to contact us first so we can try to resolve any concerns directly and promptly.
+        </p>
+
+        <h2>10. Data Security</h2>
+        <p>
+          We implement technical and organizational measures designed to protect your data against
+          unauthorized access, loss, misuse, or alteration. These may include:
+        </p>
+        <ul>
+          <li>Use of secure transport protocols (such as HTTPS) where appropriate.</li>
+          <li>Access controls and authentication mechanisms to limit who can access personal data.</li>
+          <li>Separation of duties between systems that process sensitive operations.</li>
+          <li>Regular review of systems and services to detect and mitigate potential vulnerabilities.</li>
+        </ul>
+        <p>
+          However, no online service can guarantee absolute security. You are encouraged to keep your
+          account credentials confidential and to contact us immediately if you suspect any unauthorized
+          access to your account or data. We will take reasonable steps to investigate and, where necessary,
+          mitigate any suspected incident.
+        </p>
+
+        <h2>11. Children’s Privacy</h2>
+        <p>
+          Our Services are not intentionally directed at children under the age where parental consent is
+          required under local law, and we do not knowingly collect personal data from such children.
+          If we become aware that we have collected personal data from a child without appropriate consent,
+          we will take steps to delete that information as soon as reasonably possible.
+        </p>
+
+        <h2>12. Changes to This Policy</h2>
+        <p>
+          We may update this Privacy &amp; Cookie Policy from time to time to reflect changes in our
+          practices, technologies, or legal requirements. When we make material changes, we will take
+          reasonable steps to notify you (for example, by updating the “Last Updated” date at the top
+          of this page or by providing a notice within the Services).
+        </p>
+        <p>
+          Your continued use of the Services after any update means that you have read and understood
+          the updated Policy. Where required by law, we will seek your consent to material changes that
+          affect how we use your personal data.
+        </p>
+
+        <h2>13. Contact Us</h2>
+        <p>
+          If you have any questions, concerns, or requests regarding this Policy or your personal data,
+          you can contact us at:
+        </p>
+        <ul>
+          <li><strong>Email:</strong> <a href="mailto:info@teamgalaxy.net" style="color: var(--starlight-turquoise); text-decoration: none;">info@teamgalaxy.net</a></li>
+        </ul>
+        <p>
+          We will do our best to respond promptly and handle your request in a fair and reasonable way,
+          in line with applicable data protection laws.
+        </p>
       </div>
     </main>
-    
+
     <footer>
       <p>Team Galaxy © 2025 • Building communities across the cosmos</p>
       <div class="footer-links">
@@ -503,7 +664,10 @@
         starsContainer.appendChild(star);
       }
     }
+
     window.addEventListener('load', createStars);
+
+    // Parallax-like subtle motion for stars
     document.addEventListener('mousemove', (e) => {
       const stars = document.querySelectorAll('.star');
       const x = e.clientX / window.innerWidth;
