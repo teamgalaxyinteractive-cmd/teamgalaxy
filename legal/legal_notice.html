@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Legal Notice | Team Galaxy</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --cosmic-purple: #6c5ce7;
+      --starlight-turquoise: #00cec9;
+      --deep-space: #0f0c29;
+      --nebula-blue: #304675;
+      --text-light: #f8f9fa;
+      --text-dark: #2d3436;
+      --text-bright: #ffffff;
+      --text-secondary: #e2e8f0;
+      --text-tertiary: #cbd5e0;
+      --text-footer: #a0aec0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--text-dark);
+      background: linear-gradient(135deg, var(--deep-space) 0%, #304352 100%);
+      min-height: 100vh;
+      padding-bottom: 4rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Star Background */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .star {
+      position: absolute;
+      background-color: white;
+      border-radius: 50%;
+      animation: twinkle var(--duration, 4s) infinite ease-in-out;
+      opacity: var(--opacity, 0.8);
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: var(--opacity, 0.8); transform: scale(1); }
+      50% { opacity: calc(var(--opacity, 0.8) * 1.5); transform: scale(1.2); }
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      text-align: center;
+      padding: 2rem 0;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(108, 92, 231, 0.3);
+      animation: fadeInUp 1s ease-out;
+    }
+
+    .logo {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(45deg, var(--cosmic-purple), var(--starlight-turquoise));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      transition: transform 0.3s ease;
+    }
+
+    .logo:hover {
+      transform: scale(1.05);
+    }
+
+    .logo i {
+      margin-right: 10px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.8; }
+      50% { opacity: 1; }
+      100% { opacity: 0.8; }
+    }
+
+    .page-title {
+      font-size: 2.8rem;
+      margin: 1.5rem 0;
+      color: var(--text-bright);
+      text-shadow: 0 2px 10px rgba(0, 206, 201, 0.3);
+      animation: fadeInDown 1s ease-out;
+    }
+
+    .last-updated {
+      background: rgba(108, 92, 231, 0.15);
+      color: var(--starlight-turquoise);
+      display: inline-block;
+      padding: 0.3rem 1rem;
+      border-radius: 20px;
+      margin: 1rem 0;
+      font-weight: 600;
+      animation: fadeIn 1.5s ease-out;
+    }
+
+    .content-card {
+      background: rgba(25, 18, 66, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(108, 92, 231, 0.2);
+      animation: slideInUp 1s ease-out;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .content-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    h2 {
+      color: var(--starlight-turquoise);
+      font-size: 1.8rem;
+      margin: 1.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--cosmic-purple);
+      transition: color 0.3s ease;
+    }
+
+    h2:hover {
+      color: #00e5e0;
+    }
+
+    h3 {
+      color: var(--cosmic-purple);
+      font-size: 1.4rem;
+      margin: 1.2rem 0 0.8rem;
+      transition: color 0.3s ease;
+    }
+
+    h3:hover {
+      color: #8a7fff;
+    }
+
+    p {
+      margin: 1rem 0;
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    ul {
+      padding-left: 1.8rem;
+      margin: 1.5rem 0;
+    }
+
+    li {
+      margin-bottom: 0.8rem;
+      color: var(--text-tertiary);
+      font-size: 1.05rem;
+    }
+
+    li::marker {
+      color: var(--starlight-turquoise);
+      font-weight: bold;
+    }
+
+    .highlight-box {
+      background: rgba(0, 206, 201, 0.1);
+      border-left: 4px solid var(--starlight-turquoise);
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+      border-radius: 0 8px 8px 0;
+      transition: background-color 0.3s ease;
+    }
+
+    .highlight-box:hover {
+      background: rgba(0, 206, 201, 0.15);
+    }
+
+    .highlight-box strong {
+      color: var(--text-bright);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      margin-top: 2rem;
+      color: var(--text-footer);
+      font-size: 1.1rem;
+      border-top: 1px solid rgba(0, 206, 201, 0.2);
+      animation: fadeInUp 2s ease-out;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .footer-links a {
+      color: var(--starlight-turquoise);
+      text-decoration: none;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+
+    .footer-links a:hover {
+      color: var(--cosmic-purple);
+      text-shadow: 0 0 10px rgba(108, 92, 231, 0.7);
+      transform: scale(1.1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-title {
+        font-size: 2.2rem;
+      }
+      .content-card {
+        padding: 1.8rem;
+      }
+      .footer-links {
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Star Background -->
+  <div class="stars" id="stars"></div>
+
+  <div class="container">
+    <header>
+      <div class="logo" onclick="window.location.href='../dashboard.html'" style="cursor: pointer;">
+        <img src="https://dl.dropboxusercontent.com/scl/fi/v5d7xte4tksarsdufk4ay/image.png?rlkey=ca8p4jsfcw1pnqr79q8uympso&st=ikst5uy1&dl=0" alt="Team Galaxy Logo" style="height: 130px; width: auto;">
+      </div>
+      <p style="color: var(--text-footer); max-width: 700px; margin: 0 auto;">
+        Building the future of gaming communities in the cosmos
+      </p>
+    </header>
+
+    <main>
+      <h1 class="page-title">Legal Notice</h1>
+      <div class="last-updated">Last Updated: December 7, 2025</div>
+
+      <div class="content-card">
+        <p>
+          This Legal Notice provides key information about the ownership, hosting,
+          and legal responsibilities related to the <strong>Team Galaxy</strong> website
+          and associated online services.
+        </p>
+
+        <h2>1. Website Owner</h2>
+        <p>
+          <strong>Brand / Trade Name:</strong> Team Galaxy<br>
+          <strong>Website:</strong> <span>teamgalaxy.net</span> (and any related sub-pages or subdomains)<br>
+        </p>
+        <p>
+          <strong>Legal Owner / Responsible Person:</strong><br>
+          [Your full legal name or registered business name]<br>
+          [Optional: Registered Business Name, if different]<br>
+          [City, State, Country]<br>
+        </p>
+        <p>
+          <strong>Contact Email:</strong>
+          <a href="mailto:info@teamgalaxy.net" style="color: var(--starlight-turquoise); text-decoration: none;">
+            info@teamgalaxy.net
+          </a>
+        </p>
+
+        <div class="highlight-box">
+          <strong>Note:</strong>
+          <p>
+            For privacy and security reasons, we do not publicly list full personal address details here.
+            Where required by applicable law or competent authorities, additional information can be
+            provided through appropriate and lawful channels.
+          </p>
+        </div>
+
+        <h2>2. Hosting & Technical Infrastructure</h2>
+        <p>
+          The Team Galaxy website and related services rely on a combination of hosting and technical
+          providers to operate reliably and securely:
+        </p>
+        <ul>
+          <li>
+            <strong>GitHub Pages</strong> – Static site hosting and delivery of the main website content.
+          </li>
+          <li>
+            <strong>Firebase (Google)</strong> – Backend infrastructure and certain application services
+            (such as databases, authentication, or APIs where used).
+          </li>
+          <li>
+            <strong>Supabase</strong> – Additional backend and database services for specific features.
+          </li>
+          <li>
+            <strong>Dropbox</strong> – Content delivery and asset storage (for example, image or file hosting).
+          </li>
+        </ul>
+        <p>
+          These technical providers operate their own infrastructure and have their own terms and
+          privacy policies which apply in addition to Team Galaxy’s policies.
+        </p>
+
+        <h2>3. Intellectual Property</h2>
+        <p>
+          Unless otherwise indicated, all content available on this website and associated services,
+          including but not limited to:
+        </p>
+        <ul>
+          <li>Logos, branding, and visual identity elements;</li>
+          <li>Custom graphics, layouts, and UI elements;</li>
+          <li>Text, copy, and other written materials;</li>
+          <li>Animations, visual effects, and design concepts;</li>
+          <li>Code and configuration specifically developed for Team Galaxy;</li>
+        </ul>
+        <p>
+          are the intellectual property of Team Galaxy or its respective creators and are protected by
+          applicable copyright and related laws.
+        </p>
+        <p>
+          Any reproduction, modification, distribution, or reuse of this content without prior written
+          authorization is prohibited, except where limited exceptions are granted under applicable law
+          (such as fair use or similar concepts).
+        </p>
+
+        <h2>4. Third-Party Content & Trademarks</h2>
+        <p>
+          References to third-party games, platforms, brands, or trademarks on this website or within
+          the Services (for example, game titles, publisher names, platform names) are used only to
+          describe the context of Team Galaxy’s activities (such as community involvement) and do
+          not imply any official partnership, sponsorship, or endorsement, unless explicitly stated.
+        </p>
+        <p>
+          All third-party trademarks, logos, and brand names are the property of their respective owners.
+        </p>
+
+        <h2>5. External Links</h2>
+        <p>
+          Our website may contain links to external websites or services that are not operated or
+          controlled by Team Galaxy. These links are provided for convenience and informational
+          purposes only.
+        </p>
+        <p>
+          We do not monitor, review, or control the content or policies of such third-party websites,
+          and we are not responsible for:
+        </p>
+        <ul>
+          <li>The availability, accuracy, or reliability of external sites;</li>
+          <li>Any content, products, or services offered on those sites;</li>
+          <li>Any damages or issues arising from your use of external sites.</li>
+        </ul>
+        <p>
+          You are encouraged to review the terms and privacy policies of any third-party sites you visit.
+        </p>
+
+        <h2>6. Liability Disclaimer</h2>
+        <p>
+          While we aim to keep the website and Services available, accurate, and up to date, they are
+          provided on an “as is” and “as available” basis.
+        </p>
+        <p>
+          To the maximum extent permitted by applicable law, Team Galaxy does not accept liability for:
+        </p>
+        <ul>
+          <li>Temporary interruptions or unavailability of the website or Services;</li>
+          <li>Errors, omissions, or outdated information in the content provided;</li>
+          <li>Any indirect, incidental, or consequential damages arising from the use of the website;</li>
+          <li>Any misuse of the website or Services by users or third parties.</li>
+        </ul>
+        <p>
+          Nothing in this Legal Notice is intended to exclude or limit any rights or remedies that
+          cannot be excluded or limited under applicable law.
+        </p>
+
+        <h2>7. Data Protection & Privacy</h2>
+        <p>
+          Information about how we collect, use, and protect personal data is described in our separate
+          <a href="privacy_policy.html" style="color: var(--starlight-turquoise); text-decoration: none;">
+            Privacy &amp; Cookie Policy
+          </a>.
+        </p>
+        <p>
+          That document explains, among other things:
+        </p>
+        <ul>
+          <li>What types of data we collect;</li>
+          <li>How we use cookies and similar technologies (with a consent banner in place);</li>
+          <li>How we work with third-party providers such as GitHub, Firebase, Supabase, and Dropbox;</li>
+          <li>What rights users may have in relation to their personal data.</li>
+        </ul>
+        <p>
+          This Legal Notice does not repeat those details, and in case of any doubt, the
+          Privacy &amp; Cookie Policy should be consulted.
+        </p>
+
+        <h2>8. Governing Law</h2>
+        <p>
+          Unless otherwise required by mandatory local law, this Legal Notice and any non-contractual
+          obligations arising out of or in connection with it are governed by the laws of
+          <strong>India</strong>, without regard to conflict of law rules.
+        </p>
+        <p>
+          This section does not remove or limit any legal protections that may mandatorily apply
+          in your own country as a matter of consumer or data protection law.
+        </p>
+
+        <h2>9. Updates to This Legal Notice</h2>
+        <p>
+          We may update this Legal Notice from time to time (for example, to reflect changes in
+          hosting providers, ownership details, or legal requirements). When changes are made, the
+          “Last Updated” date at the top of this page will be revised.
+        </p>
+        <p>
+          Your continued use of the website after such updates means that you have taken note of the
+          updated Legal Notice.
+        </p>
+
+        <h2>10. Contact</h2>
+        <p>
+          For any questions about this Legal Notice or to reach the website owner, you can contact:
+        </p>
+        <ul>
+          <li>
+            <strong>Email:</strong>
+            <a href="mailto:info@teamgalaxy.net" style="color: var(--starlight-turquoise); text-decoration: none;">
+              info@teamgalaxy.net
+            </a>
+          </li>
+        </ul>
+      </div>
+    </main>
+
+    <footer>
+      <p>Team Galaxy © 2025 • Building communities across the cosmos</p>
+      <div class="footer-links">
+        <a href="privacy_policy.html"><i class="fas fa-shield-alt"></i> Privacy Policy</a>
+        <a href="terms_and_conditions.html"><i class="fas fa-file-contract"></i> Terms of Use</a>
+        <a href="../dashboard.html"><i class="fas fa-home"></i> Return to Homepage</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Create realistic star background
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      const starCount = 200;
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        const size = Math.random() * 1.5 + 0.5;
+        const opacity = Math.random() * 0.7 + 0.3;
+        const duration = Math.random() * 6 + 2;
+        star.style.left = `${x}%`;
+        star.style.top = `${y}%`;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        star.style.setProperty('--opacity', opacity);
+        star.style.setProperty('--duration', `${duration}s`);
+        star.style.animationDelay = `${Math.random() * 5}s`;
+        starsContainer.appendChild(star);
+      }
+    }
+
+    window.addEventListener('load', createStars);
+
+    // Subtle parallax effect for stars
+    document.addEventListener('mousemove', (e) => {
+      const stars = document.querySelectorAll('.star');
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+      stars.forEach((star, index) => {
+        const speed = (index % 10) * 0.01;
+        const moveX = x * speed * 10;
+        const moveY = y * speed * 10;
+        star.style.transform = `translate(${moveX}px, ${moveY}px)`;
+      });
+    });
+  </script>
+</body>
+</html>
