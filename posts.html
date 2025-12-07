@@ -1140,7 +1140,7 @@ function profileNavHandler(e) {
   dropdownMenu.classList.remove('show');
   dropdownMenu.setAttribute('aria-hidden','true');
   // direct navigation per user's requested path
-  window.location.href = '/teamgalaxy/user_management/user_profile.html';
+  window.location.href = '/user_management/user_profile.html';
 }
 
 // SETTINGS was removed from DOM; ensure no event attached
@@ -1444,7 +1444,7 @@ submitComment.addEventListener('click', async () => {
 /* ---------- CREATE POST BTN ---------- */
 createPostBtn.addEventListener('click', () => {
   if (!currentUser) { alert('Sign in to create a post'); return; }
-  window.location.href = '/teamgalaxy/tools/create_post.html';
+  window.location.href = '/tools/create_post.html';
 });
 
 /* ---------- INITIAL ROUTING / LAUNCH ---------- */
