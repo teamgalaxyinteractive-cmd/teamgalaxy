@@ -700,12 +700,20 @@
     </div>
   </footer>
 
-  <!-- ReCAPTCHA (kept as-is) -->
-  <script src="https://www.google.com/recaptcha/api.js?render=6LfJDgcsAAAAABRkg1BC_ni3R8dFSCAXimVRAYOD"></script>
+<!-- ReCAPTCHA (kept as-is) -->
+<script src="https://www.google.com/recaptcha/api.js?render=6LfJDgcsAAAAABRkg1BC_ni3R8dFSCAXimVRAYOD"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+  import { 
+    getAuth, 
+    onAuthStateChanged, 
+    signInWithPopup, 
+    GoogleAuthProvider, 
+    signOut,
+    setPersistence,
+    browserLocalPersistence
+  } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
   import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app-check.js";
   import { getFirestore, doc, setDoc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
@@ -729,6 +737,16 @@
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
   const db = getFirestore(app);
+
+  // ✅ Force LOCAL persistence so login survive reload / nav
+  (async () => {
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+      console.log('Auth persistence set to LOCAL (modular)');
+    } catch (e) {
+      console.warn('Failed to set auth persistence:', e);
+    }
+  })();
 
   /* -------------------------
      Inject CSS fixes (keep existing look + ensure left HUD static + button style)
@@ -797,14 +815,6 @@
   const playCard = document.getElementById('playCard');
   const earthEl = document.getElementById('earthEl');
 
-  // RIGHT HUD elements (these are already present in your HTML):
-  // <div class="hud-small" id="hud">  
-  //   <div>  
-  //     <div class="label" id="hudName">Guest</div>  
-  //     <div class="muted" id="hudSlug">@guest</div>  
-  //   </div>  
-  //   ...
-  // Ensure we get those nodes:
   const hudNameRight = document.getElementById('hudName');   // top-right name label
   const hudSlugRight = document.getElementById('hudSlug');   // top-right slug label
   const hudCollected = document.getElementById('hudCollected');
@@ -891,7 +901,6 @@
      Do NOT change the static left HUD.
      ------------------------- */
   function updateHUD(){
-    // right HUD: name + slug
     try {
       if (currentUser || currentProfile) {
         const displayName = currentProfile?.name || currentUser?.displayName || 'Guest';
@@ -905,11 +914,10 @@
       }
     } catch(e){ console.warn('updateHUD right failure', e); }
 
-    // numeric HUD bits
     if (hudCollected) hudCollected.textContent = collected;
     if (hudHigh) hudHigh.textContent = 'High: ' + high;
 
-    updateProfileButton(); // still updates profile button (photo etc.)
+    updateProfileButton();
   }
 
   /* -------------------------
@@ -1222,7 +1230,6 @@
      Download & Save (includes photoUrl)
      ------------------------- */
   function downloadScoreImage(){
-    // same implementation as before (kept)
     const w = 1400, h = 760;
     const c = document.createElement('canvas'); c.width = w; c.height = h;
     const g = c.getContext('2d');
@@ -1231,7 +1238,7 @@
     for(let i=0;i<200;i++){ g.fillStyle = 'rgba(200,230,255,' + (0.02 + Math.random()*0.07) + ')'; const x=Math.random()*w,y=Math.random()*h,s= Math.random()*2.4; g.beginPath(); g.ellipse(x,y,s,s,0,0,Math.PI*2); g.fill(); }
     g.fillStyle = 'rgba(8,14,22,0.62)'; roundRect(g, 64, 84, w-128, h-188, 20); g.fill();
     const cx = 150, cy = 300, cr = 120;
-    const pg = g.createRadialGradient(cx-30, cy-30, 10, cx, cy, cr); pg.addColorStop(0, '#9ee6ff'); pg.addColorStop(0.5, '#6abcf1'); pg.addColorStop(1, '#1b3d66'); g.fillStyle = pg; g.beginPath(); g.arc(cx, cy, cr, 0, Math.PI*2); g.fill();
+    const pg = g.createRadialGradient(cx-30, cy-30, 10, cx, cy, cr); pg.addColorStop(0, '#9ee6ff'); pg.addColorStop(0.5, '#6abcf1'); pg.addColorStop(1, '#1b3d66'); g.beginPath(); g.arc(cx, cy, cr, 0, Math.PI*2); g.fill();
     g.strokeStyle = 'rgba(255,255,255,0.08)'; g.lineWidth = 8; g.beginPath(); g.ellipse(cx, cy+8, cr+28, cr-18, -0.35, 0, Math.PI*2); g.stroke();
     g.font = '92px serif'; g.textAlign = 'center'; g.textBaseline='middle'; g.fillText('🌎', cx, cy);
     g.font = '700 44px Poppins, Arial'; g.fillStyle = '#fff'; g.fillText('Team Galaxy — Orbit Score Card', 380, 140);
@@ -1275,13 +1282,16 @@
 
   function updateProfileButton(){
     try {
-      const u = currentUser;
       if (!profileBtn) return;
+      const u = currentUser;
       if (u) {
         if (u.photoURL) { profileBtn.innerHTML = `<img src="${u.photoURL}" alt="Profile" style="width:36px;height:36px;border-radius:50%;">`; }
         else { profileBtn.innerHTML = `<i class="fa-solid fa-user"></i>`; }
         profileBtn.title = currentProfile?.name || u.displayName || u.email || "Profile";
-      } else { profileBtn.innerHTML = 'Sign In'; profileBtn.title = 'Sign In'; }
+      } else {
+        profileBtn.innerHTML = 'Sign In';
+        profileBtn.title = 'Sign In';
+      }
     } catch(e){ console.warn('updateProfileBtn err', e); }
   }
 
@@ -1291,11 +1301,10 @@
     if (user) {
       try {
         const privRef = doc(db, 'usersPrivate', user.uid);
-        // subscribe: keep slug & name live
         userPrivUnsub = onSnapshot(privRef, (snap) => {
           if (snap.exists()) currentProfile = snap.data();
           else currentProfile = { name: user.displayName || null, slug: null, profilePhotoUrl: null };
-          updateHUD(); // <-- updates RIGHT HUD only
+          updateHUD();
         }, (err) => {
           console.warn('usersPrivate snapshot error', err);
           currentProfile = { name: user.displayName || null, slug: null, profilePhotoUrl: null };
@@ -1312,16 +1321,45 @@
     }
   });
 
-  profileBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const liveUser = auth.currentUser;
-    if (!liveUser) { window.location.href = "/legal/sign_up.html"; return; }
-    if (!profileMenu) return;
-    profileMenu.style.display = profileMenu.style.display === 'block' ? 'none' : 'block';
-  });
+  // Profile dropdown behaviour (auth-safe)
+  if (profileBtn && !profileBtn._attached) {
+    profileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault && e.preventDefault();
+      const liveUser = currentUser || auth.currentUser;
+      if (!liveUser) {
+        window.location.href = "/legal/sign_up.html";
+        return;
+      }
+      if (!profileMenu) return;
+      profileMenu.style.display = profileMenu.style.display === 'block' ? 'none' : 'block';
+    });
+    profileBtn._attached = true;
+  }
+
   window.addEventListener('click', ()=> { if(profileMenu) profileMenu.style.display = 'none'; });
-  logoutLink.addEventListener('click', (e)=> { e.preventDefault(); signOut(auth).then(()=>{ alert('Signed out'); }).catch(()=>{}); });
-  profileLink.addEventListener('click', (e)=> { e.preventDefault(); if(!auth.currentUser) window.location.href = "/legal/sign_up.html"; else window.location.href = "/user_management/user_profile.html"; });
+
+  if (logoutLink && !logoutLink._attached) {
+    logoutLink.addEventListener('click', (e)=> {
+      e.preventDefault();
+      const liveUser = currentUser || auth.currentUser;
+      if (!liveUser) return;
+      signOut(auth)
+        .then(()=>{ alert('Signed out'); })
+        .catch(()=>{});
+    });
+    logoutLink._attached = true;
+  }
+
+  if (profileLink && !profileLink._attached) {
+    profileLink.addEventListener('click', (e)=> {
+      e.preventDefault();
+      const liveUser = currentUser || auth.currentUser;
+      if(!liveUser) window.location.href = "/legal/sign_up.html";
+      else window.location.href = "/user_management/user_profile.html";
+    });
+    profileLink._attached = true;
+  }
 
   earthEl.addEventListener('dblclick', async () => {
     if (currentUser){ alert('Signed in as ' + (currentUser.displayName || currentUser.email)); return; }
@@ -1353,7 +1391,10 @@
   }
   window.addEventListener('load', init);
 
-  window.addEventListener('beforeunload', ()=> { localStorage.setItem('galaxy_high', high); if (userPrivUnsub) try{ userPrivUnsub(); } catch(_){} });
+  window.addEventListener('beforeunload', ()=> { 
+    localStorage.setItem('galaxy_high', high); 
+    if (userPrivUnsub) try{ userPrivUnsub(); } catch(_){} 
+  });
 
   // polyfill roundRect
   if (!CanvasRenderingContext2D.prototype.roundRect) {
@@ -1363,7 +1404,8 @@
     };
   }
 </script>
-<!-- Updated: Desktop-only overlay (improved detection for "Request Desktop Site") -->
+
+<!-- Updated: Desktop-only overlay (unchanged) -->
 <script>
 (function () {
   const DESKTOP_MIN_WIDTH = 1024; // adjust if you prefer a different breakpoint (px)
@@ -1385,13 +1427,11 @@
     @media print { .dg-desktop-overlay { display:none !important; } }
     @media (prefers-reduced-motion: reduce) { .dg-desktop-overlay, .dg-desktop-card { transition: none; } }
   `;
-  // inject styles
   const style = document.createElement('style');
   style.id = 'dg-desktop-overlay-styles';
   style.appendChild(document.createTextNode(css));
   document.head.appendChild(style);
 
-  // create overlay
   const overlay = document.createElement('div');
   overlay.className = 'dg-desktop-overlay';
   overlay.setAttribute('role', 'dialog');
@@ -1433,7 +1473,6 @@
   `;
   document.body.appendChild(overlay);
 
-  // mobile-detection regex (covers most phones/tablets)
   const MOBILE_RE = /Mobi|Android|iPhone|iPad|Windows Phone|BlackBerry|BB10|Opera Mini|Mobile/i;
 
   function isUserAgentMobile() {
@@ -1445,7 +1484,6 @@
   }
 
   function isLikelyDesktopByUA() {
-    // If UA no longer looks like a mobile UA, assume user requested desktop site
     return !isUserAgentMobile();
   }
 
@@ -1454,16 +1492,13 @@
     return w >= DESKTOP_MIN_WIDTH;
   }
 
-  // Final decision: show overlay only when NOT considered desktop
   function shouldShowOverlay() {
-    // If either width or UA indicates desktop, treat as desktop (no overlay).
     return !(isLikelyDesktopByWidth() || isLikelyDesktopByUA());
   }
 
   function applyOverlayState(show) {
     if (show) {
       overlay.classList.add('show');
-      // block page scroll while overlay visible
       document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
       try { overlay.querySelector('.dg-desktop-card').focus(); } catch (e) {}
@@ -1478,10 +1513,8 @@
     applyOverlayState(shouldShowOverlay());
   }
 
-  // Init
   setTimeout(updateOverlay, 60);
 
-  // Listen for changes
   let resizeTimer = null;
   function schedule() {
     if (resizeTimer) clearTimeout(resizeTimer);
@@ -1493,13 +1526,9 @@
     window.visualViewport.addEventListener('resize', schedule, { passive: true });
     window.visualViewport.addEventListener('scroll', schedule, { passive: true });
   }
-
-  // Also re-check on visibilitychange (sometimes UA/flags apply on refresh/navigation)
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') updateOverlay();
   });
-
-  // Pagehide cleanup
   window.addEventListener('pagehide', function () {
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
