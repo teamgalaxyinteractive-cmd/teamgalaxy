@@ -1201,440 +1201,477 @@
     </div>
   </footer>
 
-  <!-- reCaptcha -->
-  <script src="https://www.google.com/recaptcha/api.js?render=6LfJDgcsAAAAABRkg1BC_ni3R8dFSCAXimVRAYOD"></script>
+ <!-- reCaptcha -->
+<script src="https://www.google.com/recaptcha/api.js?render=6LfJDgcsAAAAABRkg1BC_ni3R8dFSCAXimVRAYOD"></script>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-    import { getFirestore, collection, query, orderBy, limit, getDocs, updateDoc, increment, serverTimestamp, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
-    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app-check.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+  import { 
+    getAuth, 
+    onAuthStateChanged, 
+    signInWithPopup, 
+    GoogleAuthProvider, 
+    signOut, 
+    setPersistence, 
+    browserLocalPersistence 
+  } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+  import { 
+    getFirestore, 
+    collection, 
+    query, 
+    orderBy, 
+    limit, 
+    getDocs, 
+    updateDoc, 
+    increment, 
+    serverTimestamp, 
+    doc, 
+    getDoc, 
+    setDoc 
+  } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+  import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app-check.js";
 
-    // ===== Firebase config (unchanged) =====
-    const firebaseConfig = {
-      apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
-      authDomain: "teamgalaxy-77344.firebaseapp.com",
-      projectId: "teamgalaxy-77344",
-      storageBucket: "teamgalaxy-77344.firebasestorage.app",
-      messagingSenderId: "770256225320",
-      appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
-      measurementId: "G-6C2W9NSNCH"
-    };
+  // ===== Firebase config (unchanged) =====
+  const firebaseConfig = {
+    apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+    authDomain: "teamgalaxy-77344.firebaseapp.com",
+    projectId: "teamgalaxy-77344",
+    storageBucket: "teamgalaxy-77344.firebasestorage.app",
+    messagingSenderId: "770256225320",
+    appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+    measurementId: "G-6C2W9NSNCH"
+  };
 
-    // ===== Initialize Firebase =====
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  // ===== Initialize Firebase =====
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    // ===== Activate App Check =====
-    try {
-      const appCheckProvider = new ReCaptchaV3Provider("6LfJDgcsAAAAABRkg1BC_ni3R8dFSCAXimVRAYOD");
-      initializeAppCheck(app, {
-        provider: appCheckProvider,
-        isTokenAutoRefreshEnabled: true
-      });
-      console.log("App Check activated");
-    } catch (e) {
-      console.warn("App Check activation failed:", e);
-    }
-
-    // ===== Ensure auth persistence is LOCAL so sessions survive reloads =====
-    try {
-      setPersistence(auth, browserLocalPersistence)
-        .then(() => console.log("Auth persistence set to LOCAL"))
-        .catch(err => console.warn("Failed to set auth persistence:", err));
-    } catch (err) {
-      console.warn("Could not set persistence:", err);
-    }
-
-    // ===== DOM refs (guarded) =====
-    const profileBtn = document.getElementById("profileBtn");
-    const profileMenu = document.getElementById("profileMenu");
-    const logoutLink = document.getElementById("logoutLink");
-    const profileLink = document.getElementById("profileLink");
-    const cardsContainer = document.getElementById("cardsContainer");
-    const loadingOverlay = document.getElementById("loadingOverlay");
-    const starsContainer = document.getElementById("starsContainer");
-
-    // ===== Create Sharp Professional Stars =====
-    function createSharpStars() {
-      const starCount = 350; // Increased for better coverage
-
-      for (let i = 0; i < starCount; i++) {
-        const star = document.createElement('div');
-        const size = Math.random();
-
-        if (size < 0.7) {
-          star.className = 'star small';
-        } else if (size < 0.9) {
-          star.className = 'star medium';
-        } else {
-          star.className = 'star large';
-        }
-
-        star.style.left = `${Math.random() * 100}%`;
-        star.style.top = `${Math.random() * 100}%`;
-
-        starsContainer.appendChild(star);
-      }
-    }
-
-    // Initialize stars when page loads
-    createSharpStars();
-
-    // ===== collaborator boxes (unchanged) =====
-    document.querySelectorAll('.collaborator-logo-box').forEach(box => {
-      box.addEventListener('click', () => {
-        const url = box.getAttribute('data-url');
-        if (url) window.open(url, '_blank');
-      });
+  // ===== Activate App Check =====
+  try {
+    const appCheckProvider = new ReCaptchaV3Provider("6LfJDgcsAAAAABRkg1BC_ni3R8dFSCAXimVRAYOD");
+    initializeAppCheck(app, {
+      provider: appCheckProvider,
+      isTokenAutoRefreshEnabled: true
     });
+    console.log("App Check activated");
+  } catch (e) {
+    console.warn("App Check activation failed:", e);
+  }
 
-    // ===== Single click handler that checks live auth state =====
-    function handleProfileBtnClick(e) {
-      e && e.stopPropagation();
-      try {
-        const liveUser = auth.currentUser;
-        // Redirect path updated per your request
-        if (!liveUser) {
-          console.log("Profile clicked while not signed in — redirecting to /legal/sign_up.html");
-          window.location.href = "/legal/sign_up.html";
-          return;
-        }
-        // Signed in -> toggle menu
-        if (!profileMenu) return;
-        profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
-      } catch (err) {
-        console.error("Error in profile button click handler:", err);
+  // ===== Ensure auth persistence is LOCAL so sessions survive reloads =====
+  // Proper async IIFE so future sign-ins use LOCAL persistence for sure
+  (async () => {
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+      console.log("Auth persistence set to LOCAL");
+    } catch (err) {
+      console.warn("Failed to set auth persistence:", err);
+    }
+  })();
+
+  // ===== DOM refs (guarded) =====
+  const profileBtn = document.getElementById("profileBtn");
+  const profileMenu = document.getElementById("profileMenu");
+  const logoutLink = document.getElementById("logoutLink");
+  const profileLink = document.getElementById("profileLink");
+  const cardsContainer = document.getElementById("cardsContainer");
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  const starsContainer = document.getElementById("starsContainer");
+
+  // ===== Create Sharp Professional Stars =====
+  function createSharpStars() {
+    if (!starsContainer) return;
+    const starCount = 350; // Increased for better coverage
+
+    for (let i = 0; i < starCount; i++) {
+      const star = document.createElement('div');
+      const size = Math.random();
+
+      if (size < 0.7) {
+        star.className = 'star small';
+      } else if (size < 0.9) {
+        star.className = 'star medium';
+      } else {
+        star.className = 'star large';
       }
-    }
 
-    // Attach once defensively
-    if (profileBtn && !profileBtn._attached) {
-      profileBtn.addEventListener("click", handleProfileBtnClick);
-      profileBtn._attached = true;
-    }
+      star.style.left = `${Math.random() * 100}%`;
+      star.style.top = `${Math.random() * 100}%`;
 
-    // Close profile menu if clicking outside (but don't auto-signout)
-    window.addEventListener("click", () => {
+      starsContainer.appendChild(star);
+    }
+  }
+
+  // Initialize stars when page loads
+  createSharpStars();
+
+  // ===== collaborator boxes (unchanged) =====
+  document.querySelectorAll('.collaborator-logo-box').forEach(box => {
+    box.addEventListener('click', () => {
+      const url = box.getAttribute('data-url');
+      if (url) window.open(url, '_blank');
+    });
+  });
+
+  // ===== Single click handler that checks live auth state =====
+  function handleProfileBtnClick(e) {
+    e && e.stopPropagation();
+    try {
+      const liveUser = auth.currentUser;
+      // Redirect path updated per your request
+      if (!liveUser) {
+        console.log("Profile clicked while not signed in — redirecting to /legal/sign_up.html");
+        window.location.href = "/legal/sign_up.html";
+        return;
+      }
+      // Signed in -> toggle menu
+      if (!profileMenu) return;
+      profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
+    } catch (err) {
+      console.error("Error in profile button click handler:", err);
+    }
+  }
+
+  // Attach once defensively
+  if (profileBtn && !profileBtn._attached) {
+    profileBtn.addEventListener("click", handleProfileBtnClick);
+    profileBtn._attached = true;
+  }
+
+  // Close profile menu if clicking outside (but don't auto-signout)
+  window.addEventListener("click", () => {
+    if (profileMenu) profileMenu.style.display = "none";
+  });
+
+  // ===== Sign in / Sign out functions =====
+  async function signIn() {
+    const provider = new GoogleAuthProvider();
+    try {
+      await signInWithPopup(auth, provider);
+      console.log("Sign-in succeeded");
+    } catch (error) {
+      console.error("Sign-in failed:", error);
+      alert("Sign-in failed: " + (error && error.message ? error.message : error));
+    }
+  }
+
+  async function signOutUser() {
+    try {
+      await signOut(auth);
+      console.log("User signed out");
+      if (profileMenu) profileMenu.style.display = "none";
+    } catch (error) {
+      console.error("Sign-out failed:", error);
+      alert("Sign-out failed: " + (error && error.message ? error.message : error));
+    }
+  }
+
+  // Optionally expose signIn globally if needed somewhere else
+  window.teamGalaxySignIn = signIn;
+
+  // Wire logout link safely (only once)
+  if (logoutLink && !logoutLink._attached) {
+    logoutLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      signOutUser();
+    });
+    logoutLink._attached = true;
+  }
+
+  // Wire profileLink safely (only once)
+  if (profileLink && !profileLink._attached) {
+    profileLink.addEventListener("click", (e) => {
+      e.preventDefault(); 
+      e.stopPropagation();
+      if (!auth.currentUser) {
+        window.location.href = "/legal/sign_up.html";
+        return;
+      }
+      window.location.href = "/user_management/user_profile.html"; 
       if (profileMenu) profileMenu.style.display = "none";
     });
+    profileLink._attached = true;
+  }
 
-    // ===== Sign in / Sign out functions =====
-    async function signIn() {
-      const provider = new GoogleAuthProvider();
-      try {
-        await signInWithPopup(auth, provider);
-        console.log("Sign-in succeeded");
-      } catch (error) {
-        console.error("Sign-in failed:", error);
-        alert("Sign-in failed: " + (error && error.message ? error.message : error));
-      }
-    }
+  // ===== Keep a single onAuthStateChanged listener (prevent duplicates) =====
+  let currentUser = null;
+  if (!auth._ourOnAuthAttached) {
+    onAuthStateChanged(auth, (user) => {
+      console.log("onAuthStateChanged fired. user:", !!user);
+      currentUser = user; // keep compatibility with other code using `currentUser`
+      updateProfileButton();
+      // load cards when auth state changes (safe)
+      if (typeof loadCards === "function") loadCards();
+    });
+    auth._ourOnAuthAttached = true;
+  } else {
+    console.log("Auth listener already attached - skipping re-attach");
+  }
 
-    async function signOutUser() {
-      try {
-        await signOut(auth);
-        console.log("User signed out");
-        if (profileMenu) profileMenu.style.display = "none";
-      } catch (error) {
-        console.error("Sign-out failed:", error);
-        alert("Sign-out failed: " + (error && error.message ? error.message : error));
-      }
-    }
+  // ===== Update the profile button UI (no event re-binding here) =====
+  function updateProfileButton() {
+    if (!profileBtn) return;
 
-    // Wire logout link safely (only once)
-    if (logoutLink && !logoutLink._attached) {
-      logoutLink.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        signOutUser();
-      });
-      logoutLink._attached = true;
-    }
-
-    // Wire profileLink safely (only once)
-    if (profileLink && !profileLink._attached) {
-      profileLink.addEventListener("click", (e) => {
-        e.preventDefault(); // 
-        e.stopPropagation();
-        if (!auth.currentUser) {
-          window.location.href = "/legal/sign_up.html";
-          return;
-        }
-        window.location.href = "/user_management/user_profile.html"; 
-        if (profileMenu) profileMenu.style.display = "none";
-      });
-      profileLink._attached = true;
-    }
-
-    // ===== Keep a single onAuthStateChanged listener (prevent duplicates) =====
-    if (!auth._ourOnAuthAttached) {
-      onAuthStateChanged(auth, (user) => {
-        console.log("onAuthStateChanged fired. user:", !!user);
-        currentUser = user; // keep compatibility with other code using `currentUser`
-        updateProfileButton();
-        // load cards when auth state changes (safe)
-        if (typeof loadCards === "function") loadCards();
-      });
-      auth._ourOnAuthAttached = true;
-    } else {
-      console.log("Auth listener already attached - skipping re-attach");
-    }
-
-    // ===== Update the profile button UI (no event re-binding here) =====
-    let currentUser = null;
-    function updateProfileButton() {
-      if (!profileBtn) return;
-
-      const u = auth.currentUser;
-      if (u) {
-        currentUser = u;
-        if (u.photoURL) {
-          profileBtn.innerHTML = `<img src="${u.photoURL}" alt="Profile" style="width:36px;height:36px;border-radius:50%;">`;
-        } else {
-          profileBtn.innerHTML = `<i class="fa-solid fa-user"></i>`;
-        }
-        profileBtn.title = u.displayName || u.email || "Profile";
+    const u = auth.currentUser;
+    if (u) {
+      currentUser = u;
+      if (u.photoURL) {
+        profileBtn.innerHTML = `<img src="${u.photoURL}" alt="Profile" style="width:36px;height:36px;border-radius:50%;">`;
       } else {
-        currentUser = null;
-        profileBtn.innerHTML = "Sign In";
-        profileBtn.title = "Sign In";
+        profileBtn.innerHTML = `<i class="fa-solid fa-user"></i>`;
       }
+      profileBtn.title = u.displayName || u.email || "Profile";
+    } else {
+      currentUser = null;
+      profileBtn.innerHTML = "Sign In";
+      profileBtn.title = "Sign In";
     }
+  }
 
-    // ===== Visited cache =====
-    let visitedCards = JSON.parse(sessionStorage.getItem("visitedCards")) || [];
+  // ===== Visited cache =====
+  let visitedCards = [];
+  try {
+    visitedCards = JSON.parse(sessionStorage.getItem("visitedCards")) || [];
+  } catch (e) {
+    visitedCards = [];
+  }
 
-    // ===== Helper: check if current user has liked a card (safe) =====
-    async function userHasLiked(cardId) {
+  // ===== Helper: check if current user has liked a card (safe) =====
+  async function userHasLiked(cardId) {
+    try {
+      const user = auth.currentUser;
+      if (!user || !user.uid) return false;
+      const likeRef = doc(db, "cards", cardId, "likes", user.uid);
+      const snap = await getDoc(likeRef);
+      return snap.exists();
+    } catch (err) {
+      console.warn("userHasLiked error:", err);
+      return false;
+    }
+  }
+
+  // ===== createCard with robust like handling (keeps visual & styling intact) =====
+  function createCard(id, heading, description, views, likesInitial, imageUrl) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+
+    // click -> proper encoded path
+    card.addEventListener("click", () => {
+      window.location.href = `/card_showcase.html?id=${encodeURIComponent(id)}`;
+    });
+
+    card.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") card.click();
+    });
+
+    // Card image
+    const img = document.createElement("img");
+    img.src = imageUrl || "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=500&q=80";
+    img.alt = heading;
+    card.appendChild(img);
+
+    // Content container
+    const content = document.createElement("div");
+    content.className = "card-content";
+
+    const h3 = document.createElement("h3");
+    h3.textContent = heading || "Sample Heading";
+
+    const p = document.createElement("p");
+    // Limit description to 120 characters and add "..."
+    const limitedDescription = description && description.length > 120 
+      ? description.substring(0, 120) + "..." 
+      : description || "No description available.";
+    p.textContent = limitedDescription;
+
+    content.appendChild(h3);
+    content.appendChild(p);
+    card.appendChild(content);
+
+    // Footer container (views and likes)
+    const footer = document.createElement("div");
+    footer.className = "card-footer";
+
+    // Views
+    const viewsSpan = document.createElement("span");
+    viewsSpan.className = "views";
+    viewsSpan.innerHTML = `<i class="fa-regular fa-eye"></i> ${views}`;
+    footer.appendChild(viewsSpan);
+
+    // Likes (only for logged-in)
+    const likesSpan = document.createElement("span");
+    likesSpan.className = "likes";
+    likesSpan.style.cursor = auth.currentUser ? "pointer" : "not-allowed";
+    likesSpan.title = auth.currentUser ? "Like" : "Sign In to Like";
+    likesSpan.innerHTML = `<i class="fa-regular fa-heart"></i> ${likesInitial}`;
+
+    // Mark loading state while we check server for whether user already liked
+    likesSpan.dataset.loading = "1";
+    (async () => {
       try {
-        const user = auth.currentUser;
-        if (!user || !user.uid) return false;
-        const likeRef = doc(db, "cards", cardId, "likes", user.uid);
-        const snap = await getDoc(likeRef);
-        return snap.exists();
-      } catch (err) {
-        console.warn("userHasLiked error:", err);
-        return false;
-      }
-    }
-
-    // ===== createCard with robust like handling (keeps visual & styling intact) =====
-    function createCard(id, heading, description, views, likesInitial, imageUrl) {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.tabIndex = 0;
-      card.setAttribute("role", "button");
-
-      // click -> proper encoded path
-      card.addEventListener("click", () => {
-        window.location.href = `/card_showcase.html?id=${encodeURIComponent(id)}`;
-      });
-
-      card.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") card.click();
-      });
-
-      // Card image
-      const img = document.createElement("img");
-      img.src = imageUrl || " https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=500&q=80";
-      img.alt = heading;
-      card.appendChild(img);
-
-      // Content container
-      const content = document.createElement("div");
-      content.className = "card-content";
-
-      const h3 = document.createElement("h3");
-      h3.textContent = heading || "Sample Heading";
-
-      const p = document.createElement("p");
-      // Limit description to 120 characters and add "..."
-      const limitedDescription = description && description.length > 120 
-        ? description.substring(0, 120) + "..." 
-        : description || "No description available.";
-      p.textContent = limitedDescription;
-
-      content.appendChild(h3);
-      content.appendChild(p);
-      card.appendChild(content);
-
-      // Footer container (views and likes)
-      const footer = document.createElement("div");
-      footer.className = "card-footer";
-
-      // Views
-      const viewsSpan = document.createElement("span");
-      viewsSpan.className = "views";
-      viewsSpan.innerHTML = `<i class="fa-regular fa-eye"></i> ${views}`;
-      footer.appendChild(viewsSpan);
-
-      // Likes (only for logged-in)
-      const likesSpan = document.createElement("span");
-      likesSpan.className = "likes";
-      likesSpan.style.cursor = auth.currentUser ? "pointer" : "not-allowed";
-      likesSpan.title = auth.currentUser ? "Like" : "Sign In to Like";
-      likesSpan.innerHTML = `<i class="fa-regular fa-heart"></i> ${likesInitial}`;
-
-      // Mark loading state while we check server for whether user already liked
-      likesSpan.dataset.loading = "1";
-      (async () => {
-        try {
-          if (!auth.currentUser || !auth.currentUser.uid) {
-            // If no user yet, just clear loading; auth listener will cause reload later
-            delete likesSpan.dataset.loading;
-            return;
-          }
-          const liked = await userHasLiked(id);
-          if (liked) {
-            likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${likesInitial}`;
-            likesSpan.dataset.liked = "true";
-            likesSpan.style.cursor = "default";
-            likesSpan.title = "You liked this";
-          }
-        } catch (err) {
-          console.warn('Initial like-check failed for', id, err);
-        } finally {
-          delete likesSpan.dataset.loading;
-        }
-      })();
-
-      likesSpan.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        // if still checking initial state, ignore clicks
-        if (likesSpan.dataset.loading) return;
-
         if (!auth.currentUser || !auth.currentUser.uid) {
-          alert("Please sign in to like.");
+          // If no user yet, just clear loading; auth listener will cause reload later
+          delete likesSpan.dataset.loading;
           return;
         }
+        const liked = await userHasLiked(id);
+        if (liked) {
+          likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${likesInitial}`;
+          likesSpan.dataset.liked = "true";
+          likesSpan.style.cursor = "default";
+          likesSpan.title = "You liked this";
+        }
+      } catch (err) {
+        console.warn('Initial like-check failed for', id, err);
+      } finally {
+        delete likesSpan.dataset.loading;
+      }
+    })();
 
-        // If already liked (UI says so), reflect and stop
-        if (likesSpan.dataset.liked === "true") {
+    likesSpan.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      // if still checking initial state, ignore clicks
+      if (likesSpan.dataset.loading) return;
+
+      if (!auth.currentUser || !auth.currentUser.uid) {
+        alert("Please sign in to like.");
+        return;
+      }
+
+      // If already liked (UI says so), reflect and stop
+      if (likesSpan.dataset.liked === "true") {
+        alert("You have already liked this card.");
+        return;
+      }
+
+      // disable during operation
+      likesSpan.dataset.loading = "1";
+
+      try {
+        // re-verify server-side (avoids race / stale UI state)
+        const likeRef = doc(db, "cards", id, "likes", auth.currentUser.uid);
+        const likeSnap = await getDoc(likeRef);
+        if (likeSnap.exists()) {
+          likesSpan.dataset.liked = "true";
+          likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${likesInitial}`;
+          likesSpan.style.cursor = "default";
+          likesSpan.title = "You liked this";
           alert("You have already liked this card.");
           return;
         }
 
-        // disable during operation
-        likesSpan.dataset.loading = "1";
+        // create like doc + increment likes atomically-ish
+        await setDoc(likeRef, { likedAt: serverTimestamp() });
+        await updateDoc(doc(db, "cards", id), { likes: increment(1) });
 
-        try {
-          // re-verify server-side (avoids race / stale UI state)
-          const likeRef = doc(db, "cards", id, "likes", auth.currentUser.uid);
-          const likeSnap = await getDoc(likeRef);
-          if (likeSnap.exists()) {
-            likesSpan.dataset.liked = "true";
-            likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${likesInitial}`;
-            likesSpan.style.cursor = "default";
-            likesSpan.title = "You liked this";
-            alert("You have already liked this card.");
-            return;
-          }
+        // update UI
+        const newLikes = Number(likesInitial) + 1;
+        likesSpan.dataset.liked = "true";
+        likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${newLikes}`;
+        likesSpan.style.cursor = "default";
+        likesSpan.title = "You liked this";
+      } catch (err) {
+        console.error("Error liking card:", err);
+        alert("Error liking card: " + (err && err.message ? err.message : err));
+      } finally {
+        delete likesSpan.dataset.loading;
+      }
+    });
 
-          // create like doc + increment likes atomically-ish
-          await setDoc(likeRef, { likedAt: serverTimestamp() });
-          await updateDoc(doc(db, "cards", id), { likes: increment(1) });
+    footer.appendChild(likesSpan);
+    card.appendChild(footer);
 
-          // update UI
-          const newLikes = Number(likesInitial) + 1;
-          likesSpan.dataset.liked = "true";
-          likesSpan.innerHTML = `<i class="fa-solid fa-heart" style="color: #ff5b5b;"></i> ${newLikes}`;
-          likesSpan.style.cursor = "default";
-          likesSpan.title = "You liked this";
-        } catch (err) {
-          console.error("Error liking card:", err);
-          alert("Error liking card: " + (err && err.message ? err.message : err));
-        } finally {
-          delete likesSpan.dataset.loading;
-        }
-      });
+    return card;
+  } // end createCard
 
-      footer.appendChild(likesSpan);
-      card.appendChild(footer);
+  // ===== loadCards (modified to validate likes on render and show only latest 3) =====
+  async function loadCards() {
+    if (!cardsContainer) return;
 
-      return card;
-    } // end createCard
+    try {
+      const q = query(
+        collection(db, "cards"),
+        orderBy("publishedAt", "desc"),
+        limit(3) // <-- show only latest 3 cards
+      );
+      const snapshot = await getDocs(q);
 
-    // ===== loadCards (modified to validate likes on render and show only latest 3) =====
-    async function loadCards() {
-      if (!cardsContainer) return;
+      cardsContainer.innerHTML = "";
 
-      try {
-        const q = query(
-          collection(db, "cards"),
-          orderBy("publishedAt", "desc"),
-          limit(3) // <-- show only latest 3 cards
-        );
-        const snapshot = await getDocs(q);
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        const id = docSnap.id;
 
-        cardsContainer.innerHTML = "";
-
-        for (const docSnap of snapshot.docs) {
-          const data = docSnap.data();
-          const id = docSnap.id;
-
-          // Increment views once per session
-          if (!visitedCards.includes(id)) {
-            updateDoc(doc(db, "cards", id), {
-              views: increment(1),
-            }).catch(err => console.warn('views increment failed', err));
-            visitedCards.push(id);
+        // Increment views once per session
+        if (!visitedCards.includes(id)) {
+          updateDoc(doc(db, "cards", id), {
+            views: increment(1),
+          }).catch(err => console.warn('views increment failed', err));
+          visitedCards.push(id);
+          try {
             sessionStorage.setItem("visitedCards", JSON.stringify(visitedCards));
+          } catch (e) {
+            // ignore storage errors
           }
-
-          const card = createCard(
-            id,
-            data.heading,
-            data.description,
-            data.views || 0,
-            data.likes || 0,
-            data.imageUrl || ""
-          );
-          cardsContainer.appendChild(card);
         }
 
-        // Add a small delay to let users enjoy the animation then remove overlay
-        setTimeout(() => {
-          if (loadingOverlay) {
-            loadingOverlay.style.transition = 'all 0.8s ease';
-            loadingOverlay.style.opacity = '0';
-            setTimeout(() => {
-              loadingOverlay.style.display = 'none';
-            }, 800);
-          }
-        }, 900);
-      } catch (error) {
-        console.error("Error loading cards:", error);
-        cardsContainer.innerHTML = "<p>Error loading content. Please try again later.</p>";
-        // Still remove overlay even if there's an error
+        const card = createCard(
+          id,
+          data.heading,
+          data.description,
+          data.views || 0,
+          data.likes || 0,
+          data.imageUrl || ""
+        );
+        cardsContainer.appendChild(card);
+      }
+
+      // Add a small delay to let users enjoy the animation then remove overlay
+      setTimeout(() => {
         if (loadingOverlay) {
           loadingOverlay.style.transition = 'all 0.8s ease';
           loadingOverlay.style.opacity = '0';
-          setTimeout(() => { loadingOverlay.style.display = 'none'; }, 800);
+          setTimeout(() => {
+            loadingOverlay.style.display = 'none';
+          }, 800);
         }
+      }, 900);
+    } catch (error) {
+      console.error("Error loading cards:", error);
+      if (cardsContainer) {
+        cardsContainer.innerHTML = "<p>Error loading content. Please try again later.</p>";
+      }
+      // Still remove overlay even if there's an error
+      if (loadingOverlay) {
+        loadingOverlay.style.transition = 'all 0.8s ease';
+        loadingOverlay.style.opacity = '0';
+        setTimeout(() => { loadingOverlay.style.display = 'none'; }, 800);
       }
     }
+  }
 
-    // ===== Initial run: update UI and load cards once =====
-    updateProfileButton();
-    loadCards();
-    console.log("Auth + cards script loaded");
-  </script>
+  // ===== Initial run: load cards once (auth listener will also trigger safe reload) =====
+  loadCards();
+  console.log("Auth + cards script loaded");
+</script>
 
- <!-- Replace your existing script section at the end with this corrected version -->
+<!-- Navigation + Hamburger + More Dropdown Fix Script -->
 <script>
   // ===== Hamburger Menu Fix =====
   document.addEventListener('DOMContentLoaded', function() {
     const hamburger = document.querySelector('.hamburger');
     const navButtons = document.querySelector('.nav-buttons');
-    
+
     if (hamburger && navButtons) {
       hamburger.addEventListener('click', function(e) {
         e.stopPropagation();
         navButtons.classList.toggle('show');
       });
-      
+
       // Close menu when clicking outside
       document.addEventListener('click', function(e) {
         if (!navButtons.contains(e.target) && !hamburger.contains(e.target)) {
@@ -1646,7 +1683,7 @@
     // ===== More Dropdown Fix =====
     const moreBtn = document.querySelector('.more-options button');
     const moreDropdown = document.getElementById('moreDropdown');
-    
+
     if (moreBtn && moreDropdown) {
       // Click toggle for "More" button (works on both desktop and mobile)
       moreBtn.addEventListener('click', function(e) {
@@ -1655,14 +1692,14 @@
         const isCurrentlyVisible = moreDropdown.style.display === 'block';
         moreDropdown.style.display = isCurrentlyVisible ? 'none' : 'block';
       });
-      
+
       // Close dropdown when clicking outside
       document.addEventListener('click', function(e) {
         if (!moreBtn.contains(e.target) && !moreDropdown.contains(e.target)) {
           moreDropdown.style.display = 'none';
         }
       });
-      
+
       // Close dropdown on clicking any link inside it
       moreDropdown.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
@@ -1670,7 +1707,7 @@
         });
       });
     }
-    
+
     // Prevent dropdown from closing when clicking inside it
     if (moreDropdown) {
       moreDropdown.addEventListener('click', function(e) {
