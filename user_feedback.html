@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TeamGalaxy — Send Feedback</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#7c3aed;--muted:#94a3b8;--glass:rgba(255,255,255,0.03)}
+    html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+    body{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#021226 0%, #071331 100%);color:#e6eef8;padding:24px}
+    .card{width:100%;max-width:760px;background:var(--card);border-radius:12px;padding:28px;box-shadow:0 8px 30px rgba(2,6,23,0.6);}.card a{color:inherit}
+    h1{margin:0 0 6px;font-size:20px}
+    p.small{margin:0 0 18px;color:var(--muted)}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+    select,input[type=number],input[type=email],textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;outline:none}
+    textarea{min-height:120px;resize:vertical}
+    .controls{display:flex;gap:8px;align-items:center;margin-top:12px}
+    button{background:var(--accent);border:none;color:white;padding:10px 14px;border-radius:10px;cursor:pointer}
+    button[disabled]{opacity:0.5;cursor:not-allowed}
+    .meta{font-size:13px;color:var(--muted);margin-top:10px}
+    .success{background:linear-gradient(90deg,#047857,#059669);padding:10px;border-radius:8px;margin-top:10px;color:white}
+    .error{background:linear-gradient(90deg,#b91c1c,#ef4444);padding:10px;border-radius:8px;margin-top:10px;color:white}
+    .small-muted{font-size:12px;color:var(--muted)}
+    .rating-stars{display:inline-flex;gap:6px}
+    .star{cursor:pointer;font-size:20px;opacity:0.7}
+    .star.active{color:gold;opacity:1}
+    footer.note{margin-top:14px;font-size:13px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="card" role="main">
+    <h1>Send Feedback</h1>
+    <p class="small">Quick, anonymous, and helpful — tell us what's working or what's broken. No screenshots to keep storage light.</p>
+
+    <form id="feedbackForm" autocomplete="off">
+      <div class="row">
+        <div class="col">
+          <label for="category">Category</label>
+          <select id="category" required>
+            <option value="bug">Bug</option>
+            <option value="suggestion">Suggestion</option>
+            <option value="praise">Praise</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div style="width:140px" class="col">
+          <label for="rating">Rating</label>
+          <div id="rating" style="display:flex;gap:6px;align-items:center">
+            <div class="rating-stars" id="stars" aria-hidden="true"></div>
+            <input type="number" id="ratingValue" min="1" max="5" value="5" style="width:56px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit"/>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <label for="message">Message</label>
+        <textarea id="message" placeholder="Tell us what's happening (min 20 characters)" required minlength="20"></textarea>
+      </div>
+
+      <div style="margin-top:12px" class="row">
+        <div class="col">
+          <label for="email">Optional - Email (if you want a reply)</label>
+          <input type="email" id="email" placeholder="yourname@example.com" />
+        </div>
+        <div style="width:120px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start">
+          <label style="font-size:13px;color:var(--muted)">Anonymous</label>
+          <label style="display:flex;align-items:center;gap:8px;margin-top:6px;cursor:pointer">
+            <input type="checkbox" id="isAnon" checked /> <span class="small-muted">Submit anonymously</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="submitBtn" type="submit">Send Feedback</button>
+        <div class="meta" id="metaInfo">Ref: <span id="refPreview">—</span></div>
+      </div>
+
+      <div id="messageBox" aria-live="polite"></div>
+    </form>
+
+    <footer class="note">Note: We keep feedback data to improve the product. <strong>We do not collect screenshots</strong> here to save storage.</footer>
+  </div>
+
+  <script type="module">
+    // ----------------- YOUR FIREBASE CONFIG (from your message) -----------------
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+      authDomain: "teamgalaxy-77344.firebaseapp.com",
+      projectId: "teamgalaxy-77344",
+      storageBucket: "teamgalaxy-77344.firebasestorage.app",
+      messagingSenderId: "770256225320",
+      appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+      measurementId: "G-6C2W9NSNCH"
+    };
+    // --------------------------------------------------------------------------
+
+    // Firebase SDK v11.9.0 (modular)
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js';
+    import { getFirestore, collection, addDoc, serverTimestamp, updateDoc } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js';
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // Utility: clientId (persistent), use crypto.randomUUID when available
+    function getClientId() {
+      const key = 'teamgalaxy:clientId:v1';
+      let id = localStorage.getItem(key);
+      if (!id) {
+        if (crypto && typeof crypto.randomUUID === 'function') id = crypto.randomUUID();
+        else id = 'cid-' + Math.floor(Math.random()*1e9).toString(36) + '-' + Date.now().toString(36);
+        localStorage.setItem(key, id);
+      }
+      return id;
+    }
+
+    // SHA-256 digest helper (returns hex)
+    async function digestUTF8(message) {
+      const enc = new TextEncoder();
+      const data = enc.encode(message);
+      const hash = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    // Privacy-minded fingerprint: userAgent + platform + timezone + clientId
+    async function getFingerprint() {
+      try {
+        const clientId = getClientId();
+        const f = [
+          navigator.userAgent || '',
+          navigator.platform || '',
+          Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+          clientId
+        ].join('||');
+        return await digestUTF8(f);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // Friendly ref id generator from doc id
+    function shortRefFromId(id) {
+      return `FB-${(new Date()).toISOString().slice(0,10).replace(/-/g,'')}-${id.slice(0,6).toUpperCase()}`;
+    }
+
+    // Stars UI
+    const starsWrap = document.getElementById('stars');
+    const ratingValue = document.getElementById('ratingValue');
+    function renderStars(n){
+      starsWrap.innerHTML = '';
+      for(let i=1;i<=5;i++){
+        const s = document.createElement('span');
+        s.className = 'star' + (i<=n ? ' active' : '');
+        s.textContent = '★';
+        s.dataset.value = i;
+        s.addEventListener('click', ()=>{ ratingValue.value = i; renderStars(i); });
+        starsWrap.appendChild(s);
+      }
+    }
+    renderStars(parseInt(ratingValue.value,10) || 5);
+    ratingValue.addEventListener('input', ()=>{
+      let v = parseInt(ratingValue.value,10);
+      if (isNaN(v) || v<1) v=1; if (v>5) v=5; ratingValue.value = v; renderStars(v);
+    });
+
+    // Form wiring
+    const form = document.getElementById('feedbackForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const messageBox = document.getElementById('messageBox');
+    const refPreview = document.getElementById('refPreview');
+
+    let currentUser = null;
+    onAuthStateChanged(auth, (u)=>{ currentUser = u; });
+
+    function showMessage(text, type='ok'){
+      messageBox.innerHTML = '';
+      const div = document.createElement('div');
+      div.className = type === 'ok' ? 'success' : 'error';
+      div.textContent = text;
+      messageBox.appendChild(div);
+    }
+
+    let isSubmitting = false;
+
+    form.addEventListener('submit', async (ev)=>{
+      ev.preventDefault();
+      if (isSubmitting) return;
+      isSubmitting = true; submitBtn.disabled = true; messageBox.innerHTML = '';
+
+      const category = document.getElementById('category').value;
+      const rating = parseInt(document.getElementById('ratingValue').value, 10) || 5;
+      const message = document.getElementById('message').value.trim();
+      const emailInput = (document.getElementById('email').value || '').trim();
+      const email = emailInput === '' ? null : emailInput;
+      const isAnon = document.getElementById('isAnon').checked;
+
+      if (message.length < 20) { showMessage('Message is too short — please write at least 20 characters.', 'err'); isSubmitting=false; submitBtn.disabled=false; return; }
+      if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { showMessage('Invalid email address.', 'err'); isSubmitting=false; submitBtn.disabled=false; return; }
+
+      try {
+        const fingerprint = await getFingerprint();
+        const clientId = getClientId();
+
+        const payload = {
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          userId: (currentUser && !isAnon) ? currentUser.uid : null,
+          displayName: (currentUser && !isAnon) ? (currentUser.displayName || null) : null,
+          email: (isAnon ? null : email),
+          rating: rating,
+          category: category,
+          message: message,
+          status: 'open',
+          visible: true,
+          clientId: clientId,
+          fingerprint: fingerprint,
+          clientLocale: navigator.language || null
+          // intentionally NOT storing raw userAgent or IP here to minimize PII on client
+        };
+
+        const col = collection(db, 'feedback');
+        const docRef = await addDoc(col, payload);
+
+        // Generate friendly refId and write back
+        const refId = shortRefFromId(docRef.id);
+        await updateDoc(docRef, { refId, updatedAt: serverTimestamp() });
+
+        // UI success
+        refPreview.textContent = refId;
+        showMessage(`Thank you! Your feedback was submitted — reference ${refId}.`, 'ok');
+        form.reset(); renderStars(5); ratingValue.value = 5;
+
+      } catch (err) {
+        console.error('Submission failed', err);
+        showMessage('Submission failed. Please try again later.', 'err');
+      } finally {
+        isSubmitting = false; submitBtn.disabled = false;
+      }
+    });
+
+    // small initial preview ref using clientId
+    (function(){
+      const fake = getClientId().slice(0,6).toUpperCase();
+      refPreview.textContent = `FB-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${fake}`;
+    })();
+  </script>
+</body>
+</html>
