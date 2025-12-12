@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Praises — TeamGalaxy Admin</title>
+
+  <!-- Firebase modular SDK v11.9.0 -->
+  <script type="module">
+    // we will import inside main script to match browser CSP; placeholder here to satisfy HTML validators
+  </script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Keep loading-screen visuals exactly like your earlier design */
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);color:#fff;min-height:100vh;position:relative;overflow-x:hidden}
+    .loading-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,12,41,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .5s ease}
+    .loading-spinner{width:50px;height:50px;border:4px solid rgba(255,255,255,0.1);border-top:4px solid #00d4ff;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}
+    @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+    .loading-text{font-size:1.15rem;color:#00d4ff;text-align:center}
+
+    .stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+    .star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--duration,3s) infinite ease-in-out;opacity:.2}
+    @keyframes twinkle{0%,100%{opacity:.2}50%{opacity:1}}
+
+    .container{max-width:1200px;margin:0 auto;padding:20px;position:relative;z-index:10;display:none}
+    .header{display:flex;justify-content:space-between;align-items:center;padding:20px 0;margin-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.08)}
+    .back-btn{background:rgba(255,255,255,0.08);border:none;color:#fff;padding:10px 18px;border-radius:22px;cursor:pointer;transition:all .2s}
+    .back-btn:hover{background:rgba(0,212,255,0.12)}
+    .page-title{font-size:1.5rem;color:#00d4ff}
+
+    .grid {display:grid;grid-template-columns: 1fr 360px; gap:20px;align-items:start}
+    .left { /* praise list column */ }
+    .right { /* stats + controls */ }
+
+    .panel { background: rgba(25,25,35,0.88); border-radius:12px; padding:16px; border:1px solid rgba(255,255,255,0.04); }
+    .search-row{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+    .search-box{background:rgba(255,255,255,0.06);border:none;padding:10px 14px;border-radius:22px;color:#fff;width:100%}
+    .export-btn{background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.12);padding:8px 12px;border-radius:10px;color:#cfefff;cursor:pointer}
+
+    .stats {display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:12px}
+    .stat {background:rgba(30,30,40,0.7);padding:12px;border-radius:10px;text-align:center;border:1px solid rgba(255,255,255,0.03)}
+    .stat .num{font-size:1.4rem;color:#00d4ff;font-weight:700}
+    .stat .label{color:#a0aec0;font-size:0.9rem;margin-top:6px}
+
+    .praise-list{margin-top:10px}
+    .praise-card{background:rgba(40,40,50,0.72);border-radius:10px;padding:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.04);display:flex;gap:12px;align-items:flex-start}
+    .avatar{width:56px;height:56px;border-radius:10px;object-fit:cover;border:2px solid rgba(255,255,255,0.04)}
+    .praise-body{flex:1}
+    .praise-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .praise-author{font-weight:700;font-size:1rem}
+    .praise-ref{font-size:0.85rem;color:#a0aec0}
+    .praise-msg{margin-top:8px;color:#fff;white-space:pre-wrap}
+    .praise-meta{margin-top:10px;display:flex;gap:10px;align-items:center;font-size:13px;color:#9fb4c9}
+
+    .no-praises{padding:40px;text-align:center;color:#a0aec0}
+
+    @media (max-width:980px){ .grid{grid-template-columns:1fr} .right{order:2} .left{order:1} }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen (preserved text & behaviour) -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="loadingText">Verifying admin access...</div>
+  </div>
+
+  <!-- Stars background -->
+  <div class="stars" id="stars"></div>
+
+  <!-- Main container -->
+  <div class="container" id="mainContainer" role="main" aria-live="polite">
+    <div class="header">
+      <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+      <div class="page-title">Praises — TeamGalaxy</div>
+    </div>
+
+    <div class="grid">
+      <!-- Left: praises -->
+      <div class="left">
+        <div class="panel">
+          <div class="search-row">
+            <input type="text" id="search" class="search-box" placeholder="Search praises or names..." oninput="filterPraises()">
+            <button class="export-btn" onclick="exportPraisesCSV()">Export CSV</button>
+          </div>
+
+          <div id="praiseContainer" class="praise-list">
+            <div class="no-praises">Loading praises...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: stats -->
+      <aside class="right">
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div style="font-weight:700">Praises Overview</div>
+            <div style="color:#9fb4c9;font-size:13px" id="loadedCount">—</div>
+          </div>
+
+          <div class="stats" id="statsBlock">
+            <div class="stat"><div class="num" id="totalPraises">—</div><div class="label">Total praises</div></div>
+            <div class="stat"><div class="num" id="anonPraises">—</div><div class="label">Anonymous</div></div>
+            <div class="stat"><div class="num" id="avgRating">—</div><div class="label">Avg rating</div></div>
+            <div class="stat"><div class="num" id="distinctUsers">—</div><div class="label">Distinct users</div></div>
+          </div>
+
+          <div style="margin-top:10px">
+            <div style="font-size:13px;color:#a0aec0;margin-bottom:8px">Rating distribution</div>
+            <div id="ratingDist"></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Main script: modular Firebase v11.9.0 -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js';
+    import { getFirestore, collection, query, where, orderBy, limit, getDocs, doc, getDoc } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js';
+
+    // ========== your firebase config ==========
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+      authDomain: "teamgalaxy-77344.firebaseapp.com",
+      projectId: "teamgalaxy-77344",
+      storageBucket: "teamgalaxy-77344.firebasestorage.app",
+      messagingSenderId: "770256225320",
+      appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+      measurementId: "G-6C2W9NSNCH"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    // ===========================================
+
+    // UI refs
+    const loadingScreen = document.getElementById('loadingScreen');
+    const loadingText = document.getElementById('loadingText');
+    const mainContainer = document.getElementById('mainContainer');
+    const starsEl = document.getElementById('stars');
+
+    const praiseContainer = document.getElementById('praiseContainer');
+    const totalPraisesEl = document.getElementById('totalPraises');
+    const anonPraisesEl = document.getElementById('anonPraises');
+    const avgRatingEl = document.getElementById('avgRating');
+    const distinctUsersEl = document.getElementById('distinctUsers');
+    const ratingDistEl = document.getElementById('ratingDist');
+    const loadedCountEl = document.getElementById('loadedCount');
+
+    let PRAISES = []; // loaded praises
+    let USERS_MAP = {}; // cache usersPrivate docs keyed by uid
+
+    // create star background similar to your previous function
+    function createStars() {
+      const starCount = 120;
+      for (let i = 0; i < starCount; i++) {
+        const s = document.createElement('div');
+        s.className = 'star';
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        s.style.left = `${x}%`;
+        s.style.top = `${y}%`;
+        const size = Math.random() * 3 + 1;
+        s.style.width = `${size}px`;
+        s.style.height = `${size}px`;
+        const duration = Math.random() * 5 + 2;
+        s.style.setProperty('--duration', `${duration}s`);
+        starsEl.appendChild(s);
+      }
+    }
+
+    // admin verification: check admin collection gmail == user.email
+    async function checkAdmin() {
+      try {
+        const user = await new Promise((resolve, reject) => {
+          const unsub = onAuthStateChanged(auth, async (u) => {
+            if (u) {
+              try {
+                // query admin collection
+                const q = query(collection(db, 'admin'), where('gmail', '==', u.email), limit(1));
+                const snap = await getDocs(q);
+                unsub();
+                if (!snap.empty) resolve(u);
+                else reject(new Error('Not an admin'));
+              } catch (err) {
+                unsub();
+                reject(err);
+              }
+            } else {
+              unsub();
+              reject(new Error('Not signed in'));
+            }
+          });
+        });
+
+        // show main UI after same simulated delay you used
+        setTimeout(() => {
+          loadingScreen.style.opacity = '0';
+          setTimeout(() => {
+            loadingScreen.classList.add('hidden');
+            mainContainer.style.display = 'block';
+            loadPraises();
+          }, 500);
+        }, 1500);
+
+      } catch (err) {
+        console.error('Admin check failed', err);
+        loadingText.textContent = 'Access denied. Redirecting...';
+        setTimeout(() => window.location.href = 'index.html', 2000);
+      }
+    }
+
+    // load praise documents (only praise category and closed_as_praise)
+    async function loadPraises() {
+      praiseContainer.innerHTML = '<div class="no-praises">Loading praises...</div>';
+      try {
+        // Build query: category == 'praise' and status == 'closed_as_praise', newest first
+        const fbCol = collection(db, 'feedback');
+        const q = query(
+          fbCol,
+          where('category', '==', 'praise'),
+          where('status', '==', 'closed_as_praise'),
+          orderBy('createdAt', 'desc')
+        );
+        const snap = await getDocs(q);
+        const praises = [];
+        const userIdsToFetch = new Set();
+
+        snap.forEach(d => {
+          const data = d.data();
+          praises.push({ id: d.id, ...data });
+          if (data.userId) userIdsToFetch.add(data.userId);
+        });
+
+        PRAISES = praises;
+        // batch fetch usersPrivate for userIds (if any)
+        const userIds = Array.from(userIdsToFetch);
+        USERS_MAP = {}; // reset
+        if (userIds.length) {
+          // fetch each doc (could optimize with bulk get)
+          await Promise.all(userIds.map(async (uid) => {
+            try {
+              const uDoc = await getDoc(doc(db, 'usersPrivate', uid));
+              if (uDoc.exists()) USERS_MAP[uid] = uDoc.data();
+            } catch (e) {
+              console.warn('Failed to load usersPrivate', uid, e);
+            }
+          }));
+        }
+
+        renderPraises();
+        computeStats();
+      } catch (err) {
+        console.error('Failed loading praises', err);
+        praiseContainer.innerHTML = '<div class="no-praises">Error loading praises. Try again later.</div>';
+      }
+    }
+
+    function formatDate(ts) {
+      if (!ts) return 'N/A';
+      if (ts.toDate) {
+        try { return ts.toDate().toLocaleString(); } catch {}
+      }
+      try { return new Date(ts).toLocaleString(); } catch { return 'N/A'; }
+    }
+
+    // render praise cards
+    function renderPraises(filter = '') {
+      if (!PRAISES || PRAISES.length === 0) {
+        praiseContainer.innerHTML = '<div class="no-praises">No praises found.</div>';
+        loadedCountEl.textContent = '0 loaded';
+        return;
+      }
+
+      const f = String(filter || '').trim().toLowerCase();
+      const html = PRAISES
+        .filter(p => {
+          if (!f) return true;
+          const msg = (p.message || '').toLowerCase();
+          const ref = (p.refId || p.id || '').toLowerCase();
+          const userName = (p.displayName || (p.userId && (USERS_MAP[p.userId]?.name || '')) || '').toLowerCase();
+          return msg.includes(f) || ref.includes(f) || userName.includes(f);
+        })
+        .map(p => {
+          const isAnon = (!!p.anonymousSubmission) || (!p.userId);
+          const userInfo = (!isAnon && p.userId && USERS_MAP[p.userId]) ? USERS_MAP[p.userId] : null;
+          const author = isAnon ? 'Anonymous' : (p.displayName || (userInfo && (userInfo.name || userInfo.displayName)) || 'User');
+          const avatar = (!isAnon && userInfo && userInfo.profilePhotoUrl) ? escapeHtml(userInfo.profilePhotoUrl) : 'https://via.placeholder.com/56';
+          const rating = p.rating || '-';
+          const created = formatDate(p.createdAt);
+          const ref = p.refId || p.id;
+          const safeMsg = escapeHtml(p.message || '');
+          return `
+            <div class="praise-card" data-ref="${escapeHtml(ref)}">
+              <img class="avatar" src="${avatar}" alt="${escapeHtml(author)}" onerror="this.src='https://via.placeholder.com/56'">
+              <div class="praise-body">
+                <div class="praise-head">
+                  <div>
+                    <div class="praise-author">${escapeHtml(author)}</div>
+                    <div class="praise-ref">${escapeHtml(ref)} · ${escapeHtml(created)}</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div style="color:#ffd54a;font-weight:700">${escapeHtml(String(rating))} ★</div>
+                  </div>
+                </div>
+                <div class="praise-msg">${safeMsg}</div>
+                <div class="praise-meta">
+                  <div>${escapeHtml(p.clientLocale || '')}</div>
+                  <div>${escapeHtml(p.clientId ? ('CID:' + String(p.clientId).slice(0,8)) : '')}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      praiseContainer.innerHTML = html || '<div class="no-praises">No praises match your filter.</div>';
+      loadedCountEl.textContent = `${PRAISES.length} loaded`;
+    }
+
+    // compute stats relevant to praises
+    function computeStats() {
+      const total = PRAISES.length;
+      const anonymousCount = PRAISES.filter(p => (!!p.anonymousSubmission) || (!p.userId)).length;
+      const distinctUsers = new Set(PRAISES.filter(p => p.userId).map(p => p.userId)).size;
+      const ratings = PRAISES.map(p => (typeof p.rating === 'number' ? p.rating : parseInt(p.rating) || 0)).filter(r => r>0);
+      const avg = ratings.length ? (ratings.reduce((a,b)=>a+b,0)/ratings.length) : 0;
+      const roundedAvg = avg ? (Math.round(avg*10)/10).toFixed(1) : '—';
+
+      // rating distribution
+      const dist = {5:0,4:0,3:0,2:0,1:0};
+      ratings.forEach(r => { if (r>=1 && r<=5) dist[r] = (dist[r]||0)+1; });
+
+      totalPraisesEl.textContent = total;
+      anonPraisesEl.textContent = anonymousCount;
+      avgRatingEl.textContent = roundedAvg;
+      distinctUsersEl.textContent = distinctUsers;
+
+      // render distribution
+      const maxCount = Math.max(...Object.values(dist),1);
+      let distHtml = '';
+      [5,4,3,2,1].forEach(star => {
+        const count = dist[star] || 0;
+        const pct = Math.round((count / (total || 1)) * 100);
+        const w = Math.round((count / maxCount) * 100);
+        distHtml += `
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div style="width:36px;text-align:right;color:#ffd54a;font-weight:700">${star}★</div>
+            <div style="flex:1;background:rgba(255,255,255,0.04);height:10px;border-radius:6px;overflow:hidden">
+              <div style="width:${w}%;height:100%;background:linear-gradient(90deg,#ffd54a,#fbbf24)"></div>
+            </div>
+            <div style="width:48px;text-align:right;color:#9fb4c9">${count}</div>
+          </div>
+        `;
+      });
+      ratingDistEl.innerHTML = distHtml;
+    }
+
+    // filter praises client-side
+    function filterPraises() {
+      const v = document.getElementById('search').value || '';
+      renderPraises(v);
+    }
+
+    // export currently loaded praises (with resolved user info where possible)
+    function exportPraisesCSV() {
+      if (!PRAISES || !PRAISES.length) return alert('No praises to export');
+      const headers = ['refId','id','createdAt','rating','message','anonymous','userId','userName','profilePhotoUrl','clientLocale','clientId'];
+      const rows = PRAISES.map(p => {
+        const isAnon = (!!p.anonymousSubmission) || (!p.userId);
+        const userInfo = (!isAnon && p.userId && USERS_MAP[p.userId]) ? USERS_MAP[p.userId] : null;
+        const ref = p.refId || p.id;
+        const created = (p.createdAt && p.createdAt.toDate) ? p.createdAt.toDate().toISOString() : (p.createdAt ? new Date(p.createdAt).toISOString() : '');
+        const userName = userInfo ? (userInfo.name || userInfo.displayName || '') : (p.displayName || '');
+        const profile = userInfo ? (userInfo.profilePhotoUrl || '') : '';
+        const vals = [
+          ref,
+          p.id,
+          created,
+          String(p.rating || ''),
+          (p.message||'').replace(/"/g,'""'),
+          isAnon ? 'true' : 'false',
+          p.userId || '',
+          (userName||'').replace(/"/g,'""'),
+          profile,
+          p.clientLocale || '',
+          p.clientId || ''
+        ];
+        return vals.map(v => `"${v}"`).join(',');
+      });
+      const csv = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `praises_${(new Date()).toISOString().slice(0,10)}.csv`; document.body.appendChild(a); a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 5000);
+    }
+
+    // safe escape
+    function escapeHtml(s='') {
+      return String(s)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#039;');
+    }
+
+    // go back
+    function goBack() { window.location.href = '../admin_panel.html'; }
+
+    // init star background and admin check
+    document.addEventListener('DOMContentLoaded', () => {
+      createStars();
+      checkAdmin();
+    });
+
+    // expose filter and export to global scope (used by inline attributes)
+    window.filterPraises = filterPraises;
+    window.exportPraisesCSV = exportPraisesCSV;
+    window.goBack = goBack;
+
+  </script>
+</body>
+</html>
