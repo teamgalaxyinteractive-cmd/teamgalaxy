@@ -14,6 +14,9 @@
     @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
     .loading-text{font-size:1.15rem;color:#00d4ff;text-align:center}
 
+    /* helper class to actually hide element */
+    .hidden{display:none !important; pointer-events:none !important; opacity:0 !important}
+
     .stars{position:fixed;inset:0;z-index:0;pointer-events:none}
     .star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--duration,3s) infinite ease-in-out;opacity:.2}
     @keyframes twinkle{0%,100%{opacity:.2}50%{opacity:1}}
@@ -90,7 +93,7 @@
     <div class="grid">
       <div class="panel">
         <div class="controls-row">
-          <input type="text" id="search" class="search-box" placeholder="Search praises, names or refs..." />
+          <input type="text" id="search" class="search-box" placeholder="Search praises, names or refs..." autocomplete="off" />
         </div>
 
         <div id="praiseContainer" class="praise-list">
@@ -123,6 +126,8 @@
     // Module-scope state
     let PRAISES = [];
     let USERS_MAP = {};
+    let isLoadingPraises = true;
+    let pendingFilter = ''; // store user-typed filter while loading
 
     // DOM refs — declared but assigned inside DOMContentLoaded to avoid timing issues
     let loadingScreen, loadingText, mainContainer, starsEl, backBtn;
@@ -172,23 +177,28 @@
 
         // show main UI after small delay (preserve original timing)
         setTimeout(() => {
+          // fade out
           loadingScreen.style.opacity = '0';
+          // after transition, fully remove/hide it so it doesn't block pointer events
           setTimeout(() => {
             loadingScreen.classList.add('hidden');
+            loadingScreen.style.pointerEvents = 'none';
+            loadingScreen.style.display = 'none';
             mainContainer.style.display = 'block';
             loadPraises(); // load after UI shown
-          }, 500);
-        }, 1500);
+          }, 600);
+        }, 800);
 
       } catch (error) {
         console.error('Auth check error:', error);
         loadingText.textContent = 'Access denied. Redirecting...';
-        setTimeout(() => window.location.href = 'index.html', 2000);
+        setTimeout(() => window.location.href = 'index.html', 1500);
       }
     }
 
     // load praises
     async function loadPraises() {
+      isLoadingPraises = true;
       praiseContainer.innerHTML = '<div class="no-praises">Loading praises...</div>';
       try {
         const fbCol = collection(db, 'feedback');
@@ -221,11 +231,14 @@
           }));
         }
 
-        renderPraises();
+        isLoadingPraises = false;
+        // if user typed while loading, apply that filter; else show all
+        renderPraises(pendingFilter || '');
         computeStats();
       } catch (err) {
         console.error('Failed loading praises', err);
         praiseContainer.innerHTML = '<div class="no-praises">Error loading praises. Try again later.</div>';
+        isLoadingPraises = false;
       }
     }
 
@@ -239,6 +252,12 @@
 
     // render praises with optional filter
     function renderPraises(filter = '') {
+      // If still loading, store pending filter and return
+      if (isLoadingPraises) {
+        pendingFilter = String(filter || '');
+        return;
+      }
+
       if (!PRAISES || PRAISES.length === 0) {
         praiseContainer.innerHTML = '<div class="no-praises">No praises found.</div>';
         loadedCountEl.textContent = '0 loaded';
@@ -365,16 +384,32 @@
       // Back button: try history.back, otherwise fallback to admin panel
       backBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        if (window.history.length > 1) window.history.back();
-        else window.location.href = '../admin_panel.html';
+        try {
+          if (window.history && window.history.length > 1) {
+            window.history.back();
+            // give a short timeout in case history.back() doesn't navigate (single-page shells)
+            setTimeout(() => {
+              // if after 300ms we're still on same page, redirect
+              if (document.visibilityState === 'visible') {
+                window.location.href = '../admin_panel.html';
+              }
+            }, 300);
+          } else {
+            window.location.href = '../admin_panel.html';
+          }
+        } catch (err) {
+          console.warn('Back navigation failed, redirecting', err);
+          window.location.href = '../admin_panel.html';
+        }
       });
 
       // Search input: debounce for better UX
       let debounceTimer = null;
       searchInput.addEventListener('input', (e) => {
+        const val = e.target.value || '';
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
-          renderPraises(e.target.value || '');
+          renderPraises(val);
         }, 150);
       });
 
