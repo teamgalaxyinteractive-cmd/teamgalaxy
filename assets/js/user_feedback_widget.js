@@ -1,7 +1,4 @@
-// feedback-widget.js
-// Standalone script to inject a non-overlapping floating feedback button
-// Usage: include this file on any page. Button redirects to /user_feedback.
-
+// feedback-widget.js (debuggable, more visible, robust against CSS overrides)
 (function () {
   if (window.__TG_FEEDBACK_WIDGET_INJECTED__) return;
   window.__TG_FEEDBACK_WIDGET_INJECTED__ = true;
@@ -10,54 +7,64 @@
   const ID = 'tg-feedback-widget-v1';
   const STYLE_ID = 'tg-feedback-widget-style-v1';
 
-  // CSS for the widget
+  // Toggle this to true to always show label + red outline for debugging
+  const DEBUG = false;
+
   const css = `
-  /* widget container */
+  /* Strong !important rules to avoid host page overrides */
   #${ID} {
-    position:fixed;
-    right:18px;
-    bottom:18px;
-    z-index: 2147483000; /* very high but below browser chrome */
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width:64px;
-    height:64px;
-    border-radius:999px;
-    background:linear-gradient(180deg,#ff4757,#e84118);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
-    color:#fff;
-    font-size:28px;
-    cursor:pointer;
-    border: 0;
-    transition: transform .12s ease, box-shadow .12s ease, opacity .12s;
-    user-select:none;
-    -webkit-tap-highlight-color: transparent;
+    position: fixed !important;
+    right: 18px !important;
+    bottom: 18px !important;
+    z-index: 2147483640 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 72px !important;
+    height: 72px !important;
+    border-radius: 999px !important;
+    background: linear-gradient(180deg,#ff4757,#e84118) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.55) !important;
+    color: #fff !important;
+    font-size: 34px !important;
+    cursor: pointer !important;
+    border: 0 !important;
+    transition: transform .12s ease, box-shadow .12s ease, opacity .12s !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    opacity: 1 !important;
+    outline: none !important;
   }
-  #${ID}:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.5); }
-  #${ID}:active { transform: translateY(-1px) scale(.99); }
-  #${ID}:focus { outline: 3px solid rgba(255,200,200,.15); outline-offset: 4px; }
-  /* small label that can appear to the left if there's space */
+  #${ID}:hover { transform: translateY(-6px) !important; box-shadow: 0 16px 40px rgba(0,0,0,0.6) !important; }
+  #${ID}:active { transform: translateY(-2px) scale(.985) !important; }
+  #${ID}:focus { outline: 4px solid rgba(255,200,200,0.16) !important; outline-offset: 4px !important; }
+
+  /* Label always visible in debug, else on hover */
   #${ID} .tg-fw-label {
-    display:none;
-    position:absolute;
-    right:80px;
-    white-space:nowrap;
-    background: rgba(0,0,0,0.75);
-    color: #fff;
-    font-size: 13px;
-    padding: 8px 10px;
-    border-radius: 8px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
-    transform-origin: right center;
-    transform: translateY(-2px);
+    display: ${DEBUG ? 'block' : 'none'}; /* will be toggled by JS for non-debug */
+    position: absolute !important;
+    right: 92px !important;
+    white-space: nowrap !important;
+    background: rgba(0,0,0,0.78) !important;
+    color: #fff !important;
+    font-size: 13px !important;
+    padding: 8px 10px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45) !important;
+    transform-origin: right center !important;
+    transform: translateY(-2px) !important;
+    pointer-events: none !important;
+    opacity: 1 !important;
   }
-  #${ID}:hover .tg-fw-label { display:block; }
-  /* accessibility: hide for visual but available to screen readers */
+  #${ID}.show-label .tg-fw-label { display:block !important; }
+
   #${ID} .sr-only {
     position: absolute !important;
-    width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+    width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0,0,0,0) !important;white-space:nowrap !important;border:0 !important;
   }
+
+  /* debug helper (red outline) */
+  #${ID}.tg-debug { box-shadow: 0 0 0 3px rgba(255,0,0,0.18) inset !important; border:2px dashed rgba(255,0,0,0.12) !important; }
   `;
 
   // inject style
@@ -66,9 +73,10 @@
     s.id = STYLE_ID;
     s.textContent = css;
     document.head.appendChild(s);
+    console.debug('[TG-WIDGET] style injected');
   }
 
-  // helper: check if two rects intersect (with a small padding)
+  // helper intersection test
   function rectsIntersect(a, b, padding = 6) {
     return !(a.right - padding <= b.left + padding ||
              a.left + padding >= b.right - padding ||
@@ -76,7 +84,6 @@
              a.top + padding >= b.bottom - padding);
   }
 
-  // create widget element
   function createWidget() {
     if (document.getElementById(ID)) return document.getElementById(ID);
 
@@ -86,29 +93,25 @@
     btn.title = 'Open feedback panel';
     btn.setAttribute('aria-label', 'Open feedback panel (redirects to feedback page)');
     btn.innerHTML = `
-      <span aria-hidden="true">💬</span>
+      <span aria-hidden="true" style="line-height:1">${DEBUG ? '💬' : '💬'}</span>
       <span class="tg-fw-label" aria-hidden="true">Send feedback</span>
       <span class="sr-only">Open feedback page</span>
     `;
-    // click behaviour: navigate
+
+    // Inline defensive styles (helps override aggressive page CSS)
+    btn.style.setProperty('position', 'fixed', 'important');
+    btn.style.setProperty('right', '18px', 'important');
+    btn.style.setProperty('bottom', '18px', 'important');
+    btn.style.setProperty('width', '72px', 'important');
+    btn.style.setProperty('height', '72px', 'important');
+    btn.style.setProperty('fontSize', '34px', 'important');
+
+    // click behaviour: safe redirect
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      try {
-        // prefer SPA-friendly navigation if available
-        if (window.history && typeof window.history.pushState === 'function' && window.location.pathname !== REDIRECT_URL) {
-          // If you want pure redirect uncomment next line and comment pushState:
-          // window.location.href = REDIRECT_URL;
-          // We'll try a normal top-level redirect to be safe
-          window.location.href = REDIRECT_URL;
-        } else {
-          window.location.href = REDIRECT_URL;
-        }
-      } catch (_) {
-        window.location.href = REDIRECT_URL;
-      }
+      try { window.location.href = REDIRECT_URL; } catch (err) { console.error('[TG-WIDGET] redirect failed', err); }
     });
 
-    // keyboard accessible: Enter / Space
     btn.addEventListener('keydown', (ev) => {
       if (ev.key === 'Enter' || ev.key === ' ') {
         ev.preventDefault();
@@ -116,75 +119,62 @@
       }
     });
 
-    // allow right-click context menu (don't block)
-    btn.style.touchAction = 'manipulation';
+    // append as the very last child of body (helps avoid some stacking contexts)
+    try {
+      document.body.appendChild(btn);
+    } catch (err) {
+      // fallback: try document.documentElement
+      try { document.documentElement.appendChild(btn); } catch (e) { console.error('[TG-WIDGET] append failed', e); }
+    }
 
-    document.body.appendChild(btn);
     return btn;
   }
 
-  // attempt to place widget at bottom-right but avoid overlapping other fixed/sticky elements
   function placeWidgetAvoidingOverlap(widget) {
-    const viewport = document.documentElement.getBoundingClientRect();
-    // start from bottom-right margin values used in CSS
-    const marginRight = 18;
-    const marginBottom = 18;
-    // compute current widget rect by temporarily setting to that position (already styled as fixed).
-    widget.style.right = marginRight + 'px';
-    widget.style.bottom = marginBottom + 'px';
-    widget.style.top = '';
-    widget.style.left = '';
-    widget.style.opacity = '1';
+    // ensure it uses fixed positioning and visible size
+    widget.style.setProperty('position', 'fixed', 'important');
+    widget.style.setProperty('right', '18px', 'important');
+    widget.style.setProperty('bottom', '18px', 'important');
+    widget.style.setProperty('display', 'flex', 'important');
 
-    // find potential colliding elements: all elements with position fixed or sticky or absolute + high z-index
-    const candidates = Array.from(document.querySelectorAll('body *')).filter(el => {
-      if (el === widget) return false;
-      if (!(el instanceof HTMLElement)) return false;
+    // collect candidates (fixed/absolute/sticky or high z-index)
+    const all = Array.from(document.querySelectorAll('body *'));
+    const candidates = [];
+    for (const el of all) {
+      if (el === widget) continue;
+      if (!(el instanceof HTMLElement)) continue;
       const st = window.getComputedStyle(el);
-      if (st.display === 'none' || st.visibility === 'hidden' || st.opacity === '0') return false;
+      if (st.display === 'none' || st.visibility === 'hidden' || parseFloat(st.opacity) === 0) continue;
       const pos = st.position;
-      if (pos === 'fixed' || pos === 'sticky' || pos === 'absolute') {
-        // ignore elements with zero-size
+      const z = isNaN(parseInt(st.zIndex, 10)) ? 0 : parseInt(st.zIndex, 10);
+      if (pos === 'fixed' || pos === 'sticky' || pos === 'absolute' || z >= 1000) {
         const r = el.getBoundingClientRect();
-        return !(r.width === 0 && r.height === 0);
+        if (!(r.width === 0 && r.height === 0)) candidates.push(el);
       }
-      // also consider sticky and fixed-like floating UI by z-index threshold
-      const z = parseInt(st.zIndex, 10);
-      if (!Number.isNaN(z) && z >= 1000) return true;
-      return false;
-    });
+    }
 
-    // we will try to move the widget upward in steps until it doesn't intersect any candidate
-    const step = 8; // px per attempt
+    // start at bottom-right, nudge up until no collision
+    let step = 12;
     const maxAttempts = Math.ceil(window.innerHeight / step) + 10;
     let attempts = 0;
-    // compute bounding rect of widget
-    let wRect = widget.getBoundingClientRect();
+    widget.style.setProperty('right', '18px', 'important');
+    widget.style.setProperty('bottom', '18px', 'important');
 
-    // loop until no intersection with any candidate or reached top limit
+    let wRect = widget.getBoundingClientRect();
     while (attempts < maxAttempts) {
       let collides = false;
       for (const c of candidates) {
-        try {
-          const cRect = c.getBoundingClientRect();
-          if (rectsIntersect(wRect, cRect, 6)) {
-            collides = true;
-            break;
-          }
-        } catch (err) { /* ignore weird elements */ }
+        const cRect = c.getBoundingClientRect();
+        if (rectsIntersect(wRect, cRect, 6)) { collides = true; break; }
       }
       if (!collides) break;
-      // nudge widget upward by 'step' px
-      const currentBottom = parseFloat(widget.style.bottom || marginBottom);
-      const newBottom = currentBottom + step; // increase bottom moves it up visually
-      widget.style.bottom = newBottom + 'px';
-      // update rect and loop
+      const currentBottom = parseFloat(widget.style.bottom || '18');
+      widget.style.setProperty('bottom', (currentBottom + step) + 'px', 'important');
       wRect = widget.getBoundingClientRect();
-      attempts += 1;
+      attempts++;
     }
 
-    // as fallback, if still colliding, move slightly left so it can sit beside other widget
-    // check one more time
+    // final collision check — try shifting left as a fallback
     let finalCollide = false;
     wRect = widget.getBoundingClientRect();
     for (const c of candidates) {
@@ -192,16 +182,12 @@
       if (rectsIntersect(wRect, cRect, 6)) { finalCollide = true; break; }
     }
     if (finalCollide) {
-      // attempt a left shift in steps up to 120px
-      const maxLeftShift = 120;
       let shifted = 0;
-      while (shifted < maxLeftShift) {
-        const currentRight = parseFloat(widget.style.right || marginRight);
-        const newRight = currentRight + 16; // move left by increasing right
-        widget.style.right = newRight + 'px';
-        shifted += 16;
+      while (shifted <= 160) {
+        const currentRight = parseFloat(widget.style.right || '18');
+        widget.style.setProperty('right', (currentRight + 18) + 'px', 'important');
+        shifted += 18;
         wRect = widget.getBoundingClientRect();
-        // re-check collisions
         let coll = false;
         for (const c of candidates) {
           const cRect = c.getBoundingClientRect();
@@ -211,59 +197,89 @@
       }
     }
 
-    // If still colliding, reduce z-index to avoid stealing clicks from modal overlays
-    if (finalCollide) {
-      widget.style.zIndex = 999999;
-    } else {
-      // ensure top visibility for normal pages
-      widget.style.zIndex = 2147483000;
+    // if still colliding, lower z-index slightly to avoid taking clicks from modals
+    if (finalCollide) widget.style.setProperty('zIndex', '999999', 'important');
+    else widget.style.setProperty('zIndex', '2147483640', 'important');
+
+    // ensure label shows on hover (non-debug)
+    if (!DEBUG) {
+      widget.addEventListener('mouseenter', () => widget.classList.add('show-label'));
+      widget.addEventListener('mouseleave', () => widget.classList.remove('show-label'));
     }
+
+    console.debug('[TG-WIDGET] placed (bottom/right)', {
+      bottom: widget.style.bottom,
+      right: widget.style.right,
+      zIndex: widget.style.zIndex
+    });
   }
 
-  // observe DOM mutations (new floating elements added) and re-run placement occasionally
+  // Observe DOM changes and reposition
   function observeAndAdjust(widget) {
     let scheduled = false;
-    const adjust = () => {
-      scheduled = false;
-      placeWidgetAvoidingOverlap(widget);
-    };
-    const debouncedAdjust = () => {
-      if (scheduled) return;
-      scheduled = true;
-      setTimeout(adjust, 160);
-    };
+    const adjust = () => { scheduled = false; try { placeWidgetAvoidingOverlap(widget); } catch (e) { console.warn('[TG-WIDGET] adjust failed', e); } };
+    const debouncedAdjust = () => { if (scheduled) return; scheduled = true; setTimeout(adjust, 160); };
 
-    // watch for layout changes
     const mo = new MutationObserver(debouncedAdjust);
-    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
+    try { mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] }); } catch (e) { /* fail silently */ }
 
-    // also adjust on resize / scroll / orientationchange
     window.addEventListener('resize', debouncedAdjust, { passive: true });
     window.addEventListener('orientationchange', debouncedAdjust, { passive: true });
     window.addEventListener('scroll', debouncedAdjust, { passive: true });
 
-    // initial run + small delayed runs (to catch late-loading widgets)
+    // schedule a few runs (for late loads)
     setTimeout(debouncedAdjust, 200);
-    setTimeout(debouncedAdjust, 1000);
-    setTimeout(debouncedAdjust, 2500);
+    setTimeout(debouncedAdjust, 900);
+    setTimeout(debouncedAdjust, 2400);
   }
 
-  // main insertion flow
+  // Public debug helpers
+  window.__TGFW = window.__TGFW || {};
+  window.__TGFW.getElement = () => document.getElementById(ID);
+  window.__TGFW.showDebug = function () {
+    const el = document.getElementById(ID);
+    if (!el) return console.warn('[TG-WIDGET] not found');
+    el.classList.add('tg-debug', 'show-label');
+    el.style.setProperty('width', '88px', 'important');
+    el.style.setProperty('height', '88px', 'important');
+    el.style.setProperty('fontSize', '40px', 'important');
+    placeWidgetAvoidingOverlap(el);
+    console.info('[TG-WIDGET] debug-visible');
+  };
+  window.__TGFW.hideDebug = function () {
+    const el = document.getElementById(ID);
+    if (!el) return;
+    el.classList.remove('tg-debug', 'show-label');
+    el.style.setProperty('width', '72px', 'important');
+    el.style.setProperty('height', '72px', 'important');
+    el.style.setProperty('fontSize', '34px', 'important');
+    placeWidgetAvoidingOverlap(el);
+  };
+  window.__TGFW.forceFlash = function (times = 3) {
+    const el = document.getElementById(ID);
+    if (!el) return;
+    let i = 0;
+    const iv = setInterval(() => {
+      el.style.transform = 'translateY(-12px) scale(1.02)';
+      setTimeout(() => el.style.transform = '', 180);
+      i++;
+      if (i >= times) clearInterval(iv);
+    }, 320);
+  };
+
   function init() {
-    // If body not ready, wait
-    if (!document.body) {
-      return setTimeout(init, 50);
-    }
+    if (!document.body) return setTimeout(init, 50);
     const widget = createWidget();
     placeWidgetAvoidingOverlap(widget);
     observeAndAdjust(widget);
+    // small visible pulse to indicate presence (only if not debug)
+    setTimeout(() => { try { window.__TGFW.forceFlash(2); } catch (e) {} }, 350);
+    console.debug('[TG-WIDGET] initialized');
   }
 
-  // run on ready
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    init();
-  } else {
-    window.addEventListener('DOMContentLoaded', init);
-  }
+  if (document.readyState === 'complete' || document.readyState === 'interactive') init();
+  else window.addEventListener('DOMContentLoaded', init);
 
+  // Quick usage helpers logged so you know
+  console.log('[TG-WIDGET] feedback widget script loaded. If you cannot see it: run `__TGFW.getElement()` in console, or `__TGFW.showDebug()` to make it obvious.');
 })();
