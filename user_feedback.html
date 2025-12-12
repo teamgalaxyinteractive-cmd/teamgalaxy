@@ -3,150 +3,230 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TeamGalaxy — Share Praise ✨</title>
+  <title>TeamGalaxy — Share Praise</title>
 
-  <!-- Minimal web font fallback -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
     :root{
-      --bg1:#040612;
-      --bg2:#07122a;
-      --card:#071428;
-      --accent:#8b5cf6;
-      --accent-2:#06b6d4;
+      --bg:#071025;
+      --card:#0b1220;
       --muted:#9fb4c9;
-      --glass:rgba(255,255,255,0.04);
-      --success:#10b981;
-      --danger:#ef4444;
+      --accent:#6d28d9;
+      --accent-2:#06b6d4;
+      --glass:rgba(255,255,255,0.03);
+      --radius:14px;
+      --shadow:0 10px 30px rgba(2,6,23,0.6);
     }
-    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:#e6f0fb}
-    /* full-screen centered layout */
-    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px;box-sizing:border-box;position:relative;overflow:hidden}
-    /* starfield canvas sits behind everything */
-    canvas#starfield{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.85;filter:drop-shadow(0 8px 32px rgba(0,0,0,0.6));}
 
-    /* card */
-    .card{position:relative;z-index:2;width:100%;max-width:920px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border-radius:16px;padding:30px 28px;box-shadow:0 12px 40px rgba(2,6,23,0.7);backdrop-filter: blur(6px);border:1px solid rgba(255,255,255,0.03)}
-    .head{display:flex;align-items:center;gap:16px}
-    .logo{
-      width:54px;height:54px;border-radius:12px;display:inline-grid;place-items:center;
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;background:linear-gradient(180deg,#041026 0%, #071025 60%);color:#e8f4ff; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
+
+    /* page container */
+    .page {
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:48px 24px;
+      box-sizing:border-box;
+    }
+
+    /* layout */
+    .container {
+      width:100%;
+      max-width:980px;
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:28px;
+      align-items:start;
+    }
+
+    /* left hero / content */
+    .hero {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      padding:28px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .brand {
+      display:flex;
+      gap:14px;
+      align-items:center;
+    }
+    .brand-mark {
+      width:64px;height:64px;border-radius:12px;display:grid;place-items:center;font-weight:800;color:white;
       background:linear-gradient(135deg,var(--accent),var(--accent-2));
-      box-shadow:0 6px 20px rgba(139,92,246,0.16);font-weight:800;color:white;font-size:22px;
+      box-shadow:0 8px 28px rgba(13,30,60,0.35);
+      font-size:20px;
     }
-    h1{font-size:20px;margin:0}
-    p.lead{margin:6px 0 0;color:var(--muted);font-size:14px}
+    h1 { margin:0; font-size:22px; font-weight:700; }
+    p.lead { margin:8px 0 0; color:var(--muted); font-size:14px; max-width:70ch; line-height:1.5 }
 
-    /* form layout */
-    form{margin-top:18px;display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
-    .left{display:flex;flex-direction:column;gap:12px}
-    .right{display:flex;flex-direction:column;gap:12px;align-items:stretch}
-    label{font-size:13px;color:var(--muted);margin-bottom:6px}
-    textarea{min-height:150px;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);background:rgba(255,255,255,0.02);color:inherit;resize:vertical;font-size:15px;outline:none}
-    textarea::placeholder{color:rgba(230,240,251,0.5)}
-    .small{font-size:13px;color:var(--muted)}
-
-    /* rating big stars (left) */
-    .big-stars{display:flex;gap:8px;align-items:center}
-    .big-stars .star{
-      font-size:34px;cursor:pointer;transition:transform .12s ease, opacity .12s;opacity:0.9;
-      text-shadow:0 6px 18px rgba(0,0,0,0.5)
+    /* praise examples card */
+    .sample {
+      margin-top:18px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
     }
-    .big-stars .star:hover{transform:translateY(-6px) scale(1.06)}
-    .big-stars .active{color:#ffd54a;filter:drop-shadow(0 6px 18px rgba(255,213,74,0.12))}
-
-    /* small control box (right) */
-    .box{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:12px}
-    .toggle{display:flex;align-items:center;gap:12px}
-    .toggle input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}
-    .note{font-size:13px;color:var(--muted);line-height:1.35}
-
-    /* submit */
-    .row{display:flex;gap:10px;align-items:center}
-    button.submit{
-      background:linear-gradient(90deg,var(--accent),var(--accent-2));border:0;padding:12px 16px;border-radius:10px;color:white;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(6,182,212,0.12);
-      transition:transform .12s ease, box-shadow .12s;
-    }
-    button.submit:active{transform:translateY(1px)}
-    .ref{font-size:13px;color:var(--muted)}
-    .success{background:linear-gradient(90deg,#059669,#10b981);padding:10px;border-radius:10px;color:white}
-    .error{background:linear-gradient(90deg,#ef4444,#f97316);padding:10px;border-radius:10px;color:white}
-
-    /* mobile layout */
-    @media (max-width:880px){
-      form{grid-template-columns:1fr;gap:16px}
-      .right{order:2}
+    .chip {
+      background:rgba(255,255,255,0.02);
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.02);
+      color:var(--muted);
+      font-size:13px;
     }
 
-    /* subtle footer */
-    .tiny{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
+    /* right panel (form) */
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      padding:22px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,0.03);
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+    label { display:block; font-size:13px; color:var(--muted); margin-bottom:8px; }
+    textarea { width:100%; min-height:130px; resize:vertical; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.03); background:var(--glass); color:inherit; font-size:15px; outline:none }
+    textarea::placeholder { color: rgba(230,240,251,0.55) }
+    input[type="number"] { padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.03); background:var(--glass); color:inherit; width:100% }
+
+    /* rating stars row */
+    .rating-row { display:flex; gap:12px; align-items:center; }
+    .stars { display:flex; gap:8px; align-items:center; }
+    .star {
+      font-size:28px;
+      cursor:pointer;
+      transition:transform .12s ease, opacity .12s ease;
+      opacity:0.92;
+      color:rgba(255,255,255,0.18);
+      text-shadow:0 6px 18px rgba(0,0,0,0.5);
+      user-select:none;
+    }
+    .star:hover{ transform:translateY(-6px) scale(1.06) }
+    .star.active { color:#ffd54a; filter:drop-shadow(0 6px 20px rgba(255,213,74,0.12)); opacity:1; }
+
+    /* controls */
+    .controls { display:flex; gap:12px; align-items:center; justify-content:space-between; margin-top:6px }
+    .left-controls { display:flex; gap:12px; align-items:center; }
+    .submit {
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      border:0;
+      padding:12px 16px;
+      color:white;
+      font-weight:600;
+      border-radius:10px;
+      cursor:pointer;
+      box-shadow:0 8px 26px rgba(109,40,217,0.12);
+      transition:transform .08s ease;
+    }
+    .submit:active { transform:translateY(1px) }
+    .meta { color:var(--muted); font-size:13px; }
+
+    /* small toggle / anon line */
+    .toggle-row { display:flex; gap:10px; align-items:center; justify-content:space-between; }
+    .toggle-left { display:flex; gap:10px; align-items:center; }
+    .toggle-left input[type="checkbox"] { width:18px; height:18px; accent-color:var(--accent) }
+
+    .hint { font-size:13px; color:var(--muted) }
+
+    /* message area */
+    .message { margin-top:10px; font-size:14px; }
+    .success { background:linear-gradient(90deg,#059669,#10b981); padding:10px 12px; border-radius:10px; color:white }
+    .error { background:linear-gradient(90deg,#ef4444,#fb923c); padding:10px 12px; border-radius:10px; color:white }
+
+    /* footer small */
+    .foot { margin-top:18px; text-align:center; color:var(--muted); font-size:13px }
+
+    /* professional responsive */
+    @media (max-width:980px) {
+      .container { grid-template-columns: 1fr; }
+      .panel { order:2 }
+      .hero { order:1 }
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <canvas id="starfield" aria-hidden="true"></canvas>
-
-    <div class="card" role="main" aria-labelledby="pageTitle">
-      <div class="head">
-        <div class="logo">TG</div>
-        <div>
-          <h1 id="pageTitle">Share a quick praise ✨</h1>
-          <p class="lead">Short, happy notes that make our day. This is read-only — the team won't reply from here.</p>
+  <div class="page">
+    <div class="container" role="main">
+      <!-- Left hero / context -->
+      <section class="hero" aria-labelledby="title">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">TG</div>
+          <div>
+            <h1 id="title">Share a quick praise</h1>
+            <p class="lead">Tell us what you enjoyed. Short, positive notes that brighten the team’s day. (This is not a support channel — no replies.)</p>
+          </div>
         </div>
-      </div>
 
-      <!-- Signed-in hint (filled by JS) -->
-      <div id="signedInfo" style="margin-top:12px;display:none">
-        <div class="small" id="signedText"></div>
-      </div>
+        <div class="sample" aria-hidden="true">
+          <div class="chip">Loved the smooth login flow</div>
+          <div class="chip">That new animation looked great</div>
+          <div class="chip">Super helpful onboarding</div>
+          <div class="chip">Great customer experience!</div>
+        </div>
 
-      <form id="praiseForm" autocomplete="off" novalidate>
-        <div class="left">
+        <div style="margin-top:18px" class="hint">
+          A little praise goes a long way. Keep it short and kind — the team reads these regularly.
+        </div>
+      </section>
+
+      <!-- Right form panel -->
+      <aside class="panel" aria-labelledby="formTitle">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-weight:600;font-size:15px" id="formTitle">Send praise ✨</div>
+            <div class="hint" id="signedInfo" style="display:none;margin-top:6px"></div>
+          </div>
+          <div style="opacity:0.9;color:var(--muted);font-size:13px" id="refPreview">Ref: —</div>
+        </div>
+
+        <form id="praiseForm" autocomplete="off" novalidate>
           <div>
             <label for="message">Your praise</label>
-            <textarea id="message" placeholder="What did you like? (at least 20 characters)" required minlength="20"></textarea>
+            <textarea id="message" placeholder="What did you like? (20 characters minimum)" required minlength="20" aria-label="Praise message"></textarea>
           </div>
 
-          <div>
-            <label>How much did you enjoy it?</label>
-            <div class="big-stars" id="bigStars" aria-hidden="true"></div>
-            <div class="small" style="margin-top:8px">Tip: click a star or use the number input on the right.</div>
-          </div>
-
-          <div class="tiny">Praise is anonymous for guests. If you're signed in, we encourage leaving your name — but you can still hide it.</div>
-        </div>
-
-        <div class="right">
-          <div class="box">
-            <div>
-              <label for="ratingValue">Rating</label>
-              <input id="ratingValue" type="number" min="1" max="5" value="5" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:rgba(255,255,255,0.02);color:inherit;font-size:15px">
-            </div>
-
-            <div style="display:flex;gap:10px;align-items:center;justify-content:space-between">
-              <div class="toggle">
-                <input type="checkbox" id="isAnon" checked aria-label="Submit anonymously">
-                <label for="isAnon" class="small">Submit anonymously</label>
+          <div style="margin-top:8px">
+            <label>Rating</label>
+            <div class="rating-row">
+              <div class="stars" id="starContainer" aria-hidden="true"></div>
+              <div style="flex:1;display:flex;justify-content:flex-end;align-items:center">
+                <input id="ratingValue" type="number" min="1" max="5" value="5" aria-label="Numeric rating" />
               </div>
-              <div class="ref" id="refPreview">Ref: —</div>
-            </div>
-
-            <div class="note">This form collects only what's needed to celebrate — no screenshots or support replies here.</div>
-
-            <div class="row" style="margin-top:6px">
-              <button class="submit" id="submitBtn" type="submit">Send Praise</button>
-              <div id="msgBox" style="flex:1"></div>
             </div>
           </div>
-        </div>
-      </form>
 
-      <div class="tiny">Thanks for making TeamGalaxy better 💫</div>
+          <div style="margin-top:10px" class="toggle-row">
+            <div class="toggle-left">
+              <input type="checkbox" id="isAnon" checked aria-label="Submit anonymously" />
+              <label for="isAnon" class="hint">Submit anonymously</label>
+            </div>
+            <div class="meta">Category: <strong style="margin-left:6px">Praise</strong></div>
+          </div>
+
+          <div class="controls">
+            <div class="left-controls">
+              <button class="submit" type="submit" id="submitBtn">Send Praise</button>
+              <div id="msgBox" aria-live="polite"></div>
+            </div>
+            <div class="meta" id="statusMeta"></div>
+          </div>
+        </form>
+
+        <div class="foot">No screenshots or follow-ups here — just good vibes.</div>
+      </aside>
     </div>
   </div>
 
-  <!-- Firebase & app logic (SDK v11.9.0). Keep this script type=module. -->
+  <!-- Firebase + logic (SDK v11.9.0). Keep as module. -->
   <script type="module">
-    // =========== Firebase config (your provided values) ===========
+    // =========== Firebase config (provided) ===========
     const firebaseConfig = {
       apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
       authDomain: "teamgalaxy-77344.firebaseapp.com",
@@ -156,7 +236,7 @@
       appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
       measurementId: "G-6C2W9NSNCH"
     };
-    // ============================================================
+    // =================================================
 
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js';
     import { getFirestore, collection, addDoc, serverTimestamp, updateDoc } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js';
@@ -166,7 +246,7 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // ---------- small helpers (client id + hash) ----------
+    // ---------- Helpers ----------
     function getClientId() {
       const key = 'teamgalaxy:clientId:v1';
       let id = localStorage.getItem(key);
@@ -177,12 +257,14 @@
       }
       return id;
     }
+
     async function digestUTF8(message) {
       const enc = new TextEncoder();
       const data = enc.encode(message);
       const hash = await crypto.subtle.digest('SHA-256', data);
       return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
     }
+
     async function getFingerprint() {
       try {
         const clientId = getClientId();
@@ -190,12 +272,13 @@
         return await digestUTF8(f);
       } catch { return null; }
     }
+
     function shortRefFromId(id) {
       return `FB-${(new Date()).toISOString().slice(0,10).replace(/-/g,'')}-${id.slice(0,6).toUpperCase()}`;
     }
 
     // ---------- UI wiring ----------
-    const bigStars = document.getElementById('bigStars');
+    const starContainer = document.getElementById('starContainer');
     const ratingValue = document.getElementById('ratingValue');
     const messageEl = document.getElementById('message');
     const isAnon = document.getElementById('isAnon');
@@ -203,28 +286,31 @@
     const msgBox = document.getElementById('msgBox');
     const refPreview = document.getElementById('refPreview');
     const signedInfo = document.getElementById('signedInfo');
-    const signedText = document.getElementById('signedText');
+    const statusMeta = document.getElementById('statusMeta');
 
-    // render 5 stars and click handlers
-    function renderStars(n = 5){
-      bigStars.innerHTML = '';
-      for(let i=1;i<=5;i++){
+    function renderStars(n = 5) {
+      starContainer.innerHTML = '';
+      for (let i = 1; i <= 5; i++) {
         const s = document.createElement('span');
-        s.className = 'star' + (i<=n ? ' active' : '');
+        s.className = 'star' + (i <= n ? ' active' : '');
         s.textContent = '★';
         s.dataset.value = i;
         s.title = `${i} star${i>1?'s':''}`;
-        s.addEventListener('click', ()=>{ ratingValue.value = i; renderStars(i); });
-        bigStars.appendChild(s);
+        s.addEventListener('click', () => { ratingValue.value = i; renderStars(i); });
+        starContainer.appendChild(s);
       }
     }
     renderStars(5);
-    ratingValue.addEventListener('input', ()=> {
-      let v = parseInt(ratingValue.value,10);
-      if (isNaN(v) || v<1) v=1; if (v>5) v=5; ratingValue.value = v; renderStars(v);
+
+    ratingValue.addEventListener('input', () => {
+      let v = parseInt(ratingValue.value, 10);
+      if (isNaN(v) || v < 1) v = 1;
+      if (v > 5) v = 5;
+      ratingValue.value = v;
+      renderStars(v);
     });
 
-    // auth: encourage signed users to leave name
+    // Auth behaviour: encourage signed users to show name
     let currentUser = null;
     let signedDefaultAnon = true;
     onAuthStateChanged(auth, (u) => {
@@ -232,19 +318,21 @@
       if (u) {
         signedDefaultAnon = false;
         signedInfo.style.display = 'block';
-        signedText.textContent = `Signed in as ${u.displayName || (u.email ? u.email.split('@')[0] : u.uid.slice(0,6))}. You can hide your name, but we appreciate when you don’t.`;
+        signedInfo.textContent = `Signed in as ${u.displayName || (u.email ? u.email.split('@')[0] : u.uid.slice(0,6))}. You may hide your name but sharing it helps the team know who to thank.`;
         isAnon.checked = false;
+        statusMeta.textContent = 'You are signed in';
       } else {
         signedDefaultAnon = true;
         signedInfo.style.display = 'none';
         isAnon.checked = true;
+        statusMeta.textContent = '';
       }
-      // set preview ref to include client id snippet
+      // preview ref using clientId snippet
       const fake = getClientId().slice(0,6).toUpperCase();
       refPreview.textContent = `Ref: FB-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${fake}`;
     });
 
-    function showMessage(text, type='ok'){
+    function showMessage(text, type = 'ok') {
       msgBox.innerHTML = '';
       const d = document.createElement('div');
       d.className = type === 'ok' ? 'success' : 'error';
@@ -252,18 +340,24 @@
       msgBox.appendChild(d);
     }
 
-    // form submit logic
+    // Submit logic
     let busy = false;
     document.getElementById('praiseForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (busy) return;
-      busy = true; submitBtn.disabled = true; msgBox.innerHTML = '';
+      busy = true;
+      submitBtn.disabled = true;
+      msgBox.innerHTML = '';
 
       const message = messageEl.value.trim();
-      const rating = parseInt(ratingValue.value,10) || 5;
+      const rating = parseInt(ratingValue.value, 10) || 5;
       const wantAnon = isAnon.checked;
 
-      if (message.length < 20) { showMessage('Please add a bit more — 20 characters min.', 'err'); busy=false; submitBtn.disabled=false; return; }
+      if (message.length < 20) {
+        showMessage('Please add a bit more — 20 characters minimum.', 'err');
+        busy = false; submitBtn.disabled = false;
+        return;
+      }
 
       try {
         const fingerprint = await getFingerprint();
@@ -292,79 +386,25 @@
         const refId = shortRefFromId(docRef.id);
         await updateDoc(docRef, { refId, updatedAt: serverTimestamp() });
 
-        // success UI
         refPreview.textContent = `Ref: ${refId}`;
-        showMessage('Thanks! Your praise brightened our day ✨', 'ok');
-        messageEl.value = '';
-        ratingValue.value = 5; renderStars(5);
-        isAnon.checked = signedDefaultAnon; // reset anon to default for user type
+        showMessage('Thanks — your praise brightened our day ✨', 'ok');
 
+        messageEl.value = '';
+        ratingValue.value = 5;
+        renderStars(5);
+        isAnon.checked = signedDefaultAnon;
       } catch (err) {
-        console.error(err);
-        showMessage('Submission failed — try again in a bit.', 'err');
+        console.error('Submit failed', err);
+        showMessage('Submission failed — please try again shortly.', 'err');
       } finally {
-        busy=false; submitBtn.disabled=false;
+        busy = false;
+        submitBtn.disabled = false;
       }
     });
 
-    // ---------- animated starfield canvas (interactive) ----------
-    (function initStarfield(){
-      const canvas = document.getElementById('starfield');
-      const ctx = canvas.getContext('2d');
-      let w = canvas.width = innerWidth;
-      let h = canvas.height = innerHeight;
-      const stars = [];
-      const STAR_COUNT = Math.round((w*h)/9000); // density
-      for (let i=0;i<STAR_COUNT;i++){
-        stars.push({
-          x: Math.random()*w,
-          y: Math.random()*h,
-          r: (Math.random()*1.4)+0.4,
-          vx: (Math.random()-0.5)*0.05,
-          vy: (Math.random()-0.5)*0.05,
-          twinkle: Math.random()*0.8
-        });
-      }
-      let mouseX = w/2, mouseY = h/2;
-      window.addEventListener('resize', ()=>{ w = canvas.width = innerWidth; h = canvas.height = innerHeight; });
-      window.addEventListener('mousemove', (e)=>{ mouseX = e.clientX; mouseY = e.clientY; });
+    // accessibility: focus textarea on load
+    window.addEventListener('load', () => { setTimeout(()=> messageEl.focus(), 220); });
 
-      function draw(){
-        ctx.clearRect(0,0,w,h);
-        // subtle gradient
-        const g = ctx.createLinearGradient(0,0,0,h);
-        g.addColorStop(0,'rgba(7,18,40,0.06)');
-        g.addColorStop(1,'rgba(2,6,18,0.08)');
-        ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
-
-        for (let s of stars){
-          // slight movement and parallax to mouse
-          const dx = (mouseX - w/2)/ (w) * (s.r*6);
-          const dy = (mouseY - h/2)/ (h) * (s.r*6);
-          s.x += s.vx + dx*0.002;
-          s.y += s.vy + dy*0.002;
-          if (s.x < -10) s.x = w+10;
-          if (s.x > w+10) s.x = -10;
-          if (s.y < -10) s.y = h+10;
-          if (s.y > h+10) s.y = -10;
-
-          const a = 0.6 + Math.sin((Date.now()/1000 + s.twinkle)*2)*0.35;
-          ctx.beginPath();
-          ctx.fillStyle = `rgba(255,255,255,${a})`;
-          ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
-          ctx.fill();
-        }
-
-        // animate a faint moving constellation near the card center
-        requestAnimationFrame(draw);
-      }
-      draw();
-    })();
-
-    // small accessibility: focus textarea on load
-    window.addEventListener('load', ()=>{ setTimeout(()=>messageEl.focus(),300); });
-
-    // End of module
   </script>
 </body>
 </html>
