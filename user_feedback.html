@@ -19,9 +19,11 @@
     }
     html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;background:linear-gradient(180deg,#031026 0%, #061025 60%);color:#e8f4ff; -webkit-font-smoothing:antialiased}
     .page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:48px 24px;box-sizing:border-box;position:relative;overflow:hidden}
-    /* starfield canvas behind everything */
     canvas#starfield{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.95}
-    .container{position:relative;z-index:2;width:100%;max-width:980px;display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
+    
+    /* Updated container for responsiveness */
+    .container{position:relative;z-index:2;width:100%;max-width:1020px;display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
+    
     .hero{background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.03)}
     .brand{display:flex;gap:14px;align-items:center}
     .brand-img{
@@ -42,7 +44,7 @@
     .star{font-size:28px;cursor:pointer;transition:transform .12s, opacity .12s;color:rgba(255,255,255,0.18);text-shadow:0 6px 18px rgba(0,0,0,0.5);user-select:none}
     .star:hover{transform:translateY(-6px) scale(1.06)}
     .star.active{color:#ffd54a;filter:drop-shadow(0 6px 20px rgba(255,213,74,0.12));opacity:1}
-    .controls{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:6px}
+    .controls{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
     .submit{background:linear-gradient(90deg,var(--accent),var(--accent-2));border:0;padding:12px 16px;color:white;font-weight:600;border-radius:10px;cursor:pointer;box-shadow:0 8px 26px rgba(109,40,217,0.12)}
     .submit:active{transform:translateY(1px)}
     .meta{color:var(--muted);font-size:13px}
@@ -54,21 +56,87 @@
     .success{background:linear-gradient(90deg,#059669,#10b981);padding:10px 12px;border-radius:10px;color:white}
     .error{background:linear-gradient(90deg,#ef4444,#fb923c);padding:10px 12px;border-radius:10px;color:white}
     .foot{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
-    @media (max-width:980px){.container{grid-template-columns:1fr}.panel{order:2}.hero{order:1}}
+
+    /* Mobile & Tablet Responsive Fixes */
+    @media (max-width: 980px) {
+      .container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 20px;
+      }
+      
+      .panel, .hero {
+        padding: 20px;
+      }
+      
+      .brand {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .brand-img {
+        width: 50px;
+        height: 50px;
+      }
+      
+      h1 {
+        font-size: 20px;
+      }
+      
+      .lead, .hint, .meta, .chip {
+        font-size: 13px;
+      }
+      
+      .rating-row {
+        flex-wrap: wrap;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .submit {
+        width: 100%;
+        text-align: center;
+      }
+      
+      .toggle-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page {
+        padding: 16px 12px;
+      }
+      
+      .sample {
+        gap: 8px;
+      }
+      
+      .chip {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+      
+      .star {
+        font-size: 24px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="page">
-    <!-- starfield canvas -->
     <canvas id="starfield" aria-hidden="true"></canvas>
 
     <div class="container" role="main">
-      <!-- Left hero -->
       <section class="hero" aria-labelledby="title">
         <div class="brand">
           <div class="brand-img" title="Replace this image by setting #brandImg src">
-            <!-- Replace the src or the data-src below with your logo URL -->
-            <img id="brandImg" src="https://dl.dropboxusercontent.com/scl/fi/v5d7xte4tksarsdufk4ay/image.png?rlkey=ca8p4jsfcw1pnqr79q8uympso&st=ikst5uy1&dl=0" alt="TeamGalaxy logo placeholder" />
+            <img id="brandImg" src="https://dl.dropboxusercontent.com/scl/fi/v5d7xte4tksarsdufk4ay/image.png?rlkey=ca8p4jsfcw1pnqr79q8uympso&st=ikst5uy1&dl=0 " alt="TeamGalaxy logo placeholder" />
           </div>
           <div>
             <h1 id="title">Share a quick praise</h1>
@@ -88,7 +156,6 @@
         </div>
       </section>
 
-      <!-- Right form -->
       <aside class="panel" aria-labelledby="formTitle">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div>
@@ -136,7 +203,6 @@
     </div>
   </div>
 
-  <!-- Firebase + app (SDK v11.9.0) -->
   <script type="module">
     // =========== Firebase config (provided) ===========
     const firebaseConfig = {
@@ -150,9 +216,9 @@
     };
     // =================================================
 
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js';
-    import { getFirestore, collection, addDoc, serverTimestamp, updateDoc } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js';
-    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js ';
+    import { getFirestore, collection, addDoc, serverTimestamp, updateDoc } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js ';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js ';
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -373,16 +439,10 @@
       draw();
     })();
 
-    // OPTIONAL: allow replacing brand image via JS data-src attribute if you want dynamic replace
     (function placeholderSetup(){
       const brandImg = document.getElementById('brandImg');
-      // If you prefer, replace the src directly in HTML. Otherwise you can set data-src and uncomment below:
-      // const dataSrc = brandImg.getAttribute('data-src');
-      // if (dataSrc) brandImg.src = dataSrc;
-      // Keep alt text helpful:
       brandImg.alt = brandImg.alt || 'TeamGalaxy logo';
     })();
-
   </script>
 </body>
 </html>
