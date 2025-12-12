@@ -24,8 +24,8 @@
     :host {
       all: initial; /* reset inherited UA/host styles */
       position: fixed;
-      right: 18px;
-      bottom: 18px;
+      right: 30px;
+      bottom: 30px;
       z-index: 2147483647;
       display: block;
       pointer-events: auto;
