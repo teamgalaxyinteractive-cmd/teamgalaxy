@@ -2,84 +2,151 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TeamGalaxy — Share Praise</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TeamGalaxy — Share Praise ✨</title>
+
+  <!-- Minimal web font fallback -->
   <style>
-    :root{--bg:#0f1724;--card:#0b1220;--accent:#7c3aed;--muted:#94a3b8;--glass:rgba(255,255,255,0.03)}
-    html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
-    body{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#021226 0%, #071331 100%);color:#e6eef8;padding:24px}
-    .card{width:100%;max-width:760px;background:var(--card);border-radius:12px;padding:28px;box-shadow:0 8px 30px rgba(2,6,23,0.6);}.card a{color:inherit}
-    h1{margin:0 0 6px;font-size:20px}
-    p.small{margin:0 0 18px;color:var(--muted)}
-    label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
-    input[type=number],textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;outline:none}
-    textarea{min-height:120px;resize:vertical}
-    .controls{display:flex;gap:8px;align-items:center;margin-top:12px}
-    button{background:var(--accent);border:none;color:white;padding:10px 14px;border-radius:10px;cursor:pointer}
-    button[disabled]{opacity:0.5;cursor:not-allowed}
-    .meta{font-size:13px;color:var(--muted);margin-top:10px}
-    .success{background:linear-gradient(90deg,#047857,#059669);padding:10px;border-radius:8px;margin-top:10px;color:white}
-    .error{background:linear-gradient(90deg,#b91c1c,#ef4444);padding:10px;border-radius:8px;margin-top:10px;color:white}
-    .small-muted{font-size:12px;color:var(--muted)}
-    .rating-stars{display:inline-flex;gap:6px}
-    .star{cursor:pointer;font-size:20px;opacity:0.7}
-    .star.active{color:gold;opacity:1}
-    .signed {font-size:13px;color:#cfe9ff;margin-top:8px}
-    .anon-encourage{font-size:12px;color:var(--muted);margin-left:8px}
-    footer.note{margin-top:14px;font-size:13px;color:var(--muted)}
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+    :root{
+      --bg1:#040612;
+      --bg2:#07122a;
+      --card:#071428;
+      --accent:#8b5cf6;
+      --accent-2:#06b6d4;
+      --muted:#9fb4c9;
+      --glass:rgba(255,255,255,0.04);
+      --success:#10b981;
+      --danger:#ef4444;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:#e6f0fb}
+    /* full-screen centered layout */
+    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px;box-sizing:border-box;position:relative;overflow:hidden}
+    /* starfield canvas sits behind everything */
+    canvas#starfield{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.85;filter:drop-shadow(0 8px 32px rgba(0,0,0,0.6));}
+
+    /* card */
+    .card{position:relative;z-index:2;width:100%;max-width:920px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border-radius:16px;padding:30px 28px;box-shadow:0 12px 40px rgba(2,6,23,0.7);backdrop-filter: blur(6px);border:1px solid rgba(255,255,255,0.03)}
+    .head{display:flex;align-items:center;gap:16px}
+    .logo{
+      width:54px;height:54px;border-radius:12px;display:inline-grid;place-items:center;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      box-shadow:0 6px 20px rgba(139,92,246,0.16);font-weight:800;color:white;font-size:22px;
+    }
+    h1{font-size:20px;margin:0}
+    p.lead{margin:6px 0 0;color:var(--muted);font-size:14px}
+
+    /* form layout */
+    form{margin-top:18px;display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
+    .left{display:flex;flex-direction:column;gap:12px}
+    .right{display:flex;flex-direction:column;gap:12px;align-items:stretch}
+    label{font-size:13px;color:var(--muted);margin-bottom:6px}
+    textarea{min-height:150px;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);background:rgba(255,255,255,0.02);color:inherit;resize:vertical;font-size:15px;outline:none}
+    textarea::placeholder{color:rgba(230,240,251,0.5)}
+    .small{font-size:13px;color:var(--muted)}
+
+    /* rating big stars (left) */
+    .big-stars{display:flex;gap:8px;align-items:center}
+    .big-stars .star{
+      font-size:34px;cursor:pointer;transition:transform .12s ease, opacity .12s;opacity:0.9;
+      text-shadow:0 6px 18px rgba(0,0,0,0.5)
+    }
+    .big-stars .star:hover{transform:translateY(-6px) scale(1.06)}
+    .big-stars .active{color:#ffd54a;filter:drop-shadow(0 6px 18px rgba(255,213,74,0.12))}
+
+    /* small control box (right) */
+    .box{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:12px}
+    .toggle{display:flex;align-items:center;gap:12px}
+    .toggle input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent)}
+    .note{font-size:13px;color:var(--muted);line-height:1.35}
+
+    /* submit */
+    .row{display:flex;gap:10px;align-items:center}
+    button.submit{
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));border:0;padding:12px 16px;border-radius:10px;color:white;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(6,182,212,0.12);
+      transition:transform .12s ease, box-shadow .12s;
+    }
+    button.submit:active{transform:translateY(1px)}
+    .ref{font-size:13px;color:var(--muted)}
+    .success{background:linear-gradient(90deg,#059669,#10b981);padding:10px;border-radius:10px;color:white}
+    .error{background:linear-gradient(90deg,#ef4444,#f97316);padding:10px;border-radius:10px;color:white}
+
+    /* mobile layout */
+    @media (max-width:880px){
+      form{grid-template-columns:1fr;gap:16px}
+      .right{order:2}
+    }
+
+    /* subtle footer */
+    .tiny{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
   </style>
 </head>
 <body>
-  <div class="card" role="main">
-    <h1>Share some praise ✨</h1>
-    <p class="small">Got something you liked? Leave a short praise — anonymous or signed. Note: this is not a support channel; the team won't reply from here.</p>
+  <div class="wrap">
+    <canvas id="starfield" aria-hidden="true"></canvas>
 
-    <div id="signedInfo" class="signed" style="display:none">
-      Signed in as <strong id="signedName">—</strong>
-      <span class="anon-encourage" id="anonHint" style="display:none">• You can choose to submit anonymously, but we encourage leaving your name so the team knows who sent it.</span>
+    <div class="card" role="main" aria-labelledby="pageTitle">
+      <div class="head">
+        <div class="logo">TG</div>
+        <div>
+          <h1 id="pageTitle">Share a quick praise ✨</h1>
+          <p class="lead">Short, happy notes that make our day. This is read-only — the team won't reply from here.</p>
+        </div>
+      </div>
+
+      <!-- Signed-in hint (filled by JS) -->
+      <div id="signedInfo" style="margin-top:12px;display:none">
+        <div class="small" id="signedText"></div>
+      </div>
+
+      <form id="praiseForm" autocomplete="off" novalidate>
+        <div class="left">
+          <div>
+            <label for="message">Your praise</label>
+            <textarea id="message" placeholder="What did you like? (at least 20 characters)" required minlength="20"></textarea>
+          </div>
+
+          <div>
+            <label>How much did you enjoy it?</label>
+            <div class="big-stars" id="bigStars" aria-hidden="true"></div>
+            <div class="small" style="margin-top:8px">Tip: click a star or use the number input on the right.</div>
+          </div>
+
+          <div class="tiny">Praise is anonymous for guests. If you're signed in, we encourage leaving your name — but you can still hide it.</div>
+        </div>
+
+        <div class="right">
+          <div class="box">
+            <div>
+              <label for="ratingValue">Rating</label>
+              <input id="ratingValue" type="number" min="1" max="5" value="5" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:rgba(255,255,255,0.02);color:inherit;font-size:15px">
+            </div>
+
+            <div style="display:flex;gap:10px;align-items:center;justify-content:space-between">
+              <div class="toggle">
+                <input type="checkbox" id="isAnon" checked aria-label="Submit anonymously">
+                <label for="isAnon" class="small">Submit anonymously</label>
+              </div>
+              <div class="ref" id="refPreview">Ref: —</div>
+            </div>
+
+            <div class="note">This form collects only what's needed to celebrate — no screenshots or support replies here.</div>
+
+            <div class="row" style="margin-top:6px">
+              <button class="submit" id="submitBtn" type="submit">Send Praise</button>
+              <div id="msgBox" style="flex:1"></div>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <div class="tiny">Thanks for making TeamGalaxy better 💫</div>
     </div>
-
-    <form id="praiseForm" autocomplete="off">
-      <div style="margin-top:8px">
-        <label>Category</label>
-        <div style="padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);">
-          <strong>Praise</strong>
-        </div>
-      </div>
-
-      <div style="margin-top:12px">
-        <label for="rating">Rating</label>
-        <div id="rating" style="display:flex;gap:6px;align-items:center">
-          <div class="rating-stars" id="stars" aria-hidden="true"></div>
-          <input type="number" id="ratingValue" min="1" max="5" value="5" style="width:56px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit"/>
-        </div>
-      </div>
-
-      <div style="margin-top:12px">
-        <label for="message">Message</label>
-        <textarea id="message" placeholder="Write your praise (min 20 characters) — keep it positive!" required minlength="20"></textarea>
-      </div>
-
-      <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="isAnon" /> <span class="small-muted" id="isAnonLabel">Submit anonymously</span>
-        </label>
-        <div id="anonInfo" class="small-muted" style="margin-left:auto">Default: <span id="defaultMode">Anonymous</span></div>
-      </div>
-
-      <div class="controls">
-        <button id="submitBtn" type="submit">Send Praise</button>
-        <div class="meta">Ref: <span id="refPreview">—</span></div>
-      </div>
-
-      <div id="messageBox" aria-live="polite"></div>
-    </form>
-
-    <footer class="note">We collect only minimal data to improve the product (no screenshots). Praise is anonymous by default for guests; signed users are encouraged to attach identity but can still opt to hide it.</footer>
   </div>
 
+  <!-- Firebase & app logic (SDK v11.9.0). Keep this script type=module. -->
   <script type="module">
-    // ----------------- YOUR FIREBASE CONFIG (from your message) -----------------
+    // =========== Firebase config (your provided values) ===========
     const firebaseConfig = {
       apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
       authDomain: "teamgalaxy-77344.firebaseapp.com",
@@ -89,9 +156,8 @@
       appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
       measurementId: "G-6C2W9NSNCH"
     };
-    // --------------------------------------------------------------------------
+    // ============================================================
 
-    // Firebase SDK v11.9.0 (modular)
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js';
     import { getFirestore, collection, addDoc, serverTimestamp, updateDoc } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js';
@@ -100,7 +166,7 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // persistent clientId (localStorage)
+    // ---------- small helpers (client id + hash) ----------
     function getClientId() {
       const key = 'teamgalaxy:clientId:v1';
       let id = localStorage.getItem(key);
@@ -111,164 +177,194 @@
       }
       return id;
     }
-
-    // SHA-256 digest helper (returns hex)
     async function digestUTF8(message) {
       const enc = new TextEncoder();
       const data = enc.encode(message);
       const hash = await crypto.subtle.digest('SHA-256', data);
       return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
     }
-
-    // fingerprint: userAgent + platform + timezone + clientId (hashed)
     async function getFingerprint() {
       try {
         const clientId = getClientId();
-        const f = [
-          navigator.userAgent || '',
-          navigator.platform || '',
-          Intl.DateTimeFormat().resolvedOptions().timeZone || '',
-          clientId
-        ].join('||');
+        const f = [navigator.userAgent || '', navigator.platform || '', Intl.DateTimeFormat().resolvedOptions().timeZone || '', clientId].join('||');
         return await digestUTF8(f);
-      } catch (e) {
-        return null;
-      }
+      } catch { return null; }
     }
-
     function shortRefFromId(id) {
       return `FB-${(new Date()).toISOString().slice(0,10).replace(/-/g,'')}-${id.slice(0,6).toUpperCase()}`;
     }
 
-    // Stars UI
-    const starsWrap = document.getElementById('stars');
+    // ---------- UI wiring ----------
+    const bigStars = document.getElementById('bigStars');
     const ratingValue = document.getElementById('ratingValue');
-    function renderStars(n){
-      starsWrap.innerHTML = '';
+    const messageEl = document.getElementById('message');
+    const isAnon = document.getElementById('isAnon');
+    const submitBtn = document.getElementById('submitBtn');
+    const msgBox = document.getElementById('msgBox');
+    const refPreview = document.getElementById('refPreview');
+    const signedInfo = document.getElementById('signedInfo');
+    const signedText = document.getElementById('signedText');
+
+    // render 5 stars and click handlers
+    function renderStars(n = 5){
+      bigStars.innerHTML = '';
       for(let i=1;i<=5;i++){
         const s = document.createElement('span');
         s.className = 'star' + (i<=n ? ' active' : '');
         s.textContent = '★';
         s.dataset.value = i;
+        s.title = `${i} star${i>1?'s':''}`;
         s.addEventListener('click', ()=>{ ratingValue.value = i; renderStars(i); });
-        starsWrap.appendChild(s);
+        bigStars.appendChild(s);
       }
     }
-    renderStars(parseInt(ratingValue.value,10) || 5);
-    ratingValue.addEventListener('input', ()=>{
+    renderStars(5);
+    ratingValue.addEventListener('input', ()=> {
       let v = parseInt(ratingValue.value,10);
       if (isNaN(v) || v<1) v=1; if (v>5) v=5; ratingValue.value = v; renderStars(v);
     });
 
-    // Form wiring
-    const form = document.getElementById('praiseForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const messageBox = document.getElementById('messageBox');
-    const refPreview = document.getElementById('refPreview');
-    const isAnonCheckbox = document.getElementById('isAnon');
-    const signedInfo = document.getElementById('signedInfo');
-    const signedName = document.getElementById('signedName');
-    const anonHint = document.getElementById('anonHint');
-    const defaultModeLabel = document.getElementById('defaultMode');
-
+    // auth: encourage signed users to leave name
     let currentUser = null;
-    let signedDefaultAnon = true; // will be updated on auth change
-
+    let signedDefaultAnon = true;
     onAuthStateChanged(auth, (u) => {
       currentUser = u;
       if (u) {
-        // user signed in -> default to NOT anonymous (encourage identity)
         signedDefaultAnon = false;
         signedInfo.style.display = 'block';
-        signedName.textContent = u.displayName || (u.email ? u.email.split('@')[0] : u.uid.slice(0,6));
-        anonHint.style.display = 'inline';
-        isAnonCheckbox.checked = false; // default: not anonymous
-        defaultModeLabel.textContent = 'Signed (recommended)';
+        signedText.textContent = `Signed in as ${u.displayName || (u.email ? u.email.split('@')[0] : u.uid.slice(0,6))}. You can hide your name, but we appreciate when you don’t.`;
+        isAnon.checked = false;
       } else {
-        // guest -> default anonymous
         signedDefaultAnon = true;
         signedInfo.style.display = 'none';
-        anonHint.style.display = 'none';
-        isAnonCheckbox.checked = true;
-        defaultModeLabel.textContent = 'Anonymous';
+        isAnon.checked = true;
       }
+      // set preview ref to include client id snippet
+      const fake = getClientId().slice(0,6).toUpperCase();
+      refPreview.textContent = `Ref: FB-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${fake}`;
     });
 
     function showMessage(text, type='ok'){
-      messageBox.innerHTML = '';
-      const div = document.createElement('div');
-      div.className = type === 'ok' ? 'success' : 'error';
-      div.textContent = text;
-      messageBox.appendChild(div);
+      msgBox.innerHTML = '';
+      const d = document.createElement('div');
+      d.className = type === 'ok' ? 'success' : 'error';
+      d.textContent = text;
+      msgBox.appendChild(d);
     }
 
-    let isSubmitting = false;
+    // form submit logic
+    let busy = false;
+    document.getElementById('praiseForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (busy) return;
+      busy = true; submitBtn.disabled = true; msgBox.innerHTML = '';
 
-    form.addEventListener('submit', async (ev)=>{
-      ev.preventDefault();
-      if (isSubmitting) return;
-      isSubmitting = true; submitBtn.disabled = true; messageBox.innerHTML = '';
+      const message = messageEl.value.trim();
+      const rating = parseInt(ratingValue.value,10) || 5;
+      const wantAnon = isAnon.checked;
 
-      const rating = parseInt(document.getElementById('ratingValue').value, 10) || 5;
-      const message = document.getElementById('message').value.trim();
-      const wantsAnon = isAnonCheckbox.checked;
-
-      if (message.length < 20) { showMessage('Message is too short — please write at least 20 characters.', 'err'); isSubmitting=false; submitBtn.disabled=false; return; }
+      if (message.length < 20) { showMessage('Please add a bit more — 20 characters min.', 'err'); busy=false; submitBtn.disabled=false; return; }
 
       try {
         const fingerprint = await getFingerprint();
         const clientId = getClientId();
-
-        // If user is signed-in AND did NOT choose anonymous, attach their uid/displayName.
-        // Otherwise store null for userId/displayName (anonymous).
-        const authorId = (currentUser && !wantsAnon) ? currentUser.uid : null;
-        const authorName = (currentUser && !wantsAnon) ? (currentUser.displayName || null) : null;
+        const authorId = (currentUser && !wantAnon) ? currentUser.uid : null;
+        const authorName = (currentUser && !wantAnon) ? (currentUser.displayName || null) : null;
 
         const payload = {
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
-          rating: rating,
+          rating,
           category: 'praise',
-          message: message,
-          status: 'closed_as_praise', // indicates praise-only (no reply)
+          message,
+          status: 'closed_as_praise',
           visible: true,
-          clientId: clientId,
-          fingerprint: fingerprint,
+          clientId,
+          fingerprint,
           clientLocale: navigator.language || null,
           userId: authorId,
           displayName: authorName,
-          anonymousSubmission: !!wantsAnon
+          anonymousSubmission: !!wantAnon
         };
 
         const col = collection(db, 'feedback');
         const docRef = await addDoc(col, payload);
-
-        // Generate friendly refId and write back
         const refId = shortRefFromId(docRef.id);
         await updateDoc(docRef, { refId, updatedAt: serverTimestamp() });
 
-        refPreview.textContent = refId;
-        showMessage(`Thanks! Your praise is received — reference ${refId}.`, 'ok');
-        form.reset(); renderStars(5); ratingValue.value = 5;
-
-        // After reset, restore default anon state according to sign-in
-        isAnonCheckbox.checked = signedDefaultAnon;
+        // success UI
+        refPreview.textContent = `Ref: ${refId}`;
+        showMessage('Thanks! Your praise brightened our day ✨', 'ok');
+        messageEl.value = '';
+        ratingValue.value = 5; renderStars(5);
+        isAnon.checked = signedDefaultAnon; // reset anon to default for user type
 
       } catch (err) {
-        console.error('Submission failed', err);
-        showMessage('Submission failed. Please try again later.', 'err');
+        console.error(err);
+        showMessage('Submission failed — try again in a bit.', 'err');
       } finally {
-        isSubmitting = false; submitBtn.disabled = false;
+        busy=false; submitBtn.disabled=false;
       }
     });
 
-    // initial preview ref using clientId
-    (function(){
-      const fake = getClientId().slice(0,6).toUpperCase();
-      refPreview.textContent = `FB-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${fake}`;
-      // initial default checkbox state
-      isAnonCheckbox.checked = true;
+    // ---------- animated starfield canvas (interactive) ----------
+    (function initStarfield(){
+      const canvas = document.getElementById('starfield');
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = innerWidth;
+      let h = canvas.height = innerHeight;
+      const stars = [];
+      const STAR_COUNT = Math.round((w*h)/9000); // density
+      for (let i=0;i<STAR_COUNT;i++){
+        stars.push({
+          x: Math.random()*w,
+          y: Math.random()*h,
+          r: (Math.random()*1.4)+0.4,
+          vx: (Math.random()-0.5)*0.05,
+          vy: (Math.random()-0.5)*0.05,
+          twinkle: Math.random()*0.8
+        });
+      }
+      let mouseX = w/2, mouseY = h/2;
+      window.addEventListener('resize', ()=>{ w = canvas.width = innerWidth; h = canvas.height = innerHeight; });
+      window.addEventListener('mousemove', (e)=>{ mouseX = e.clientX; mouseY = e.clientY; });
+
+      function draw(){
+        ctx.clearRect(0,0,w,h);
+        // subtle gradient
+        const g = ctx.createLinearGradient(0,0,0,h);
+        g.addColorStop(0,'rgba(7,18,40,0.06)');
+        g.addColorStop(1,'rgba(2,6,18,0.08)');
+        ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+
+        for (let s of stars){
+          // slight movement and parallax to mouse
+          const dx = (mouseX - w/2)/ (w) * (s.r*6);
+          const dy = (mouseY - h/2)/ (h) * (s.r*6);
+          s.x += s.vx + dx*0.002;
+          s.y += s.vy + dy*0.002;
+          if (s.x < -10) s.x = w+10;
+          if (s.x > w+10) s.x = -10;
+          if (s.y < -10) s.y = h+10;
+          if (s.y > h+10) s.y = -10;
+
+          const a = 0.6 + Math.sin((Date.now()/1000 + s.twinkle)*2)*0.35;
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(255,255,255,${a})`;
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+          ctx.fill();
+        }
+
+        // animate a faint moving constellation near the card center
+        requestAnimationFrame(draw);
+      }
+      draw();
     })();
+
+    // small accessibility: focus textarea on load
+    window.addEventListener('load', ()=>{ setTimeout(()=>messageEl.focus(),300); });
+
+    // End of module
   </script>
 </body>
 </html>
