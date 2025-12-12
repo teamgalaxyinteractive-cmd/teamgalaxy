@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TeamGalaxy — Send Feedback</title>
+  <title>TeamGalaxy — Share Praise</title>
   <style>
     :root{--bg:#0f1724;--card:#0b1220;--accent:#7c3aed;--muted:#94a3b8;--glass:rgba(255,255,255,0.03)}
     html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
@@ -11,10 +11,8 @@
     .card{width:100%;max-width:760px;background:var(--card);border-radius:12px;padding:28px;box-shadow:0 8px 30px rgba(2,6,23,0.6);}.card a{color:inherit}
     h1{margin:0 0 6px;font-size:20px}
     p.small{margin:0 0 18px;color:var(--muted)}
-    .row{display:flex;gap:12px}
-    .col{flex:1}
     label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
-    select,input[type=number],input[type=email],textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;outline:none}
+    input[type=number],textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;outline:none}
     textarea{min-height:120px;resize:vertical}
     .controls{display:flex;gap:8px;align-items:center;margin-top:12px}
     button{background:var(--accent);border:none;color:white;padding:10px 14px;border-radius:10px;cursor:pointer}
@@ -26,61 +24,58 @@
     .rating-stars{display:inline-flex;gap:6px}
     .star{cursor:pointer;font-size:20px;opacity:0.7}
     .star.active{color:gold;opacity:1}
+    .signed {font-size:13px;color:#cfe9ff;margin-top:8px}
+    .anon-encourage{font-size:12px;color:var(--muted);margin-left:8px}
     footer.note{margin-top:14px;font-size:13px;color:var(--muted)}
   </style>
 </head>
 <body>
   <div class="card" role="main">
-    <h1>Send Feedback</h1>
-    <p class="small">Quick, anonymous, and helpful — tell us what's working or what's broken. No screenshots to keep storage light.</p>
+    <h1>Share some praise ✨</h1>
+    <p class="small">Got something you liked? Leave a short praise — anonymous or signed. Note: this is not a support channel; the team won't reply from here.</p>
 
-    <form id="feedbackForm" autocomplete="off">
-      <div class="row">
-        <div class="col">
-          <label for="category">Category</label>
-          <select id="category" required>
-            <option value="bug">Bug</option>
-            <option value="suggestion">Suggestion</option>
-            <option value="praise">Praise</option>
-            <option value="other">Other</option>
-          </select>
+    <div id="signedInfo" class="signed" style="display:none">
+      Signed in as <strong id="signedName">—</strong>
+      <span class="anon-encourage" id="anonHint" style="display:none">• You can choose to submit anonymously, but we encourage leaving your name so the team knows who sent it.</span>
+    </div>
+
+    <form id="praiseForm" autocomplete="off">
+      <div style="margin-top:8px">
+        <label>Category</label>
+        <div style="padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);">
+          <strong>Praise</strong>
         </div>
-        <div style="width:140px" class="col">
-          <label for="rating">Rating</label>
-          <div id="rating" style="display:flex;gap:6px;align-items:center">
-            <div class="rating-stars" id="stars" aria-hidden="true"></div>
-            <input type="number" id="ratingValue" min="1" max="5" value="5" style="width:56px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit"/>
-          </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <label for="rating">Rating</label>
+        <div id="rating" style="display:flex;gap:6px;align-items:center">
+          <div class="rating-stars" id="stars" aria-hidden="true"></div>
+          <input type="number" id="ratingValue" min="1" max="5" value="5" style="width:56px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit"/>
         </div>
       </div>
 
       <div style="margin-top:12px">
         <label for="message">Message</label>
-        <textarea id="message" placeholder="Tell us what's happening (min 20 characters)" required minlength="20"></textarea>
+        <textarea id="message" placeholder="Write your praise (min 20 characters) — keep it positive!" required minlength="20"></textarea>
       </div>
 
-      <div style="margin-top:12px" class="row">
-        <div class="col">
-          <label for="email">Optional - Email (if you want a reply)</label>
-          <input type="email" id="email" placeholder="yourname@example.com" />
-        </div>
-        <div style="width:120px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start">
-          <label style="font-size:13px;color:var(--muted)">Anonymous</label>
-          <label style="display:flex;align-items:center;gap:8px;margin-top:6px;cursor:pointer">
-            <input type="checkbox" id="isAnon" checked /> <span class="small-muted">Submit anonymously</span>
-          </label>
-        </div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="isAnon" /> <span class="small-muted" id="isAnonLabel">Submit anonymously</span>
+        </label>
+        <div id="anonInfo" class="small-muted" style="margin-left:auto">Default: <span id="defaultMode">Anonymous</span></div>
       </div>
 
       <div class="controls">
-        <button id="submitBtn" type="submit">Send Feedback</button>
-        <div class="meta" id="metaInfo">Ref: <span id="refPreview">—</span></div>
+        <button id="submitBtn" type="submit">Send Praise</button>
+        <div class="meta">Ref: <span id="refPreview">—</span></div>
       </div>
 
       <div id="messageBox" aria-live="polite"></div>
     </form>
 
-    <footer class="note">Note: We keep feedback data to improve the product. <strong>We do not collect screenshots</strong> here to save storage.</footer>
+    <footer class="note">We collect only minimal data to improve the product (no screenshots). Praise is anonymous by default for guests; signed users are encouraged to attach identity but can still opt to hide it.</footer>
   </div>
 
   <script type="module">
@@ -105,7 +100,7 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
-    // Utility: clientId (persistent), use crypto.randomUUID when available
+    // persistent clientId (localStorage)
     function getClientId() {
       const key = 'teamgalaxy:clientId:v1';
       let id = localStorage.getItem(key);
@@ -125,7 +120,7 @@
       return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
     }
 
-    // Privacy-minded fingerprint: userAgent + platform + timezone + clientId
+    // fingerprint: userAgent + platform + timezone + clientId (hashed)
     async function getFingerprint() {
       try {
         const clientId = getClientId();
@@ -141,7 +136,6 @@
       }
     }
 
-    // Friendly ref id generator from doc id
     function shortRefFromId(id) {
       return `FB-${(new Date()).toISOString().slice(0,10).replace(/-/g,'')}-${id.slice(0,6).toUpperCase()}`;
     }
@@ -167,13 +161,38 @@
     });
 
     // Form wiring
-    const form = document.getElementById('feedbackForm');
+    const form = document.getElementById('praiseForm');
     const submitBtn = document.getElementById('submitBtn');
     const messageBox = document.getElementById('messageBox');
     const refPreview = document.getElementById('refPreview');
+    const isAnonCheckbox = document.getElementById('isAnon');
+    const signedInfo = document.getElementById('signedInfo');
+    const signedName = document.getElementById('signedName');
+    const anonHint = document.getElementById('anonHint');
+    const defaultModeLabel = document.getElementById('defaultMode');
 
     let currentUser = null;
-    onAuthStateChanged(auth, (u)=>{ currentUser = u; });
+    let signedDefaultAnon = true; // will be updated on auth change
+
+    onAuthStateChanged(auth, (u) => {
+      currentUser = u;
+      if (u) {
+        // user signed in -> default to NOT anonymous (encourage identity)
+        signedDefaultAnon = false;
+        signedInfo.style.display = 'block';
+        signedName.textContent = u.displayName || (u.email ? u.email.split('@')[0] : u.uid.slice(0,6));
+        anonHint.style.display = 'inline';
+        isAnonCheckbox.checked = false; // default: not anonymous
+        defaultModeLabel.textContent = 'Signed (recommended)';
+      } else {
+        // guest -> default anonymous
+        signedDefaultAnon = true;
+        signedInfo.style.display = 'none';
+        anonHint.style.display = 'none';
+        isAnonCheckbox.checked = true;
+        defaultModeLabel.textContent = 'Anonymous';
+      }
+    });
 
     function showMessage(text, type='ok'){
       messageBox.innerHTML = '';
@@ -190,35 +209,35 @@
       if (isSubmitting) return;
       isSubmitting = true; submitBtn.disabled = true; messageBox.innerHTML = '';
 
-      const category = document.getElementById('category').value;
       const rating = parseInt(document.getElementById('ratingValue').value, 10) || 5;
       const message = document.getElementById('message').value.trim();
-      const emailInput = (document.getElementById('email').value || '').trim();
-      const email = emailInput === '' ? null : emailInput;
-      const isAnon = document.getElementById('isAnon').checked;
+      const wantsAnon = isAnonCheckbox.checked;
 
       if (message.length < 20) { showMessage('Message is too short — please write at least 20 characters.', 'err'); isSubmitting=false; submitBtn.disabled=false; return; }
-      if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { showMessage('Invalid email address.', 'err'); isSubmitting=false; submitBtn.disabled=false; return; }
 
       try {
         const fingerprint = await getFingerprint();
         const clientId = getClientId();
 
+        // If user is signed-in AND did NOT choose anonymous, attach their uid/displayName.
+        // Otherwise store null for userId/displayName (anonymous).
+        const authorId = (currentUser && !wantsAnon) ? currentUser.uid : null;
+        const authorName = (currentUser && !wantsAnon) ? (currentUser.displayName || null) : null;
+
         const payload = {
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
-          userId: (currentUser && !isAnon) ? currentUser.uid : null,
-          displayName: (currentUser && !isAnon) ? (currentUser.displayName || null) : null,
-          email: (isAnon ? null : email),
           rating: rating,
-          category: category,
+          category: 'praise',
           message: message,
-          status: 'open',
+          status: 'closed_as_praise', // indicates praise-only (no reply)
           visible: true,
           clientId: clientId,
           fingerprint: fingerprint,
-          clientLocale: navigator.language || null
-          // intentionally NOT storing raw userAgent or IP here to minimize PII on client
+          clientLocale: navigator.language || null,
+          userId: authorId,
+          displayName: authorName,
+          anonymousSubmission: !!wantsAnon
         };
 
         const col = collection(db, 'feedback');
@@ -228,10 +247,12 @@
         const refId = shortRefFromId(docRef.id);
         await updateDoc(docRef, { refId, updatedAt: serverTimestamp() });
 
-        // UI success
         refPreview.textContent = refId;
-        showMessage(`Thank you! Your feedback was submitted — reference ${refId}.`, 'ok');
+        showMessage(`Thanks! Your praise is received — reference ${refId}.`, 'ok');
         form.reset(); renderStars(5); ratingValue.value = 5;
+
+        // After reset, restore default anon state according to sign-in
+        isAnonCheckbox.checked = signedDefaultAnon;
 
       } catch (err) {
         console.error('Submission failed', err);
@@ -241,10 +262,12 @@
       }
     });
 
-    // small initial preview ref using clientId
+    // initial preview ref using clientId
     (function(){
       const fake = getClientId().slice(0,6).toUpperCase();
       refPreview.textContent = `FB-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${fake}`;
+      // initial default checkbox state
+      isAnonCheckbox.checked = true;
     })();
   </script>
 </body>
