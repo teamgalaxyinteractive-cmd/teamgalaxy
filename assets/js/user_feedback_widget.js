@@ -1,4 +1,4 @@
-// feedback-widget.js — delayed, animated, nicer UI, shadow-dom isolated, robust placement
+// feedback-widget.js — redirect fixed + smoother animation + robust pointer handling
 (function () {
   if (window.__TG_FEEDBACK_WIDGET_INJECTED__) return;
   window.__TG_FEEDBACK_WIDGET_INJECTED__ = true;
@@ -6,11 +6,9 @@
   const REDIRECT_URL = '/user_feedback';
   const BASE_ID = 'tg-feedback-widget-v1-root';
   const DEBUG = false;
+  const SHOW_DELAY_MS = 5000; // 5s delay before showing
 
-  // Show delay (ms)
-  const SHOW_DELAY_MS = 5000; // 5 seconds initial hidden period
-
-  // Utility: create element
+  // Utilities
   function ce(tag, attrs = {}) {
     const el = document.createElement(tag);
     for (const k in attrs) {
@@ -20,8 +18,6 @@
     }
     return el;
   }
-
-  // Collision detection helper
   function rectsIntersect(a, b, padding = 6) {
     return !(a.right - padding <= b.left + padding ||
              a.left + padding >= b.right - padding ||
@@ -29,195 +25,131 @@
              a.top + padding >= b.bottom - padding);
   }
 
-  // Create host and shadow content (if available)
+  // Create host and shadow, with isolated styles
   function createHost() {
     let host = document.getElementById(BASE_ID);
     if (host) return host;
 
     host = document.createElement('div');
     host.id = BASE_ID;
-    // prevent accidental fading from host by default
+    // initial hidden state
     host.style.pointerEvents = 'none';
     host.style.opacity = '0';
-    host.style.transition = 'opacity 360ms ease';
 
-    // Try Shadow DOM for style isolation
+    // try shadow root
     let useShadow = false;
-    try {
-      if (host.attachShadow) {
-        host._shadow = host.attachShadow({ mode: 'open' });
-        useShadow = true;
-      }
-    } catch (e) {
-      useShadow = false;
-    }
+    try { if (host.attachShadow) { host._shadow = host.attachShadow({ mode: 'open' }); useShadow = true; } } catch (e) { useShadow = false; }
 
-    // Build inner markup
+    // inner structure
     const inner = ce('div', { id: 'tg-inner' });
-    const btn = ce('button', { id: 'tg-btn', type: 'button', title: 'Open feedback panel', 'aria-label': 'Open feedback panel (redirects to feedback page)', html: '&#128172;' }); // 💬
+    const btn = ce('button', { id: 'tg-btn', type: 'button', title: 'Open feedback panel', 'aria-label': 'Open feedback panel (redirects to feedback page)', html: '💬' });
     const label = ce('span', { class: 'tg-fw-label', html: 'Send feedback' });
     const sr = ce('span', { class: 'sr-only', text: 'Open feedback page' });
+    inner.appendChild(btn); inner.appendChild(label); inner.appendChild(sr);
 
-    inner.appendChild(btn);
-    inner.appendChild(label);
-    inner.appendChild(sr);
-
-    // Strong isolated CSS for shadow root
-    const widgetCSS = `
-      :host {
-        all: initial;
-        position: fixed;
-        right: 18px;
-        bottom: 18px;
-        z-index: 2147483647;
-        display: block;
-        pointer-events: none;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        transform: translateY(28px);
-        opacity: 0;
-        transition: transform 420ms cubic-bezier(.2,.9,.2,1), opacity 360ms ease;
-      }
-
-      :host(.tg-visible) {
-        transform: translateY(0);
-        opacity: 1;
-        pointer-events: auto;
-      }
-
-      #tg-btn {
-        box-sizing: border-box;
-        position: relative;
-        width: 84px;
-        height: 84px;
-        border-radius: 20px;
-        background: linear-gradient(180deg,#ff6b6b,#ff4757);
-        background-origin: border-box;
-        padding: 8px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        font-size: 38px;
-        line-height: 1;
-        border: none;
-        cursor: pointer;
-        user-select: none;
-        -webkit-tap-highlight-color: transparent;
-        box-shadow: 0 12px 40px rgba(0,0,0,0.55), 0 2px 8px rgba(255,99,130,0.06) inset;
-        transition: transform .14s ease, box-shadow .14s ease;
-        outline: none;
-      }
-      #tg-btn:hover { transform: translateY(-8px); box-shadow: 0 20px 56px rgba(0,0,0,0.6); }
-      #tg-btn:active { transform: translateY(-3px) scale(.99); }
+    // isolated strong CSS (shadow or fallback)
+    const css = `
+      :host { all: initial; position: fixed; right: 18px; bottom: 18px; z-index: 2147483647; display:block; pointer-events:none;
+             transform: translateY(28px); opacity:0; transition: transform 520ms cubic-bezier(.16,.84,.34,1), opacity 420ms ease;
+             will-change: transform, opacity; }
+      :host(.tg-visible) { transform: translateY(0); opacity:1; pointer-events:auto; }
+      #tg-btn { box-sizing:border-box; width:86px; height:86px; border-radius:22px; background: linear-gradient(180deg,#ff6b6b,#ff4757);
+               color:#fff; font-size:40px; display:inline-flex; align-items:center; justify-content:center; border:none;
+               cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent; transition: transform .12s ease, box-shadow .12s ease;
+               box-shadow: 0 14px 48px rgba(0,0,0,0.55); outline:none; }
+      #tg-btn:hover { transform: translateY(-8px); box-shadow: 0 26px 70px rgba(0,0,0,0.6); }
+      #tg-btn:active { transform: translateY(-3px) scale(.995); }
       #tg-btn:focus { outline: 4px solid rgba(255,255,255,0.12); outline-offset: 4px; }
-
-      /* decorative ring for subtle polish */
-      #tg-btn::before {
-        content: "";
-        position: absolute;
-        inset: -6px;
-        border-radius: 26px;
-        background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.03), transparent 25%);
-        pointer-events: none;
-      }
-
-      .tg-fw-label {
-        display: none;
-        position: absolute;
-        right: 106px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: linear-gradient(180deg, rgba(3,7,18,0.95), rgba(12,16,28,0.9));
-        color: #fff;
-        font-size: 13px;
-        padding: 10px 14px;
-        border-radius: 12px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        pointer-events: none;
-        white-space: nowrap;
-        letter-spacing: 0.1px;
-      }
-      :host(.show-label) .tg-fw-label { display: block; }
-
-      .sr-only {
-        position: absolute !important;
-        width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
-      }
-
-      :host(.tg-debug) #tg-btn {
-        box-shadow: 0 0 0 6px rgba(255,0,0,0.12) inset, 0 20px 60px rgba(0,0,0,0.6);
-      }
-
-      @media (max-width: 600px) {
-        #tg-btn { width: 72px; height: 72px; font-size: 32px; border-radius: 18px; }
-        .tg-fw-label { right: 94px; padding: 8px 12px; font-size: 12px; border-radius: 10px; }
-      }
+      #tg-btn::before { content:''; position:absolute; inset:-6px; border-radius:26px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.03), transparent 25%); pointer-events:none; }
+      .tg-fw-label { display:none; position:absolute; right:110px; top:50%; transform:translateY(-50%); background: rgba(6,10,20,0.95);
+                     color:#fff; font-size:13px; padding:10px 14px; border-radius:12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); pointer-events:none; white-space:nowrap; }
+      :host(.show-label) .tg-fw-label { display:block; }
+      .sr-only { position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+      @media (max-width:600px){ #tg-btn{ width:72px; height:72px; font-size:34px;} .tg-fw-label{ right:96px; padding:8px 12px; font-size:12px;} }
+      @media (prefers-reduced-motion: reduce){ :host, :host(.tg-visible){ transition: none; transform:none; opacity:1; } }
     `;
 
     if (useShadow) {
-      const style = document.createElement('style');
-      style.textContent = widgetCSS;
+      const style = document.createElement('style'); style.textContent = css;
       host._shadow.appendChild(style);
       host._shadow.appendChild(inner);
     } else {
-      // Fallback: minimal namespaced style injection to avoid page overrides
-      const fallbackCSS = `
-        #${BASE_ID} { position: fixed !important; right: 18px !important; bottom: 18px !important; z-index: 2147483647 !important; pointer-events: none !important; transform: translateY(28px); opacity: 0; transition: transform 420ms cubic-bezier(.2,.9,.2,1), opacity 360ms ease !important; }
-        #${BASE_ID}.tg-visible { transform: translateY(0) !important; opacity: 1 !important; pointer-events: auto !important; }
-        #${BASE_ID} #tg-btn { width:84px !important; height:84px !important; border-radius:20px !important; font-size:38px !important; background: linear-gradient(180deg,#ff6b6b,#ff4757) !important; box-shadow: 0 12px 40px rgba(0,0,0,0.55) !important; border: none !important; cursor: pointer !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; }
-        #${BASE_ID} .tg-fw-label { display:none !important; position:absolute !important; right:106px !important; top:50% !important; transform:translateY(-50%) !important; background: rgba(3,7,18,0.95) !important; color:#fff !important; padding:10px 14px !important; border-radius:12px !important; box-shadow:0 10px 30px rgba(0,0,0,0.5) !important; pointer-events:none !important; white-space:nowrap !important; }
-        #${BASE_ID}.show-label .tg-fw-label { display:block !important; }
-        @media (max-width:600px) { #${BASE_ID} #tg-btn { width:72px !important; height:72px !important; font-size:32px !important; } #${BASE_ID} .tg-fw-label { right:94px !important; padding:8px 12px !important; } }
-      `;
+      // fallback: inject namespaced style into head
       const fsId = BASE_ID + '-fallback-style';
       if (!document.getElementById(fsId)) {
-        const fs = document.createElement('style');
-        fs.id = fsId;
-        fs.textContent = fallbackCSS;
-        document.head.appendChild(fs);
+        try {
+          const fs = document.createElement('style'); fs.id = fsId;
+          // convert :host rules to #BASE_ID selectors for fallback
+          const fallback = css.replace(/:host\b/g, `#${BASE_ID}`).replace(/:host\(\.tg-visible\)/g, `#${BASE_ID}.tg-visible`);
+          fs.textContent = fallback;
+          document.head.appendChild(fs);
+        } catch (e) {}
       }
       host.appendChild(inner);
     }
 
-    // append host, but keep it invisible/untouchable initially
     (document.body || document.documentElement).appendChild(host);
     return host;
   }
 
-  // Wire interactions
+  // Wire interactions and robust redirect
   function wire(host) {
     const root = host._shadow || host;
     const btn = root.querySelector('#tg-btn');
     if (!btn) return;
 
+    function doRedirect() {
+      try {
+        if (window && typeof window.location !== 'undefined' && typeof window.location.assign === 'function') {
+          console.debug && console.debug('[TG-WIDGET] redirecting via location.assign ->', REDIRECT_URL);
+          window.location.assign(REDIRECT_URL);
+          return;
+        }
+      } catch (e) { console.warn('[TG-WIDGET] location.assign failed, fallbacking', e); }
+
+      // Fallback: try window.open in same tab, then new tab
+      try {
+        console.debug && console.debug('[TG-WIDGET] fallback redirect via window.open');
+        window.open(REDIRECT_URL, '_self');
+      } catch (e) {
+        try { window.open(REDIRECT_URL, '_blank'); } catch (er) { console.error('[TG-WIDGET] final redirect fallback failed', er); }
+      }
+    }
+
+    // Ensure button is keyboard accessible
+    btn.setAttribute('tabindex', '0');
     btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      try { window.location.href = REDIRECT_URL; } catch (err) { console.error('[TG-WIDGET] redirect failed', err); }
+      try { e.preventDefault(); } catch (err) {}
+      // small tactile press feedback
+      try {
+        btn.style.transform = 'translateY(-3px) scale(.995)';
+        setTimeout(() => { btn.style.transform = ''; }, 140);
+      } catch (e) {}
+      // final redirect
+      doRedirect();
     });
+
     btn.addEventListener('keydown', (ev) => {
       if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') {
-        ev.preventDefault(); btn.click();
+        ev.preventDefault();
+        btn.click();
       }
     });
 
-    // show/hide label on hover/focus when not debug
-    if (!DEBUG) {
-      host.addEventListener('mouseenter', () => host.classList.add('show-label'));
-      host.addEventListener('mouseleave', () => host.classList.remove('show-label'));
-      btn.addEventListener('focus', () => host.classList.add('show-label'));
-      btn.addEventListener('blur', () => host.classList.remove('show-label'));
-    }
+    // label show/hide
+    host.addEventListener('mouseenter', () => host.classList.add('show-label'));
+    host.addEventListener('mouseleave', () => host.classList.remove('show-label'));
+    btn.addEventListener('focus', () => host.classList.add('show-label'));
+    btn.addEventListener('blur', () => host.classList.remove('show-label'));
   }
 
-  // Placement: avoid collisions; this runs right before showing
+  // Place to avoid overlap: keeps similar to earlier logic
   function placeAvoidingOverlap(host) {
     try {
-      const root = host._shadow || host;
-      // ensure host uses fixed coordinates
       host.style.position = 'fixed';
       host.style.right = '18px';
       host.style.bottom = '18px';
-      host.style.pointerEvents = 'none'; // keep off until explicitly enabled
+      host.style.pointerEvents = 'none'; // keep off until we explicitly enable after placement
 
       const els = Array.from(document.querySelectorAll('body *'));
       const candidates = [];
@@ -257,7 +189,6 @@
       }
 
       if (attempts >= maxAttempts) {
-        // try shift left fallback
         let shifted = 0;
         while (shifted <= 200) {
           right += 20;
@@ -269,22 +200,23 @@
             const cRect = c.getBoundingClientRect();
             if (rectsIntersect(hRect, cRect, 8)) { coll = true; break; }
           }
-          if (!coll) { host.style.zIndex = '2147483647'; return; }
+          if (!coll) { host.style.zIndex = '2147483647'; host.style.pointerEvents = 'none'; return; }
         }
         host.style.zIndex = '999999';
       } else {
         host.style.zIndex = '2147483647';
       }
+      // keep pointer-events none here; enabling happens when making visible
     } catch (e) {
-      if (window.console && console.debug) console.debug('[TG-WIDGET] place failed', e);
+      console.debug && console.debug('[TG-WIDGET] placeAvoidingOverlap failed', e);
     }
   }
 
-  // Observe page changes and nudge if needed after shown
+  // Observe changes and nudge placement
   function observeAndAdjust(host) {
     let scheduled = false;
-    const adjust = () => { scheduled = false; try { placeAvoidingOverlap(host); } catch (e) {} };
-    const debounced = () => { if (scheduled) return; scheduled = true; setTimeout(adjust, 180); };
+    const adj = () => { scheduled = false; placeAvoidingOverlap(host); };
+    const debounced = () => { if (scheduled) return; scheduled = true; setTimeout(adj, 180); };
 
     try {
       const mo = new MutationObserver(debounced);
@@ -294,84 +226,74 @@
     window.addEventListener('orientationchange', debounced, { passive: true });
     window.addEventListener('scroll', debounced, { passive: true });
 
-    // a few scheduled adjustments (late loads)
     setTimeout(debounced, 300);
     setTimeout(debounced, 900);
     setTimeout(debounced, 2200);
   }
 
-  // Debug helpers
-  window.__TGFW = window.__TGFW || {};
-  window.__TGFW.getElement = () => document.getElementById(BASE_ID);
-  window.__TGFW.showDebug = function () {
-    const host = document.getElementById(BASE_ID);
-    if (!host) return console.warn('[TG-WIDGET] not found');
-    host.classList.add('tg-debug', 'show-label', 'tg-visible');
-    host.style.pointerEvents = 'auto';
-    host.style.opacity = '1';
-    placeAvoidingOverlap(host);
-    console.info('[TG-WIDGET] debug-visible');
-  };
-  window.__TGFW.hideDebug = function () {
-    const host = document.getElementById(BASE_ID);
-    if (!host) return;
-    host.classList.remove('tg-debug', 'show-label', 'tg-visible');
-    host.style.pointerEvents = 'none';
-    host.style.opacity = '0';
-    console.info('[TG-WIDGET] debug-hidden');
-  };
-  window.__TGFW.forceFlash = function (times = 3) {
-    const host = document.getElementById(BASE_ID);
-    if (!host) return;
-    const root = host._shadow || host;
-    const btn = root.querySelector('#tg-btn');
-    if (!btn) return;
-    let i = 0;
-    const iv = setInterval(() => {
-      btn.style.transform = 'translateY(-14px) scale(1.02)';
-      setTimeout(() => btn.style.transform = '', 220);
-      i++;
-      if (i >= times) clearInterval(iv);
-    }, 380);
-  };
-
-  // Initialize: create host, wire, but DO NOT show immediately
+  // Init: create, wire, delay show with smooth animation and enable pointer events
   function init() {
     if (!document.body) return setTimeout(init, 50);
     const host = createHost();
-    host.id = BASE_ID; // ensure id present for debug APIs
-    const root = host._shadow || host;
-
     wire(host);
 
-    // keep hidden initially for SHOW_DELAY_MS to avoid "random ghumta" while layout is settling
-    host.style.pointerEvents = 'none';
+    // initially hidden and non-interactive; placement run just before showing
     host.classList.remove('tg-visible', 'show-label');
+    host.style.pointerEvents = 'none';
 
-    // Wait SHOW_DELAY_MS, then run placement and reveal with slide-from-bottom
     setTimeout(() => {
       try {
-        placeAvoidingOverlap(host);
-        // allow pointer events after placement
-        host.style.pointerEvents = 'auto';
-        // make visible using host class — shadow CSS will animate transform/opacity
+        placeAvoidingOverlap(host); // compute safe spot before reveal
+        // reveal: add class (shadow or fallback CSS will animate)
         host.classList.add('tg-visible');
-        // small opacity safety
+        // enable pointer events for interaction
+        host.style.pointerEvents = 'auto';
+        // ensure host visible in case fallback didn't animate
         host.style.opacity = '1';
-        // start observing page changes for later nudges
+        // observe changes afterwards
         observeAndAdjust(host);
-        // gentle entrance cue
-        try { window.__TGFW.forceFlash(1); } catch (e) {}
-        console.log('[TG-WIDGET] shown after delay');
+        // tiny flash to draw attention (avoid if reduced motion)
+        try {
+          if (!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            const root = host._shadow || host;
+            const btn = root.querySelector('#tg-btn');
+            if (btn) {
+              btn.style.transform = 'translateY(-10px) scale(1.02)';
+              setTimeout(() => btn.style.transform = '', 280);
+            }
+          }
+        } catch (e) {}
+        console.info('[TG-WIDGET] shown after delay');
       } catch (e) {
         console.error('[TG-WIDGET] show failed', e);
       }
     }, SHOW_DELAY_MS);
 
-    // Informational console
-    console.log('[TG-WIDGET] initialized (will appear after ' + (SHOW_DELAY_MS/1000) + 's). Use __TGFW.getElement(), __TGFW.showDebug() in console for debugging.');
+    // expose small debug hooks
+    window.__TGFW = window.__TGFW || {};
+    window.__TGFW.getElement = () => document.getElementById(BASE_ID);
+    window.__TGFW.showDebug = function () {
+      const hostEl = document.getElementById(BASE_ID);
+      if (!hostEl) return console.warn('[TG-WIDGET] not found');
+      hostEl.classList.add('tg-debug', 'show-label', 'tg-visible');
+      hostEl.style.pointerEvents = 'auto';
+      hostEl.style.opacity = '1';
+      placeAvoidingOverlap(hostEl);
+      console.info('[TG-WIDGET] debug visible');
+    };
+    window.__TGFW.forceFlash = function () {
+      const hostEl = document.getElementById(BASE_ID);
+      if (!hostEl) return;
+      const root = hostEl._shadow || hostEl;
+      const btn = root.querySelector('#tg-btn');
+      if (!btn) return;
+      btn.style.transform = 'translateY(-10px) scale(1.02)';
+      setTimeout(() => btn.style.transform = '', 280);
+    };
   }
 
   if (document.readyState === 'complete' || document.readyState === 'interactive') init();
   else window.addEventListener('DOMContentLoaded', init);
+
+  console.log('[TG-WIDGET] loaded. If redirect still fails: open console and run __TGFW.showDebug() to inspect the element.');
 })();
