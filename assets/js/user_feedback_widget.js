@@ -1,14 +1,13 @@
-// feedback-widget.js — redirect fixed + smoother animation + robust pointer handling
+// feedback-widget.js — improved redirect + robust fallback + touch/keyboard fixes
 (function () {
   if (window.__TG_FEEDBACK_WIDGET_INJECTED__) return;
   window.__TG_FEEDBACK_WIDGET_INJECTED__ = true;
 
   const REDIRECT_URL = '/user_feedback';
   const BASE_ID = 'tg-feedback-widget-v1-root';
-  const DEBUG = false;
-  const SHOW_DELAY_MS = 5000; // 5s delay before showing
+  const SHOW_DELAY_MS = 5000;
 
-  // Utilities
+  // --- Utilities
   function ce(tag, attrs = {}) {
     const el = document.createElement(tag);
     for (const k in attrs) {
@@ -25,29 +24,27 @@
              a.top + padding >= b.bottom - padding);
   }
 
-  // Create host and shadow, with isolated styles
+  // --- Create host + shadow (with safer fallback CSS conversion)
   function createHost() {
     let host = document.getElementById(BASE_ID);
     if (host) return host;
 
     host = document.createElement('div');
     host.id = BASE_ID;
-    // initial hidden state
     host.style.pointerEvents = 'none';
     host.style.opacity = '0';
 
-    // try shadow root
     let useShadow = false;
-    try { if (host.attachShadow) { host._shadow = host.attachShadow({ mode: 'open' }); useShadow = true; } } catch (e) { useShadow = false; }
+    try {
+      if (host.attachShadow) { host._shadow = host.attachShadow({ mode: 'open' }); useShadow = true; }
+    } catch (e) { useShadow = false; }
 
-    // inner structure
     const inner = ce('div', { id: 'tg-inner' });
     const btn = ce('button', { id: 'tg-btn', type: 'button', title: 'Open feedback panel', 'aria-label': 'Open feedback panel (redirects to feedback page)', html: '💬' });
     const label = ce('span', { class: 'tg-fw-label', html: 'Send feedback' });
     const sr = ce('span', { class: 'sr-only', text: 'Open feedback page' });
     inner.appendChild(btn); inner.appendChild(label); inner.appendChild(sr);
 
-    // isolated strong CSS (shadow or fallback)
     const css = `
       :host { all: initial; position: fixed; right: 18px; bottom: 18px; z-index: 2147483647; display:block; pointer-events:none;
              transform: translateY(28px); opacity:0; transition: transform 520ms cubic-bezier(.16,.84,.34,1), opacity 420ms ease;
@@ -56,7 +53,7 @@
       #tg-btn { box-sizing:border-box; width:86px; height:86px; border-radius:22px; background: linear-gradient(180deg,#ff6b6b,#ff4757);
                color:#fff; font-size:40px; display:inline-flex; align-items:center; justify-content:center; border:none;
                cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent; transition: transform .12s ease, box-shadow .12s ease;
-               box-shadow: 0 14px 48px rgba(0,0,0,0.55); outline:none; }
+               box-shadow: 0 14px 48px rgba(0,0,0,0.55); outline:none; pointer-events:auto; position:relative; }
       #tg-btn:hover { transform: translateY(-8px); box-shadow: 0 26px 70px rgba(0,0,0,0.6); }
       #tg-btn:active { transform: translateY(-3px) scale(.995); }
       #tg-btn:focus { outline: 4px solid rgba(255,255,255,0.12); outline-offset: 4px; }
@@ -74,13 +71,15 @@
       host._shadow.appendChild(style);
       host._shadow.appendChild(inner);
     } else {
-      // fallback: inject namespaced style into head
       const fsId = BASE_ID + '-fallback-style';
       if (!document.getElementById(fsId)) {
         try {
           const fs = document.createElement('style'); fs.id = fsId;
-          // convert :host rules to #BASE_ID selectors for fallback
-          const fallback = css.replace(/:host\b/g, `#${BASE_ID}`).replace(/:host\(\.tg-visible\)/g, `#${BASE_ID}.tg-visible`);
+          // safer fallback conversion:
+          // 1) convert :host(<class>) patterns to #BASE_ID.class
+          // 2) convert remaining :host to #BASE_ID
+          let fallback = css.replace(/:host\((\.[^)]+)\)/g, `#${BASE_ID}$1`);
+          fallback = fallback.replace(/:host\b/g, `#${BASE_ID}`);
           fs.textContent = fallback;
           document.head.appendChild(fs);
         } catch (e) {}
@@ -92,49 +91,77 @@
     return host;
   }
 
-  // Wire interactions and robust redirect
+  // --- Redirect helper (try top/parent/window and fallbacks)
+  function safeRedirect(url) {
+    const tryAssign = (obj) => {
+      try {
+        if (!obj || typeof obj.location === 'undefined') return false;
+        // try assign/href to be more compatible in restricted frames
+        if (typeof obj.location.assign === 'function') {
+          obj.location.assign(url);
+        } else {
+          obj.location.href = url;
+        }
+        return true;
+      } catch (e) {
+        return false;
+      }
+    };
+
+    // 1) try top (if same-origin)
+    if (tryAssign(window.top)) return;
+    // 2) try parent
+    if (window.parent && window.parent !== window && tryAssign(window.parent)) return;
+    // 3) try current window
+    if (tryAssign(window)) return;
+
+    // 4) try window.open in same tab (some CSPs block)
+    try {
+      const w = window.open(url, '_self');
+      if (w) return;
+    } catch (e) {}
+
+    // 5) final fallback: open new tab
+    try { window.open(url, '_blank'); } catch (e) { /* give up */ }
+  }
+
+  // --- Wire interactions
   function wire(host) {
     const root = host._shadow || host;
     const btn = root.querySelector('#tg-btn');
     if (!btn) return;
 
-    function doRedirect() {
-      try {
-        if (window && typeof window.location !== 'undefined' && typeof window.location.assign === 'function') {
-          console.debug && console.debug('[TG-WIDGET] redirecting via location.assign ->', REDIRECT_URL);
-          window.location.assign(REDIRECT_URL);
-          return;
-        }
-      } catch (e) { console.warn('[TG-WIDGET] location.assign failed, fallbacking', e); }
-
-      // Fallback: try window.open in same tab, then new tab
-      try {
-        console.debug && console.debug('[TG-WIDGET] fallback redirect via window.open');
-        window.open(REDIRECT_URL, '_self');
-      } catch (e) {
-        try { window.open(REDIRECT_URL, '_blank'); } catch (er) { console.error('[TG-WIDGET] final redirect fallback failed', er); }
-      }
-    }
-
-    // Ensure button is keyboard accessible
+    // ensure keyboard + accessibility
     btn.setAttribute('tabindex', '0');
-    btn.addEventListener('click', (e) => {
-      try { e.preventDefault(); } catch (err) {}
-      // small tactile press feedback
+    btn.setAttribute('role', 'button');
+
+    function clickHandler(e) {
+      try { if (e && typeof e.preventDefault === 'function') e.preventDefault(); } catch (err) {}
+      // tactile feedback (non-blocking)
       try {
         btn.style.transform = 'translateY(-3px) scale(.995)';
         setTimeout(() => { btn.style.transform = ''; }, 140);
       } catch (e) {}
-      // final redirect
-      doRedirect();
-    });
+      // do the redirect asynchronously but immediately
+      setTimeout(() => safeRedirect(REDIRECT_URL), 8);
+    }
 
+    btn.addEventListener('click', clickHandler, { passive: false });
+
+    // handle keyboard activation (Enter + Space)
     btn.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') {
-        ev.preventDefault();
-        btn.click();
+      const k = ev.key || ev.code;
+      if (k === 'Enter' || k === ' ' || k === 'Spacebar' || k === 'Space') {
+        try { ev.preventDefault(); } catch (e) {}
+        clickHandler(ev);
       }
     });
+
+    // also handle touchstart to make mobile feel instant
+    btn.addEventListener('touchstart', (ev) => {
+      try { ev.preventDefault(); } catch (e) {}
+      clickHandler(ev);
+    }, { passive: false });
 
     // label show/hide
     host.addEventListener('mouseenter', () => host.classList.add('show-label'));
@@ -143,13 +170,13 @@
     btn.addEventListener('blur', () => host.classList.remove('show-label'));
   }
 
-  // Place to avoid overlap: keeps similar to earlier logic
+  // --- Placement (avoid overlap) — keeps pointer-events none until visible
   function placeAvoidingOverlap(host) {
     try {
       host.style.position = 'fixed';
       host.style.right = '18px';
       host.style.bottom = '18px';
-      host.style.pointerEvents = 'none'; // keep off until we explicitly enable after placement
+      host.style.pointerEvents = 'none';
 
       const els = Array.from(document.querySelectorAll('body *'));
       const candidates = [];
@@ -206,13 +233,12 @@
       } else {
         host.style.zIndex = '2147483647';
       }
-      // keep pointer-events none here; enabling happens when making visible
     } catch (e) {
-      console.debug && console.debug('[TG-WIDGET] placeAvoidingOverlap failed', e);
+      /* ignore placement errors */
     }
   }
 
-  // Observe changes and nudge placement
+  // --- Observe + adjust
   function observeAndAdjust(host) {
     let scheduled = false;
     const adj = () => { scheduled = false; placeAvoidingOverlap(host); };
@@ -231,28 +257,25 @@
     setTimeout(debounced, 2200);
   }
 
-  // Init: create, wire, delay show with smooth animation and enable pointer events
+  // --- Init
   function init() {
     if (!document.body) return setTimeout(init, 50);
     const host = createHost();
     wire(host);
 
-    // initially hidden and non-interactive; placement run just before showing
     host.classList.remove('tg-visible', 'show-label');
     host.style.pointerEvents = 'none';
 
     setTimeout(() => {
       try {
-        placeAvoidingOverlap(host); // compute safe spot before reveal
-        // reveal: add class (shadow or fallback CSS will animate)
+        placeAvoidingOverlap(host);
         host.classList.add('tg-visible');
-        // enable pointer events for interaction
+        // enable pointer events on host so the button can be clicked
         host.style.pointerEvents = 'auto';
-        // ensure host visible in case fallback didn't animate
         host.style.opacity = '1';
-        // observe changes afterwards
         observeAndAdjust(host);
-        // tiny flash to draw attention (avoid if reduced motion)
+
+        // flash the button slightly (respect reduced-motion)
         try {
           if (!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             const root = host._shadow || host;
@@ -263,13 +286,10 @@
             }
           }
         } catch (e) {}
-        console.info('[TG-WIDGET] shown after delay');
-      } catch (e) {
-        console.error('[TG-WIDGET] show failed', e);
-      }
+      } catch (e) {}
     }, SHOW_DELAY_MS);
 
-    // expose small debug hooks
+    // debug hooks
     window.__TGFW = window.__TGFW || {};
     window.__TGFW.getElement = () => document.getElementById(BASE_ID);
     window.__TGFW.showDebug = function () {
@@ -279,7 +299,6 @@
       hostEl.style.pointerEvents = 'auto';
       hostEl.style.opacity = '1';
       placeAvoidingOverlap(hostEl);
-      console.info('[TG-WIDGET] debug visible');
     };
     window.__TGFW.forceFlash = function () {
       const hostEl = document.getElementById(BASE_ID);
