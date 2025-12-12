@@ -226,6 +226,13 @@
                 <h3 class="module-title">SUPPORT 🔒</h3>
                 <p class="module-description">Handle support tickets and user queries.</p>
             </div>
+
+            <!-- FEEDBACK VISUALISER - NEW -->
+            <div class="module-card" onclick="navigateTo('user_data/feedback_visualizer')">
+                <div class="module-icon"><i class="fas fa-comments"></i></div>
+                <h3 class="module-title">FEEDBACK VISUALISER</h3>
+                <p class="module-description">View user-submitted feedback on the platform.</p>
+            </div>
         </div>
     </div>
 
@@ -237,7 +244,7 @@
                 <div style="opacity:0.8;font-size:0.9rem;">Quick access:</div>
             </div>
             <div class="actions">
-                <button class="btn-ghost" onclick="window.location.href='admin_panel_guide.html'"><i class="fas fa-book"></i> Admin Panel Guide</button>
+                <button class="btn-ghost" onclick="window.location.href='admin/secured/admin_panel_guide.html'"><i class="fas fa-book"></i> Admin Panel Guide</button>
                 <button class="btn-primary" onclick="openNativeMail()"><i class="fas fa-envelope"></i> Contact IT</button>
             </div>
         </div>
@@ -323,8 +330,11 @@
         }
 
         // Write last access and append rich log
-        async function writeLastAccessAndLog(moduleKey) {
+        async function writeLastAccessAndLog(moduleKeyRaw) {
             try {
+                // Use moduleKeyRaw but normalize by replacing slashes with underscores for easy indexing
+                const moduleKey = (typeof moduleKeyRaw === 'string') ? moduleKeyRaw.replace(/\//g, '_') : String(moduleKeyRaw);
+
                 const user = auth.currentUser;
                 const uid = user ? user.uid : null;
                 const email = user ? user.email : null;
@@ -371,7 +381,7 @@
                     raw: { clientContext: clientCtx }
                 });
             } catch (err) {
-                console.error('Logging error for', moduleKey, err);
+                console.error('Logging error for', moduleKeyRaw, err);
             }
         }
 
@@ -395,12 +405,15 @@
             return map;
         }
 
-        // Navigation function (restored original mapping) but logs access before redirect
+        // Navigation function (restored original mapping), new case for feedback_visualizer included
         async function navigateTo(module) {
             let url = '';
             switch(module) {
                 case 'user_data/data_visualizer':
                     url = 'user_data/data_visualizer.html';
+                    break;
+                case 'user_data/feedback_visualizer':
+                    url = 'user_data/feedback_visualizer.html';
                     break;
                 case 'analytics':
                     url = 'analytics.html';
@@ -442,22 +455,18 @@
                     url = module + '.html';
             }
 
-            // Determine module key for logging (simple mapping based on module string)
-            // We'll take the first part before slash or the module string itself
-            const moduleKey = (typeof module === 'string' && module.indexOf('/') !== -1) ? module.split('/')[0] : module;
+            // Use full module path as raw key, but normalize when writing to Firestore.
+            const moduleKeyRaw = module;
 
             try {
-                // write last access and log (await to increase chance it's stored before leaving)
-                await writeLastAccessAndLog(moduleKey);
+                await writeLastAccessAndLog(moduleKeyRaw);
             } catch (e) {
                 console.warn('Could not write last access before redirect', e);
             }
 
-            // redirect (if url is valid)
             if (url && url !== '#') {
                 window.location.href = url;
             } else {
-                // fallback behavior from original
                 window.location.href = url;
             }
         }
