@@ -1,82 +1,100 @@
-// feedback-widget.js (debuggable, more visible, robust against CSS overrides)
+// feedback-widget.js (shadow-dom backed, robust, debuggable)
 (function () {
   if (window.__TG_FEEDBACK_WIDGET_INJECTED__) return;
   window.__TG_FEEDBACK_WIDGET_INJECTED__ = true;
 
   const REDIRECT_URL = '/user_feedback';
-  const ID = 'tg-feedback-widget-v1';
-  const STYLE_ID = 'tg-feedback-widget-style-v1';
+  const BASE_ID = 'tg-feedback-widget-v1-root';
+  const HOST_ID = 'tg-feedback-widget-host-v1';
+  const DEBUG = false; // set to true for always-visible label + red outline
 
-  // Toggle this to true to always show label + red outline for debugging
-  const DEBUG = false;
-
-  const css = `
-  /* Strong !important rules to avoid host page overrides */
-  #${ID} {
-    position: fixed !important;
-    right: 18px !important;
-    bottom: 18px !important;
-    z-index: 2147483640 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 72px !important;
-    height: 72px !important;
-    border-radius: 999px !important;
-    background: linear-gradient(180deg,#ff4757,#e84118) !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.55) !important;
-    color: #fff !important;
-    font-size: 34px !important;
-    cursor: pointer !important;
-    border: 0 !important;
-    transition: transform .12s ease, box-shadow .12s ease, opacity .12s !important;
-    user-select: none !important;
-    -webkit-tap-highlight-color: transparent !important;
-    opacity: 1 !important;
-    outline: none !important;
-  }
-  #${ID}:hover { transform: translateY(-6px) !important; box-shadow: 0 16px 40px rgba(0,0,0,0.6) !important; }
-  #${ID}:active { transform: translateY(-2px) scale(.985) !important; }
-  #${ID}:focus { outline: 4px solid rgba(255,200,200,0.16) !important; outline-offset: 4px !important; }
-
-  /* Label always visible in debug, else on hover */
-  #${ID} .tg-fw-label {
-    display: ${DEBUG ? 'block' : 'none'}; /* will be toggled by JS for non-debug */
-    position: absolute !important;
-    right: 92px !important;
-    white-space: nowrap !important;
-    background: rgba(0,0,0,0.78) !important;
-    color: #fff !important;
-    font-size: 13px !important;
-    padding: 8px 10px !important;
-    border-radius: 8px !important;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.45) !important;
-    transform-origin: right center !important;
-    transform: translateY(-2px) !important;
-    pointer-events: none !important;
-    opacity: 1 !important;
-  }
-  #${ID}.show-label .tg-fw-label { display:block !important; }
-
-  #${ID} .sr-only {
-    position: absolute !important;
-    width:1px !important;height:1px !important;padding:0 !important;margin:-1px !important;overflow:hidden !important;clip:rect(0,0,0,0) !important;white-space:nowrap !important;border:0 !important;
+  // Utility: create element with attrs
+  function ce(tag, attrs = {}) {
+    const el = document.createElement(tag);
+    for (const k in attrs) {
+      if (k === 'html') el.innerHTML = attrs[k];
+      else if (k === 'text') el.textContent = attrs[k];
+      else el.setAttribute(k, attrs[k]);
+    }
+    return el;
   }
 
-  /* debug helper (red outline) */
-  #${ID}.tg-debug { box-shadow: 0 0 0 3px rgba(255,0,0,0.18) inset !important; border:2px dashed rgba(255,0,0,0.12) !important; }
+  // Strong CSS that will be inserted inside shadow root (isolated)
+  const widgetCSS = `
+    :host {
+      all: initial; /* reset inherited UA/host styles */
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 2147483647;
+      display: block;
+      pointer-events: auto;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    #tg-btn {
+      box-sizing: border-box;
+      position: relative;
+      width: 72px;
+      height: 72px;
+      border-radius: 999px;
+      background: linear-gradient(180deg,#ff4757,#e84118);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.55);
+      color: #fff;
+      font-size: 34px;
+      line-height: 72px;
+      text-align: center;
+      border: 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .12s ease, box-shadow .12s ease, opacity .12s;
+      outline: none;
+    }
+    #tg-btn:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.6); }
+    #tg-btn:active { transform: translateY(-2px) scale(.985); }
+    #tg-btn:focus { outline: 4px solid rgba(255,200,200,0.16); outline-offset: 4px; }
+
+    /* label bubble */
+    .tg-fw-label {
+      display: ${DEBUG ? 'block' : 'none'};
+      position: absolute;
+      right: 92px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.78);
+      color: #fff;
+      font-size: 13px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    :host(.show-label) .tg-fw-label { display: block; }
+
+    /* accessible off-screen text */
+    .sr-only {
+      position: absolute !important;
+      width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+    }
+
+    /* debug outline */
+    :host(.tg-debug) #tg-btn { box-shadow: 0 0 0 4px rgba(255,0,0,0.12) inset, 0 10px 30px rgba(0,0,0,0.55); border: 2px dashed rgba(255,0,0,0.12); }
   `;
 
-  // inject style
-  if (!document.getElementById(STYLE_ID)) {
-    const s = document.createElement('style');
-    s.id = STYLE_ID;
-    s.textContent = css;
-    document.head.appendChild(s);
-    console.debug('[TG-WIDGET] style injected');
-  }
+  // Fallback non-shadow CSS for environments that don't support shadow DOM
+  const fallbackCSS = `
+    /* namespaced ID-based fallback to reduce overrides */
+    #${HOST_ID} { position: fixed !important; right: 18px !important; bottom: 18px !important; z-index: 2147483647 !important; pointer-events:auto !important; }
+    #${HOST_ID} #tg-btn { width:72px !important; height:72px !important; border-radius:999px !important; background: linear-gradient(180deg,#ff4757,#e84118) !important; color:#fff !important; font-size:34px !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; box-shadow:0 10px 30px rgba(0,0,0,0.55) !important; border:0 !important; cursor:pointer !important; user-select:none !important; -webkit-tap-highlight-color:transparent !important; }
+    #${HOST_ID} .tg-fw-label { display: ${DEBUG ? 'block' : 'none'} !important; position:absolute !important; right:92px !important; top:50% !important; transform:translateY(-50%) !important; background:rgba(0,0,0,0.78) !important; color:#fff !important; padding:8px 10px !important; border-radius:8px !important; box-shadow:0 6px 18px rgba(0,0,0,0.45) !important; white-space:nowrap !important; pointer-events:none !important; }
+    #${HOST_ID}.show-label .tg-fw-label { display:block !important; }
+  `;
 
-  // helper intersection test
+  // Helpers for collision detection
   function rectsIntersect(a, b, padding = 6) {
     return !(a.right - padding <= b.left + padding ||
              a.left + padding >= b.right - padding ||
@@ -84,202 +102,266 @@
              a.top + padding >= b.bottom - padding);
   }
 
-  function createWidget() {
-    if (document.getElementById(ID)) return document.getElementById(ID);
+  // create host container and shadow root (if possible)
+  function createHost() {
+    let host = document.getElementById(BASE_ID);
+    if (host) return host;
 
-    const btn = document.createElement('button');
-    btn.id = ID;
-    btn.type = 'button';
-    btn.title = 'Open feedback panel';
-    btn.setAttribute('aria-label', 'Open feedback panel (redirects to feedback page)');
-    btn.innerHTML = `
-      <span aria-hidden="true" style="line-height:1">${DEBUG ? '💬' : '💬'}</span>
-      <span class="tg-fw-label" aria-hidden="true">Send feedback</span>
-      <span class="sr-only">Open feedback page</span>
-    `;
+    host = document.createElement('div');
+    host.id = BASE_ID;
 
-    // Inline defensive styles (helps override aggressive page CSS)
-    btn.style.setProperty('position', 'fixed', 'important');
-    btn.style.setProperty('right', '18px', 'important');
-    btn.style.setProperty('bottom', '18px', 'important');
-    btn.style.setProperty('width', '72px', 'important');
-    btn.style.setProperty('height', '72px', 'important');
-    btn.style.setProperty('fontSize', '34px', 'important');
+    // Try to attach a shadow root to isolate styles
+    let useShadow = false;
+    try {
+      if (host.attachShadow) {
+        host._shadow = host.attachShadow({ mode: 'open' });
+        useShadow = true;
+      }
+    } catch (e) {
+      useShadow = false;
+    }
 
-    // click behaviour: safe redirect
+    // Build inner content
+    const inner = ce('div', { id: 'tg-inner' });
+    const btn = ce('button', { id: 'tg-btn', type: 'button', title: 'Open feedback panel', 'aria-label': 'Open feedback panel (redirects to feedback page)', html: '💬' });
+    const label = ce('span', { class: 'tg-fw-label', html: 'Send feedback' });
+    const sr = ce('span', { class: 'sr-only', text: 'Open feedback page' });
+
+    inner.appendChild(btn);
+    inner.appendChild(label);
+    inner.appendChild(sr);
+
+    if (useShadow) {
+      // append style and inner to shadow root
+      const style = document.createElement('style');
+      style.textContent = widgetCSS;
+      host._shadow.appendChild(style);
+      host._shadow.appendChild(inner);
+    } else {
+      // fallback: put everything in normal DOM with a namespaced id and injected style
+      host.appendChild(inner);
+      // inject fallback css once
+      if (!document.getElementById(BASE_ID + '-fallback-style')) {
+        try {
+          const fs = document.createElement('style');
+          fs.id = BASE_ID + '-fallback-style';
+          fs.textContent = fallbackCSS;
+          document.head.appendChild(fs);
+        } catch (e) {}
+      }
+    }
+
+    // append to body (as last child)
+    (document.body || document.documentElement).appendChild(host);
+    return host;
+  }
+
+  // ensure button is interactive and wired
+  function wire(host) {
+    // If we used shadow root, query inside it; else query host subtree
+    const root = host._shadow || host;
+    const btn = root.querySelector('#tg-btn');
+    const label = root.querySelector('.tg-fw-label');
+
+    if (!btn) return null;
+
+    // Click redirect (safe)
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      try { window.location.href = REDIRECT_URL; } catch (err) { console.error('[TG-WIDGET] redirect failed', err); }
+      try {
+        window.location.href = REDIRECT_URL;
+      } catch (err) {
+        console.error('[TG-WIDGET] redirect failed', err);
+      }
     });
 
+    // keyboard support
     btn.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter' || ev.key === ' ') {
+      if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') {
         ev.preventDefault();
         btn.click();
       }
     });
 
-    // append as the very last child of body (helps avoid some stacking contexts)
-    try {
-      document.body.appendChild(btn);
-    } catch (err) {
-      // fallback: try document.documentElement
-      try { document.documentElement.appendChild(btn); } catch (e) { console.error('[TG-WIDGET] append failed', e); }
+    // hover label toggling when not debug
+    if (!DEBUG) {
+      host.addEventListener('mouseenter', () => host.classList.add('show-label'));
+      host.addEventListener('mouseleave', () => host.classList.remove('show-label'));
+      // also support focus/blur for keyboard users
+      btn.addEventListener('focus', () => host.classList.add('show-label'));
+      btn.addEventListener('blur', () => host.classList.remove('show-label'));
     }
 
-    return btn;
+    return { btn, label };
   }
 
-  function placeWidgetAvoidingOverlap(widget) {
-    // ensure it uses fixed positioning and visible size
-    widget.style.setProperty('position', 'fixed', 'important');
-    widget.style.setProperty('right', '18px', 'important');
-    widget.style.setProperty('bottom', '18px', 'important');
-    widget.style.setProperty('display', 'flex', 'important');
+  // placement: avoid collisions with other fixed/sticky/high-z elements
+  function placeAvoidingOverlap(host) {
+    try {
+      const root = host._shadow || host;
+      const btn = root.querySelector('#tg-btn');
+      if (!btn) return;
 
-    // collect candidates (fixed/absolute/sticky or high z-index)
-    const all = Array.from(document.querySelectorAll('body *'));
-    const candidates = [];
-    for (const el of all) {
-      if (el === widget) continue;
-      if (!(el instanceof HTMLElement)) continue;
-      const st = window.getComputedStyle(el);
-      if (st.display === 'none' || st.visibility === 'hidden' || parseFloat(st.opacity) === 0) continue;
-      const pos = st.position;
-      const z = isNaN(parseInt(st.zIndex, 10)) ? 0 : parseInt(st.zIndex, 10);
-      if (pos === 'fixed' || pos === 'sticky' || pos === 'absolute' || z >= 1000) {
-        const r = el.getBoundingClientRect();
-        if (!(r.width === 0 && r.height === 0)) candidates.push(el);
-      }
-    }
+      // ensure fixed positioning on the host (shadow doesn't inherit host positioning)
+      host.style.position = 'fixed';
+      host.style.right = '18px';
+      host.style.bottom = '18px';
+      host.style.zIndex = '2147483647';
+      host.style.pointerEvents = 'auto';
 
-    // start at bottom-right, nudge up until no collision
-    let step = 12;
-    const maxAttempts = Math.ceil(window.innerHeight / step) + 10;
-    let attempts = 0;
-    widget.style.setProperty('right', '18px', 'important');
-    widget.style.setProperty('bottom', '18px', 'important');
+      // Build list of candidate blocking elements
+      const els = Array.from(document.querySelectorAll('body *'));
+      const candidates = [];
+      els.forEach(el => {
+        if (el === host) return;
+        if (!(el instanceof HTMLElement)) return;
+        const st = window.getComputedStyle(el);
+        if (st.display === 'none' || st.visibility === 'hidden' || parseFloat(st.opacity) === 0) return;
+        const pos = st.position;
+        const z = parseInt(st.zIndex, 10);
+        if (pos === 'fixed' || pos === 'sticky' || pos === 'absolute' || (!isNaN(z) && z >= 1000)) {
+          const r = el.getBoundingClientRect();
+          if (!(r.width === 0 && r.height === 0)) candidates.push(el);
+        }
+      });
 
-    let wRect = widget.getBoundingClientRect();
-    while (attempts < maxAttempts) {
-      let collides = false;
-      for (const c of candidates) {
-        const cRect = c.getBoundingClientRect();
-        if (rectsIntersect(wRect, cRect, 6)) { collides = true; break; }
-      }
-      if (!collides) break;
-      const currentBottom = parseFloat(widget.style.bottom || '18');
-      widget.style.setProperty('bottom', (currentBottom + step) + 'px', 'important');
-      wRect = widget.getBoundingClientRect();
-      attempts++;
-    }
+      // Start at bottom-right and nudge up until no collision
+      let step = Math.max(12, Math.round(Math.min(window.innerHeight, window.innerWidth) * 0.02));
+      let maxAttempts = Math.ceil(window.innerHeight / step) + 10;
+      let attempts = 0;
+      // initialize numeric bottom/right
+      let bottom = 18;
+      let right = 18;
+      host.style.right = right + 'px';
+      host.style.bottom = bottom + 'px';
 
-    // final collision check — try shifting left as a fallback
-    let finalCollide = false;
-    wRect = widget.getBoundingClientRect();
-    for (const c of candidates) {
-      const cRect = c.getBoundingClientRect();
-      if (rectsIntersect(wRect, cRect, 6)) { finalCollide = true; break; }
-    }
-    if (finalCollide) {
-      let shifted = 0;
-      while (shifted <= 160) {
-        const currentRight = parseFloat(widget.style.right || '18');
-        widget.style.setProperty('right', (currentRight + 18) + 'px', 'important');
-        shifted += 18;
-        wRect = widget.getBoundingClientRect();
-        let coll = false;
+      let wRect = host.getBoundingClientRect();
+      while (attempts < maxAttempts) {
+        let collides = false;
         for (const c of candidates) {
           const cRect = c.getBoundingClientRect();
-          if (rectsIntersect(wRect, cRect, 6)) { coll = true; break; }
+          if (rectsIntersect(wRect, cRect, 6)) { collides = true; break; }
         }
-        if (!coll) { finalCollide = false; break; }
+        if (!collides) break;
+        bottom += step;
+        host.style.bottom = bottom + 'px';
+        wRect = host.getBoundingClientRect();
+        attempts++;
       }
+
+      // If still colliding, try shifting left in small increments
+      if (attempts >= maxAttempts) {
+        let shifted = 0;
+        while (shifted <= 160) {
+          right += 18;
+          host.style.right = right + 'px';
+          shifted += 18;
+          wRect = host.getBoundingClientRect();
+          let coll = false;
+          for (const c of candidates) {
+            const cRect = c.getBoundingClientRect();
+            if (rectsIntersect(wRect, cRect, 6)) { coll = true; break; }
+          }
+          if (!coll) {
+            host.style.zIndex = '2147483647';
+            return;
+          }
+        }
+        // final fallback: lower z-index to avoid stealing modal clicks
+        host.style.zIndex = '999999';
+      } else {
+        host.style.zIndex = '2147483647';
+      }
+    } catch (e) {
+      // fail silently but log in dev console
+      if (window.console && console.debug) console.debug('[TG-WIDGET] place failed', e);
     }
-
-    // if still colliding, lower z-index slightly to avoid taking clicks from modals
-    if (finalCollide) widget.style.setProperty('zIndex', '999999', 'important');
-    else widget.style.setProperty('zIndex', '2147483640', 'important');
-
-    // ensure label shows on hover (non-debug)
-    if (!DEBUG) {
-      widget.addEventListener('mouseenter', () => widget.classList.add('show-label'));
-      widget.addEventListener('mouseleave', () => widget.classList.remove('show-label'));
-    }
-
-    console.debug('[TG-WIDGET] placed (bottom/right)', {
-      bottom: widget.style.bottom,
-      right: widget.style.right,
-      zIndex: widget.style.zIndex
-    });
   }
 
-  // Observe DOM changes and reposition
-  function observeAndAdjust(widget) {
+  // observe DOM changes and adjust
+  function observeAndAdjust(host) {
     let scheduled = false;
-    const adjust = () => { scheduled = false; try { placeWidgetAvoidingOverlap(widget); } catch (e) { console.warn('[TG-WIDGET] adjust failed', e); } };
-    const debouncedAdjust = () => { if (scheduled) return; scheduled = true; setTimeout(adjust, 160); };
+    const adjust = () => {
+      scheduled = false;
+      placeAvoidingOverlap(host);
+    };
+    const debounced = () => { if (scheduled) return; scheduled = true; setTimeout(adjust, 160); };
 
-    const mo = new MutationObserver(debouncedAdjust);
-    try { mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] }); } catch (e) { /* fail silently */ }
+    try {
+      const mo = new MutationObserver(debounced);
+      mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
+    } catch (e) {}
 
-    window.addEventListener('resize', debouncedAdjust, { passive: true });
-    window.addEventListener('orientationchange', debouncedAdjust, { passive: true });
-    window.addEventListener('scroll', debouncedAdjust, { passive: true });
+    window.addEventListener('resize', debounced, { passive: true });
+    window.addEventListener('orientationchange', debounced, { passive: true });
+    window.addEventListener('scroll', debounced, { passive: true });
 
-    // schedule a few runs (for late loads)
-    setTimeout(debouncedAdjust, 200);
-    setTimeout(debouncedAdjust, 900);
-    setTimeout(debouncedAdjust, 2400);
+    // schedule a few adjustments for late-loaded content
+    setTimeout(debounced, 120);
+    setTimeout(debounced, 700);
+    setTimeout(debounced, 2000);
   }
 
-  // Public debug helpers
+  // exposed debug helpers
   window.__TGFW = window.__TGFW || {};
-  window.__TGFW.getElement = () => document.getElementById(ID);
+  window.__TGFW.getElement = () => document.getElementById(BASE_ID);
   window.__TGFW.showDebug = function () {
-    const el = document.getElementById(ID);
-    if (!el) return console.warn('[TG-WIDGET] not found');
-    el.classList.add('tg-debug', 'show-label');
-    el.style.setProperty('width', '88px', 'important');
-    el.style.setProperty('height', '88px', 'important');
-    el.style.setProperty('fontSize', '40px', 'important');
-    placeWidgetAvoidingOverlap(el);
-    console.info('[TG-WIDGET] debug-visible');
+    const host = document.getElementById(BASE_ID);
+    if (!host) return console.warn('[TG-WIDGET] no element');
+    host.classList.add('tg-debug', 'show-label');
+    host.style.width = '88px';
+    host.style.height = '88px';
+    placeAvoidingOverlap(host);
+    console.info('[TG-WIDGET] debug visible');
   };
   window.__TGFW.hideDebug = function () {
-    const el = document.getElementById(ID);
-    if (!el) return;
-    el.classList.remove('tg-debug', 'show-label');
-    el.style.setProperty('width', '72px', 'important');
-    el.style.setProperty('height', '72px', 'important');
-    el.style.setProperty('fontSize', '34px', 'important');
-    placeWidgetAvoidingOverlap(el);
+    const host = document.getElementById(BASE_ID);
+    if (!host) return;
+    host.classList.remove('tg-debug', 'show-label');
+    placeAvoidingOverlap(host);
+    console.info('[TG-WIDGET] debug hidden');
   };
   window.__TGFW.forceFlash = function (times = 3) {
-    const el = document.getElementById(ID);
-    if (!el) return;
+    const host = document.getElementById(BASE_ID);
+    if (!host) return;
+    const root = host._shadow || host;
+    const btn = root.querySelector('#tg-btn');
+    if (!btn) return;
     let i = 0;
     const iv = setInterval(() => {
-      el.style.transform = 'translateY(-12px) scale(1.02)';
-      setTimeout(() => el.style.transform = '', 180);
+      btn.style.transform = 'translateY(-12px) scale(1.02)';
+      setTimeout(() => btn.style.transform = '', 180);
       i++;
       if (i >= times) clearInterval(iv);
     }, 320);
   };
 
+  // init logic
   function init() {
     if (!document.body) return setTimeout(init, 50);
-    const widget = createWidget();
-    placeWidgetAvoidingOverlap(widget);
-    observeAndAdjust(widget);
-    // small visible pulse to indicate presence (only if not debug)
-    setTimeout(() => { try { window.__TGFW.forceFlash(2); } catch (e) {} }, 350);
-    console.debug('[TG-WIDGET] initialized');
+    const host = createHost();
+    // if createHost appended but shadow root exists, set an id on host for easier debugging
+    host.id = BASE_ID;
+
+    // If shadow used, host._shadow exists. Ensure host has the public fallback id for query
+    try {
+      // wire button events
+      wire(host);
+      // initial placement
+      placeAvoidingOverlap(host);
+      // observe changes
+      observeAndAdjust(host);
+      // small visible cue
+      setTimeout(() => { try { window.__TGFW.forceFlash(2); } catch (e) {} }, 350);
+      console.log('[TG-WIDGET] initialized (shadow:' + (!!host._shadow) + ')');
+      console.log('  - run __TGFW.getElement(), __TGFW.showDebug(), or __TGFW.forceFlash() from console for debugging');
+    } catch (e) {
+      console.error('[TG-WIDGET] init failed', e);
+    }
   }
 
   if (document.readyState === 'complete' || document.readyState === 'interactive') init();
   else window.addEventListener('DOMContentLoaded', init);
 
-  // Quick usage helpers logged so you know
-  console.log('[TG-WIDGET] feedback widget script loaded. If you cannot see it: run `__TGFW.getElement()` in console, or `__TGFW.showDebug()` to make it obvious.');
+  console.log('[TG-WIDGET] loaded. If you cannot see it, run __TGFW.showDebug() in the console.');
 })();
