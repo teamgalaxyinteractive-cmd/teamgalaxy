@@ -1,4 +1,4 @@
-// feedback-widget.js — improved redirect + robust fallback + touch/keyboard fixes
+// feedback-widget.js — improved redirect + robust fallback + touch/keyboard fixes + manual fallback
 (function () {
   if (window.__TG_FEEDBACK_WIDGET_INJECTED__) return;
   window.__TG_FEEDBACK_WIDGET_INJECTED__ = true;
@@ -75,9 +75,6 @@
       if (!document.getElementById(fsId)) {
         try {
           const fs = document.createElement('style'); fs.id = fsId;
-          // safer fallback conversion:
-          // 1) convert :host(<class>) patterns to #BASE_ID.class
-          // 2) convert remaining :host to #BASE_ID
           let fallback = css.replace(/:host\((\.[^)]+)\)/g, `#${BASE_ID}$1`);
           fallback = fallback.replace(/:host\b/g, `#${BASE_ID}`);
           fs.textContent = fallback;
@@ -91,12 +88,11 @@
     return host;
   }
 
-  // --- Redirect helper (try top/parent/window and fallbacks)
+  // --- Enhanced redirect helper with manual fallback
   function safeRedirect(url) {
     const tryAssign = (obj) => {
       try {
         if (!obj || typeof obj.location === 'undefined') return false;
-        // try assign/href to be more compatible in restricted frames
         if (typeof obj.location.assign === 'function') {
           obj.location.assign(url);
         } else {
@@ -109,20 +105,99 @@
     };
 
     // 1) try top (if same-origin)
-    if (tryAssign(window.top)) return;
+    if (tryAssign(window.top)) return true;
     // 2) try parent
-    if (window.parent && window.parent !== window && tryAssign(window.parent)) return;
+    if (window.parent && window.parent !== window && tryAssign(window.parent)) return true;
     // 3) try current window
-    if (tryAssign(window)) return;
+    if (tryAssign(window)) return true;
 
-    // 4) try window.open in same tab (some CSPs block)
+    // 4) try anchor click method (more reliable in restricted environments)
     try {
-      const w = window.open(url, '_self');
-      if (w) return;
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_self';
+      a.rel = 'noopener noreferrer';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      return true;
     } catch (e) {}
 
-    // 5) final fallback: open new tab
-    try { window.open(url, '_blank'); } catch (e) { /* give up */ }
+    // 5) try window.open in same tab
+    try {
+      const w = window.open(url, '_self');
+      if (w) return true;
+    } catch (e) {}
+
+    // 6) final fallback: new tab
+    try {
+      window.open(url, '_blank');
+      console.warn("[TG-WIDGET] Redirect blocked. Opening feedback in new tab.");
+      return false; // Indicate that redirect didn't happen in same tab
+    } catch (e) {
+      console.error("[TG-WIDGET] All redirect methods failed. Showing manual fallback.");
+      return false;
+    }
+  }
+
+  // --- Manual fallback function to show user a link to click
+  function showManualFallback(url) {
+    // Create a temporary modal/overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2147483646;
+      backdrop-filter: blur(4px);
+    `;
+
+    const container = document.createElement('div');
+    container.style.cssText = `
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    `;
+
+    container.innerHTML = `
+      <h3 style="margin: 0 0 12px;">Redirect Blocked</h3>
+      <p style="margin: 0 0 16px; color: #555;">We couldn't automatically take you to the feedback page. Please click the button below.</p>
+      <a href="${url}" target="_self" rel="noopener noreferrer" style="
+        display: inline-block;
+        background: #ff6b6b;
+        color: white;
+        text-decoration: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-weight: bold;
+      ">Go to Feedback Page</a>
+    `;
+
+    overlay.appendChild(container);
+    document.body.appendChild(overlay);
+
+    // Remove after 10 seconds or on click outside
+    setTimeout(() => {
+      if (document.body.contains(overlay)) {
+        document.body.removeChild(overlay);
+      }
+    }, 10000);
+
+    overlay.addEventListener('click', () => {
+      if (document.body.contains(overlay)) {
+        document.body.removeChild(overlay);
+      }
+    });
   }
 
   // --- Wire interactions
@@ -131,24 +206,27 @@
     const btn = root.querySelector('#tg-btn');
     if (!btn) return;
 
-    // ensure keyboard + accessibility
     btn.setAttribute('tabindex', '0');
     btn.setAttribute('role', 'button');
 
     function clickHandler(e) {
       try { if (e && typeof e.preventDefault === 'function') e.preventDefault(); } catch (err) {}
-      // tactile feedback (non-blocking)
       try {
         btn.style.transform = 'translateY(-3px) scale(.995)';
         setTimeout(() => { btn.style.transform = ''; }, 140);
       } catch (e) {}
-      // do the redirect asynchronously but immediately
-      setTimeout(() => safeRedirect(REDIRECT_URL), 8);
+
+      // Attempt redirect
+      const success = safeRedirect(REDIRECT_URL);
+
+      // If redirect failed and opened in new tab, show manual fallback for same-tab
+      if (!success) {
+        showManualFallback(REDIRECT_URL);
+      }
     }
 
     btn.addEventListener('click', clickHandler, { passive: false });
 
-    // handle keyboard activation (Enter + Space)
     btn.addEventListener('keydown', (ev) => {
       const k = ev.key || ev.code;
       if (k === 'Enter' || k === ' ' || k === 'Spacebar' || k === 'Space') {
@@ -157,20 +235,18 @@
       }
     });
 
-    // also handle touchstart to make mobile feel instant
     btn.addEventListener('touchstart', (ev) => {
       try { ev.preventDefault(); } catch (e) {}
       clickHandler(ev);
     }, { passive: false });
 
-    // label show/hide
     host.addEventListener('mouseenter', () => host.classList.add('show-label'));
     host.addEventListener('mouseleave', () => host.classList.remove('show-label'));
     btn.addEventListener('focus', () => host.classList.add('show-label'));
     btn.addEventListener('blur', () => host.classList.remove('show-label'));
   }
 
-  // --- Placement (avoid overlap) — keeps pointer-events none until visible
+  // --- Placement (avoid overlap)
   function placeAvoidingOverlap(host) {
     try {
       host.style.position = 'fixed';
@@ -270,12 +346,10 @@
       try {
         placeAvoidingOverlap(host);
         host.classList.add('tg-visible');
-        // enable pointer events on host so the button can be clicked
         host.style.pointerEvents = 'auto';
         host.style.opacity = '1';
         observeAndAdjust(host);
 
-        // flash the button slightly (respect reduced-motion)
         try {
           if (!window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             const root = host._shadow || host;
