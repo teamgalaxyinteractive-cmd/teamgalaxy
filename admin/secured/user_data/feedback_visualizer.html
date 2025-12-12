@@ -9,6 +9,7 @@
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);color:#fff;min-height:100vh;position:relative;overflow-x:hidden}
+    /* Loading Screen (kept visuals) */
     .loading-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,12,41,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .5s ease}
     .loading-spinner{width:50px;height:50px;border:4px solid rgba(255,255,255,0.1);border-top:4px solid #00d4ff;border-radius:50%;animation:spin 1s linear infinite;margin-bottom:20px}
     @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
@@ -63,11 +64,11 @@
   <!-- Main container -->
   <div class="container" id="mainContainer" role="main" aria-live="polite">
     <div class="header">
-      <button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+      <button class="back-btn" id="backBtn"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
     </div>
 
-    <!-- Overview panel moved to top (right after header) -->
-    <div class="overview panel">
+    <!-- Overview panel moved to top -->
+    <div class="overview panel" id="overviewPanel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <div style="font-weight:700;font-size:1.1rem">Praises Overview</div>
         <div style="color:#9fb4c9;font-size:13px" id="loadedCount">—</div>
@@ -90,7 +91,7 @@
     <div class="grid">
       <div class="panel">
         <div class="controls-row">
-          <input type="text" id="search" class="search-box" placeholder="Search praises, names or refs..." oninput="filterPraises()">
+          <input type="text" id="search" class="search-box" placeholder="Search praises, names or refs..." />
         </div>
 
         <div id="praiseContainer" class="praise-list">
@@ -121,10 +122,12 @@
     const auth = getAuth(app);
     // ======================================
 
+    // UI refs
     const loadingScreen = document.getElementById('loadingScreen');
     const loadingText = document.getElementById('loadingText');
     const mainContainer = document.getElementById('mainContainer');
     const starsEl = document.getElementById('stars');
+    const backBtn = document.getElementById('backBtn');
 
     const praiseContainer = document.getElementById('praiseContainer');
     const totalPraisesEl = document.getElementById('totalPraises');
@@ -133,11 +136,13 @@
     const distinctUsersEl = document.getElementById('distinctUsers');
     const ratingDistEl = document.getElementById('ratingDist');
     const loadedCountEl = document.getElementById('loadedCount');
+    const searchInput = document.getElementById('search');
 
     let PRAISES = [];
     let USERS_MAP = {};
 
-    function createStars() {
+    // Create star background (single declaration)
+    function createStarBackground() {
       const starCount = 120;
       for (let i = 0; i < starCount; i++) {
         const s = document.createElement('div');
@@ -155,15 +160,16 @@
       }
     }
 
-    // Admin verification (same as your flow; checks admin collection where gmail == user.email)
-    async function checkAdmin() {
+    // Admin verification: checks admin collection where gmail == user.email
+    async function performAdminCheck() {
       try {
         const user = await new Promise((resolve, reject) => {
           const unsub = onAuthStateChanged(auth, async (u) => {
             if (u) {
               try {
-                const q = query(collection(db, 'admin'), where('gmail', '==', u.email));
-                const snap = await getDocs(q);
+                // query admin collection
+                const adminQuery = query(collection(db, 'admin'), where('gmail', '==', u.email));
+                const snap = await getDocs(adminQuery);
                 unsub();
                 if (!snap.empty) resolve(u);
                 else reject(new Error('Not an admin'));
@@ -178,7 +184,7 @@
           });
         });
 
-        // show main UI after same delay
+        // show main UI after same simulated delay you used
         setTimeout(() => {
           loadingScreen.style.opacity = '0';
           setTimeout(() => {
@@ -188,14 +194,16 @@
           }, 500);
         }, 1500);
 
-      } catch (err) {
-        console.error('Admin check failed', err);
+      } catch (error) {
+        console.error('Auth check error:', error);
         loadingText.textContent = 'Access denied. Redirecting...';
-        setTimeout(() => window.location.href = 'index.html', 2000);
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
       }
     }
 
-    // Load praises (only praise category & closed_as_praise)
+    // Load praise documents only (category == 'praise' && status == 'closed_as_praise')
     async function loadPraises() {
       praiseContainer.innerHTML = '<div class="no-praises">Loading praises...</div>';
       try {
@@ -220,6 +228,7 @@
         USERS_MAP = {};
         const userIds = Array.from(userIdsToFetch);
         if (userIds.length) {
+          // fetch usersPrivate docs in parallel
           await Promise.all(userIds.map(async (uid) => {
             try {
               const uDoc = await getDoc(doc(db, 'usersPrivate', uid));
@@ -246,6 +255,7 @@
       try { return new Date(ts).toLocaleString(); } catch { return 'N/A'; }
     }
 
+    // Render praise cards (with filter)
     function renderPraises(filter = '') {
       if (!PRAISES || PRAISES.length === 0) {
         praiseContainer.innerHTML = '<div class="no-praises">No praises found.</div>';
@@ -298,6 +308,7 @@
       loadedCountEl.textContent = `${PRAISES.length} loaded`;
     }
 
+    // Compute and display praise-focused stats
     function computeStats() {
       const total = PRAISES.length;
       const anonymousCount = PRAISES.filter(p => (!!p.anonymousSubmission) || (!p.userId)).length;
@@ -332,13 +343,12 @@
       ratingDistEl.innerHTML = distHtml;
     }
 
-    function filterPraises() {
-      const v = document.getElementById('search').value || '';
-      renderPraises(v);
-    }
+    // Simple filter listener
+    searchInput.addEventListener('input', () => {
+      renderPraises(searchInput.value || '');
+    });
 
-    // remove CSV export as requested (no export function)
-
+    // Utilities
     function escapeHtml(s='') {
       return String(s)
         .replace(/&/g,'&amp;')
@@ -348,120 +358,14 @@
         .replace(/'/g,'&#039;');
     }
 
-    function goBack() { window.location.href = '../admin_panel.html'; }
+    // Back button
+    backBtn.addEventListener('click', () => { window.location.href = '../admin_panel.html'; });
 
-    // init
+    // Init
     document.addEventListener('DOMContentLoaded', () => {
-      createStars();
-      checkAdmin();
+      createStarBackground(); // single call to star creation
+      performAdminCheck();    // start admin validation + load praises
     });
-
-    // expose filter to inline handler
-    window.filterPraises = filterPraises;
-    window.goBack = goBack;
-
-    // helper: createStars declared earlier but used here
-    function createStars() {
-      const starsEl = document.getElementById('stars');
-      const starCount = 120;
-      for (let i = 0; i < starCount; i++) {
-        const s = document.createElement('div');
-        s.className = 'star';
-        const x = Math.random() * 100;
-        const y = Math.random() * 100;
-        s.style.left = `${x}%`;
-        s.style.top = `${y}%`;
-        const size = Math.random() * 3 + 1;
-        s.style.width = `${size}px`;
-        s.style.height = `${size}px`;
-        const duration = Math.random() * 5 + 2;
-        s.style.setProperty('--duration', `${duration}s`);
-        starsEl.appendChild(s);
-      }
-    }
-
-    // reuse checkAdmin definition (placed earlier in module)
-    async function checkAdmin() {
-      try {
-        const user = await new Promise((resolve, reject) => {
-          const unsub = onAuthStateChanged(auth, async (u) => {
-            if (u) {
-              try {
-                const adminQ = query(collection(db, 'admin'), where('gmail', '==', u.email));
-                const snap = await getDocs(adminQ);
-                unsub();
-                if (!snap.empty) resolve(u);
-                else reject(new Error('Not an admin'));
-              } catch (err) {
-                unsub();
-                reject(err);
-              }
-            } else {
-              unsub();
-              reject(new Error('Not signed in'));
-            }
-          });
-        });
-
-        setTimeout(() => {
-          loadingScreen.style.opacity = '0';
-          setTimeout(() => {
-            loadingScreen.classList.add('hidden');
-            mainContainer.style.display = 'block';
-            loadPraises();
-          }, 500);
-        }, 1500);
-
-      } catch (err) {
-        console.error('Admin check failed', err);
-        loadingText.textContent = 'Access denied. Redirecting...';
-        setTimeout(() => window.location.href = 'index.html', 2000);
-      }
-    }
-
-    // loadPraises uses earlier definition (kept above)
-    async function loadPraises() {
-      praiseContainer.innerHTML = '<div class="no-praises">Loading praises...</div>';
-      try {
-        const fbCol = collection(db, 'feedback');
-        const q = query(
-          fbCol,
-          where('category', '==', 'praise'),
-          where('status', '==', 'closed_as_praise'),
-          orderBy('createdAt', 'desc')
-        );
-        const snap = await getDocs(q);
-        const praises = [];
-        const userIdsToFetch = new Set();
-
-        snap.forEach(d => {
-          const data = d.data();
-          praises.push({ id: d.id, ...data });
-          if (data.userId) userIdsToFetch.add(data.userId);
-        });
-
-        PRAISES = praises;
-        USERS_MAP = {};
-        const userIds = Array.from(userIdsToFetch);
-        if (userIds.length) {
-          await Promise.all(userIds.map(async (uid) => {
-            try {
-              const uDoc = await getDoc(doc(db, 'usersPrivate', uid));
-              if (uDoc.exists()) USERS_MAP[uid] = uDoc.data();
-            } catch (e) {
-              console.warn('Failed to load usersPrivate', uid, e);
-            }
-          }));
-        }
-
-        renderPraises();
-        computeStats();
-      } catch (err) {
-        console.error('Failed loading praises', err);
-        praiseContainer.innerHTML = '<div class="no-praises">Error loading praises. Try again later.</div>';
-      }
-    }
-
   </script>
 </body>
 </html>
