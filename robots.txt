@@ -1,0 +1,37 @@
+# =====================================================
+# robots.txt — TeamGalaxy
+# Modern, SEO-safe, production ready
+# =====================================================
+
+User-agent: *
+Allow: /
+
+# -------------------------
+# Block non-user / internal paths
+# -------------------------
+Disallow: /api/
+Disallow: /internal/
+Disallow: /admin/
+Disallow: /logs/
+Disallow: /assets/
+Disallow: /debug/
+Disallow: /private/
+
+# -------------------------
+# Block common junk & system files
+# -------------------------
+Disallow: /*.json$
+Disallow: /*.log$
+Disallow: /*.env$
+Disallow: /*.sql$
+Disallow: /*.bak$
+
+# -------------------------
+# Crawl optimization
+# -------------------------
+Crawl-delay: 5
+
+# -------------------------
+# Sitemap location
+# -------------------------
+Sitemap: https://www.teamgalaxy.net/sitemap.xml
