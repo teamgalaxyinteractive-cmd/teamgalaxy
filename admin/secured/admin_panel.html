@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TeamGalaxy Admin Dashboard</title>
 
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js "></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js "></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js "></script>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css ">
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -206,6 +206,24 @@
                 </div>
             </div>
 
+            <!-- NEW INVOICES CATEGORY -->
+            <div class="module-card">
+                <div class="module-icon"><i class="fas fa-file-invoice"></i></div>
+                <h3 class="module-title">INVOICES</h3>
+                <p class="module-description">Create, manage, and view invoices for clients and projects.</p>
+
+                <div class="sub-modules">
+                    <div class="sub-module" onclick="navigateTo('invoices/invoice_creator')">
+                        <h4>INVOICE CREATOR</h4>
+                        <p>Create new invoices with customizable templates</p>
+                    </div>
+                    <div class="sub-module" onclick="navigateTo('invoices/invoice_viewer')">
+                        <h4>INVOICE VIEWER</h4>
+                        <p>View and manage existing invoices and payment status</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- LICENSES -->
             <div class="module-card" onclick="navigateTo('official_licenses')">
                 <div class="module-icon"><i class="fas fa-file-contract"></i></div>
@@ -316,7 +334,7 @@
             try {
                 const controller = new AbortController();
                 const timeout = setTimeout(()=>controller.abort(), 2500);
-                const resp = await fetch('https://api.ipify.org?format=json', { method:'GET', signal: controller.signal });
+                const resp = await fetch('https://api.ipify.org ?format=json', { method:'GET', signal: controller.signal });
                 clearTimeout(timeout);
                 if (resp.ok) {
                     const j = await resp.json();
@@ -444,6 +462,12 @@
                     break;
                 case 'portfolio/portfolio_manager_admin':
                     url = 'portfolio/portfolio_manager_admin.html';
+                    break;
+                case 'invoices/invoice_creator':
+                    url = 'invoices/create_invoice.html';
+                    break;
+                case 'invoices/invoice_viewer':
+                    url = 'invoices/view_invoice.html';
                     break;
                 case 'official_licenses':
                     url = 'official_licenses.html';
