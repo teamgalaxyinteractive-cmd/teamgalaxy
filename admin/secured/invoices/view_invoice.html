@@ -575,21 +575,21 @@
             .search-controls {
                 grid-template-columns: 1fr;
             }
-            
+
             .invoice-details {
                 grid-template-columns: 1fr;
             }
-            
+
             .invoice-header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 8px;
             }
-            
+
             .invoice-actions {
                 flex-direction: column;
             }
-            
+
             .btn {
                 width: 100%;
             }
@@ -640,6 +640,7 @@
             <h1 class="pdf-title">FACTURE</h1>
             <p class="pdf-subtitle">Invoice No: <span id="pdf-invoice-number"></span></p>
         </div>
+
 
         <div class="pdf-company-info">
             <h3>Galaxy Designs (Creatine EI)</h3>
@@ -703,7 +704,7 @@
             <h4>Payment Information</h4>
             <p><strong>Mode de règlement:</strong> <span id="pdf-payment-method"></span></p>
         </div>
-        
+
         <div class="pdf-legal-footer">
             <h4>Legal Information</h4>
             <p><strong>TVA non applicable, art. 293 B du CGI</strong></p>
@@ -726,400 +727,303 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script>
-        // Initialize Firebase
-        const app = firebase.initializeApp({
-                      apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
-          authDomain: "teamgalaxy-77344.firebaseapp.com",
-          projectId: "teamgalaxy-77344",
-          storageBucket: "teamgalaxy-77344.firebasestorage.app",
-          messagingSenderId: "770256225320",
-          appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
-          measurementId: "G-6C2W9NSNCH"
-        });
-        const db = firebase.firestore();
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+import { 
+  getFirestore, 
+  collection, 
+  getDocs, 
+  getDoc, 
+  doc 
+} from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+import { 
+  getAuth, 
+  onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
 
-        let allInvoices = [];
-        let filteredInvoices = [];
 
-        // Load invoices from all years
-        async function loadInvoices() {
-            try {
-                // Get current year and previous year for loading
-                const currentYear = new Date().getFullYear();
-                const years = [currentYear, currentYear - 1, currentYear - 2]; // Load last 3 years
-                
-                allInvoices = [];
-                
-                for (const year of years) {
-                    const invoicesRef = db.collection(`invoices/${year}/invoices`);
-                    const snapshot = await invoicesRef.get();
-                    
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        data.id = doc.id; // Store the document ID
-                        data.year = year; // Store the year
-                        // Fix date issue
-                        if (data.created_at && typeof data.created_at.toDate === 'function') {
-                            data.created_at = data.created_at.toDate();
-                        }
-                        if (data.issue_date && typeof data.issue_date.toDate === 'function') {
-                            data.issue_date = data.issue_date.toDate();
-                        }
-                        allInvoices.push(data);
-                    });
-                }
-                
-                // Sort by creation date by default
-                allInvoices.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                filteredInvoices = [...allInvoices];
-                
-                displayInvoices(filteredInvoices);
-            } catch (error) {
-                console.error('Error loading invoices:', error);
-                document.getElementById('invoice-list').innerHTML = '<div class="no-invoices">Error loading invoices. Please refresh.</div>';
-            }
-        }
+// --------------------
+// FIREBASE INIT
+// --------------------
+const app = initializeApp({
+  apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+  authDomain: "teamgalaxy-77344.firebaseapp.com",
+  projectId: "teamgalaxy-77344",
+  storageBucket: "teamgalaxy-77344.firebasestorage.app",
+  messagingSenderId: "770256225320",
+  appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+  measurementId: "G-6C2W9NSNCH"
+});
 
-        // Display invoices
-        function displayInvoices(invoices) {
-            const container = document.getElementById('invoice-list');
-            
-            if (invoices.length === 0) {
-                container.innerHTML = '<div class="no-invoices">No invoices found.</div>';
-                return;
-            }
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-            const invoiceList = invoices.map(invoice => {
-                // Format customer address from map structure
-                const address = invoice.customer_address;
-                const fullAddress = address ? `${address.street}, ${address.country}` : 'Address not available';
-                
-                return `
-                <div class="invoice-item">
-                    <div class="invoice-header">
-                        <div class="invoice-number">#${invoice.invoice_number}</div>
-                        <div class="invoice-date">${new Date(invoice.created_at).toLocaleDateString('fr-FR')}</div>
-                    </div>
-                    
-                    <div class="invoice-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Client</div>
-                            <div class="detail-value">${invoice.customer_name}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Amount</div>
-                            <div class="detail-value">€${invoice.total_amount.toFixed(2)}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Payment Method</div>
-                            <div class="detail-value">${invoice.payment_method}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Address</div>
-                            <div class="detail-value">${fullAddress}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="invoice-actions">
-                        <button class="btn btn-success btn-sm" onclick="generatePDF('${invoice.id}', ${invoice.year})">Generate PDF</button>
-                        <button class="btn btn-warning btn-sm" onclick="viewInvoice('${invoice.id}', ${invoice.year})">View Details</button>
-                    </div>
-                </div>
-            `;}).join('');
 
-            container.innerHTML = invoiceList;
-        }
+// --------------------
+// AUTH CHECK ONLY (no auto login)
+// --------------------
+let currentUser = null;
 
-        // Filter invoices
-        function filterInvoices() {
-            const searchClient = document.getElementById('search-client').value.toLowerCase();
-            const sortBy = document.getElementById('sort-by').value;
-            const sortOrder = document.getElementById('sort-order').value;
+onAuthStateChanged(auth, (user) => {
+  currentUser = user || null;
+});
 
-            let filtered = allInvoices.filter(invoice => {
-                return invoice.customer_name.toLowerCase().includes(searchClient);
-            });
 
-            // Sort
-            filtered.sort((a, b) => {
-                let comparison = 0;
-                if (sortBy === 'created_at') {
-                    comparison = new Date(a.created_at) - new Date(b.created_at);
-                } else if (sortBy === 'invoice_number') {
-                    comparison = a.invoice_number.localeCompare(b.invoice_number);
-                } else if (sortBy === 'total_amount') {
-                    comparison = a.total_amount - b.total_amount;
-                } else if (sortBy === 'customer_name') {
-                    comparison = a.customer_name.localeCompare(b.customer_name);
-                }
+// --------------------
+// GLOBAL STATE
+// --------------------
+let allInvoices = [];
+let filteredInvoices = [];
 
-                return sortOrder === 'asc' ? comparison : -comparison;
-            });
 
-            filteredInvoices = filtered;
-            displayInvoices(filteredInvoices);
-        }
+// --------------------
+// SAFE DATE NORMALIZER
+// --------------------
+function normalizeDate(v) {
+  if (!v) return null;
+  if (v.toDate) return v.toDate();
+  return new Date(v);
+}
 
-        // Generate PDF
-        async function generatePDF(invoiceId, year) {
-            try {
-                // Get invoice data from Firebase
-                const invoiceDoc = await db.collection(`invoices/${year}/invoices`).doc(invoiceId).get();
-                const invoice = invoiceDoc.data();
-                
-                if (!invoice) {
-                    alert('Invoice not found');
-                    return;
-                }
 
-                // Fill PDF template with invoice data
-                document.getElementById('pdf-invoice-number').textContent = invoice.invoice_number;
-                
-                // Fix date issue
-                let issueDate = new Date(invoice.issue_date);
-                if (typeof invoice.issue_date.toDate === 'function') {
-                    issueDate = invoice.issue_date.toDate();
-                }
-                
-                document.getElementById('pdf-issue-date').textContent = issueDate.toLocaleDateString('fr-FR');
-                document.getElementById('pdf-customer-name').textContent = invoice.customer_name;
-                document.getElementById('pdf-customer-email').textContent = invoice.customer_email;
-                
-                // Format customer address from map structure
-                const address = invoice.customer_address;
-                const fullAddress = address ? `${address.street}, ${address.country}` : 'Address not available';
-                document.getElementById('pdf-customer-address').textContent = fullAddress;
-                
-                // Set payment method
-                document.getElementById('pdf-payment-method').textContent = invoice.payment_method;
-                
-                // Fill items table
-                const itemsBody = document.getElementById('pdf-items-body');
-                itemsBody.innerHTML = '';
-                invoice.items_json.forEach(item => {
-                    const row = document.createElement('tr');
-                    // Fix item description for legal compliance
-                    let description = item.name;
-                    if (description === 'Fcc' || description === 'FCC' || description === 'fcc') {
-                        description = 'Digital Asset - Galaxy Pack Vol 1'; // Default legal description
-                    }
-                    row.innerHTML = `
-                        <td>${description}</td>
-                        <td>${item.quantity}</td>
-                        <td>€${item.price.toFixed(2)}</td>
-                        <td>€${item.total.toFixed(2)}</td>
-                    `;
-                    itemsBody.appendChild(row);
-                });
+// --------------------
+// LOAD INVOICES (last 3 years)
+// --------------------
+async function loadInvoices() {
 
-                // Fill totals with discount as a line item
-                const subtotal = invoice.total_amount + invoice.discount_amount;
-                document.getElementById('pdf-subtotal-amount').textContent = subtotal.toFixed(2);
-                document.getElementById('pdf-discount-display').textContent = invoice.discount_amount.toFixed(2);
-                document.getElementById('pdf-final-total-amount').textContent = invoice.total_amount.toFixed(2);
+  if (!currentUser) {
+    document.getElementById("invoice-list").innerHTML =
+      `<div class="no-invoices">Please login (owner Gmail only).</div>`;
+    return;
+  }
 
-                // Generate PDF using jsPDF
-                const { jsPDF } = window.jspdf;
-                
-                // Determine if we need a second page based on item count
-                const itemCount = invoice.items_json.length;
-                const needSecondPage = itemCount > 3; // Changed from 5 to 3
-                
-                // Show the main template
-                const element = document.getElementById('pdf-template');
-                element.style.display = 'block';
-                
-                // Hide totals section if we need a second page
-                if (needSecondPage) {
-                    document.getElementById('pdf-totals-section').style.display = 'none';
-                }
-                
-                // Capture the first page
-                const canvas = await html2canvas(element, {
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    logging: false
-                });
-                
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const imgWidth = 210; // A4 width in mm
-                const pageHeight = 297; // A4 height in mm
-                const imgHeight = canvas.height * imgWidth / canvas.width;
-                
-                // Add first page
-                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-                
-                // If we need a second page
-                if (needSecondPage) {
-                    pdf.addPage();
-                    
-                    // Show the payment/legal section and capture it
-                    const paymentLegalElement = document.getElementById('pdf-payment-legal-section');
-                    paymentLegalElement.style.display = 'block';
-                    
-                    const paymentLegalCanvas = await html2canvas(paymentLegalElement, {
-                        scale: 2,
-                        useCORS: true,
-                        allowTaint: true,
-                        logging: false
-                    });
-                    
-                    const paymentLegalImgData = paymentLegalCanvas.toDataURL('image/png');
-                    const paymentLegalImgHeight = paymentLegalCanvas.height * imgWidth / paymentLegalCanvas.width;
-                    pdf.addImage(paymentLegalImgData, 'PNG', 0, 0, imgWidth, paymentLegalImgHeight);
-                    
-                    // Hide payment/legal section again
-                    paymentLegalElement.style.display = 'none';
-                    
-                    // Add totals section to second page
-                    pdf.addPage();
-                    
-                    // Show totals section again for second page capture
-                    document.getElementById('pdf-totals-section').style.display = 'block';
-                    
-                    // Capture totals for second page
-                    const secondPageCanvas = await html2canvas(element, {
-                        scale: 2,
-                        useCORS: true,
-                        allowTaint: true,
-                        logging: false
-                    });
-                    
-                    const secondPageImgData = secondPageCanvas.toDataURL('image/png');
-                    const secondPageImgHeight = secondPageCanvas.height * imgWidth / secondPageCanvas.width;
-                    pdf.addImage(secondPageImgData, 'PNG', 0, 0, imgWidth, secondPageImgHeight);
-                } else {
-                    // If no second page needed, add payment/legal section to same page
-                    pdf.addPage();
-                    
-                    const paymentLegalElement = document.getElementById('pdf-payment-legal-section');
-                    paymentLegalElement.style.display = 'block';
-                    
-                    const paymentLegalCanvas = await html2canvas(paymentLegalElement, {
-                        scale: 2,
-                        useCORS: true,
-                        allowTaint: true,
-                        logging: false
-                    });
-                    
-                    const paymentLegalImgData = paymentLegalCanvas.toDataURL('image/png');
-                    const paymentLegalImgHeight = paymentLegalCanvas.height * imgWidth / paymentLegalCanvas.width;
-                    pdf.addImage(paymentLegalImgData, 'PNG', 0, 0, imgWidth, paymentLegalImgHeight);
-                    
-                    paymentLegalElement.style.display = 'none';
-                }
-                
-                // Hide templates again
-                element.style.display = 'none';
-                
-                // Save the PDF
-                pdf.save(`invoice_${invoice.invoice_number}.pdf`);
-                
-            } catch (error) {
-                console.error('Error generating PDF:', error);
-                alert('Error generating PDF: ' + error.message);
-            }
-        }
+  allInvoices = [];
 
-        // View invoice details in modal
-        function viewInvoice(invoiceId, year) {
-            const invoice = allInvoices.find(inv => inv.id === invoiceId && inv.year === year);
-            if (invoice) {
-                // Format customer address from map structure
-                const address = invoice.customer_address;
-                const fullAddress = address ? `${address.street}, ${address.country}` : 'Address not available';
-                
-                const modalBody = document.getElementById('modal-body');
-                
-                let itemsHtml = '<div class="modal-items"><h3>Items</h3><table class="items-table"><thead><tr><th>Description</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead><tbody>';
-                
-                invoice.items_json.forEach(item => {
-                    let description = item.name;
-                    if (description === 'Fcc' || description === 'FCC' || description === 'fcc') {
-                        description = 'Digital Asset - Galaxy Pack Vol 1';
-                    }
-                    itemsHtml += `
-                        <tr>
-                            <td>${description}</td>
-                            <td>${item.quantity}</td>
-                            <td>€${item.price.toFixed(2)}</td>
-                            <td>€${item.total.toFixed(2)}</td>
-                        </tr>
-                    `;
-                });
-                
-                itemsHtml += '</tbody></table></div>';
-                
-                modalBody.innerHTML = `
-                    <div class="modal-detail">
-                        <span class="modal-label">Invoice Number</span>
-                        <div class="modal-value">${invoice.invoice_number}</div>
-                    </div>
-                    <div class="modal-detail">
-                        <span class="modal-label">Customer Name</span>
-                        <div class="modal-value">${invoice.customer_name}</div>
-                    </div>
-                    <div class="modal-detail">
-                        <span class="modal-label">Customer Email</span>
-                        <div class="modal-value">${invoice.customer_email}</div>
-                    </div>
-                    <div class="modal-detail">
-                        <span class="modal-label">Customer Address</span>
-                        <div class="modal-value">${fullAddress}</div>
-                    </div>
-                    <div class="modal-detail">
-                        <span class="modal-label">Total Amount</span>
-                        <div class="modal-value">€${invoice.total_amount.toFixed(2)}</div>
-                    </div>
-                    <div class="modal-detail">
-                        <span class="modal-label">Payment Method</span>
-                        <div class="modal-value">${invoice.payment_method}</div>
-                    </div>
-                    <div class="modal-detail">
-                        <span class="modal-label">Issue Date</span>
-                        <div class="modal-value">${new Date(invoice.issue_date).toLocaleDateString('fr-FR')}</div>
-                    </div>
-                    <div class="modal-detail">
-                        <span class="modal-label">Due Date</span>
-                        <div class="modal-value">Paiement comptant</div>
-                    </div>
-                    <div class="modal-detail">
-                        <span class="modal-label">Created At</span>
-                        <div class="modal-value">${new Date(invoice.created_at).toLocaleDateString('fr-FR')}</div>
-                    </div>
-                    ${itemsHtml}
-                `;
-                
-                document.getElementById('details-modal').style.display = 'flex';
-            }
-        }
+  const currentYear = new Date().getFullYear();
+  const years = [currentYear, currentYear - 1, currentYear - 2];
 
-        // Close modal
-        document.getElementById('close-modal').addEventListener('click', () => {
-            document.getElementById('details-modal').style.display = 'none';
-        });
+  for (const y of years) {
+    const ref = collection(db, `invoices/${y}/invoices`);
+    const snap = await getDocs(ref);
 
-        // Close modal when clicking outside
-        window.addEventListener('click', (e) => {
-            const modal = document.getElementById('details-modal');
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
+    snap.forEach(d => {
+      const data = d.data();
 
-        // Event listeners
-        document.getElementById('search-client').addEventListener('input', filterInvoices);
-        document.getElementById('sort-by').addEventListener('change', filterInvoices);
-        document.getElementById('sort-order').addEventListener('change', filterInvoices);
-        document.getElementById('refresh-data').addEventListener('click', loadInvoices);
+      allInvoices.push({
+        ...data,
+        id: d.id,
+        year: y,
+        created_at: normalizeDate(data.created_at),
+        issue_date: normalizeDate(data.issue_date)
+      });
+    });
+  }
 
-        // Initialize
-        loadInvoices();
-    </script>
+  // newest first
+  allInvoices.sort((a, b) => b.created_at - a.created_at);
+
+  filteredInvoices = [...allInvoices];
+  displayInvoices(filteredInvoices);
+}
+
+
+// --------------------
+// DISPLAY INVOICES
+// --------------------
+function displayInvoices(invoices) {
+  const container = document.getElementById("invoice-list");
+
+  if (!invoices.length) {
+    container.innerHTML = `<div class="no-invoices">No invoices found.</div>`;
+    return;
+  }
+
+  container.innerHTML = invoices.map(inv => {
+    const addr = inv.customer_address
+      ? `${inv.customer_address.street}, ${inv.customer_address.country}`
+      : "Not provided";
+
+    return `
+      <div class="invoice-item">
+        <div class="invoice-header">
+          <div class="invoice-number">#${inv.invoice_number}</div>
+          <div class="invoice-date">
+            ${normalizeDate(inv.created_at).toLocaleDateString('fr-FR')}
+          </div>
+        </div>
+
+        <div class="invoice-details">
+          <div class="detail-item">
+            <div class="detail-label">Client</div>
+            <div class="detail-value">${inv.customer_name}</div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Amount</div>
+            <div class="detail-value">€${Number(inv.total_amount || 0).toFixed(2)}</div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Payment</div>
+            <div class="detail-value">${inv.payment_method || "—"}</div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Address</div>
+            <div class="detail-value">${addr}</div>
+          </div>
+        </div>
+
+        <div class="invoice-actions">
+          <button class="btn btn-success btn-sm" onclick="generatePDF('${inv.id}', ${inv.year})">Generate PDF</button>
+          <button class="btn btn-warning btn-sm" onclick="viewInvoice('${inv.id}', ${inv.year})">View Details</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+
+// --------------------
+// CLIENT SEARCH + SORT
+// --------------------
+function filterInvoices() {
+
+  const term = document.getElementById("search-client").value.toLowerCase();
+  const sortBy = document.getElementById("sort-by").value;
+  const order = document.getElementById("sort-order").value;
+
+  let list = allInvoices.filter(i =>
+    (i.customer_name || "").toLowerCase().includes(term)
+  );
+
+  list.sort((a, b) => {
+    let cmp = 0;
+
+    if (sortBy === "created_at")
+      cmp = a.created_at - b.created_at;
+    else if (sortBy === "total_amount")
+      cmp = a.total_amount - b.total_amount;
+    else
+      cmp = String(a[sortBy]).localeCompare(String(b[sortBy]));
+
+    return order === "asc" ? cmp : -cmp;
+  });
+
+  filteredInvoices = list;
+  displayInvoices(list);
+}
+
+
+// --------------------
+// MAKE PDF (fixed null crashes)
+// --------------------
+window.generatePDF = async (id, year) => {
+
+  const ref = doc(db, `invoices/${year}/invoices`, id);
+  const snap = await getDoc(ref);
+
+  if (!snap.exists()) return alert("Invoice missing");
+
+  const inv = snap.data();
+
+  const items = inv.items_json || [];
+
+  const discount = Number(inv.discount_amount || 0);
+  const total = Number(inv.total_amount || 0);
+  const subtotal = total + discount;
+
+  // fill template values
+  document.getElementById("pdf-invoice-number").textContent = inv.invoice_number;
+  document.getElementById("pdf-issue-date").textContent =
+    normalizeDate(inv.issue_date).toLocaleDateString("fr-FR");
+  document.getElementById("pdf-customer-name").textContent = inv.customer_name || "";
+  document.getElementById("pdf-customer-email").textContent = inv.customer_email || "";
+
+  const addr = inv.customer_address
+    ? `${inv.customer_address.street}, ${inv.customer_address.country}`
+    : "Not provided";
+
+  document.getElementById("pdf-customer-address").textContent = addr;
+  document.getElementById("pdf-payment-method").textContent = inv.payment_method || "—";
+
+  const body = document.getElementById("pdf-items-body");
+  body.innerHTML = "";
+
+  items.forEach(x => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${x.name}</td>
+      <td>${x.quantity}</td>
+      <td>€${Number(x.price).toFixed(2)}</td>
+      <td>€${Number(x.total).toFixed(2)}</td>
+    `;
+    body.appendChild(tr);
+  });
+
+  document.getElementById("pdf-subtotal-amount").textContent = subtotal.toFixed(2);
+  document.getElementById("pdf-discount-display").textContent = discount.toFixed(2);
+  document.getElementById("pdf-final-total-amount").textContent = total.toFixed(2);
+
+  // render → pdf
+  const { jsPDF } = window.jspdf;
+
+  const el = document.getElementById("pdf-template");
+  el.style.display = "block";
+
+  const canvas = await html2canvas(el, { scale: 2 });
+  const img = canvas.toDataURL("image/png");
+
+  const pdf = new jsPDF("p", "mm", "a4");
+  pdf.addImage(img, "PNG", 0, 0, 210, (canvas.height * 210) / canvas.width);
+
+  el.style.display = "none";
+
+  pdf.save(`invoice_${inv.invoice_number}.pdf`);
+};
+
+
+// --------------------
+// VIEW MODAL
+// --------------------
+window.viewInvoice = (id, year) => {
+  const inv = allInvoices.find(x => x.id === id && x.year === year);
+  if (!inv) return;
+
+  const modal = document.getElementById("details-modal");
+
+  document.getElementById("modal-body").innerHTML = `
+    <div class="modal-detail">
+      <span class="modal-label">Invoice</span>
+      <div class="modal-value">${inv.invoice_number}</div>
+    </div>
+
+    <div class="modal-detail">
+      <span class="modal-label">Issue Date</span>
+      <div class="modal-value">${normalizeDate(inv.issue_date).toLocaleDateString("fr-FR")}</div>
+    </div>
+  `;
+
+  modal.style.display = "flex";
+};
+
+
+// --------------------
+// EVENTS
+// --------------------
+document.getElementById("search-client").addEventListener("input", filterInvoices);
+document.getElementById("sort-by").addEventListener("change", filterInvoices);
+document.getElementById("sort-order").addEventListener("change", filterInvoices);
+document.getElementById("refresh-data").addEventListener("click", loadInvoices);
+document.getElementById("close-modal").addEventListener("click", () => {
+  document.getElementById("details-modal").style.display = "none";
+});
+
+
+// --------------------
+// START
+// --------------------
+loadInvoices();
+</script>
 </body>
 </html>
