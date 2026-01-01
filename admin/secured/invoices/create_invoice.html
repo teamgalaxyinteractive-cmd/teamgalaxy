@@ -624,32 +624,51 @@
     document.getElementById('customer-address').addEventListener('blur', validateAddress);
     document.getElementById('customer-country').addEventListener('blur', validateAddress);
 
-    async function getNextInvoiceNumber() {
-        try {
-            const year = new Date().getFullYear();
-            const invoicesRef = db.collection(\`invoices/\${year}/invoices\`)
-                .where('invoice_number', '>=', \`GD-\${year}-000\`)
-                .where('invoice_number', '<=', \`GD-\${year}-999\`);
+async function getNextInvoiceNumber() {
+    try {
+        var year = new Date().getFullYear();
 
-            const snapshot = await invoicesRef.orderBy('invoice_number', 'desc').limit(1).get();
+        // Collection path: invoices/{year}/invoices
+        var invoicesRef = db
+            .collection("invoices/" + year + "/invoices")
+            .where("invoice_number", ">=", "GD-" + year + "-000")
+            .where("invoice_number", "<=", "GD-" + year + "-999")
+            .orderBy("invoice_number", "desc")
+            .limit(1);
 
-            let nextNumber = 1;
-            if (!snapshot.empty) {
-                const lastInvoice = snapshot.docs[0].data();
-                const lastNum = parseInt(lastInvoice.invoice_number.split('-')[2]);
-                nextNumber = lastNum + 1;
-            }
+        var snapshot = await invoicesRef.get();
 
-            const formattedNumber = \`GD-\${year}-\${nextNumber.toString().padStart(3, '0')}\`;
-            document.getElementById('invoice-number').value = formattedNumber;
-            document.getElementById('preview-invoice-number').textContent = formattedNumber;
+        var nextNumber = 1;
 
-            return formattedNumber;
-        } catch (error) {
-            console.error('Error getting next invoice number:', error);
-            return \`GD-\${new Date().getFullYear()}-001\`;
+        if (!snapshot.empty) {
+            var lastInvoice = snapshot.docs[0].data();
+            var parts = lastInvoice.invoice_number.split("-");
+            var lastNum = parseInt(parts[2]);
+            nextNumber = lastNum + 1;
         }
+
+        var formattedNumber =
+            "GD-" +
+            year +
+            "-" +
+            nextNumber.toString().padStart(3, "0");
+
+        document.getElementById("invoice-number").value = formattedNumber;
+        document.getElementById("preview-invoice-number").textContent = formattedNumber;
+
+        return formattedNumber;
+    } catch (error) {
+        console.error("Error getting next invoice number:", error);
+
+        var fallback =
+            "GD-" + new Date().getFullYear() + "-001";
+
+        document.getElementById("invoice-number").value = fallback;
+        document.getElementById("preview-invoice-number").textContent = fallback;
+
+        return fallback;
     }
+}
 
     function calculateItemTotal(row) {
         const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
