@@ -558,111 +558,104 @@
             </button>
         </div>
     </div>
-<!-- Firebase 11.9.0 + Auth + Firestore + Full Logic -->
+<!-- Firebase 11.9.0 -->
 <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore-compat.js"></script>
 
 <script>
-    // Initialize Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
-        authDomain: "teamgalaxy-77344.firebaseapp.com",
-        projectId: "teamgalaxy-77344",
-        storageBucket: "teamgalaxy-77344.firebasestorage.app",
-        messagingSenderId: "770256225320",
-        appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
-        measurementId: "G-6C2W9NSNCH"
-    };
+/* ---------------- FIREBASE CONFIG ------------------ */
+const firebaseConfig = {
+    apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+    authDomain: "teamgalaxy-77344.firebaseapp.com",
+    projectId: "teamgalaxy-77344",
+    storageBucket: "teamgalaxy-77344.firebasestorage.app",
+    messagingSenderId: "770256225320",
+    appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+    measurementId: "G-6C2W9NSNCH"
+};
 
-    firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // 🔐 Ensure every Firestore request is authenticated
-    auth.onAuthStateChanged(async (user) => {
-        if (!user) {
-            try {
-                await auth.signInAnonymously();
-                console.log("Signed in anonymously");
-            } catch (e) {
-                console.error("Anonymous sign-in failed:", e);
-            }
-        } else {
-            // refresh token to include latest custom role claims
-            await user.getIdToken(true);
-            console.log("Authenticated user:", user.uid);
-        }
-    });
-
-    // -------------------- YOUR LOGIC BELOW (unchanged) --------------------
-
-    // Set current date
-    const today = new Date();
-    const formattedDate = today.toLocaleDateString('fr-FR');
-    document.getElementById('issue-date').value = formattedDate;
-
-    function validateAddress() {
-        const address = document.getElementById('customer-address').value.trim();
-        const country = document.getElementById('customer-country').value.trim();
-        const validationDiv = document.getElementById('address-validation');
-
-        if (!address || !country) {
-            validationDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> <span>Please fill in both address and country</span>';
-            validationDiv.className = 'address-validation validation-error';
-            document.getElementById('preview-address-validated').textContent = 'No';
-            return false;
-        } else {
-            validationDiv.innerHTML = '<i class="fas fa-check-circle"></i> <span>Address details complete</span>';
-            validationDiv.className = 'address-validation validation-success';
-            document.getElementById('preview-address-validated').textContent = 'Yes';
-            return true;
-        }
+/* ---------------- AUTH (IMPORTANT) ------------------ */
+auth.onAuthStateChanged(function(user) {
+    if (!user) {
+        auth.signInAnonymously()
+        .then(function() {
+            console.log("Signed in anonymously");
+        })
+        .catch(function(e) {
+            console.error("Auth error:", e);
+        });
+    } else {
+        user.getIdToken(true);
     }
+});
 
-    document.getElementById('customer-address').addEventListener('blur', validateAddress);
-    document.getElementById('customer-country').addEventListener('blur', validateAddress);
+/* ---------------- DATE ------------------ */
+var today = new Date();
+document.getElementById("issue-date").value =
+    today.toLocaleDateString("fr-FR");
 
+/* ---------------- ADDRESS VALIDATION ------------------ */
+function validateAddress() {
+    var address = document.getElementById("customer-address").value.trim();
+    var country = document.getElementById("customer-country").value.trim();
+
+    var div = document.getElementById("address-validation");
+
+    if (!address || !country) {
+        div.innerHTML =
+            '<i class="fas fa-exclamation-circle"></i> <span>Please fill in both address and country</span>';
+        div.className = "address-validation validation-error";
+        document.getElementById("preview-address-validated").textContent = "No";
+        return false;
+    } else {
+        div.innerHTML =
+            '<i class="fas fa-check-circle"></i> <span>Address details complete</span>';
+        div.className = "address-validation validation-success";
+        document.getElementById("preview-address-validated").textContent = "Yes";
+        return true;
+    }
+}
+
+document.getElementById("customer-address").addEventListener("blur", validateAddress);
+document.getElementById("customer-country").addEventListener("blur", validateAddress);
+
+/* ---------------- INVOICE NUMBER AUTO ------------------ */
 async function getNextInvoiceNumber() {
     try {
         var year = new Date().getFullYear();
 
-        // Collection path: invoices/{year}/invoices
-        var invoicesRef = db
+        var ref = db
             .collection("invoices/" + year + "/invoices")
             .where("invoice_number", ">=", "GD-" + year + "-000")
             .where("invoice_number", "<=", "GD-" + year + "-999")
             .orderBy("invoice_number", "desc")
             .limit(1);
 
-        var snapshot = await invoicesRef.get();
+        var snapshot = await ref.get();
 
-        var nextNumber = 1;
+        var next = 1;
 
         if (!snapshot.empty) {
-            var lastInvoice = snapshot.docs[0].data();
-            var parts = lastInvoice.invoice_number.split("-");
-            var lastNum = parseInt(parts[2]);
-            nextNumber = lastNum + 1;
+            var last = snapshot.docs[0].data();
+            var parts = last.invoice_number.split("-");
+            next = parseInt(parts[2]) + 1;
         }
 
-        var formattedNumber =
-            "GD-" +
-            year +
-            "-" +
-            nextNumber.toString().padStart(3, "0");
+        var num = "GD-" + year + "-" + next.toString().padStart(3, "0");
 
-        document.getElementById("invoice-number").value = formattedNumber;
-        document.getElementById("preview-invoice-number").textContent = formattedNumber;
+        document.getElementById("invoice-number").value = num;
+        document.getElementById("preview-invoice-number").textContent = num;
 
-        return formattedNumber;
-    } catch (error) {
-        console.error("Error getting next invoice number:", error);
+        return num;
+    } catch (err) {
+        console.error(err);
 
-        var fallback =
-            "GD-" + new Date().getFullYear() + "-001";
-
+        var fallback = "GD-" + new Date().getFullYear() + "-001";
         document.getElementById("invoice-number").value = fallback;
         document.getElementById("preview-invoice-number").textContent = fallback;
 
@@ -670,240 +663,231 @@ async function getNextInvoiceNumber() {
     }
 }
 
-    function calculateItemTotal(row) {
-        const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
-        const price = parseFloat(row.querySelector('.item-price').value) || 0;
-        const total = qty * price;
-        row.querySelector('.item-total').textContent = total.toFixed(2);
-        updateTotals();
+/* ---------------- CALCULATIONS ------------------ */
+function calculateItemTotal(row) {
+    var qty = parseFloat(row.querySelector(".item-qty").value) || 0;
+    var price = parseFloat(row.querySelector(".item-price").value) || 0;
+    var total = qty * price;
+
+    row.querySelector(".item-total").textContent = total.toFixed(2);
+    updateTotals();
+}
+
+function updateTotals() {
+    var subtotal = 0;
+
+    document.querySelectorAll("#items-body tr").forEach(function(row) {
+        var qty = parseFloat(row.querySelector(".item-qty").value) || 0;
+        var price = parseFloat(row.querySelector(".item-price").value) || 0;
+        subtotal += qty * price;
+    });
+
+    document.getElementById("subtotal-amount").textContent = subtotal.toFixed(2);
+    calculateDiscount(subtotal);
+}
+
+function calculateDiscount(subtotal) {
+    var type = document.getElementById("discount-type").value;
+    var value = parseFloat(document.getElementById("discount-value").value) || 0;
+
+    var amount = 0;
+
+    if (type === "percentage") {
+        amount = subtotal * value / 100;
+    } else {
+        amount = value;
     }
 
-    function updateTotals() {
-        let subtotal = 0;
-        document.querySelectorAll('#items-body tr').forEach(row => {
-            const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
-            const price = parseFloat(row.querySelector('.item-price').value) || 0;
-            subtotal += qty * price;
-        });
+    if (amount > subtotal) amount = subtotal;
 
-        document.getElementById('subtotal-amount').textContent = subtotal.toFixed(2);
-        calculateDiscount(subtotal);
+    document.getElementById("discount-amount").textContent = amount.toFixed(2);
+    document.getElementById("discount-display").textContent = amount.toFixed(2);
+
+    var total = subtotal - amount;
+    document.getElementById("final-total-amount").textContent = total.toFixed(2);
+}
+
+/* ---------------- UPDATE PREVIEW ------------------ */
+function updatePreview() {
+    var name = document.getElementById("customer-name").value;
+    if (!name) name = "-";
+    document.getElementById("preview-customer-name").textContent = name;
+
+    var count = document.querySelectorAll("#items-body tr").length;
+    document.getElementById("preview-item-count").textContent = count;
+
+    var value = parseFloat(document.getElementById("discount-value").value) || 0;
+    var type = document.getElementById("discount-type").value;
+
+    if (value > 0) {
+        if (type === "percentage") {
+            document.getElementById("preview-discount-applied").textContent =
+                value + " %";
+        } else {
+            document.getElementById("preview-discount-applied").textContent =
+                value + " €";
+        }
+    } else {
+        document.getElementById("preview-discount-applied").textContent = "None";
+    }
+}
+
+document.getElementById("customer-name").addEventListener("input", updatePreview);
+
+/* ---------------- ADD / REMOVE ITEMS ------------------ */
+document.getElementById("add-item").addEventListener("click", function() {
+    var tbody = document.getElementById("items-body");
+
+    var row = document.createElement("tr");
+    row.innerHTML =
+        '<td><input type="text" class="item-desc" placeholder="Product description"></td>' +
+        '<td><input type="number" class="item-qty" value="1" min="1"></td>' +
+        '<td><input type="number" class="item-price" step="0.01" placeholder="0.00"></td>' +
+        '<td class="item-total">0.00</td>' +
+        '<td><button type="button" class="btn btn-error" style="padding:6px 10px;font-size:12px;width:auto;">Remove</button></td>';
+
+    tbody.appendChild(row);
+
+    row.querySelector(".item-qty").addEventListener("input", function() {
+        calculateItemTotal(row);
+    });
+
+    row.querySelector(".item-price").addEventListener("input", function() {
+        calculateItemTotal(row);
+    });
+
+    updatePreview();
+});
+
+/* remove buttons */
+document.addEventListener("click", function(e) {
+    if (e.target.textContent.indexOf("Remove") !== -1) {
+        var rows = document.querySelectorAll("#items-body tr").length;
+
+        if (rows > 1) {
+            e.target.closest("tr").remove();
+            updateTotals();
+            updatePreview();
+        }
+    }
+});
+
+/* ---------------- SAVE TO FIRESTORE ------------------ */
+document.getElementById("save-data").addEventListener("click", async function() {
+
+    var invoice = document.getElementById("invoice-number").value;
+    var name = document.getElementById("customer-name").value.trim();
+    var email = document.getElementById("customer-email").value.trim();
+    var address = document.getElementById("customer-address").value.trim();
+    var country = document.getElementById("customer-country").value.trim();
+    var payment = document.getElementById("payment-method").value;
+
+    if (!name || !email || !address || !country || !payment) {
+        showStatus("Please fill all required fields", "error");
+        return;
     }
 
-    function calculateDiscount(subtotal) {
-        const discountType = document.getElementById('discount-type').value;
-        const discountValue = parseFloat(document.getElementById('discount-value').value) || 0;
-
-        let discountAmount = 0;
-        if (discountType === 'percentage') discountAmount = (subtotal * discountValue) / 100;
-        else discountAmount = discountValue;
-
-        discountAmount = Math.min(discountAmount, subtotal);
-
-        document.getElementById('discount-amount').textContent = discountAmount.toFixed(2);
-        document.getElementById('discount-display').textContent = discountAmount.toFixed(2);
-
-        const finalTotal = subtotal - discountAmount;
-        document.getElementById('final-total-amount').textContent = finalTotal.toFixed(2);
+    if (!validateAddress()) {
+        showStatus("Please complete address", "error");
+        return;
     }
 
-    document.getElementById('add-item').addEventListener('click', function() {
-        const tbody = document.getElementById('items-body');
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td><input type="text" class="item-desc" placeholder="Product description"></td>
-            <td><input type="number" class="item-qty" value="1" min="1"></td>
-            <td><input type="number" class="item-price" step="0.01" placeholder="0.00"></td>
-            <td class="item-total">0.00</td>
-            <td><button type="button" class="btn" style="background: #ef4444; padding: 6px 10px; font-size: 12px; width: auto; margin: 0;">Remove</button></td>
-        `;
-        tbody.appendChild(newRow);
+    var items = [];
+    document.querySelectorAll("#items-body tr").forEach(function(row) {
+        var d = row.querySelector(".item-desc").value.trim();
+        var q = parseFloat(row.querySelector(".item-qty").value) || 0;
+        var p = parseFloat(row.querySelector(".item-price").value) || 0;
 
-        newRow.querySelector('.item-qty').addEventListener('input', () => calculateItemTotal(newRow));
-        newRow.querySelector('.item-price').addEventListener('input', () => calculateItemTotal(newRow));
-    });
-
-    document.addEventListener('click', function(e) {
-        if (e.target.style.background === 'rgb(239, 68, 68)') {
-            if (document.querySelectorAll('#items-body tr').length > 1) {
-                e.target.closest('tr').remove();
-                updateTotals();
-                updatePreview();
-            } else {
-                showStatus('At least one item is required', 'error');
-            }
-        }
-    });
-
-    document.querySelectorAll('#items-body input').forEach(input => {
-        if (input.classList.contains('item-qty') || input.classList.contains('item-price')) {
-            input.addEventListener('input', () => calculateItemTotal(input.closest('tr')));
-        }
-    });
-
-    document.getElementById('discount-type').addEventListener('change', () => {
-        const subtotal = parseFloat(document.getElementById('subtotal-amount').textContent) || 0;
-        calculateDiscount(subtotal);
-        updatePreview();
-    });
-
-    document.getElementById('discount-value').addEventListener('input', () => {
-        const subtotal = parseFloat(document.getElementById('subtotal-amount').textContent) || 0;
-        calculateDiscount(subtotal);
-        updatePreview();
-    });
-
-    function updatePreview() {
-        document.getElementById('preview-customer-name').textContent =
-            document.getElementById('customer-name').value || '-';
-        document.getElementById('preview-item-count').textContent =
-            document.querySelectorAll('#items-body tr').length;
-
-        const discountValue = parseFloat(document.getElementById('discount-value').value) || 0;
-        const discountType = document.getElementById('discount-type').value;
-
-        if (discountValue > 0)
-            document.getElementById('preview-discount-applied').textContent =
-                \`\${discountValue} \${discountType === 'percentage' ? '%' : '€'}\`;
-        else
-            document.getElementById('preview-discount-applied').textContent = 'None';
-    }
-
-    document.getElementById('customer-name').addEventListener('input', updatePreview);
-
-    document.getElementById('save-data').addEventListener('click', async function() {
-        const invoiceNumber = document.getElementById('invoice-number').value;
-        const customerName = document.getElementById('customer-name').value.trim();
-        const customerEmail = document.getElementById('customer-email').value.trim();
-        const customerAddress = document.getElementById('customer-address').value.trim();
-        const customerCountry = document.getElementById('customer-country').value.trim();
-        const paymentMethod = document.getElementById('payment-method').value;
-
-        if (!customerName || !customerEmail || !customerAddress || !customerCountry || !paymentMethod) {
-            showStatus('Please fill all required fields', 'error');
-            return;
-        }
-
-        if (!validateAddress()) {
-            showStatus('Please provide a complete address and country', 'error');
-            return;
-        }
-
-        const items = [];
-        document.querySelectorAll('#items-body tr').forEach(row => {
-            const desc = row.querySelector('.item-desc').value.trim();
-            const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
-            const price = parseFloat(row.querySelector('.item-price').value) || 0;
-            if (desc && qty > 0 && price > 0) {
-                items.push({
-                    name: desc,
-                    quantity: qty,
-                    price: price,
-                    total: qty * price
-                });
-            }
-        });
-
-        if (items.length === 0) {
-            showStatus('Please add at least one item', 'error');
-            return;
-        }
-
-        const discountType = document.getElementById('discount-type').value;
-        const discountValue = parseFloat(document.getElementById('discount-value').value) || 0;
-        const discountAmount = parseFloat(document.getElementById('discount-amount').textContent) || 0;
-        const totalAmount = parseFloat(document.getElementById('final-total-amount').textContent);
-
-        try {
-            const year = new Date().getFullYear();
-            const existingInvoice = await db.collection(\`invoices/\${year}/invoices\`).doc(invoiceNumber).get();
-
-            if (existingInvoice.exists) {
-                showStatus('Invoice number already exists! Please refresh to get a new number.', 'error');
-                return;
-            }
-        } catch (error) {
-            console.error('Error checking invoice number:', error);
-        }
-
-        try {
-            const year = new Date().getFullYear();
-            await db.collection(\`invoices/\${year}/invoices\`).doc(invoiceNumber).set({
-                id: Date.now(),
-                invoice_number: invoiceNumber,
-                issue_date: new Date(),
-                customer_name: customerName,
-                customer_email: customerEmail,
-                customer_address: {
-                    street: customerAddress,
-                    country: customerCountry
-                },
-                total_amount: totalAmount,
-                currency: 'EUR',
-                items_json: items,
-                discount_type: discountType,
-                discount_value: discountValue,
-                discount_amount: discountAmount,
-                file_sent_status: false,
-                payment_method: paymentMethod,
-                created_at: new Date()
+        if (d && q > 0 && p > 0) {
+            items.push({
+                name: d,
+                quantity: q,
+                price: p,
+                total: q * p
             });
-
-            showStatus('Data saved successfully to database!', 'success');
-            resetForm();
-        } catch (error) {
-            console.error('Error saving ', error);
-            showStatus('Error saving ' + error.message, 'error');
         }
     });
 
-    function showStatus(message, type) {
-        const statusDiv = document.getElementById('status-message');
-        statusDiv.textContent = message;
-        statusDiv.className = \`status-message \${type}\`;
-        statusDiv.style.display = 'block';
-
-        setTimeout(() => statusDiv.style.display = 'none', 5000);
+    if (items.length === 0) {
+        showStatus("Add at least one item", "error");
+        return;
     }
 
-    function resetForm() {
-        document.getElementById('customer-name').value = '';
-        document.getElementById('customer-email').value = '';
-        document.getElementById('customer-address').value = '';
-        document.getElementById('customer-country').value = '';
-        document.getElementById('payment-method').value = '';
-        document.getElementById('discount-type').value = 'percentage';
-        document.getElementById('discount-value').value = '';
+    var discountType = document.getElementById("discount-type").value;
+    var discountValue = parseFloat(document.getElementById("discount-value").value) || 0;
+    var discountAmount = parseFloat(document.getElementById("discount-amount").textContent) || 0;
+    var totalAmount = parseFloat(document.getElementById("final-total-amount").textContent) || 0;
 
-        const tbody = document.getElementById('items-body');
-        while (tbody.children.length > 1) tbody.removeChild(tbody.lastChild);
+    try {
+        var year = new Date().getFullYear();
 
-        const firstRow = tbody.firstElementChild;
-        firstRow.querySelector('.item-desc').value = '';
-        firstRow.querySelector('.item-qty').value = '1';
-        firstRow.querySelector('.item-price').value = '';
-        firstRow.querySelector('.item-total').textContent = '0.00';
+        await db.collection("invoices/" + year + "/invoices")
+        .doc(invoice)
+        .set({
+            invoice_number: invoice,
+            customer_name: name,
+            customer_email: email,
+            customer_address: {
+                street: address,
+                country: country
+            },
+            items_json: items,
+            total_amount: totalAmount,
+            discount_type: discountType,
+            discount_value: discountValue,
+            discount_amount: discountAmount,
+            payment_method: payment,
+            created_at: new Date(),
+            issue_date: new Date(),
+            file_sent_status: false
+        });
 
-        document.getElementById('subtotal-amount').textContent = '0.00';
-        document.getElementById('discount-amount').textContent = '0.00';
-        document.getElementById('discount-display').textContent = '0.00';
-        document.getElementById('final-total-amount').textContent = '0.00';
-
-        document.getElementById('preview-customer-name').textContent = '-';
-        document.getElementById('preview-item-count').textContent = '0';
-        document.getElementById('preview-discount-applied').textContent = 'None';
-        document.getElementById('preview-address-validated').textContent = 'No';
-
-        const validationDiv = document.getElementById('address-validation');
-        validationDiv.innerHTML = '<i class="fas fa-info-circle"></i> <span>Enter complete address details</span>';
-        validationDiv.className = 'address-validation';
-
-        getNextInvoiceNumber();
+        showStatus("Saved successfully!", "success");
+        resetForm();
+    } catch (err) {
+        console.error(err);
+        showStatus("Save failed: " + err.message, "error");
     }
+});
+
+/* ---------------- STATUS UI ------------------ */
+function showStatus(msg, type) {
+    var box = document.getElementById("status-message");
+    box.textContent = msg;
+    box.className = "status-message " + type;
+    box.style.display = "block";
+
+    setTimeout(function() {
+        box.style.display = "none";
+    }, 5000);
+}
+
+/* ---------------- RESET FORM ------------------ */
+function resetForm() {
+    document.getElementById("customer-name").value = "";
+    document.getElementById("customer-email").value = "";
+    document.getElementById("customer-address").value = "";
+    document.getElementById("customer-country").value = "";
+    document.getElementById("payment-method").value = "";
+    document.getElementById("discount-value").value = "";
+
+    document.getElementById("subtotal-amount").textContent = "0.00";
+    document.getElementById("discount-amount").textContent = "0.00";
+    document.getElementById("discount-display").textContent = "0.00";
+    document.getElementById("final-total-amount").textContent = "0.00";
+
+    document.getElementById("preview-customer-name").textContent = "-";
+    document.getElementById("preview-item-count").textContent = "0";
+    document.getElementById("preview-discount-applied").textContent = "None";
+    document.getElementById("preview-address-validated").textContent = "No";
 
     getNextInvoiceNumber();
-    updateTotals();
-    updatePreview();
+}
+
+/* ---------------- INITIALIZE ------------------ */
+getNextInvoiceNumber();
+updateTotals();
+updatePreview();
 </script>
 </body>
 </html>
