@@ -298,6 +298,87 @@
             border: 1px solid #fecaca;
         }
 
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #4285F4, #DB4437, #F4B400, #0F9D58);
+            background-size: 400% 400%;
+            animation: gradient 3s ease infinite;
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.3);
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .login-message {
+            margin-top: 20px;
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-weight: 500;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
         .totals-display {
             background: #f9fafb;
             padding: 24px;
@@ -389,7 +470,7 @@
         }
 
         .validation-error {
-            color: #ef4444;
+            color: #ef4044;
         }
 
         @media (max-width: 768px) {
@@ -424,10 +505,24 @@
                 </div>
                 <h1>Galaxy Designs</h1>
                 <p>Premium Data Storage & Invoice Management System</p>
+                <div class="user-info hidden" id="user-info">
+                    <img id="user-avatar" class="user-avatar" src="" alt="User Avatar">
+                    <span id="user-name">User</span>
+                    <button class="logout-btn" id="logout-btn">Logout</button>
+                </div>
             </div>
         </div>
 
-        <div class="form-section">
+        <div id="login-section" class="login-container">
+            <h2><i class="fas fa-lock"></i> Authentication Required</h2>
+            <p class="login-message">Please sign in with Google to access the invoice management system</p>
+            <button class="login-btn" id="google-login-btn">
+                <i class="fab fa-google"></i>
+                Sign in with Google
+            </button>
+        </div>
+
+        <div id="form-section" class="form-section hidden">
             <div id="status-message" class="status-message" style="display: none;"></div>
 
             <div class="form-group">
@@ -577,8 +672,9 @@
         import { 
             getAuth, 
             onAuthStateChanged, 
-            setPersistence, 
-            browserSessionPersistence 
+            signInWithPopup, 
+            GoogleAuthProvider, 
+            signOut 
         } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
 
         // Initialize Firebase
@@ -594,37 +690,65 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
-        // Set auth persistence to session
-        setPersistence(auth, browserSessionPersistence)
-            .catch(console.error);
+        // DOM Elements
+        const loginSection = document.getElementById('login-section');
+        const formSection = document.getElementById('form-section');
+        const googleLoginBtn = document.getElementById('google-login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userInfo = document.getElementById('user-info');
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
 
-        // Auth state management
-        let currentUser = null;
-        let isAuthChecked = false;
-
-        function waitForAuth(callback) {
-            if (isAuthChecked) {
-                if (currentUser) {
-                    callback();
-                } else {
-                    showStatus('Authentication required', 'error');
-                }
-                return;
-            }
-
-            const unsubscribe = onAuthStateChanged(auth, (user) => {
-                isAuthChecked = true;
-                currentUser = user;
-                unsubscribe(); // Stop listening after first check
+        // Handle auth state changes
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in
+                loginSection.classList.add('hidden');
+                formSection.classList.remove('hidden');
+                userInfo.classList.remove('hidden');
                 
-                if (user) {
-                    callback();
-                } else {
-                    showStatus('Authentication required', 'error');
+                // Display user info
+                userAvatar.src = user.photoURL || 'https://via.placeholder.com/40';
+                userName.textContent = user.displayName || user.email;
+                
+                // Initialize form after auth check
+                if (formSection.classList.contains('hidden')) {
+                    formSection.classList.remove('hidden');
+                    getNextInvoiceNumber().then(() => {
+                        updateTotals();
+                        updatePreview();
+                    });
                 }
-            });
-        }
+            } else {
+                // User is signed out
+                loginSection.classList.remove('hidden');
+                formSection.classList.add('hidden');
+                userInfo.classList.add('hidden');
+            }
+        });
+
+        // Google login
+        googleLoginBtn.addEventListener('click', async () => {
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error('Google login error:', error);
+                showStatus('Login failed: ' + error.message, 'error');
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                showStatus('Successfully logged out', 'success');
+            } catch (error) {
+                console.error('Logout error:', error);
+                showStatus('Logout failed: ' + error.message, 'error');
+            }
+        });
 
         // Enhanced address validation (only checks if fields are empty)
         function validateAddress() {
@@ -651,39 +775,38 @@
 
         // Generate next invoice number
         async function getNextInvoiceNumber() {
-            return new Promise((resolve) => {
-                waitForAuth(async () => {
-                    try {
-                        const year = new Date().getFullYear();
-                        const invoicesRef = collection(db, `invoices/${year}/invoices`);
-                        const q = query(
-                            invoicesRef,
-                            where('invoice_number', '>=', `GD-${year}-000`),
-                            where('invoice_number', '<=', `GD-${year}-999`),
-                            orderBy('invoice_number', 'desc'),
-                            limit(1)
-                        );
+            try {
+                const year = new Date().getFullYear();
+                const invoicesRef = collection(db, `invoices/${year}/invoices`);
+                const q = query(
+                    invoicesRef,
+                    where('invoice_number', '>=', `GD-${year}-000`),
+                    where('invoice_number', '<=', `GD-${year}-999`),
+                    orderBy('invoice_number', 'desc'),
+                    limit(1)
+                );
 
-                        const snapshot = await getDocs(q);
-                        let nextNumber = 1;
-                        
-                        if (!snapshot.empty) {
-                            const lastInvoice = snapshot.docs[0].data();
-                            const lastNum = parseInt(lastInvoice.invoice_number.split('-')[2]);
-                            nextNumber = lastNum + 1;
-                        }
+                const snapshot = await getDocs(q);
+                let nextNumber = 1;
+                
+                if (!snapshot.empty) {
+                    const lastInvoice = snapshot.docs[0].data();
+                    const lastNum = parseInt(lastInvoice.invoice_number.split('-')[2]);
+                    nextNumber = lastNum + 1;
+                }
 
-                        const formattedNumber = `GD-${year}-${nextNumber.toString().padStart(3, '0')}`;
-                        document.getElementById('invoice-number').value = formattedNumber;
-                        document.getElementById('preview-invoice-number').textContent = formattedNumber;
-                        resolve(formattedNumber);
-                    } catch (error) {
-                        console.error('Error getting next invoice number:', error);
-                        const fallback = `GD-${new Date().getFullYear()}-001`;
-                        resolve(fallback);
-                    }
-                });
-            });
+                const formattedNumber = `GD-${year}-${nextNumber.toString().padStart(3, '0')}`;
+                document.getElementById('invoice-number').value = formattedNumber;
+                document.getElementById('preview-invoice-number').textContent = formattedNumber;
+                
+                return formattedNumber;
+            } catch (error) {
+                console.error('Error getting next invoice number:', error);
+                const fallback = `GD-${new Date().getFullYear()}-001`;
+                document.getElementById('invoice-number').value = fallback;
+                document.getElementById('preview-invoice-number').textContent = fallback;
+                return fallback;
+            }
         }
 
         // Calculate item total
@@ -789,108 +912,106 @@
         document.getElementById('customer-name').addEventListener('input', updatePreview);
 
         // Save data to database
-        document.getElementById('save-data').addEventListener('click', function() {
-            waitForAuth(async () => {
-                const invoiceNumber = document.getElementById('invoice-number').value;
-                const issueDate = document.getElementById('issue-date').value;
-                const customerName = document.getElementById('customer-name').value.trim();
-                const customerEmail = document.getElementById('customer-email').value.trim();
-                const customerAddress = document.getElementById('customer-address').value.trim();
-                const customerCountry = document.getElementById('customer-country').value.trim();
-                const paymentMethod = document.getElementById('payment-method').value;
+        document.getElementById('save-data').addEventListener('click', async function() {
+            const invoiceNumber = document.getElementById('invoice-number').value;
+            const issueDate = document.getElementById('issue-date').value;
+            const customerName = document.getElementById('customer-name').value.trim();
+            const customerEmail = document.getElementById('customer-email').value.trim();
+            const customerAddress = document.getElementById('customer-address').value.trim();
+            const customerCountry = document.getElementById('customer-country').value.trim();
+            const paymentMethod = document.getElementById('payment-method').value;
 
-                // Validate required fields
-                if (!customerName || !customerEmail || !customerAddress || !customerCountry || !paymentMethod) {
-                    showStatus('Please fill all required fields', 'error');
-                    return;
-                }
+            // Validate required fields
+            if (!customerName || !customerEmail || !customerAddress || !customerCountry || !paymentMethod) {
+                showStatus('Please fill all required fields', 'error');
+                return;
+            }
 
-                // Validate address
-                if (!validateAddress()) {
-                    showStatus('Please provide a complete address and country', 'error');
-                    return;
-                }
+            // Validate address
+            if (!validateAddress()) {
+                showStatus('Please provide a complete address and country', 'error');
+                return;
+            }
 
-                // Get items
-                const items = [];
-                document.querySelectorAll('#items-body tr').forEach(row => {
-                    const desc = row.querySelector('.item-desc').value.trim();
-                    const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
-                    const price = parseFloat(row.querySelector('.item-price').value) || 0;
-                    if (desc && qty > 0 && price > 0) {
-                        items.push({
-                            name: desc,
-                            quantity: qty,
-                            price: price,
-                            total: qty * price
-                        });
-                    }
-                });
-
-                if (items.length === 0) {
-                    showStatus('Please add at least one item', 'error');
-                    return;
-                }
-
-                // Get discount info
-                const discountType = document.getElementById('discount-type').value;
-                const discountValue = parseFloat(document.getElementById('discount-value').value) || 0;
-                const discountAmount = parseFloat(document.getElementById('discount-amount').textContent) || 0;
-                const totalAmount = parseFloat(document.getElementById('final-total-amount').textContent);
-
-                // Check if invoice number already exists (strict verification)
-                try {
-                    const year = new Date().getFullYear();
-                    const invoiceRef = doc(db, `invoices/${year}/invoices`, invoiceNumber);
-                    const existingInvoice = await getDoc(invoiceRef);
-
-                    if (existingInvoice.exists()) {
-                        showStatus('Invoice number already exists! Please refresh to get a new number.', 'error');
-                        return;
-                    }
-                } catch (error) {
-                    console.error('Error checking invoice number:', error);
-                    showStatus('Error checking invoice number', 'error');
-                    return;
-                }
-
-                // Save to Firebase with new structure
-                try {
-                    const year = new Date().getFullYear();
-                    const invoiceData = {
-                        id: Date.now(),
-                        invoice_number: invoiceNumber,
-                        issue_date: new Date(), // Fixed: Use current date object
-                        customer_name: customerName,
-                        customer_email: customerEmail,
-                        customer_address: {
-                            street: customerAddress,
-                            country: customerCountry
-                        },
-                        total_amount: totalAmount,
-                        currency: 'EUR',
-                        items_json: items,
-                        discount_type: discountType,
-                        discount_value: discountValue,
-                        discount_amount: discountAmount,
-                        file_sent_status: false,
-                        payment_method: paymentMethod,
-                        created_at: new Date()
-                    };
-
-                    // Save to sub-collection
-                    await setDoc(doc(db, `invoices/${year}/invoices`, invoiceNumber), invoiceData);
-
-                    showStatus('Data saved successfully to database!', 'success');
-
-                    // Reset form for next entry
-                    resetForm();
-
-                } catch (error) {
-                    console.error('Error saving ', error);
-                    showStatus('Error saving  ' + error.message, 'error');
+            // Get items
+            const items = [];
+            document.querySelectorAll('#items-body tr').forEach(row => {
+                const desc = row.querySelector('.item-desc').value.trim();
+                const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                if (desc && qty > 0 && price > 0) {
+                    items.push({
+                        name: desc,
+                        quantity: qty,
+                        price: price,
+                        total: qty * price
+                    });
                 }
             });
+
+            if (items.length === 0) {
+                showStatus('Please add at least one item', 'error');
+                return;
+            }
+
+            // Get discount info
+            const discountType = document.getElementById('discount-type').value;
+            const discountValue = parseFloat(document.getElementById('discount-value').value) || 0;
+            const discountAmount = parseFloat(document.getElementById('discount-amount').textContent) || 0;
+            const totalAmount = parseFloat(document.getElementById('final-total-amount').textContent);
+
+            // Check if invoice number already exists (strict verification)
+            try {
+                const year = new Date().getFullYear();
+                const invoiceRef = doc(db, `invoices/${year}/invoices`, invoiceNumber);
+                const existingInvoice = await getDoc(invoiceRef);
+
+                if (existingInvoice.exists()) {
+                    showStatus('Invoice number already exists! Please refresh to get a new number.', 'error');
+                    return;
+                }
+            } catch (error) {
+                console.error('Error checking invoice number:', error);
+                showStatus('Error checking invoice number', 'error');
+                return;
+            }
+
+            // Save to Firebase with new structure
+            try {
+                const year = new Date().getFullYear();
+                const invoiceData = {
+                    id: Date.now(),
+                    invoice_number: invoiceNumber,
+                    issue_date: new Date(), // Fixed: Use current date object
+                    customer_name: customerName,
+                    customer_email: customerEmail,
+                    customer_address: {
+                        street: customerAddress,
+                        country: customerCountry
+                    },
+                    total_amount: totalAmount,
+                    currency: 'EUR',
+                    items_json: items,
+                    discount_type: discountType,
+                    discount_value: discountValue,
+                    discount_amount: discountAmount,
+                    file_sent_status: false,
+                    payment_method: paymentMethod,
+                    created_at: new Date()
+                };
+
+                // Save to sub-collection
+                await setDoc(doc(db, `invoices/${year}/invoices`, invoiceNumber), invoiceData);
+
+                showStatus('Data saved successfully to database!', 'success');
+
+                // Reset form for next entry
+                resetForm();
+
+            } catch (error) {
+                console.error('Error saving ', error);
+                showStatus('Error saving  ' + error.message, 'error');
+            }
         });
 
         // Show status message
@@ -953,14 +1074,6 @@
         const today = new Date();
         const formattedDate = today.toLocaleDateString('fr-FR');
         document.getElementById('issue-date').value = formattedDate;
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            getNextInvoiceNumber().then(() => {
-                updateTotals();
-                updatePreview();
-            });
-        });
     </script>
 </body>
 </html>
