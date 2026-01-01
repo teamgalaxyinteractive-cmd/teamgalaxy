@@ -728,7 +728,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-import { 
+import {
   getFirestore,
   collection,
   getDocs,
@@ -745,9 +745,9 @@ import {
 
 
 // ---------------------------
-// 🔥 FIREBASE INIT
+// 🔥 FIREBASE INITIALIZATION
 // ---------------------------
-const app = initializeApp({
+const firebaseConfig = {
   apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
   authDomain: "teamgalaxy-77344.firebaseapp.com",
   projectId: "teamgalaxy-77344",
@@ -755,54 +755,46 @@ const app = initializeApp({
   messagingSenderId: "770256225320",
   appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
   measurementId: "G-6C2W9NSNCH"
-});
+};
 
+const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// persist auth across tabs
+// persist login across reload
 await setPersistence(auth, browserLocalPersistence);
 
 
 // ---------------------------
-// 👤 AUTH + OWNER ENFORCEMENT
+// 👤 AUTH HANDLING
 // ---------------------------
 let currentUser = null;
 
-// ⚠️ CHANGE THIS TO YOUR OWNER EMAIL
-const OWNER_EMAIL = "your-owner-email@gmail.com";
-
 onAuthStateChanged(auth, async (user) => {
-
   if (!user) {
     currentUser = null;
     document.getElementById("invoice-list").innerHTML =
-      `<div class="no-invoices">Please sign in with owner Gmail.</div>`;
-    console.warn("Not signed in");
+      `<div class="no-invoices">Please sign in first.</div>`;
     return;
   }
 
   currentUser = user;
 
-  console.log("Signed in:", user.email);
+  console.log("Signed in as:", user.email);
 
-  if (user.email !== OWNER_EMAIL) {
-    document.getElementById("invoice-list").innerHTML =
-      `<div class="no-invoices">Access denied. Only owner can view invoices.</div>`;
-    return;
-  }
+  // 📌 Rules handle who is owner — NOT frontend
+  // ⚠️ No Gmail static checks here
 
-  // 🎯 all good → load data
   loadInvoices();
 });
 
 
 // ---------------------------
-// 🗓 SAFE date converter
+// 🗓 DATE NORMALIZER
 // ---------------------------
 function normalizeDate(v) {
-  if (!v) return null;
-  if (v?.toDate) return v.toDate();
+  if (!v) return new Date();
+  if (typeof v?.toDate === "function") return v.toDate();
   return new Date(v);
 }
 
@@ -814,68 +806,84 @@ let allInvoices = [];
 let filteredInvoices = [];
 
 async function loadInvoices() {
+  try {
+    document.getElementById("invoice-list").innerHTML =
+      `<div class="loading">Loading invoices...</div>`;
 
-  document.getElementById("invoice-list").innerHTML =
-    `<div class="loading">Loading invoices…</div>`;
+    const currentYear = new Date().getFullYear();
+    const years = [currentYear, currentYear - 1, currentYear - 2];
 
-  allInvoices = [];
+    allInvoices = [];
 
-  const currentYear = new Date().getFullYear();
-  const years = [currentYear, currentYear - 1, currentYear - 2];
+    for (const year of years) {
+      const ref = collection(db, `invoices/${year}/invoices`);
+      const snap = await getDocs(ref);
 
-  for (const year of years) {
+      snap.forEach(docSnap => {
+        const data = docSnap.data();
 
-    const ref = collection(db, `invoices/${year}/invoices`);
-    const snap = await getDocs(ref);
-
-    snap.forEach(d => {
-      const data = d.data();
-
-      allInvoices.push({
-        ...data,
-        id: d.id,
-        year,
-        created_at: normalizeDate(data.created_at),
-        issue_date: normalizeDate(data.issue_date)
+        allInvoices.push({
+          ...data,
+          id: docSnap.id,
+          year,
+          created_at: normalizeDate(data.created_at),
+          issue_date: normalizeDate(data.issue_date)
+        });
       });
-    });
+    }
+
+    // sort newest first
+    allInvoices.sort((a, b) => b.created_at - a.created_at);
+
+    filteredInvoices = [...allInvoices];
+
+    displayInvoices(filteredInvoices);
+
+  } catch (err) {
+
+    console.error(err);
+
+    if (err.code === "permission-denied") {
+      document.getElementById("invoice-list").innerHTML =
+        `<div class="no-invoices">Access denied by Firestore security rules.</div>`;
+      return;
+    }
+
+    document.getElementById("invoice-list").innerHTML =
+      `<div class="no-invoices">Failed to load invoices.</div>`;
   }
-
-  allInvoices.sort((a, b) => b.created_at - a.created_at);
-
-  filteredInvoices = [...allInvoices];
-  displayInvoices(filteredInvoices);
 }
 
 
 // ---------------------------
-// 🧾 DISPLAY LIST
+// 🧾 DISPLAY INVOICES LIST
 // ---------------------------
 function displayInvoices(invoices) {
 
   const container = document.getElementById("invoice-list");
 
   if (!invoices.length) {
-    container.innerHTML = `<div class="no-invoices">No invoices found</div>`;
+    container.innerHTML = `<div class="no-invoices">No invoices found.</div>`;
     return;
   }
 
   container.innerHTML = invoices.map(inv => {
-
     const address = inv.customer_address
       ? `${inv.customer_address.street}, ${inv.customer_address.country}`
-      : "Address not available";
+      : "Address missing";
 
     return `
       <div class="invoice-item">
+
         <div class="invoice-header">
           <div class="invoice-number">#${inv.invoice_number}</div>
           <div class="invoice-date">
-            ${normalizeDate(inv.created_at).toLocaleDateString("fr-FR")}
+            ${normalizeDate(inv.issue_date || inv.created_at).toLocaleDateString('fr-FR')}
           </div>
         </div>
 
         <div class="invoice-details">
+
           <div class="detail-item">
             <div class="detail-label">Client</div>
             <div class="detail-value">${inv.customer_name}</div>
@@ -888,24 +896,21 @@ function displayInvoices(invoices) {
 
           <div class="detail-item">
             <div class="detail-label">Payment</div>
-            <div class="detail-value">${inv.payment_method || "—"}</div>
+            <div class="detail-value">${inv.payment_method || "-"}</div>
           </div>
 
           <div class="detail-item">
             <div class="detail-label">Address</div>
             <div class="detail-value">${address}</div>
           </div>
+
         </div>
 
         <div class="invoice-actions">
-          <button class="btn btn-success btn-sm" onclick="generatePDF('${inv.id}', ${inv.year})">
-            Generate PDF
-          </button>
-
-          <button class="btn btn-warning btn-sm" onclick="viewInvoice('${inv.id}', ${inv.year})">
-            View Details
-          </button>
+          <button class="btn btn-success btn-sm" onclick="generatePDF('${inv.id}', ${inv.year})">Generate PDF</button>
+          <button class="btn btn-warning btn-sm" onclick="viewInvoice('${inv.id}', ${inv.year})">View Details</button>
         </div>
+
       </div>
     `;
   }).join("");
@@ -913,13 +918,13 @@ function displayInvoices(invoices) {
 
 
 // ---------------------------
-// 🔍 SEARCH + SORT
+// 🔍 SEARCH / SORT
 // ---------------------------
 function filterInvoices() {
 
   const term = document.getElementById("search-client").value.toLowerCase();
   const sortBy = document.getElementById("sort-by").value;
-  const order = document.getElementById("sort-order").value;
+  const sortOrder = document.getElementById("sort-order").value;
 
   let list = allInvoices.filter(i =>
     (i.customer_name || "").toLowerCase().includes(term)
@@ -929,110 +934,178 @@ function filterInvoices() {
     let cmp = 0;
 
     if (sortBy === "created_at") cmp = a.created_at - b.created_at;
-    else if (sortBy === "total_amount") cmp = a.total_amount - b.total_amount;
+    else if (sortBy === "total_amount") cmp = (a.total_amount || 0) - (b.total_amount || 0);
     else cmp = String(a[sortBy] || "").localeCompare(String(b[sortBy] || ""));
 
-    return order === "asc" ? cmp : -cmp;
+    return sortOrder === "asc" ? cmp : -cmp;
   });
 
   filteredInvoices = list;
+
   displayInvoices(list);
 }
 
 
 // ---------------------------
-// 🧾 GENERATE PDF
-// ---------------------------
-window.generatePDF = async (id, year) => {
-
-  const ref = doc(db, `invoices/${year}/invoices`, id);
-  const snap = await getDoc(ref);
-
-  if (!snap.exists()) return alert("Invoice not found");
-
-  const inv = snap.data();
-
-  const discount = Number(inv.discount_amount || 0);
-  const total = Number(inv.total_amount || 0);
-  const subtotal = total + discount;
-
-  // fill template
-  document.getElementById("pdf-invoice-number").textContent = inv.invoice_number;
-  document.getElementById("pdf-issue-date").textContent =
-    normalizeDate(inv.issue_date).toLocaleDateString("fr-FR");
-
-  document.getElementById("pdf-customer-name").textContent = inv.customer_name || "";
-  document.getElementById("pdf-customer-email").textContent = inv.customer_email || "";
-
-  document.getElementById("pdf-payment-method").textContent = inv.payment_method || "—";
-
-  const addr = inv.customer_address
-    ? `${inv.customer_address.street}, ${inv.customer_address.country}`
-    : "Address not available";
-
-  document.getElementById("pdf-customer-address").textContent = addr;
-
-  const body = document.getElementById("pdf-items-body");
-  body.innerHTML = "";
-
-  (inv.items_json || []).forEach(item => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${item.name}</td>
-      <td>${item.quantity}</td>
-      <td>€${Number(item.price).toFixed(2)}</td>
-      <td>€${Number(item.total).toFixed(2)}</td>
-    `;
-    body.appendChild(tr);
-  });
-
-  document.getElementById("pdf-subtotal-amount").textContent = subtotal.toFixed(2);
-  document.getElementById("pdf-discount-display").textContent = discount.toFixed(2);
-  document.getElementById("pdf-final-total-amount").textContent = total.toFixed(2);
-
-
-  // ---- render to PDF ----
-  const { jsPDF } = window.jspdf;
-
-  const el = document.getElementById("pdf-template");
-  el.style.display = "block";
-
-  const canvas = await html2canvas(el, { scale: 2 });
-  const img = canvas.toDataURL("image/png");
-
-  const pdf = new jsPDF("p", "mm", "a4");
-  pdf.addImage(img, "PNG", 0, 0, 210, (canvas.height * 210) / canvas.width);
-
-  el.style.display = "none";
-
-  pdf.save(`invoice_${inv.invoice_number}.pdf`);
-};
-
-
-// ---------------------------
-// 👁 VIEW DETAILS MODAL
+// 🧾 VIEW MODAL
 // ---------------------------
 window.viewInvoice = (id, year) => {
+
   const inv = allInvoices.find(x => x.id === id && x.year === year);
   if (!inv) return;
 
-  const modal = document.getElementById("details-modal");
+  const address = inv.customer_address
+    ? `${inv.customer_address.street}, ${inv.customer_address.country}`
+    : "Address not available";
 
-  document.getElementById("modal-body").innerHTML = `
+  const modalBody = document.getElementById("modal-body");
+
+  let items = "";
+
+  (inv.items_json || []).forEach(item => {
+    items += `
+      <tr>
+        <td>${item.name}</td>
+        <td>${item.quantity}</td>
+        <td>€${item.price.toFixed(2)}</td>
+        <td>€${item.total.toFixed(2)}</td>
+      </tr>
+    `;
+  });
+
+  modalBody.innerHTML = `
     <div class="modal-detail">
-      <span class="modal-label">Invoice Number</span>
+      <span class="modal-label">Invoice</span>
       <div class="modal-value">${inv.invoice_number}</div>
     </div>
 
     <div class="modal-detail">
       <span class="modal-label">Issue Date</span>
-      <div class="modal-value">
-        ${normalizeDate(inv.issue_date).toLocaleDateString("fr-FR")}
-      </div>
+      <div class="modal-value">${normalizeDate(inv.issue_date).toLocaleDateString('fr-FR')}</div>
     </div>
+
+    <div class="modal-detail">
+      <span class="modal-label">Customer</span>
+      <div class="modal-value">${inv.customer_name}</div>
+    </div>
+
+    <div class="modal-detail">
+      <span class="modal-label">Email</span>
+      <div class="modal-value">${inv.customer_email}</div>
+    </div>
+
+    <div class="modal-detail">
+      <span class="modal-label">Address</span>
+      <div class="modal-value">${address}</div>
+    </div>
+
+    <div class="modal-detail">
+      <span class="modal-label">Total</span>
+      <div class="modal-value">€${inv.total_amount.toFixed(2)}</div>
+    </div>
+
+    <h3>Items</h3>
+
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th>Description</th><th>Qty</th><th>Price</th><th>Total</th>
+        </tr>
+      </thead>
+      <tbody>${items}</tbody>
+    </table>
   `;
 
-  modal.style.display = "flex";
+  document.getElementById("details-modal").style.display = "flex";
+};
+
+document.getElementById("close-modal").onclick = () =>
+  document.getElementById("details-modal").style.display = "none";
+
+window.addEventListener("click", e => {
+  if (e.target.id === "details-modal")
+    document.getElementById("details-modal").style.display = "none";
+});
+
+
+// ---------------------------
+// 🧾 PDF GENERATION
+// ---------------------------
+window.generatePDF = async (id, year) => {
+
+  try {
+    const ref = doc(db, `invoices/${year}/invoices`, id);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) {
+      alert("Invoice not found");
+      return;
+    }
+
+    const inv = snap.data();
+
+    document.getElementById("pdf-invoice-number").textContent = inv.invoice_number;
+    document.getElementById("pdf-issue-date").textContent =
+      normalizeDate(inv.issue_date).toLocaleDateString("fr-FR");
+
+    document.getElementById("pdf-customer-name").textContent = inv.customer_name;
+    document.getElementById("pdf-customer-email").textContent = inv.customer_email;
+
+    const addr = inv.customer_address
+      ? `${inv.customer_address.street}, ${inv.customer_address.country}`
+      : "Address not available";
+
+    document.getElementById("pdf-customer-address").textContent = addr;
+
+    document.getElementById("pdf-payment-method").textContent = inv.payment_method;
+
+    const body = document.getElementById("pdf-items-body");
+    body.innerHTML = "";
+
+    (inv.items_json || []).forEach(item => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${item.name}</td>
+        <td>${item.quantity}</td>
+        <td>€${item.price.toFixed(2)}</td>
+        <td>€${item.total.toFixed(2)}</td>
+      `;
+      body.appendChild(tr);
+    });
+
+    const discount = inv.discount_amount || 0;
+    const total = inv.total_amount || 0;
+    const subtotal = total + discount;
+
+    document.getElementById("pdf-subtotal-amount").textContent = subtotal.toFixed(2);
+    document.getElementById("pdf-discount-display").textContent = discount.toFixed(2);
+    document.getElementById("pdf-final-total-amount").textContent = total.toFixed(2);
+
+    // Render PDF
+    const { jsPDF } = window.jspdf;
+
+    const element = document.getElementById("pdf-template");
+    element.style.display = "block";
+
+    const canvas = await html2canvas(element, { scale: 2 });
+    const img = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "mm", "a4");
+    pdf.addImage(img, "PNG", 0, 0, 210, (canvas.height * 210) / canvas.width);
+
+    element.style.display = "none";
+
+    pdf.save(`invoice_${inv.invoice_number}.pdf`);
+
+  } catch (err) {
+
+    console.error(err);
+
+    if (err.code === "permission-denied")
+      alert("Blocked by Firestore rules.");
+    else
+      alert(err.message);
+  }
 };
 
 
@@ -1044,15 +1117,6 @@ document.getElementById("sort-by").addEventListener("change", filterInvoices);
 document.getElementById("sort-order").addEventListener("change", filterInvoices);
 document.getElementById("refresh-data").addEventListener("click", loadInvoices);
 
-document.getElementById("close-modal").addEventListener("click", () => {
-  document.getElementById("details-modal").style.display = "none";
-});
-
-window.addEventListener("click", (e) => {
-  if (e.target.id === "details-modal") {
-    document.getElementById("details-modal").style.display = "none";
-  }
-});
 </script>
 </body>
 </html>
