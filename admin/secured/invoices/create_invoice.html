@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Galaxy Designs - Data Storage</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase v11.9.0 Modular SDK -->
+    <!-- Firebase SDK v11.9.0 -->
     <script type="module">
-        // Firebase SDK v11.9.0 modular imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-        import { getFirestore, collection, doc, getDocs, query, orderBy, limit, where, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, query, orderBy, limit, where, getDocs, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
         // Your exact Firebase config
         const firebaseConfig = {
@@ -22,21 +21,48 @@
           measurementId: "G-6C2W9NSNCH"
         };
 
-        // Initialize Firebase
+        // Initialize
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Expose db globally for inline script (since <script type="module"> is isolated)
+        // Expose functions to global scope (for inline script)
         window.firebaseDB = db;
-        window.firebaseGetDocs = getDocs;
-        window.firebaseQuery = query;
-        window.firebaseCollection = collection;
-        window.firebaseDoc = doc;
-        window.firebaseOrderBy = orderBy;
-        window.firebaseLimit = limit;
-        window.firebaseWhere = where;
-        window.firebaseSetDoc = setDoc;
-        window.firebaseGetDoc = getDoc;
+        window.getNextInvoiceNumber = async function() {
+            try {
+                const year = new Date().getFullYear();
+                const invoicesRef = collection(db, `invoices/${year}/invoices`);
+                const q = query(
+                    invoicesRef,
+                    where('invoice_number', '>=', `GD-${year}-000`),
+                    where('invoice_number', '<=', `GD-${year}-999`),
+                    orderBy('invoice_number', 'desc'),
+                    limit(1)
+                );
+                const snapshot = await getDocs(q);
+                
+                let nextNumber = 1;
+                if (!snapshot.empty) {
+                    const lastInvoice = snapshot.docs[0].data();
+                    const lastNum = parseInt(lastInvoice.invoice_number.split('-')[2]);
+                    nextNumber = lastNum + 1;
+                }
+                return `GD-${year}-${nextNumber.toString().padStart(3, '0')}`;
+            } catch (error) {
+                console.error('Error getting invoice number:', error);
+                return `GD-${new Date().getFullYear()}-001`;
+            }
+        };
+        window.saveInvoice = async function(invoiceData, invoiceNumber) {
+            const year = new Date().getFullYear();
+            const docRef = doc(db, `invoices/${year}/invoices`, invoiceNumber);
+            await setDoc(docRef, invoiceData);
+        };
+        window.checkInvoiceExists = async function(invoiceNumber) {
+            const year = new Date().getFullYear();
+            const docRef = doc(db, `invoices/${year}/invoices`, invoiceNumber);
+            const docSnap = await getDoc(docRef);
+            return docSnap.exists();
+        };
     </script>
     <style>
         /* [Your existing CSS — unchanged] */
@@ -594,35 +620,27 @@
         </div>
     </div>
 
-    <!-- Non-module script to use Firebase APIs -->
-    <script type="text/javascript">
-        // Wait until Firebase is initialized
+    <script>
+        // Wait for Firebase to be ready
         function waitForFirebase() {
             if (typeof window.firebaseDB !== 'undefined') {
                 initApp();
             } else {
-                setTimeout(waitForFirebase, 50);
+                setTimeout(waitForFirebase, 100);
             }
         }
 
         function initApp() {
-            const db = window.firebaseDB;
-            const getDocs = window.firebaseGetDocs;
-            const query = window.firebaseQuery;
-            const collection = window.firebaseCollection;
-            const doc = window.firebaseDoc;
-            const orderBy = window.firebaseOrderBy;
-            const limit = window.firebaseLimit;
-            const where = window.firebaseWhere;
-            const setDoc = window.firebaseSetDoc;
-            const getDoc = window.firebaseGetDoc;
-
-            // Set current date (French format)
+            // Set current date
             const today = new Date();
             const formattedDate = today.toLocaleDateString('fr-FR');
             document.getElementById('issue-date').value = formattedDate;
 
-            // [All your existing JS logic — unchanged except Firestore calls adapted below]
+            // Generate next invoice number
+            window.getNextInvoiceNumber().then(number => {
+                document.getElementById('invoice-number').value = number;
+                document.getElementById('preview-invoice-number').textContent = number;
+            }).catch(e => console.error('Invoice number error:', e));
 
             // Enhanced address validation
             function validateAddress() {
@@ -646,39 +664,6 @@
             document.getElementById('customer-address').addEventListener('blur', validateAddress);
             document.getElementById('customer-country').addEventListener('blur', validateAddress);
 
-            // Generate next invoice number
-            async function getNextInvoiceNumber() {
-                try {
-                    const year = new Date().getFullYear();
-                    const invoicesRef = collection(db, `invoices/${year}/invoices`);
-                    const q = query(
-                        invoicesRef,
-                        where('invoice_number', '>=', `GD-${year}-000`),
-                        where('invoice_number', '<=', `GD-${year}-999`),
-                        orderBy('invoice_number', 'desc'),
-                        limit(1)
-                    );
-
-                    const snapshot = await getDocs(q);
-
-                    let nextNumber = 1;
-                    if (!snapshot.empty) {
-                        const lastInvoice = snapshot.docs[0].data();
-                        const lastNum = parseInt(lastInvoice.invoice_number.split('-')[2]);
-                        nextNumber = lastNum + 1;
-                    }
-
-                    const formattedNumber = `GD-${year}-${nextNumber.toString().padStart(3, '0')}`;
-                    document.getElementById('invoice-number').value = formattedNumber;
-                    document.getElementById('preview-invoice-number').textContent = formattedNumber;
-
-                    return formattedNumber;
-                } catch (error) {
-                    console.error('Error getting next invoice number:', error);
-                    return `GD-${new Date().getFullYear()}-001`;
-                }
-            }
-
             // Calculate item total
             function calculateItemTotal(row) {
                 const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
@@ -699,7 +684,6 @@
                 });
 
                 document.getElementById('subtotal-amount').textContent = subtotal.toFixed(2);
-
                 calculateDiscount(subtotal);
             }
 
@@ -837,21 +821,19 @@
 
                 // Check if invoice number already exists
                 try {
-                    const year = new Date().getFullYear();
-                    const invoiceRef = doc(db, `invoices/${year}/invoices`, invoiceNumber);
-                    const existingInvoice = await getDoc(invoiceRef);
-
-                    if (existingInvoice.exists()) {
+                    const exists = await window.checkInvoiceExists(invoiceNumber);
+                    if (exists) {
                         showStatus('Invoice number already exists! Please refresh to get a new number.', 'error');
                         return;
                     }
                 } catch (error) {
-                    console.error('Error checking invoice number:', error);
+                    console.error('Check invoice error:', error);
+                    showStatus('Error checking invoice number', 'error');
+                    return;
                 }
 
                 // Save to Firestore
                 try {
-                    const year = new Date().getFullYear();
                     const invoiceData = {
                         id: Date.now(),
                         invoice_number: invoiceNumber,
@@ -873,13 +855,13 @@
                         created_at: new Date()
                     };
 
-                    await setDoc(doc(db, `invoices/${year}/invoices`, invoiceNumber), invoiceData);
+                    await window.saveInvoice(invoiceData, invoiceNumber);
 
                     showStatus('Data saved successfully to database!', 'success');
                     resetForm();
 
                 } catch (error) {
-                    console.error('Error saving ', error);
+                    console.error('Save error:', error);
                     showStatus('Error saving: ' + error.message, 'error');
                 }
             });
@@ -931,13 +913,11 @@
                 validationDiv.innerHTML = '<i class="fas fa-info-circle"></i> <span>Enter complete address details</span>';
                 validationDiv.className = 'address-validation';
 
-                getNextInvoiceNumber();
+                window.getNextInvoiceNumber().then(number => {
+                    document.getElementById('invoice-number').value = number;
+                    document.getElementById('preview-invoice-number').textContent = number;
+                });
             }
-
-            // Initialize
-            getNextInvoiceNumber();
-            updateTotals();
-            updatePreview();
         }
 
         // Start initialization
