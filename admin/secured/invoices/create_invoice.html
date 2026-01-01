@@ -559,150 +559,242 @@
         </div>
     </div>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
 
-<script>
-  // ---------------------------
-  // FIREBASE INIT
-  // ---------------------------
-  firebase.initializeApp({
-    apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
-    authDomain: "teamgalaxy-77344.firebaseapp.com",
-    projectId: "teamgalaxy-77344",
-    storageBucket: "teamgalaxy-77344.firebasestorage.app",
-    messagingSenderId: "770256225320",
-    appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
-    measurementId: "G-6C2W9NSNCH"
-  });
 
-  const db = firebase.firestore();
+// -----------------------------
+// 🔥 FIREBASE INIT
+// -----------------------------
+const app = initializeApp({
+  apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+  authDomain: "teamgalaxy-77344.firebaseapp.com",
+  projectId: "teamgalaxy-77344",
+  storageBucket: "teamgalaxy-77344.firebasestorage.app",
+  messagingSenderId: "770256225320",
+  appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+  measurementId: "G-6C2W9NSNCH"
+});
 
-  // ---------------------------
-  // AUTH STATE (READ ONLY)
-  // ---------------------------
-  let currentUser = null;
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-  firebase.auth().onAuthStateChanged((user) => {
+
+// -----------------------------
+// 👤 AUTH STATE (READ ONLY)
+// -----------------------------
+let currentUser = null;
+
+onAuthStateChanged(auth, (user) => {
+
+  if (!user) {
+    currentUser = null;
+    showStatus("You are not logged in. Only owner Gmail can save.", "error");
+  } else {
     currentUser = user;
+    showStatus(`Signed in as ${user.email}`, "success");
+  }
 
-    if (!user) {
-      console.warn("⚠ No authenticated user");
-      showStatus(
-        "You are not signed in. Firestore secure rules will block writes.",
-        "error"
-      );
-    } else {
-      console.log("✔ Authenticated:", user.uid);
-      showStatus("Signed in ✔ You can save invoices.", "success");
-    }
+});
+
+
+// -----------------------------
+// 📅 ISSUE DATE (FIXED — now working)
+// -----------------------------
+const issueDateInput = document.getElementById("issue-date");
+const today = new Date();
+issueDateInput.value = today.toLocaleDateString("en-GB"); // dd/mm/yyyy
+
+
+// -----------------------------
+// 🧾 AUTO INVOICE NUMBER
+// -----------------------------
+async function getNextInvoiceNumber() {
+  const year = new Date().getFullYear();
+
+  const invoicesRef = collection(db, `invoices/${year}/invoices`);
+  const q = query(invoicesRef, orderBy("invoice_number", "desc"), limit(1));
+
+  const snap = await getDocs(q);
+
+  let next = 1;
+
+  if (!snap.empty) {
+    const last = snap.docs[0].data().invoice_number.split("-")[2];
+    next = parseInt(last) + 1;
+  }
+
+  const formatted = `GD-${year}-${String(next).padStart(3, "0")}`;
+
+  document.getElementById("invoice-number").value = formatted;
+  document.getElementById("preview-invoice-number").textContent = formatted;
+
+  return formatted;
+}
+
+
+// -----------------------------
+// 🏠 ADDRESS VALIDATION
+// -----------------------------
+function validateAddress() {
+
+  const address = document.getElementById("customer-address").value.trim();
+  const country = document.getElementById("customer-country").value.trim();
+  const validationDiv = document.getElementById("address-validation");
+
+  if (!address || !country) {
+    validationDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Enter full address';
+    validationDiv.className = "address-validation validation-error";
+    document.getElementById("preview-address-validated").textContent = "No";
+    return false;
+  }
+
+  validationDiv.innerHTML = '<i class="fas fa-check-circle"></i> Address complete';
+  validationDiv.className = "address-validation validation-success";
+  document.getElementById("preview-address-validated").textContent = "Yes";
+  return true;
+}
+
+document.getElementById("customer-address").addEventListener("blur", validateAddress);
+document.getElementById("customer-country").addEventListener("blur", validateAddress);
+
+
+// -----------------------------
+// 💰 TOTALS & DISCOUNT
+// -----------------------------
+function updateTotals() {
+
+  let subtotal = 0;
+
+  document.querySelectorAll("#items-body tr").forEach(row => {
+    const qty = parseFloat(row.querySelector(".item-qty").value) || 0;
+    const price = parseFloat(row.querySelector(".item-price").value) || 0;
+    const total = qty * price;
+
+    subtotal += total;
+
+    row.querySelector(".item-total").textContent = total.toFixed(2);
   });
 
-  // ---------------------------
-  // STATUS HELPER
-  // ---------------------------
-  function showStatus(message, type) {
-    const statusDiv = document.getElementById("status-message");
-    statusDiv.textContent = message;
-    statusDiv.className = `status-message ${type}`;
-    statusDiv.style.display = "block";
-    setTimeout(() => (statusDiv.style.display = "none"), 5000);
+  document.getElementById("subtotal-amount").textContent = subtotal.toFixed(2);
+
+  const discountType = document.getElementById("discount-type").value;
+  const discountValue = parseFloat(document.getElementById("discount-value").value) || 0;
+
+  let discountAmount = 0;
+
+  if (discountType === "percentage") discountAmount = subtotal * (discountValue / 100);
+  else discountAmount = discountValue;
+
+  discountAmount = Math.min(discountAmount, subtotal);
+
+  document.getElementById("discount-amount").textContent = discountAmount.toFixed(2);
+  document.getElementById("discount-display").textContent = discountAmount.toFixed(2);
+
+  const final = subtotal - discountAmount;
+
+  document.getElementById("final-total-amount").textContent = final.toFixed(2);
+}
+
+
+// 🔁 add listeners
+document.addEventListener("input", (e) => {
+  if (e.target.classList.contains("item-qty") || e.target.classList.contains("item-price")) {
+    updateTotals();
   }
+});
 
-  // ---------------------------
-  // INVOICE NUMBER
-  // ---------------------------
-  async function getNextInvoiceNumber() {
-    try {
-      const year = new Date().getFullYear();
+document.getElementById("discount-type").addEventListener("change", updateTotals);
+document.getElementById("discount-value").addEventListener("input", updateTotals);
 
-      const snapshot = await db
-        .collection(`invoices/${year}/invoices`)
-        .orderBy("invoice_number", "desc")
-        .limit(1)
-        .get();
 
-      let next = 1;
+// -----------------------------
+// 🗑 REMOVE ITEM (bug fixed)
+// -----------------------------
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("button");
 
-      if (!snapshot.empty) {
-        const last = snapshot.docs[0].data().invoice_number.split("-")[2];
-        next = parseInt(last) + 1;
-      }
+  if (!btn) return;
 
-      const formatted = `GD-${year}-${String(next).padStart(3, "0")}`;
+  if (btn.innerText.includes("Remove")) {
 
-      document.getElementById("invoice-number").value = formatted;
-      document.getElementById("preview-invoice-number").textContent = formatted;
+    const rows = document.querySelectorAll("#items-body tr");
 
-      return formatted;
-    } catch (e) {
-      console.error(e);
-      return "GD-ERROR";
-    }
-  }
-
-  // ---------------------------
-  // SAVE DATA
-  // ---------------------------
-  document.getElementById("save-data").addEventListener("click", async () => {
-    if (!currentUser) {
-      showStatus(
-        "You are not authenticated. Login required to save.",
-        "error"
-      );
+    if (rows.length <= 1) {
+      showStatus("At least one item required", "error");
       return;
     }
 
-    try {
-      const year = new Date().getFullYear();
-      const invoiceNumber = document.getElementById("invoice-number").value;
+    btn.closest("tr").remove();
+    updateTotals();
+  }
+});
 
-      // check duplicate
-      const exists = await db
-        .collection(`invoices/${year}/invoices`)
-        .doc(invoiceNumber)
-        .get();
 
-      if (exists.exists) {
-        showStatus("Invoice already exists", "error");
-        return;
-      }
+// -----------------------------
+// 💾 SAVE DATA (role rules respected)
+// -----------------------------
+document.getElementById("save-data").addEventListener("click", async () => {
 
-      // collect data
-      const payload = {
-        invoice_number: invoiceNumber,
-        created_at: new Date(),
-        issue_date: new Date(),
-        customer_name: document.getElementById("customer-name").value,
-        customer_email: document.getElementById("customer-email").value,
-        customer_address: {
-          street: document.getElementById("customer-address").value,
-          country: document.getElementById("customer-country").value
-        },
-        total_amount: parseFloat(
-          document.getElementById("final-total-amount").textContent
-        ),
-        auth_uid: currentUser.uid // helpful for rules
-      };
+  if (!currentUser) {
+    showStatus("Login required (owner Gmail only)", "error");
+    return;
+  }
 
-      await db
-        .collection(`invoices/${year}/invoices`)
-        .doc(invoiceNumber)
-        .set(payload);
+  const year = new Date().getFullYear();
+  const invoiceNumber = document.getElementById("invoice-number").value;
 
-      showStatus("Invoice saved successfully ✔", "success");
-      getNextInvoiceNumber();
-    } catch (e) {
-      console.error(e);
-      showStatus(e.message, "error");
-    }
-  });
+  const invoiceRef = doc(db, `invoices/${year}/invoices`, invoiceNumber);
 
-  // ---------------------------
-  // INIT
-  // ---------------------------
+  const exists = await getDoc(invoiceRef);
+
+  if (exists.exists()) {
+    showStatus("Invoice number already exists", "error");
+    return;
+  }
+
+  const payload = {
+    invoice_number: invoiceNumber,
+    issue_date: new Date(),
+    created_at: new Date(),
+    customer_name: document.getElementById("customer-name").value,
+    customer_email: document.getElementById("customer-email").value,
+    customer_address: {
+      street: document.getElementById("customer-address").value,
+      country: document.getElementById("customer-country").value
+    },
+    total_amount: parseFloat(document.getElementById("final-total-amount").textContent),
+    user_email: currentUser.email
+  };
+
+  await setDoc(invoiceRef, payload);
+
+  showStatus("Invoice saved successfully ✔", "success");
+
   getNextInvoiceNumber();
+});
+
+
+// -----------------------------
+// 🎯 STATUS MESSAGE
+// -----------------------------
+function showStatus(message, type) {
+  const el = document.getElementById("status-message");
+  el.textContent = message;
+  el.className = `status-message ${type}`;
+  el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 4000);
+}
+
+
+// -----------------------------
+// 🚀 INIT
+// -----------------------------
+getNextInvoiceNumber();
+updateTotals();
+
 </script>
 </body>
 </html>
