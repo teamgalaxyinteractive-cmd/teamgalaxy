@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs - TeamGalaxy Admin</title>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration, 3s) infinite ease-in-out;
+        }
+        @keyframes twinkle { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+        .loading-screen {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(15,12,41,0.95);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 1000; transition: opacity 0.5s ease;
+        }
+        .loading-spinner {
+            width: 50px; height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
+        .loading-text { font-size: 1.2rem; color: #00d4ff; text-align: center; }
+
+        .container { 
+            padding: 20px; 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            position: relative; 
+            z-index: 2; 
+            min-height: 100vh;
+        }
+
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 20px 0; 
+            margin-bottom: 30px; 
+            border-bottom: 1px solid rgba(255,255,255,0.08); 
+        }
+
+        .admin-info { 
+            display:flex; 
+            align-items:center; 
+            gap:15px; 
+        }
+        .admin-avatar { 
+            width:50px; 
+            height:50px; 
+            border-radius:50%; 
+            background: linear-gradient(45deg,#00d4ff,#0077ff); 
+            display:flex; 
+            align-items:center; 
+            justify-content:center; 
+            font-size:1.5rem; 
+        }
+        .admin-details h2 { 
+            font-size:1.5rem; 
+            margin-bottom:5px; 
+        }
+        .admin-details p { 
+            color:#a0aec0; 
+            font-size:0.9rem; 
+        }
+
+        .header-actions .btn { 
+            background:#ff4757;
+            border:none;
+            padding:10px 20px;
+            border-radius:25px;
+            color:white;
+            cursor:pointer; 
+        }
+
+        .controls {
+            background: rgba(25,25,35,0.85);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+
+        .control-group input, 
+        .control-group select {
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(40,40,50,0.6);
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .control-group input:focus, 
+        .control-group select:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #00d4ff;
+            color: #05202b;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #cfefff;
+        }
+
+        .stats-section { 
+            display:grid; 
+            grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); 
+            gap:15px; 
+            margin-bottom:30px; 
+        }
+        .stat-card { 
+            background: rgba(25,25,35,0.85); 
+            padding:18px; 
+            border-radius:10px; 
+            text-align:center; 
+            border:1px solid rgba(255,255,255,0.06); 
+        }
+        .stat-number { 
+            font-size:2rem; 
+            font-weight:bold; 
+            color:#00d4ff; 
+            margin-bottom:6px; 
+        }
+        .stat-label { 
+            color:#a0aec0; 
+            font-size:0.9rem; 
+        }
+
+        .logs-container {
+            background: rgba(25,25,35,0.85);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logs-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .logs-count {
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+
+        .logs-table-container {
+            overflow-x: auto;
+        }
+
+        .logs-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+        }
+
+        .logs-table th {
+            background: rgba(40,40,50,0.6);
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #00d4ff;
+            border-bottom: 2px solid rgba(255,255,255,0.06);
+        }
+
+        .logs-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .logs-table tr:hover {
+            background: rgba(40,40,50,0.4);
+        }
+
+        .log-module {
+            color: #00d4ff;
+            font-weight: 500;
+        }
+
+        .log-user {
+            color: #ffd19a;
+        }
+
+        .log-time {
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+
+        .log-ip {
+            color: #9ae6b4;
+        }
+
+        .log-browser {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: rgba(0,212,255,0.1);
+            color: #00d4ff;
+            font-size: 0.8rem;
+        }
+
+        .log-platform {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: rgba(255,165,0,0.1);
+            color: #ffd19a;
+            font-size: 0.8rem;
+        }
+
+        .no-logs {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .page-btn {
+            padding: 8px 15px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: #cfefff;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .page-btn.active {
+            background: #00d4ff;
+            color: #05202b;
+        }
+
+        .page-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .hidden { 
+            display:none !important; 
+        }
+
+        @media (max-width:768px) {
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .logs-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Audit Logs...</div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container" id="container">
+        <div class="header">
+            <div class="admin-info">
+                <div class="admin-avatar">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="admin-details">
+                    <h2 id="adminName">System Administrator</h2>
+                    <p>Audit Logs Viewer</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="btn" onclick="window.location.href='index.html'" style="background: #ff4757; border: none; padding: 10px 20px; border-radius: 25px; color: white; cursor: pointer;">Back to Dashboard</button>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-number" id="totalLogs">0</div>
+                <div class="stat-label">Total Logs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todayLogs">0</div>
+                <div class="stat-label">Today's Logs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="uniqueUsers">0</div>
+                <div class="stat-label">Unique Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="uniqueModules">0</div>
+                <div class="stat-label">Modules Accessed</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="controls-grid">
+                <div class="control-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="control-group">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate">
+                </div>
+                <div class="control-group">
+                    <label for="userFilter">Filter by User</label>
+                    <input type="text" id="userFilter" placeholder="Enter email or name...">
+                </div>
+                <div class="control-group">
+                    <label for="moduleFilter">Filter by Module</label>
+                    <input type="text" id="moduleFilter" placeholder="Enter module name...">
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                <button class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+            </div>
+        </div>
+
+        <div class="logs-container">
+            <div class="logs-header">
+                <h3 class="logs-title">Audit Logs</h3>
+                <div class="logs-count" id="logsCount">Loading logs...</div>
+            </div>
+            <div class="logs-table-container">
+                <table class="logs-table">
+                    <thead>
+                        <tr>
+                            <th>Module</th>
+                            <th>User</th>
+                            <th>Time</th>
+                            <th>IP Address</th>
+                            <th>Browser</th>
+                            <th>Platform</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTableBody">
+                        <tr>
+                            <td colspan="7" class="no-logs">Loading audit logs...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="pagination"></div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Firebase with your credentials
+        const firebaseConfig = {
+          apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+          authDomain: "teamgalaxy-77344.firebaseapp.com",
+          projectId: "teamgalaxy-77344",
+          storageBucket: "teamgalaxy-77344.firebasestorage.app",
+          messagingSenderId: "770256225320",
+          appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+          measurementId: "G-6C2W9NSNCH"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Create star background
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 150;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                star.style.left = `${x}%`; star.style.top = `${y}%`;
+                const size = Math.random() * 3 + 1;
+                star.style.width = `${size}px`; star.style.height = `${size}px`;
+                const duration = Math.random() * 5 + 2;
+                star.style.setProperty('--duration', `${duration}s`);
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Format date as DD/MM/YYYY HH:MM:SS
+        function formatDate(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+        }
+
+        // Format date for input field (YYYY-MM-DD)
+        function formatInputDate(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${year}-${month}-${year}`;
+        }
+
+        // Set today as default date range
+        function setDefaultDateRange() {
+            const today = new Date();
+            const formattedToday = formatInputDate(today);
+            document.getElementById('startDate').value = formattedToday;
+            document.getElementById('endDate').value = formattedToday;
+        }
+
+        // Load audit logs from Firestore
+        async function loadAuditLogs(filters = {}) {
+            try {
+                let query = db.collection('module_access_logs');
+
+                // Apply date filters if provided
+                if (filters.startDate) {
+                    const start = new Date(filters.startDate);
+                    start.setHours(0, 0, 0, 0);
+                    query = query.where('accessedAt', '>=', start);
+                }
+
+                if (filters.endDate) {
+                    const end = new Date(filters.endDate);
+                    end.setHours(23, 59, 59, 999);
+                    query = query.where('accessedAt', '<=', end);
+                }
+
+                // Apply user filter if provided
+                if (filters.userFilter) {
+                    query = query.where('email', '>=', filters.userFilter).where('email', '<=', filters.userFilter + '\uf8ff');
+                }
+
+                // Apply module filter if provided
+                if (filters.moduleFilter) {
+                    query = query.where('moduleKey', '>=', filters.moduleFilter).where('moduleKey', '<=', filters.moduleFilter + '\uf8ff');
+                }
+
+                // Order by timestamp descending
+                query = query.orderBy('accessedAt', 'desc');
+
+                const snapshot = await query.get();
+                const logs = [];
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    logs.push({
+                        id: doc.id,
+                        ...data,
+                        accessedAt: data.accessedAt ? data.accessedAt.toDate() : null
+                    });
+                });
+
+                renderLogsTable(logs);
+                updateStats(logs);
+                return logs;
+            } catch (error) {
+                console.error('Error loading audit logs:', error);
+                document.getElementById('logsTableBody').innerHTML = '<tr><td colspan="7" class="no-logs">Error loading logs. Please try again.</td></tr>';
+                return [];
+            }
+        }
+
+        // Render logs in the table
+        function renderLogsTable(logs) {
+            const tbody = document.getElementById('logsTableBody');
+
+            if (!logs || logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="no-logs">No audit logs found for the selected criteria.</td></tr>';
+                document.getElementById('logsCount').textContent = 'No logs found';
+                return;
+            }
+
+            let html = '';
+            logs.forEach(log => {
+                const module = log.moduleKey || 'Unknown';
+                const user = log.name || log.email || 'Unknown';
+                const time = log.accessedAt ? formatDate(log.accessedAt) : 'N/A';
+                const ip = log.clientIp || 'N/A';
+                const browser = log.userAgentParsed?.browser || 'Unknown';
+                const platform = log.platform || 'Unknown';
+
+                html += `
+                    <tr>
+                        <td class="log-module">${module}</td>
+                        <td class="log-user">${user}</td>
+                        <td class="log-time">${time}</td>
+                        <td class="log-ip">${ip}</td>
+                        <td><span class="log-browser">${browser}</span></td>
+                        <td><span class="log-platform">${platform}</span></td>
+                        <td><button class="btn btn-secondary" onclick="showLogDetails('${log.id}')">Details</button></td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+            document.getElementById('logsCount').textContent = `Showing ${logs.length} logs`;
+        }
+
+        // Show log details in an alert (for now)
+        function showLogDetails(logId) {
+            // In a real implementation, you might show a modal with full details
+            alert(`Log ID: ${logId}\n\nThis would show detailed information about this specific log entry.`);
+        }
+
+        // Update statistics
+        function updateStats(logs) {
+            document.getElementById('totalLogs').textContent = logs.length;
+
+            // Calculate today's logs
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayLogs = logs.filter(log => {
+                if (!log.accessedAt) return false;
+                const logDate = new Date(log.accessedAt);
+                logDate.setHours(0, 0, 0, 0);
+                return logDate.getTime() === today.getTime();
+            });
+            document.getElementById('todayLogs').textContent = todayLogs.length;
+
+            // Calculate unique users
+            const uniqueUsers = [...new Set(logs.map(log => log.email))].length;
+            document.getElementById('uniqueUsers').textContent = uniqueUsers;
+
+            // Calculate unique modules
+            const uniqueModules = [...new Set(logs.map(log => log.moduleKey))].length;
+            document.getElementById('uniqueModules').textContent = uniqueModules;
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const filters = {
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                userFilter: document.getElementById('userFilter').value.trim(),
+                moduleFilter: document.getElementById('moduleFilter').value.trim()
+            };
+
+            loadAuditLogs(filters);
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('userFilter').value = '';
+            document.getElementById('moduleFilter').value = '';
+            loadAuditLogs();
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+
+            // Show container and hide loading
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').classList.add('hidden');
+                    document.getElementById('container').style.display = 'block';
+
+                    // Set default date range and load logs
+                    setDefaultDateRange();
+                    loadAuditLogs();
+                }, 500);
+            }, 2000); // Simulate setup time
+        });
+    </script>
+</body>
+</html>
