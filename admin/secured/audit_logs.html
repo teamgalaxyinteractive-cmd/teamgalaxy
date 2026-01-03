@@ -459,9 +459,6 @@
                     <p>Audit Logs Viewer</p>
                 </div>
             </div>
-            <div class="header-actions">
-                <button class="btn" onclick="window.location.href='index.html'" style="background: #ff4757; border: none; padding: 10px 20px; border-radius: 25px; color: white; cursor: pointer;">Back to Dashboard</button>
-            </div>
         </div>
 
         <div class="stats-section">
@@ -548,403 +545,215 @@
         </div>
     </div>
 
-    <script>
-        /* ---------------- FIREBASE 11.9.0 CONFIG ---------------- */
-        const firebaseConfig = {
-          apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
-          authDomain: "teamgalaxy-77344.firebaseapp.com",
-          projectId: "teamgalaxy-77344",
-          storageBucket: "teamgalaxy-77344.firebasestorage.app",
-          messagingSenderId: "770256225320",
-          appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
-          measurementId: "G-6C2W9NSNCH"
-        };
+<script>
+/* ---------------- FIREBASE 11.9.0 CONFIG ---------------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+  authDomain: "teamgalaxy-77344.firebaseapp.com",
+  projectId: "teamgalaxy-77344",
+  storageBucket: "teamgalaxy-77344.firebasestorage.app",
+  messagingSenderId: "770256225320",
+  appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+  measurementId: "G-6C2W9NSNCH"
+};
 
-        firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+let currentLogs = [];   // ⭐ global — used by Details modal
 
-        /* ---------------- AUTH WITH TOKEN ---------------- */
-        async function ensureAuth() {
-          return new Promise((resolve, reject) => {
-            auth.onAuthStateChanged(async (user) => {
-              try {
-                if (!user) {
-                  user = (await auth.signInAnonymously()).user;
-                }
-                await user.getIdToken(true);
-                console.log("Authenticated:", user.uid);
-                resolve(user);
-              } catch (e) {
-                console.error("Auth error:", e);
-                reject(e);
-              }
-            });
-          });
+/* ---------------- AUTH WITH TOKEN ---------------- */
+async function ensureAuth() {
+  return new Promise((resolve, reject) => {
+    auth.onAuthStateChanged(async (user) => {
+      try {
+        if (!user) {
+          user = (await auth.signInAnonymously()).user;
         }
+        await user.getIdToken(true);
+        resolve(user);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  });
+}
 
-        /* ---------------- STAR BACKGROUND ---------------- */
-        function createStars() {
-          const starsContainer = document.getElementById('stars');
-          const starCount = 150;
-          for (let i = 0; i < starCount; i++) {
-            const star = document.createElement('div');
-            star.classList.add('star');
-            const x = Math.random() * 100;
-            const y = Math.random() * 100;
-            star.style.left = `${x}%`;
-            star.style.top = `${y}%`;
-            const size = Math.random() * 3 + 1;
-            star.style.width = `${size}px`;
-            star.style.height = `${size}px`;
-            const duration = Math.random() * 5 + 2;
-            star.style.setProperty('--duration', `${duration}s`);
-            starsContainer.appendChild(star);
-          }
-        }
+/* ---------------- DATE HELPERS ---------------- */
+function formatDate(date) {
+  if (!date) return "N/A";
+  const d = String(date.getDate()).padStart(2, '0');
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const y = date.getFullYear();
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  const ss = String(date.getSeconds()).padStart(2, '0');
+  return `${d}/${m}/${y} ${hh}:${mm}:${ss}`;
+}
 
-        /* ---------------- DATE HELPERS ---------------- */
-        function formatDate(date) {
-          const d = String(date.getDate()).padStart(2, '0');
-          const m = String(date.getMonth() + 1).padStart(2, '0');
-          const y = date.getFullYear();
-          const hh = String(date.getHours()).padStart(2, '0');
-          const mm = String(date.getMinutes()).padStart(2, '0');
-          const ss = String(date.getSeconds()).padStart(2, '0');
-          return `${d}/${m}/${y} ${hh}:${mm}:${ss}`;
-        }
+function setDefaultDateRange() {
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, '0');
+  const d = String(today.getDate()).padStart(2, '0');
+  const formatted = `${y}-${m}-${d}`;
+  document.getElementById('startDate').value = formatted;
+  document.getElementById('endDate').value = formatted;
+}
 
-        function formatInputDate(date) {
-          const d = String(date.getDate()).padStart(2, '0');
-          const m = String(date.getMonth() + 1).padStart(2, '0');
-          const y = date.getFullYear();
-          return `${y}-${m}-${d}`;
-        }
+/* ---------------- LOAD ALL LOGS ONCE ---------------- */
+async function fetchAllLogs() {
+  const snap = await db.collection("module_access_logs")
+    .orderBy("accessedAt", "desc")
+    .get();
 
-        function setDefaultDateRange() {
-          const today = new Date();
-          const formatted = formatInputDate(today);
-          document.getElementById('startDate').value = formatted;
-          document.getElementById('endDate').value = formatted;
-        }
+  currentLogs = snap.docs.map(doc => {
+    const d = doc.data();
+    return {
+      id: doc.id,
+      ...d,
+      accessedAt: d.accessedAt ? d.accessedAt.toDate() : null
+    };
+  });
 
-        /* ---------------- LOAD AUDIT LOGS ---------------- */
-        async function loadAuditLogs(filters = {}) {
-          try {
-            // ✅ Fixed: Use 'let' instead of 'const'
-            let query = db.collection("module_access_logs");
+  return currentLogs;
+}
 
-            if (filters.startDate) {
-              const s = new Date(filters.startDate);
-              s.setHours(0,0,0,0);
-              query = query.where("accessedAt", ">=", s);
-            }
+/* ---------------- APPLY FILTERS IN MEMORY ---------------- */
+function applyLocalFilters() {
+  let logs = [...currentLogs];
 
-            if (filters.endDate) {
-              const e = new Date(filters.endDate);
-              e.setHours(23,59,59,999);
-              query = query.where("accessedAt", "<=", e);
-            }
+  const startDate = document.getElementById("startDate").value;
+  const endDate = document.getElementById("endDate").value;
+  const userFilter = document.getElementById("userFilter").value.trim().toLowerCase();
+  const moduleFilter = document.getElementById("moduleFilter").value.trim().toLowerCase();
 
-            // For user filter, we'll use a more flexible approach
-            if (filters.userFilter) {
-              const userFilterLower = filters.userFilter.toLowerCase();
-              const snapshot = await db.collection("module_access_logs").get();
-              const logs = [];
-              snapshot.forEach(doc => {
-                const data = doc.data();
-                if (data.email && data.email.toLowerCase().includes(userFilterLower)) {
-                  logs.push({
-                    id: doc.id,
-                    ...data,
-                    accessedAt: data.accessedAt ? data.accessedAt.toDate() : null
-                  });
-                } else if (data.name && data.name.toLowerCase().includes(userFilterLower)) {
-                  logs.push({
-                    id: doc.id,
-                    ...data,
-                    accessedAt: data.accessedAt ? data.accessedAt.toDate() : null
-                  });
-                }
-              });
-              
-              // Apply date filters to the filtered results
-              if (filters.startDate || filters.endDate) {
-                logs = logs.filter(log => {
-                  if (!log.accessedAt) return true;
-                  const logDate = new Date(log.accessedAt);
-                  logDate.setHours(0,0,0,0);
-                  
-                  if (filters.startDate) {
-                    const start = new Date(filters.startDate);
-                    start.setHours(0,0,0,0);
-                    if (logDate < start) return false;
-                  }
-                  
-                  if (filters.endDate) {
-                    const end = new Date(filters.endDate);
-                    end.setHours(23,59,59,999);
-                    if (logDate > end) return false;
-                  }
-                  
-                  return true;
-                });
-              }
-              
-              // Sort by accessedAt descending
-              logs.sort((a, b) => b.accessedAt - a.accessedAt);
-              renderLogsTable(logs);
-              updateStats(logs);
-              return;
-            }
+  // date range
+  if (startDate) {
+    const s = new Date(startDate);
+    s.setHours(0,0,0,0);
+    logs = logs.filter(l => l.accessedAt && l.accessedAt >= s);
+  }
 
-            // For module filter, we'll use a more flexible approach
-            if (filters.moduleFilter) {
-              const moduleFilterLower = filters.moduleFilter.toLowerCase();
-              const snapshot = await db.collection("module_access_logs").get();
-              const logs = [];
-              snapshot.forEach(doc => {
-                const data = doc.data();
-                if (data.moduleKey && data.moduleKey.toLowerCase().includes(moduleFilterLower)) {
-                  logs.push({
-                    id: doc.id,
-                    ...data,
-                    accessedAt: data.accessedAt ? data.accessedAt.toDate() : null
-                  });
-                }
-              });
-              
-              // Apply date filters to the filtered results
-              if (filters.startDate || filters.endDate) {
-                logs = logs.filter(log => {
-                  if (!log.accessedAt) return true;
-                  const logDate = new Date(log.accessedAt);
-                  logDate.setHours(0,0,0,0);
-                  
-                  if (filters.startDate) {
-                    const start = new Date(filters.startDate);
-                    start.setHours(0,0,0,0);
-                    if (logDate < start) return false;
-                  }
-                  
-                  if (filters.endDate) {
-                    const end = new Date(filters.endDate);
-                    end.setHours(23,59,59,999);
-                    if (logDate > end) return false;
-                  }
-                  
-                  return true;
-                });
-              }
-              
-              // Sort by accessedAt descending
-              logs.sort((a, b) => b.accessedAt - a.accessedAt);
-              renderLogsTable(logs);
-              updateStats(logs);
-              return;
-            }
+  if (endDate) {
+    const e = new Date(endDate);
+    e.setHours(23,59,59,999);
+    logs = logs.filter(l => l.accessedAt && l.accessedAt <= e);
+  }
 
-            query = query.orderBy("accessedAt", "desc");
+  // user filter
+  if (userFilter) {
+    logs = logs.filter(l =>
+      (l.email && l.email.toLowerCase().includes(userFilter)) ||
+      (l.name && l.name.toLowerCase().includes(userFilter))
+    );
+  }
 
-            const snap = await query.get();
-            const logs = [];
+  // module filter
+  if (moduleFilter) {
+    logs = logs.filter(l =>
+      l.moduleKey && l.moduleKey.toLowerCase().includes(moduleFilter)
+    );
+  }
 
-            snap.forEach(doc => {
-              const d = doc.data();
-              logs.push({
-                id: doc.id,
-                ...d,
-                accessedAt: d.accessedAt ? d.accessedAt.toDate() : null
-              });
-            });
+  renderLogsTable(logs);
+  updateStats(logs);
+}
 
-            renderLogsTable(logs);
-            updateStats(logs);
+/* ---------------- RENDER TABLE ---------------- */
+function renderLogsTable(logs) {
+  const tbody = document.getElementById("logsTableBody");
 
-          } catch (err) {
-            console.error(err);
-            document.getElementById("logsTableBody").innerHTML =
-              `<tr><td colspan="7" class="no-logs">Error loading logs.</td></tr>`;
-          }
-        }
+  if (!logs.length) {
+    tbody.innerHTML = `<tr><td colspan="7" class="no-logs">No audit logs found.</td></tr>`;
+    return;
+  }
 
-        /* ---------------- RENDER TABLE ---------------- */
-        function renderLogsTable(logs) {
-          const tbody = document.getElementById("logsTableBody");
+  tbody.innerHTML = logs.map(log => `
+    <tr>
+      <td>${log.moduleKey || "Unknown"}</td>
+      <td>${log.name || log.email || "Unknown"}</td>
+      <td>${log.accessedAt ? formatDate(log.accessedAt) : "N/A"}</td>
+      <td>${log.clientIp || "N/A"}</td>
+      <td>${log.userAgentParsed?.browser || "Unknown"}</td>
+      <td>${log.platform || "Unknown"}</td>
+      <td>
+        <button class="btn btn-secondary" onclick="openDetails('${log.id}')">
+          Details
+        </button>
+      </td>
+    </tr>
+  `).join("");
+}
 
-          if (!logs.length) {
-            tbody.innerHTML = `<tr><td colspan="7" class="no-logs">No audit logs found.</td></tr>`;
-            return;
-          }
+/* ---------------- STATS ---------------- */
+function updateStats(logs) {
+  document.getElementById("totalLogs").innerText = logs.length;
 
-          tbody.innerHTML = logs.map(log => `
-            <tr>
-              <td>${log.moduleKey || "Unknown"}</td>
-              <td>${log.name || log.email || "Unknown"}</td>
-              <td>${log.accessedAt ? formatDate(log.accessedAt) : "N/A"}</td>
-              <td>${log.clientIp || "N/A"}</td>
-              <td>${log.userAgentParsed?.browser || "Unknown"}</td>
-              <td>${log.platform || "Unknown"}</td>
-              <td><button class="btn btn-secondary" onclick="showLogDetails('${log.id}', ${JSON.stringify(log).replace(/'/g, '&quot;')})">Details</button></td>
-            </tr>
-          `).join("");
-        }
+  const today = new Date();
+  today.setHours(0,0,0,0);
 
-        /* ---------------- STATS ---------------- */
-        function updateStats(logs) {
-          document.getElementById("totalLogs").innerText = logs.length;
+  const todayLogs = logs.filter(l =>
+    l.accessedAt &&
+    new Date(l.accessedAt).setHours(0,0,0,0) === today.getTime()
+  );
 
-          const today = new Date();
-          today.setHours(0,0,0,0);
+  document.getElementById("todayLogs").innerText = todayLogs.length;
+  document.getElementById("uniqueUsers").innerText =
+    new Set(logs.map(l => l.email || l.name)).size;
+  document.getElementById("uniqueModules").innerText =
+    new Set(logs.map(l => l.moduleKey)).size;
+}
 
-          const todayLogs = logs.filter(l => {
-            if (!l.accessedAt) return false;
-            const d = new Date(l.accessedAt);
-            d.setHours(0,0,0,0);
-            return d.getTime() === today.getTime();
-          });
+/* ---------------- FILTER BUTTONS ---------------- */
+function applyFilters() {
+  applyLocalFilters();
+}
 
-          document.getElementById("todayLogs").innerText = todayLogs.length;
-          document.getElementById("uniqueUsers").innerText =
-            new Set(logs.map(l => l.email)).size;
-          document.getElementById("uniqueModules").innerText =
-            new Set(logs.map(l => l.moduleKey)).size;
-        }
+function resetFilters() {
+  document.getElementById("startDate").value = "";
+  document.getElementById("endDate").value = "";
+  document.getElementById("userFilter").value = "";
+  document.getElementById("moduleFilter").value = "";
+  applyLocalFilters();
+}
 
-        /* ---------------- FILTER ACTIONS ---------------- */
-        function applyFilters() {
-          loadAuditLogs({
-            startDate: document.getElementById("startDate").value,
-            endDate: document.getElementById("endDate").value,
-            userFilter: document.getElementById("userFilter").value.trim(),
-            moduleFilter: document.getElementById("moduleFilter").value.trim()
-          });
-        }
+/* ---------------- DETAILS MODAL ---------------- */
+function openDetails(id) {
+  const log = currentLogs.find(l => l.id === id);
+  if (!log) return;
 
-        function resetFilters() {
-          document.getElementById("startDate").value = "";
-          document.getElementById("endDate").value = "";
-          document.getElementById("userFilter").value = "";
-          document.getElementById("moduleFilter").value = "";
-          loadAuditLogs();
-        }
+  const modal = document.getElementById("logModal");
+  const content = document.getElementById("logDetailsContent");
 
-        /* ---------------- SHOW UI (NO STUCK LOADER) ---------------- */
-        function showMainUI() {
-          const loading = document.getElementById("loadingScreen");
-          const container = document.getElementById("container");
+  content.innerHTML = `
+    <div class="log-details">
+      <div class="detail-group"><span class="detail-label">Log ID</span><span class="detail-value">${id}</span></div>
+      <div class="detail-group"><span class="detail-label">Module</span><span class="detail-value">${log.moduleKey || "N/A"}</span></div>
+      <div class="detail-group"><span class="detail-label">User</span><span class="detail-value">${log.name || log.email || "N/A"}</span></div>
+      <div class="detail-group"><span class="detail-label">Access Time</span><span class="detail-value">${formatDate(log.accessedAt)}</span></div>
+      <div class="detail-group"><span class="detail-label">IP</span><span class="detail-value">${log.clientIp || "N/A"}</span></div>
+      <div class="detail-group"><span class="detail-label">Browser</span><span class="detail-value">${log.userAgentParsed?.browser || "N/A"}</span></div>
+      <div class="detail-group"><span class="detail-label">Platform</span><span class="detail-value">${log.platform || "N/A"}</span></div>
+    </div>
+    <div class="raw-data">${JSON.stringify(log, null, 2)}</div>
+  `;
 
-          if (!loading || !container) return;
+  modal.style.display = "flex";
+}
 
-          loading.style.opacity = "0";
+function closeModal() {
+  document.getElementById("logModal").style.display = "none";
+}
 
-          setTimeout(() => {
-            loading.classList.add("hidden");
-            container.style.display = "block";
-          }, 400);
-        }
-
-        /* ---------------- MODAL FUNCTIONS ---------------- */
-        function showLogDetails(logId, logData) {
-          const modal = document.getElementById('logModal');
-          const content = document.getElementById('logDetailsContent');
-          
-          // Format the log data for display
-          const logDetailsHTML = `
-            <div class="log-details">
-              <div class="detail-group">
-                <span class="detail-label">Log ID</span>
-                <span class="detail-value">${logId}</span>
-              </div>
-              <div class="detail-group">
-                <span class="detail-label">Module</span>
-                <span class="detail-value">${logData.moduleKey || 'N/A'}</span>
-              </div>
-              <div class="detail-group">
-                <span class="detail-label">User Name</span>
-                <span class="detail-value">${logData.name || 'N/A'}</span>
-              </div>
-              <div class="detail-group">
-                <span class="detail-label">User Email</span>
-                <span class="detail-value">${logData.email || 'N/A'}</span>
-              </div>
-              <div class="detail-group">
-                <span class="detail-label">Access Time</span>
-                <span class="detail-value">${logData.accessedAt ? formatDate(logData.accessedAt) : 'N/A'}</span>
-              </div>
-              <div class="detail-group">
-                <span class="detail-label">IP Address</span>
-                <span class="detail-value">${logData.clientIp || 'N/A'}</span>
-              </div>
-              <div class="detail-group">
-                <span class="detail-label">Browser</span>
-                <span class="detail-value">${logData.userAgentParsed?.browser || 'N/A'} ${logData.userAgentParsed?.version || ''}</span>
-              </div>
-              <div class="detail-group">
-                <span class="detail-label">Platform</span>
-                <span class="detail-value">${logData.platform || 'N/A'}</span>
-              </div>
-              <div class="detail-group">
-                <span class="detail-label">Language</span>
-                <span class="detail-value">${logData.language || 'N/A'}</span>
-              </div>
-              <div class="detail-group">
-                <span class="detail-label">Screen Resolution</span>
-                <span class="detail-value">${logData.screen || 'N/A'}</span>
-              </div>
-              <div class="detail-group">
-                <span class="detail-label">Timezone Offset</span>
-                <span class="detail-value">${logData.timezoneOffsetMinutes || 'N/A'} minutes</span>
-              </div>
-              <div class="detail-group">
-                <span class="detail-label">Device Memory</span>
-                <span class="detail-value">${logData.deviceMemory || 'N/A'}</span>
-              </div>
-              <div class="detail-group">
-                <span class="detail-label">Hardware Concurrency</span>
-                <span class="detail-value">${logData.hardwareConcurrency || 'N/A'}</span>
-              </div>
-              <div class="detail-group">
-                <span class="detail-label">Referrer</span>
-                <span class="detail-value">${logData.referrer || 'N/A'}</span>
-              </div>
-              <div class="detail-group">
-                <span class="detail-label">Page URL</span>
-                <span class="detail-value">${logData.pageUrl || 'N/A'}</span>
-              </div>
-            </div>
-            <div class="raw-data">
-              <strong>Raw Data:</strong><br>
-              ${JSON.stringify(logData, null, 2)}
-            </div>
-          `;
-          
-          content.innerHTML = logDetailsHTML;
-          modal.style.display = 'flex';
-        }
-
-        function closeModal() {
-          document.getElementById('logModal').style.display = 'none';
-        }
-
-        /* ---------------- INIT ---------------- */
-        document.addEventListener("DOMContentLoaded", async () => {
-          createStars();
-
-          try { 
-            await ensureAuth();
-          } catch(e) {
-            console.warn("Auth error ignored", e);
-          }
-
-          setDefaultDateRange();
-
-          loadAuditLogs().finally(() => setTimeout(showMainUI, 300));
-
-          // ultimate fallback
-          setTimeout(showMainUI, 3000);
-        });
-    </script>
+/* ---------------- INIT ---------------- */
+document.addEventListener("DOMContentLoaded", async () => {
+  await ensureAuth();
+  setDefaultDateRange();
+  await fetchAllLogs();
+  applyLocalFilters();   // show initial
+});
+</script>
 </body>
 </html>
