@@ -179,7 +179,7 @@
       <div class="brand">
         <div class="logo" aria-hidden="true">
           <!-- Logo image (winter-themed) -->
-          <img src="https://dl.dropboxusercontent.com/scl/fi/3qljfqt6umlgbw8vr3u5e/IMG_20251204_201238.jpg?rlkey=etnj7vx82gae0apcwhkg3g44s&st=lkm2xjg5&dl=0 " alt="Team Galaxy logo">
+          <img src="https://dl.dropboxusercontent.com/scl/fi/3qljfqt6umlgbw8vr3u5e/IMG_20251204_201238.jpg?rlkey=etnj7vx82gae0apcwhkg3g44s&st=lkm2xjg5&dl=0" alt="Team Galaxy logo">
         </div>
 
         <div class="title-wrap">
@@ -205,7 +205,6 @@
           <button data-panel="panel-repostatus" role="tab">Repo Status</button>
           <button data-panel="panel-cards" role="tab">Cards Manager</button>
           <button data-panel="panel-portfolio" role="tab">Portfolio</button>
-          <button data-panel="panel-invoices" role="tab">Invoices</button>
           <button data-panel="panel-licenses" role="tab">Licenses</button>
           <button data-panel="panel-agreements" role="tab">Agreement Access</button>
         </div>
@@ -235,7 +234,6 @@
               <li>Repo Status (read-only file browser)</li>
               <li>Cards Manager (create cards)</li>
               <li>Portfolio (Item Manager & Folder Manager)</li>
-              <li>Invoices (Invoice Creator & Invoice Viewer)</li>
               <li>Licenses & Agreement Access</li>
             </ul>
           </div>
@@ -267,7 +265,6 @@
             <li>REPO STATUS</li>
             <li>CARDS MANAGER</li>
             <li>PORTFOLIO (Item Manager, Folder Manager)</li>
-            <li>INVOICES (Invoice Creator, Invoice Viewer)</li>
             <li>LICENSES</li>
             <li>AGREEMENT ACCESS</li>
           </ul>
@@ -416,39 +413,9 @@ Frontend → Cloudflare Worker → Dropbox → Worker returns CDN URL → Save U
           <p>Assign images using the available assignment controls in the Folder Manager UI. The panel will show available/unassigned images for assignment and the console logs will track events and fixes. "Fix Missing Fields" auto-populates basic metadata — use once per upload session as recommended by IT.</p>
         </section>
 
-        <!-- INVOICES -->
-        <section id="panel-invoices" class="section" style="display:none" role="tabpanel" aria-hidden="true">
-          <h2>7. INVOICES</h2>
-          <p>Invoice management system with two main components: creation and viewing. All invoices are stored securely in the database with legal compliance requirements already implemented.</p>
-
-          <h3>7.1 Invoice Creator</h3>
-          <p><strong>Purpose:</strong> Secure invoice creation interface with access restricted to Owner only.</p>
-
-          <h4>Rules & Capabilities</h4>
-          <ul>
-            <li>Only the Owner is eligible to create invoices</li>
-            <li>Invoice entry form captures all required data</li>
-            <li>Invoices data is stored securely in the database</li>
-            <li>Recommended maximum of 3 products per invoice for clarity</li>
-            <li>All legal requirements and formatting are handled automatically</li>
-          </ul>
-
-          <h3>7.2 Invoice Viewer</h3>
-          <p><strong>Purpose:</strong> Comprehensive invoice viewing and management interface.</p>
-
-          <h4>Features</h4>
-          <ul>
-            <li>View all invoices in a centralized interface</li>
-            <li>Search functionality to find specific invoices</li>
-            <li>Filter options to organize invoices by criteria</li>
-            <li>Print functionality to generate PDF format invoices</li>
-            <li>All legal requirements are already completed in the PDF format</li>
-          </ul>
-        </section>
-
         <!-- LICENSES -->
         <section id="panel-licenses" class="section" style="display:none" role="tabpanel" aria-hidden="true">
-          <h2>8. LICENSES</h2>
+          <h2>7. LICENSES</h2>
           <p><strong>Purpose:</strong> Central repository for asset & dependency licenses. Managed by IT; admins can view and download copies as needed.</p>
 
           <h3>Contents</h3>
@@ -464,7 +431,7 @@ Frontend → Cloudflare Worker → Dropbox → Worker returns CDN URL → Save U
 
         <!-- AGREEMENTS -->
         <section id="panel-agreements" class="section" style="display:none" role="tabpanel" aria-hidden="true">
-          <h2>9. AGREEMENT ACCESS</h2>
+          <h2>8. AGREEMENT ACCESS</h2>
           <p>This module contains the Administrative Agreement System (v3.1) and the TeamGalaxy Master Administrative Agreement. Admins must accept the agreement when required to maintain access.</p>
 
           <div class="code">
