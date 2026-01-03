@@ -421,17 +421,17 @@
             .controls-grid {
                 grid-template-columns: 1fr;
             }
-
+            
             .btn-group {
                 flex-direction: column;
             }
-
+            
             .logs-header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
             }
-
+            
             .log-details {
                 grid-template-columns: 1fr;
             }
@@ -632,6 +632,7 @@
         /* ---------------- LOAD AUDIT LOGS ---------------- */
         async function loadAuditLogs(filters = {}) {
           try {
+            // ✅ Fixed: Use 'let' instead of 'const'
             let query = db.collection("module_access_logs");
 
             if (filters.startDate) {
@@ -667,30 +668,30 @@
                   });
                 }
               });
-
+              
               // Apply date filters to the filtered results
               if (filters.startDate || filters.endDate) {
                 logs = logs.filter(log => {
                   if (!log.accessedAt) return true;
                   const logDate = new Date(log.accessedAt);
                   logDate.setHours(0,0,0,0);
-
+                  
                   if (filters.startDate) {
                     const start = new Date(filters.startDate);
                     start.setHours(0,0,0,0);
                     if (logDate < start) return false;
                   }
-
+                  
                   if (filters.endDate) {
                     const end = new Date(filters.endDate);
                     end.setHours(23,59,59,999);
                     if (logDate > end) return false;
                   }
-
+                  
                   return true;
                 });
               }
-
+              
               // Sort by accessedAt descending
               logs.sort((a, b) => b.accessedAt - a.accessedAt);
               renderLogsTable(logs);
@@ -713,30 +714,30 @@
                   });
                 }
               });
-
+              
               // Apply date filters to the filtered results
               if (filters.startDate || filters.endDate) {
                 logs = logs.filter(log => {
                   if (!log.accessedAt) return true;
                   const logDate = new Date(log.accessedAt);
                   logDate.setHours(0,0,0,0);
-
+                  
                   if (filters.startDate) {
                     const start = new Date(filters.startDate);
                     start.setHours(0,0,0,0);
                     if (logDate < start) return false;
                   }
-
+                  
                   if (filters.endDate) {
                     const end = new Date(filters.endDate);
                     end.setHours(23,59,59,999);
                     if (logDate > end) return false;
                   }
-
+                  
                   return true;
                 });
               }
-
+              
               // Sort by accessedAt descending
               logs.sort((a, b) => b.accessedAt - a.accessedAt);
               renderLogsTable(logs);
@@ -848,7 +849,7 @@
         function showLogDetails(logId, logData) {
           const modal = document.getElementById('logModal');
           const content = document.getElementById('logDetailsContent');
-
+          
           // Format the log data for display
           const logDetailsHTML = `
             <div class="log-details">
@@ -918,7 +919,7 @@
               ${JSON.stringify(logData, null, 2)}
             </div>
           `;
-
+          
           content.innerHTML = logDetailsHTML;
           modal.style.display = 'flex';
         }
