@@ -546,7 +546,7 @@
     </div>
 
 <script>
-/* ---------------- FIREBASE 11.9.0 CONFIG ---------------- */
+/* ---------------- FIREBASE CONFIG ---------------- */
 const firebaseConfig = {
   apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
   authDomain: "teamgalaxy-77344.firebaseapp.com",
@@ -561,154 +561,165 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let currentLogs = [];   // ⭐ global — used by Details modal
+let allLogs = [];
 
-/* ---------------- AUTH WITH TOKEN ---------------- */
+/* ---------------- UTIL ---------------- */
+function formatDate(d) {
+  if (!d) return "N/A";
+  const dd = String(d.getDate()).padStart(2,"0");
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const yy = d.getFullYear();
+  const hh = String(d.getHours()).padStart(2,"0");
+  const mi = String(d.getMinutes()).padStart(2,"0");
+  const ss = String(d.getSeconds()).padStart(2,"0");
+  return `${dd}/${mm}/${yy} ${hh}:${mi}:${ss}`;
+}
+
+/* ---------------- LOADER ---------------- */
+function hideLoader() {
+  const loading = document.getElementById("loadingScreen");
+  const container = document.getElementById("container");
+
+  if (!loading || !container) return;
+
+  loading.style.opacity = "0";
+
+  setTimeout(() => {
+    loading.classList.add("hidden");
+    container.style.display = "block";
+  }, 300);
+}
+
+/* ---------------- AUTH (SAFE) ---------------- */
 async function ensureAuth() {
-  return new Promise((resolve, reject) => {
-    auth.onAuthStateChanged(async (user) => {
+  return new Promise(resolve => {
+    auth.onAuthStateChanged(async user => {
       try {
         if (!user) {
           user = (await auth.signInAnonymously()).user;
         }
         await user.getIdToken(true);
         resolve(user);
-      } catch (e) {
-        reject(e);
+      } catch (_) {
+        console.warn("Auth failed, continuing without auth");
+        resolve(null);
       }
     });
   });
 }
 
-/* ---------------- DATE HELPERS ---------------- */
-function formatDate(date) {
-  if (!date) return "N/A";
-  const d = String(date.getDate()).padStart(2, '0');
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const y = date.getFullYear();
-  const hh = String(date.getHours()).padStart(2, '0');
-  const mm = String(date.getMinutes()).padStart(2, '0');
-  const ss = String(date.getSeconds()).padStart(2, '0');
-  return `${d}/${m}/${y} ${hh}:${mm}:${ss}`;
+/* ---------------- FETCH LOGS ---------------- */
+async function fetchLogs() {
+  try {
+    // primary query
+    let snap;
+    try {
+      snap = await db
+        .collection("module_access_logs")
+        .orderBy("accessedAt","desc")
+        .get();
+    } catch (e) {
+      // fallback if index/orderBy breaks
+      console.warn("orderBy failed → falling back to plain get()");
+      snap = await db.collection("module_access_logs").get();
+    }
+
+    allLogs = snap.docs.map(doc => {
+      const d = doc.data();
+      return {
+        id: doc.id,
+        ...d,
+        accessedAt: d.accessedAt ? d.accessedAt.toDate() : null
+      };
+    });
+
+    renderAndStats(allLogs);
+
+  } catch (e) {
+    console.error("Firestore read error:", e);
+    document.getElementById("logsTableBody").innerHTML = `
+      <tr><td colspan="7" class="no-logs">Unable to load logs.</td></tr>
+    `;
+  }
 }
 
-function setDefaultDateRange() {
-  const today = new Date();
-  const y = today.getFullYear();
-  const m = String(today.getMonth() + 1).padStart(2, '0');
-  const d = String(today.getDate()).padStart(2, '0');
-  const formatted = `${y}-${m}-${d}`;
-  document.getElementById('startDate').value = formatted;
-  document.getElementById('endDate').value = formatted;
-}
+/* ---------------- RENDER TABLE + STATS ---------------- */
+function renderAndStats(list) {
+  const body = document.getElementById("logsTableBody");
 
-/* ---------------- LOAD ALL LOGS ONCE ---------------- */
-async function fetchAllLogs() {
-  const snap = await db.collection("module_access_logs")
-    .orderBy("accessedAt", "desc")
-    .get();
-
-  currentLogs = snap.docs.map(doc => {
-    const d = doc.data();
-    return {
-      id: doc.id,
-      ...d,
-      accessedAt: d.accessedAt ? d.accessedAt.toDate() : null
-    };
-  });
-
-  return currentLogs;
-}
-
-/* ---------------- APPLY FILTERS IN MEMORY ---------------- */
-function applyLocalFilters() {
-  let logs = [...currentLogs];
-
-  const startDate = document.getElementById("startDate").value;
-  const endDate = document.getElementById("endDate").value;
-  const userFilter = document.getElementById("userFilter").value.trim().toLowerCase();
-  const moduleFilter = document.getElementById("moduleFilter").value.trim().toLowerCase();
-
-  // date range
-  if (startDate) {
-    const s = new Date(startDate);
-    s.setHours(0,0,0,0);
-    logs = logs.filter(l => l.accessedAt && l.accessedAt >= s);
+  if (!list.length) {
+    body.innerHTML = `<tr><td colspan="7" class="no-logs">No logs found.</td></tr>`;
+  } else {
+    body.innerHTML = list.map(l => `
+      <tr>
+        <td>${l.moduleKey || "Unknown"}</td>
+        <td>${l.name || l.email || "Unknown"}</td>
+        <td>${l.accessedAt ? formatDate(l.accessedAt) : "N/A"}</td>
+        <td>${l.clientIp || "N/A"}</td>
+        <td>${l.userAgentParsed?.browser || "Unknown"}</td>
+        <td>${l.platform || "Unknown"}</td>
+        <td>
+          <button class="btn btn-secondary" onclick="openDetails('${l.id}')">
+            Details
+          </button>
+        </td>
+      </tr>
+    `).join("");
   }
 
-  if (endDate) {
-    const e = new Date(endDate);
-    e.setHours(23,59,59,999);
-    logs = logs.filter(l => l.accessedAt && l.accessedAt <= e);
-  }
-
-  // user filter
-  if (userFilter) {
-    logs = logs.filter(l =>
-      (l.email && l.email.toLowerCase().includes(userFilter)) ||
-      (l.name && l.name.toLowerCase().includes(userFilter))
-    );
-  }
-
-  // module filter
-  if (moduleFilter) {
-    logs = logs.filter(l =>
-      l.moduleKey && l.moduleKey.toLowerCase().includes(moduleFilter)
-    );
-  }
-
-  renderLogsTable(logs);
-  updateStats(logs);
-}
-
-/* ---------------- RENDER TABLE ---------------- */
-function renderLogsTable(logs) {
-  const tbody = document.getElementById("logsTableBody");
-
-  if (!logs.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="no-logs">No audit logs found.</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = logs.map(log => `
-    <tr>
-      <td>${log.moduleKey || "Unknown"}</td>
-      <td>${log.name || log.email || "Unknown"}</td>
-      <td>${log.accessedAt ? formatDate(log.accessedAt) : "N/A"}</td>
-      <td>${log.clientIp || "N/A"}</td>
-      <td>${log.userAgentParsed?.browser || "Unknown"}</td>
-      <td>${log.platform || "Unknown"}</td>
-      <td>
-        <button class="btn btn-secondary" onclick="openDetails('${log.id}')">
-          Details
-        </button>
-      </td>
-    </tr>
-  `).join("");
-}
-
-/* ---------------- STATS ---------------- */
-function updateStats(logs) {
-  document.getElementById("totalLogs").innerText = logs.length;
+  // stats
+  document.getElementById("totalLogs").innerText = list.length;
 
   const today = new Date();
   today.setHours(0,0,0,0);
 
-  const todayLogs = logs.filter(l =>
+  const todayCount = list.filter(l =>
     l.accessedAt &&
     new Date(l.accessedAt).setHours(0,0,0,0) === today.getTime()
-  );
+  ).length;
 
-  document.getElementById("todayLogs").innerText = todayLogs.length;
+  document.getElementById("todayLogs").innerText = todayCount;
+
   document.getElementById("uniqueUsers").innerText =
-    new Set(logs.map(l => l.email || l.name)).size;
+    new Set(list.map(l => l.email || l.name)).size;
+
   document.getElementById("uniqueModules").innerText =
-    new Set(logs.map(l => l.moduleKey)).size;
+    new Set(list.map(l => l.moduleKey)).size;
 }
 
-/* ---------------- FILTER BUTTONS ---------------- */
+/* ---------------- FILTERS ---------------- */
 function applyFilters() {
-  applyLocalFilters();
+  let filtered = [...allLogs];
+
+  const s = document.getElementById("startDate").value;
+  const e = document.getElementById("endDate").value;
+  const u = document.getElementById("userFilter").value.toLowerCase();
+  const m = document.getElementById("moduleFilter").value.toLowerCase();
+
+  if (s) {
+    const sd = new Date(s); sd.setHours(0,0,0,0);
+    filtered = filtered.filter(l => l.accessedAt && l.accessedAt >= sd);
+  }
+
+  if (e) {
+    const ed = new Date(e); ed.setHours(23,59,59,999);
+    filtered = filtered.filter(l => l.accessedAt && l.accessedAt <= ed);
+  }
+
+  if (u) {
+    filtered = filtered.filter(l =>
+      (l.email && l.email.toLowerCase().includes(u)) ||
+      (l.name && l.name.toLowerCase().includes(u))
+    );
+  }
+
+  if (m) {
+    filtered = filtered.filter(l =>
+      l.moduleKey && l.moduleKey.toLowerCase().includes(m)
+    );
+  }
+
+  renderAndStats(filtered);
 }
 
 function resetFilters() {
@@ -716,31 +727,19 @@ function resetFilters() {
   document.getElementById("endDate").value = "";
   document.getElementById("userFilter").value = "";
   document.getElementById("moduleFilter").value = "";
-  applyLocalFilters();
+  renderAndStats(allLogs);
 }
 
 /* ---------------- DETAILS MODAL ---------------- */
 function openDetails(id) {
-  const log = currentLogs.find(l => l.id === id);
+  const log = allLogs.find(l => l.id === id);
   if (!log) return;
 
-  const modal = document.getElementById("logModal");
-  const content = document.getElementById("logDetailsContent");
-
-  content.innerHTML = `
-    <div class="log-details">
-      <div class="detail-group"><span class="detail-label">Log ID</span><span class="detail-value">${id}</span></div>
-      <div class="detail-group"><span class="detail-label">Module</span><span class="detail-value">${log.moduleKey || "N/A"}</span></div>
-      <div class="detail-group"><span class="detail-label">User</span><span class="detail-value">${log.name || log.email || "N/A"}</span></div>
-      <div class="detail-group"><span class="detail-label">Access Time</span><span class="detail-value">${formatDate(log.accessedAt)}</span></div>
-      <div class="detail-group"><span class="detail-label">IP</span><span class="detail-value">${log.clientIp || "N/A"}</span></div>
-      <div class="detail-group"><span class="detail-label">Browser</span><span class="detail-value">${log.userAgentParsed?.browser || "N/A"}</span></div>
-      <div class="detail-group"><span class="detail-label">Platform</span><span class="detail-value">${log.platform || "N/A"}</span></div>
-    </div>
-    <div class="raw-data">${JSON.stringify(log, null, 2)}</div>
+  document.getElementById("logDetailsContent").innerHTML = `
+    <div class="raw-data">${JSON.stringify(log,null,2)}</div>
   `;
 
-  modal.style.display = "flex";
+  document.getElementById("logModal").style.display = "flex";
 }
 
 function closeModal() {
@@ -749,10 +748,15 @@ function closeModal() {
 
 /* ---------------- INIT ---------------- */
 document.addEventListener("DOMContentLoaded", async () => {
-  await ensureAuth();
-  setDefaultDateRange();
-  await fetchAllLogs();
-  applyLocalFilters();   // show initial
+  // loader ALWAYS closes (even error case)
+  setTimeout(hideLoader, 1500);
+
+  try {
+    await ensureAuth();
+  } catch {}
+
+  await fetchLogs();
+  hideLoader();
 });
 </script>
 </body>
