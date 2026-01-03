@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audit Logs - TeamGalaxy Admin</title>
 
-    <!-- Firebase Compat SDKs (NOT modular imports) -->
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore-compat.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -446,54 +445,210 @@
     </div>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
-    authDomain: "teamgalaxy-77344.firebaseapp.com",
-    projectId: "teamgalaxy-77344",
-    storageBucket: "teamgalaxy-77344.firebasestorage.app",
-    messagingSenderId: "770256225320",
-    appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
-    measurementId: "G-6C2W9NSNCH"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+  authDomain: "teamgalaxy-77344.firebaseapp.com",
+  projectId: "teamgalaxy-77344",
+  storageBucket: "teamgalaxy-77344.firebasestorage.app",
+  messagingSenderId: "770256225320",
+  appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+  measurementId: "G-6C2W9NSNCH"
+};
 
-  // init
-  firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
 
-  // 🔥 these now work because auth-compat is loaded
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-  // ensure authenticated so Firestore sends token automatically
-  async function ensureAuth() {
-      return new Promise((resolve, reject) => {
-          auth.onAuthStateChanged(async (user) => {
-              try {
-                  if (user) {
-                      await user.getIdToken(true);
-                      console.log("Signed in existing:", user.uid);
-                      resolve(user);
-                  } else {
-                      const cred = await auth.signInAnonymously();
-                      await cred.user.getIdToken(true);
-                      console.log("Signed in anonymously:", cred.user.uid);
-                      resolve(cred.user);
-                  }
-              } catch (e) {
-                  console.error("Auth error:", e);
-                  reject(e);
-              }
-          });
-      });
-  }
+/* ---------------- AUTH WITH TOKEN ---------------- */
+async function ensureAuth() {
+    return new Promise((resolve, reject) => {
+        auth.onAuthStateChanged(async (user) => {
+            try {
+                if (!user) {
+                    user = (await auth.signInAnonymously()).user;
+                }
+                await user.getIdToken(true);
+                console.log("Authenticated:", user.uid);
+                resolve(user);
+            } catch (err) {
+                console.error(err);
+                reject(err);
+            }
+        });
+    });
+}
 
-  // your existing functions below (unchanged) …
+/* ---------------- STAR BACKGROUND ---------------- */
+function createStars() {
+    const starsContainer = document.getElementById('stars');
+    const starCount = 150;
+    for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        star.style.left = `${x}%`;
+        star.style.top = `${y}%`;
+        const size = Math.random() * 3 + 1;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        const duration = Math.random() * 5 + 2;
+        star.style.setProperty('--duration', `${duration}s`);
+        starsContainer.appendChild(star);
+    }
+}
 
-  // ⭐ DOMContentLoaded
-  document.addEventListener("DOMContentLoaded", async () => {
-      await ensureAuth();   // <<< token ready here
-      setDefaultDateRange();
-      loadAuditLogs();
-  });
+/* ---------------- DATE HELPERS ---------------- */
+function formatDate(date) {
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = date.getFullYear();
+    const hh = String(date.getHours()).padStart(2, '0');
+    const mm = String(date.getMinutes()).padStart(2, '0');
+    const ss = String(date.getSeconds()).padStart(2, '0');
+    return `${d}/${m}/${y} ${hh}:${mm}:${ss}`;
+}
+
+function formatInputDate(date) {
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = date.getFullYear();
+    return `${y}-${m}-${d}`;
+}
+
+/* -------------- FIXED -> function was missing -------------- */
+function setDefaultDateRange() {
+    const today = new Date();
+    const formatted = formatInputDate(today);
+    document.getElementById('startDate').value = formatted;
+    document.getElementById('endDate').value = formatted;
+}
+
+/* ---------------- LOAD AUDIT LOGS ---------------- */
+async function loadAuditLogs(filters = {}) {
+    try {
+        let query = db.collection("module_access_logs");
+
+        if (filters.startDate) {
+            const s = new Date(filters.startDate);
+            s.setHours(0,0,0,0);
+            query = query.where("accessedAt", ">=", s);
+        }
+
+        if (filters.endDate) {
+            const e = new Date(filters.endDate);
+            e.setHours(23,59,59,999);
+            query = query.where("accessedAt", "<=", e);
+        }
+
+        if (filters.userFilter) {
+            query = query
+                .where("email", ">=", filters.userFilter)
+                .where("email", "<=", filters.userFilter + "\uf8ff");
+        }
+
+        if (filters.moduleFilter) {
+            query = query
+                .where("moduleKey", ">=", filters.moduleFilter)
+                .where("moduleKey", "<=", filters.moduleFilter + "\uf8ff");
+        }
+
+        query = query.orderBy("accessedAt", "desc");
+
+        const snap = await query.get();
+        const logs = [];
+
+        snap.forEach(doc => {
+            const d = doc.data();
+            logs.push({
+                id: doc.id,
+                ...d,
+                accessedAt: d.accessedAt ? d.accessedAt.toDate() : null
+            });
+        });
+
+        renderLogsTable(logs);
+        updateStats(logs);
+
+    } catch (err) {
+        console.error(err);
+        document.getElementById("logsTableBody").innerHTML =
+            `<tr><td colspan="7" class="no-logs">Error loading logs.</td></tr>`;
+    }
+}
+
+/* ---------------- RENDER TABLE ---------------- */
+function renderLogsTable(logs) {
+    const tbody = document.getElementById("logsTableBody");
+
+    if (!logs.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="no-logs">No audit logs found.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = logs.map(log => `
+        <tr>
+            <td>${log.moduleKey || "Unknown"}</td>
+            <td>${log.name || log.email || "Unknown"}</td>
+            <td>${log.accessedAt ? formatDate(log.accessedAt) : "N/A"}</td>
+            <td>${log.clientIp || "N/A"}</td>
+            <td>${log.userAgentParsed?.browser || "Unknown"}</td>
+            <td>${log.platform || "Unknown"}</td>
+            <td><button class="btn btn-secondary" onclick="alert('${log.id}')">Details</button></td>
+        </tr>
+    `).join("");
+}
+
+/* ---------------- STATS ---------------- */
+function updateStats(logs) {
+    document.getElementById("totalLogs").innerText = logs.length;
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const todayLogs = logs.filter(l => {
+        if (!l.accessedAt) return false;
+        const d = new Date(l.accessedAt);
+        d.setHours(0,0,0,0);
+        return d.getTime() === today.getTime();
+    });
+
+    document.getElementById("todayLogs").innerText = todayLogs.length;
+    document.getElementById("uniqueUsers").innerText =
+        new Set(logs.map(l => l.email)).size;
+    document.getElementById("uniqueModules").innerText =
+        new Set(logs.map(l => l.moduleKey)).size;
+}
+
+/* ---------------- FILTER ACTIONS ---------------- */
+function applyFilters() {
+    loadAuditLogs({
+        startDate: document.getElementById("startDate").value,
+        endDate: document.getElementById("endDate").value,
+        userFilter: document.getElementById("userFilter").value.trim(),
+        moduleFilter: document.getElementById("moduleFilter").value.trim()
+    });
+}
+
+function resetFilters() {
+    document.getElementById("startDate").value = "";
+    document.getElementById("endDate").value = "";
+    document.getElementById("userFilter").value = "";
+    document.getElementById("moduleFilter").value = "";
+    loadAuditLogs();
+}
+
+/* ---------------- INIT ---------------- */
+document.addEventListener("DOMContentLoaded", async () => {
+    createStars();
+
+    await ensureAuth(); // token ready
+
+    setDefaultDateRange(); // now defined 👍
+
+    loadAuditLogs();
+});
 </script>
 </body>
 </html>
