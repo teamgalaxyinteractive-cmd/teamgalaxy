@@ -47,18 +47,11 @@
             border-top: 4px solid #00d4ff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
+            margin-bottom: 20px;        }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            font-size: 1.2rem;
-            color: #00d4ff;
-            text-align: center;
         }
 
         /* Star background animation */
@@ -103,8 +96,7 @@
         }
 
         .back-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
+            background: rgba(255,255,255,0.1);            border: none;
             color: white;
             padding: 10px 20px;
             border-radius: 25px;
@@ -153,8 +145,7 @@
 
         .form-input {
             width: 100%;
-            padding: 12px 15px;
-            background: rgba(255,255,255,0.05);
+            padding: 12px 15px;            background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
             color: white;
@@ -203,8 +194,7 @@
 
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
-        }
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);        }
 
         .message {
             padding: 15px;
@@ -253,7 +243,6 @@
             border: 1px solid rgba(255,255,255,0.05);
             transition: all 0.3s ease;
         }
-
         .card-item:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
@@ -293,6 +282,69 @@
 
         .hidden {
             display: none !important;
+        }
+        
+        /* Edit Button */
+        .edit-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: rgba(25, 25, 35, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: #fff;        }
+
+        .modal-body {
+            padding: 20px;
         }
     </style>
 </head>
@@ -338,10 +390,41 @@
             <div id="messageBox"></div>
         </div>
 
-        <div class="cards-section">
-            <h2 class="section-title">Existing Cards</h2>
+        <div class="cards-section">            <h2 class="section-title">Existing Cards</h2>
             <div id="cardsGrid" class="cards-grid">
                 <div class="loading">Loading cards...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Card</h2>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editCardForm">
+                    <input type="hidden" id="editCardId">
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="editHeading">Heading:</label>
+                        <input type="text" id="editHeading" class="form-input" name="heading" required maxlength="300" placeholder="Enter card heading" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="editDescription">Description:</label>
+                        <textarea id="editDescription" class="form-textarea" name="description" required maxlength="10000" placeholder="Enter card description"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="editImageUrl">Image URL:</label>
+                        <input type="text" id="editImageUrl" class="form-input" name="imageUrl" required placeholder="Enter image URL (https://...)" />
+                    </div>
+
+                    <button type="submit" class="submit-btn">Update Card</button>
+                </form>
             </div>
         </div>
     </div>
@@ -357,7 +440,6 @@
           appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
           measurementId: "G-6C2W9NSNCH"
         };
-
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -366,23 +448,23 @@
         function createStars() {
             const starsContainer = document.getElementById('stars');
             const starCount = 150;
-            
+
             for (let i = 0; i < starCount; i++) {
                 const star = document.createElement('div');
                 star.classList.add('star');
-                
+
                 const x = Math.random() * 100;
                 const y = Math.random() * 100;
                 star.style.left = `${x}%`;
                 star.style.top = `${y}%`;
-                
+
                 const size = Math.random() * 3 + 1;
                 star.style.width = `${size}px`;
                 star.style.height = `${size}px`;
-                
+
                 const duration = Math.random() * 5 + 2;
                 star.style.setProperty('--duration', `${duration}s`);
-                
+
                 starsContainer.appendChild(star);
             }
         }
@@ -406,8 +488,7 @@
                                 unsubscribe();
                                 throw error;
                             }
-                        } else {
-                            unsubscribe();
+                        } else {                            unsubscribe();
                             throw new Error('Not signed in');
                         }
                     });
@@ -436,7 +517,7 @@
             try {
                 const cardsSnapshot = await db.collection('cards').orderBy('publishedAt', 'desc').get();
                 const cardsContainer = document.getElementById('cardsGrid');
-                
+
                 if (cardsSnapshot.empty) {
                     cardsContainer.innerHTML = '<div class="no-cards">No cards found. Add your first card above.</div>';
                     return;
@@ -446,7 +527,8 @@
                 cardsSnapshot.forEach(doc => {
                     const card = doc.data();
                     const publishedAt = card.publishedAt?.toDate().toLocaleDateString() || 'N/A';
-                    
+                    const docId = doc.id; // Get document ID for editing
+
                     html += `
                         <div class="card-item">
                             <img src="${card.imageUrl}" alt="${card.heading}" class="card-image" onerror="this.src='https://via.placeholder.com/300x180'">
@@ -455,14 +537,18 @@
                                 <p class="card-description">${card.description.substring(0, 100)}${card.description.length > 100 ? '...' : ''}</p>
                                 <div class="card-stats">
                                     <span><i class="fas fa-eye"></i> ${card.views || 0}</span>
-                                    <span><i class="fas fa-heart"></i> ${card.likes || 0}</span>
-                                    <span><i class="fas fa-calendar"></i> ${publishedAt}</span>
+                                    <span><i class="fas fa-heart"></i> ${card.likes || 0}</span>                                    <span><i class="fas fa-calendar"></i> ${publishedAt}</span>
+                                </div>
+                                <div style="margin-top: 10px;">
+                                    <button class="edit-btn" onclick="openEditModal('${docId}', '${card.heading.replace(/'/g, "\\'")}', '${card.description.replace(/'/g, "\\'")}', '${card.imageUrl.replace(/'/g, "\\'")}')">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     `;
                 });
-                
+
                 cardsContainer.innerHTML = html;
             } catch (error) {
                 console.error('Error loading cards:', error);
@@ -470,11 +556,60 @@
             }
         }
 
+        // Open edit modal with current card data
+        function openEditModal(id, heading, description, imageUrl) {
+            document.getElementById('editCardId').value = id;
+            document.getElementById('editHeading').value = heading;
+            document.getElementById('editDescription').value = description;
+            document.getElementById('editImageUrl').value = imageUrl;
+            
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        // Close edit modal
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        // Handle edit form submission
+        document.getElementById('editCardForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const messageBox = document.getElementById('messageBox');
+
+            const id = document.getElementById('editCardId').value;
+            const heading = document.getElementById('editHeading').value.trim();
+            const description = document.getElementById('editDescription').value.trim();
+            const imageUrl = document.getElementById('editImageUrl').value.trim();
+
+            if (!heading || !description || !imageUrl) {
+                messageBox.className = 'message error';
+                messageBox.textContent = "Please fill all fields correctly.";
+                return;
+            }
+
+            try {
+                await db.collection('cards').doc(id).update({
+                    heading,
+                    description,
+                    imageUrl
+                });
+
+                messageBox.className = 'message success';
+                messageBox.textContent = "Card updated successfully!";
+                
+                closeEditModal();
+                loadCards(); // Reload cards to show updated data
+            } catch (error) {
+                messageBox.className = 'message error';
+                messageBox.textContent = "Error updating card: " + error.message;
+            }
+        });
+
         // Handle form submission
         document.getElementById('cardForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const messageBox = document.getElementById('messageBox');
-            
+
             const heading = document.getElementById('heading').value.trim();
             const description = document.getElementById('description').value.trim();
             const imageUrl = document.getElementById('imageUrl').value.trim();
@@ -494,11 +629,11 @@
                     likes: 0,
                     publishedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                
+
                 messageBox.className = 'message success';
                 messageBox.textContent = "Card added successfully!";
                 document.getElementById('cardForm').reset();
-                
+
                 // Reload cards
                 loadCards();
             } catch (error) {
@@ -510,6 +645,14 @@
         // Go back function
         function goBack() {
             window.location.href = 'admin_panel.html';
+        }
+
+        // Close modal if clicked outside content
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target === modal) {
+                closeEditModal();
+            }
         }
 
         // Initialize
