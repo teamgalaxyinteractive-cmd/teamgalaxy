@@ -430,236 +430,227 @@
     </div>
 
     <script>
-        // Initialize Firebase
-        const firebaseConfig = {
-          apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
-          authDomain: "teamgalaxy-77344.firebaseapp.com",
-          projectId: "teamgalaxy-77344",
-          storageBucket: "teamgalaxy-77344.firebasestorage.app",
-          messagingSenderId: "770256225320",
-          appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
-          measurementId: "G-6C2W9NSNCH"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+/* ===================== FIREBASE INIT ===================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+  authDomain: "teamgalaxy-77344.firebaseapp.com",
+  projectId: "teamgalaxy-77344",
+  storageBucket: "teamgalaxy-77344.firebasestorage.app",
+  messagingSenderId: "770256225320",
+  appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+  measurementId: "G-6C2W9NSNCH"
+};
 
-        // Create star background
-        function createStars() {
-            const starsContainer = document.getElementById('stars');
-            const starCount = 150;
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-            for (let i = 0; i < starCount; i++) {
-                const star = document.createElement('div');
-                star.classList.add('star');
+/* ===================== STAR BACKGROUND ===================== */
+function createStars() {
+    const starsContainer = document.getElementById('stars');
+    const starCount = 150;
 
-                const x = Math.random() * 100;
-                const y = Math.random() * 100;
-                star.style.left = `${x}%`;
-                star.style.top = `${y}%`;
+    for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
 
-                const size = Math.random() * 3 + 1;
-                star.style.width = `${size}px`;
-                star.style.height = `${size}px`;
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
 
-                const duration = Math.random() * 5 + 2;
-                star.style.setProperty('--duration', `${duration}s`);
+        const size = Math.random() * 3 + 1;
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
 
-                starsContainer.appendChild(star);
-            }
-        }
+        star.style.setProperty('--duration', (Math.random() * 5 + 2) + 's');
+        starsContainer.appendChild(star);
+    }
+}
 
-        // Check admin authentication
-        async function checkAuth() {
-            try {
-                const user = await new Promise((resolve, reject) => {
-                    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-                        if (user) {
-                            try {
-                                const adminQuery = await db.collection('admin').where('gmail', '==', user.email).limit(1).get();
-                                if (!adminQuery.empty) {
-                                    unsubscribe();
-                                    resolve(user);
-                                } else {
-                                    unsubscribe();
-                                    throw new Error('Not an admin');
-                                }
-                            } catch (error) {
-                                unsubscribe();
-                                throw error;
-                            }
-                        } else {                            unsubscribe();
-                            throw new Error('Not signed in');
-                        }
-                    });
-                });
-
-                setTimeout(() => {
-                    document.getElementById('loadingScreen').style.opacity = '0';
-                    setTimeout(() => {
-                        document.getElementById('loadingScreen').classList.add('hidden');
-                        document.getElementById('mainContainer').style.display = 'block';
-                        loadCards();
-                    }, 500);
-                }, 1500);
-
-            } catch (error) {
-                console.error('Auth check error:', error);
-                document.getElementById('loadingScreen').querySelector('.loading-text').textContent = 'Access denied. Redirecting...';
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000);
-            }
-        }
-
-        // Load cards from Firestore
-        async function loadCards() {
-            try {
-                const cardsSnapshot = await db.collection('cards').orderBy('publishedAt', 'desc').get();
-                const cardsContainer = document.getElementById('cardsGrid');
-
-                if (cardsSnapshot.empty) {
-                    cardsContainer.innerHTML = '<div class="no-cards">No cards found. Add your first card above.</div>';
+/* ===================== AUTH CHECK ===================== */
+async function checkAuth() {
+    try {
+        await new Promise((resolve, reject) => {
+            const unsub = auth.onAuthStateChanged(async user => {
+                if (!user) {
+                    unsub();
+                    reject('Not signed in');
                     return;
                 }
 
-                let html = '';
-                cardsSnapshot.forEach(doc => {
-                    const card = doc.data();
-                    const publishedAt = card.publishedAt?.toDate().toLocaleDateString() || 'N/A';
-                    const docId = doc.id; // Get document ID for editing
+                const adminSnap = await db
+                    .collection('admin')
+                    .where('gmail', '==', user.email)
+                    .limit(1)
+                    .get();
 
-                    html += `
-                        <div class="card-item">
-                            <img src="${card.imageUrl}" alt="${card.heading}" class="card-image" onerror="this.src='https://via.placeholder.com/300x180'">
-                            <div class="card-content">
-                                <h3 class="card-heading">${card.heading}</h3>
-                                <p class="card-description">${card.description.substring(0, 100)}${card.description.length > 100 ? '...' : ''}</p>
-                                <div class="card-stats">
-                                    <span><i class="fas fa-eye"></i> ${card.views || 0}</span>
-                                    <span><i class="fas fa-heart"></i> ${card.likes || 0}</span>                                    <span><i class="fas fa-calendar"></i> ${publishedAt}</span>
-                                </div>
-                                <div style="margin-top: 10px;">
-                                    <button class="edit-btn" onclick="openEditModal('${docId}', '${card.heading.replace(/'/g, "\\'")}', '${card.description.replace(/'/g, "\\'")}', '${card.imageUrl.replace(/'/g, "\\'")}')">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
+                unsub();
 
-                cardsContainer.innerHTML = html;
-            } catch (error) {
-                console.error('Error loading cards:', error);
-                document.getElementById('cardsGrid').innerHTML = '<div class="error">Error loading cards</div>';
-            }
-        }
-
-        // Open edit modal with current card data
-        function openEditModal(id, heading, description, imageUrl) {
-            document.getElementById('editCardId').value = id;
-            document.getElementById('editHeading').value = heading;
-            document.getElementById('editDescription').value = description;
-            document.getElementById('editImageUrl').value = imageUrl;
-            
-            document.getElementById('editModal').classList.remove('hidden');
-        }
-
-        // Close edit modal
-        function closeEditModal() {
-            document.getElementById('editModal').classList.add('hidden');
-        }
-
-        // Handle edit form submission
-        document.getElementById('editCardForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const messageBox = document.getElementById('messageBox');
-
-            const id = document.getElementById('editCardId').value;
-            const heading = document.getElementById('editHeading').value.trim();
-            const description = document.getElementById('editDescription').value.trim();
-            const imageUrl = document.getElementById('editImageUrl').value.trim();
-
-            if (!heading || !description || !imageUrl) {
-                messageBox.className = 'message error';
-                messageBox.textContent = "Please fill all fields correctly.";
-                return;
-            }
-
-            try {
-                await db.collection('cards').doc(id).update({
-                    heading,
-                    description,
-                    imageUrl
-                });
-
-                messageBox.className = 'message success';
-                messageBox.textContent = "Card updated successfully!";
-                
-                closeEditModal();
-                loadCards(); // Reload cards to show updated data
-            } catch (error) {
-                messageBox.className = 'message error';
-                messageBox.textContent = "Error updating card: " + error.message;
-            }
+                if (adminSnap.empty) reject('Not admin');
+                else resolve();
+            });
         });
 
-        // Handle form submission
-        document.getElementById('cardForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const messageBox = document.getElementById('messageBox');
+        setTimeout(() => {
+            document.getElementById('loadingScreen').classList.add('hidden');
+            document.getElementById('mainContainer').style.display = 'block';
+            loadCards();
+        }, 1200);
 
-            const heading = document.getElementById('heading').value.trim();
-            const description = document.getElementById('description').value.trim();
-            const imageUrl = document.getElementById('imageUrl').value.trim();
+    } catch (err) {
+        document.querySelector('.loading-text').textContent =
+            'Access denied. Redirecting...';
+        setTimeout(() => location.href = 'index.html', 2000);
+    }
+}
 
-            if (!heading || !description || !imageUrl) {
-                messageBox.className = 'message error';
-                messageBox.textContent = "Please fill all fields correctly.";
-                return;
-            }
+/* ===================== LOAD CARDS (FIXED) ===================== */
+async function loadCards() {
+    const grid = document.getElementById('cardsGrid');
+    grid.innerHTML = '';
 
-            try {
-                await db.collection('cards').add({
-                    heading,
-                    description,
-                    imageUrl,
-                    views: 0,
-                    likes: 0,
-                    publishedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+    try {
+        const snap = await db.collection('cards')
+            .orderBy('publishedAt', 'desc')
+            .get();
 
-                messageBox.className = 'message success';
-                messageBox.textContent = "Card added successfully!";
-                document.getElementById('cardForm').reset();
-
-                // Reload cards
-                loadCards();
-            } catch (error) {
-                messageBox.className = 'message error';
-                messageBox.textContent = "Error adding card: " + error.message;
-            }
-        });
-
-        // Go back function
-        function goBack() {
-            window.location.href = 'admin_panel.html';
+        if (snap.empty) {
+            grid.innerHTML = '<div>No cards found.</div>';
+            return;
         }
 
-        // Close modal if clicked outside content
-        window.onclick = function(event) {
-            const modal = document.getElementById('editModal');
-            if (event.target === modal) {
-                closeEditModal();
-            }
-        }
+        snap.forEach(doc => {
+            const c = doc.data();
+            const date = c.publishedAt?.toDate().toLocaleDateString() || 'N/A';
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            createStars();
-            checkAuth();
+            const card = document.createElement('div');
+            card.className = 'card-item';
+
+            card.innerHTML = `
+                <img class="card-image"
+                     src="${c.imageUrl}"
+                     onerror="this.src='https://via.placeholder.com/300x180'">
+
+                <div class="card-content">
+                    <h3 class="card-heading"></h3>
+                    <p class="card-description"></p>
+
+                    <div class="card-stats">
+                        <span><i class="fas fa-eye"></i> ${c.views || 0}</span>
+                        <span><i class="fas fa-heart"></i> ${c.likes || 0}</span>
+                        <span><i class="fas fa-calendar"></i> ${date}</span>
+                    </div>
+
+                    <div style="margin-top:10px">
+                        <button class="edit-btn">✏️ Edit</button>
+                    </div>
+                </div>
+            `;
+
+            card.querySelector('.card-heading').textContent = c.heading;
+            card.querySelector('.card-description').textContent =
+                c.description.length > 100
+                ? c.description.slice(0, 100) + '...'
+                : c.description;
+
+            const editBtn = card.querySelector('.edit-btn');
+            editBtn.addEventListener('click', () => {
+                openEditModal(doc.id, c.heading, c.description, c.imageUrl);
+            });
+
+            grid.appendChild(card);
         });
-    </script>
+
+    } catch (e) {
+        grid.innerHTML = '<div class="error">Failed to load cards</div>';
+        console.error(e);
+    }
+}
+
+/* ===================== ADD CARD ===================== */
+document.getElementById('cardForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const msg = document.getElementById('messageBox');
+
+    const heading = headingInput.value.trim();
+    const description = descriptionInput.value.trim();
+    const imageUrl = imageUrlInput.value.trim();
+
+    if (!heading || !description || !imageUrl) {
+        msg.className = 'message error';
+        msg.textContent = 'All fields required';
+        return;
+    }
+
+    try {
+        await db.collection('cards').add({
+            heading,
+            description,
+            imageUrl,
+            views: 0,
+            likes: 0,
+            publishedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        msg.className = 'message success';
+        msg.textContent = 'Card added successfully';
+        e.target.reset();
+        loadCards();
+
+    } catch (err) {
+        msg.className = 'message error';
+        msg.textContent = err.message;
+    }
+});
+
+/* ===================== EDIT MODAL ===================== */
+function openEditModal(id, heading, desc, img) {
+    editCardId.value = id;
+    editHeading.value = heading;
+    editDescription.value = desc;
+    editImageUrl.value = img;
+    editModal.classList.remove('hidden');
+}
+
+function closeEditModal() {
+    editModal.classList.add('hidden');
+}
+
+document.getElementById('editCardForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const msg = document.getElementById('messageBox');
+
+    try {
+        await db.collection('cards').doc(editCardId.value).update({
+            heading: editHeading.value.trim(),
+            description: editDescription.value.trim(),
+            imageUrl: editImageUrl.value.trim()
+        });
+
+        msg.className = 'message success';
+        msg.textContent = 'Card updated successfully';
+        closeEditModal();
+        loadCards();
+
+    } catch (err) {
+        msg.className = 'message error';
+        msg.textContent = err.message;
+    }
+});
+
+/* ===================== UTILS ===================== */
+function goBack() {
+    location.href = 'admin_panel.html';
+}
+
+window.onclick = e => {
+    if (e.target === editModal) closeEditModal();
+};
+
+/* ===================== INIT ===================== */
+document.addEventListener('DOMContentLoaded', () => {
+    createStars();
+    checkAuth();
+});
+</script>
 </body>
 </html>
