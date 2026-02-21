@@ -243,8 +243,7 @@
             border: 1px solid rgba(255,255,255,0.05);
             transition: all 0.3s ease;
         }
-        .card-item:hover {
-            transform: translateY(-5px);
+        .card-item:hover {            transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
             border-color: rgba(0, 212, 255, 0.3);
         }
@@ -283,7 +282,7 @@
         .hidden {
             display: none !important;
         }
-        
+
         /* Edit Button */
         .edit-btn {
             background: linear-gradient(45deg, #ff6b6b, #ffa500);
@@ -292,8 +291,8 @@
             padding: 8px 15px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 0.9rem;            transition: all 0.3s ease;
-            width: 100%;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;            width: 100%;
         }
 
         .edit-btn:hover {
@@ -341,8 +340,8 @@
         }
 
         .close:hover {
-            color: #fff;        }
-
+            color: #fff;
+        }
         .modal-body {
             padding: 20px;
         }
@@ -390,8 +389,8 @@
             <div id="messageBox"></div>
         </div>
 
-        <div class="cards-section">            <h2 class="section-title">Existing Cards</h2>
-            <div id="cardsGrid" class="cards-grid">
+        <div class="cards-section">
+            <h2 class="section-title">Existing Cards</h2>            <div id="cardsGrid" class="cards-grid">
                 <div class="loading">Loading cards...</div>
             </div>
         </div>
@@ -407,7 +406,7 @@
             <div class="modal-body">
                 <form id="editCardForm">
                     <input type="hidden" id="editCardId">
-                    
+
                     <div class="form-group">
                         <label class="form-label" for="editHeading">Heading:</label>
                         <input type="text" id="editHeading" class="form-input" name="heading" required maxlength="300" placeholder="Enter card heading" />
@@ -440,27 +439,32 @@ const firebaseConfig = {
   appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
   measurementId: "G-6C2W9NSNCH"
 };
-
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+/* ===================== DOM ELEMENT REFERENCES (FIXED) ===================== */
+const headingInput = document.getElementById('heading');
+const descriptionInput = document.getElementById('description');
+const imageUrlInput = document.getElementById('imageUrl');
+const editModal = document.getElementById('editModal');
+const editCardId = document.getElementById('editCardId');
+const editHeading = document.getElementById('editHeading');
+const editDescription = document.getElementById('editDescription');
+const editImageUrl = document.getElementById('editImageUrl');
 
 /* ===================== STAR BACKGROUND ===================== */
 function createStars() {
     const starsContainer = document.getElementById('stars');
     const starCount = 150;
-
     for (let i = 0; i < starCount; i++) {
         const star = document.createElement('div');
         star.className = 'star';
-
         star.style.left = Math.random() * 100 + '%';
         star.style.top = Math.random() * 100 + '%';
-
         const size = Math.random() * 3 + 1;
         star.style.width = size + 'px';
         star.style.height = size + 'px';
-
         star.style.setProperty('--duration', (Math.random() * 5 + 2) + 's');
         starsContainer.appendChild(star);
     }
@@ -471,116 +475,91 @@ async function checkAuth() {
     try {
         await new Promise((resolve, reject) => {
             const unsub = auth.onAuthStateChanged(async user => {
-                if (!user) {
-                    unsub();
-                    reject('Not signed in');
-                    return;
-                }
-
-                const adminSnap = await db
-                    .collection('admin')
-                    .where('gmail', '==', user.email)
-                    .limit(1)
-                    .get();
-
+                if (!user) { unsub(); reject('Not signed in'); return; }
+                const adminSnap = await db.collection('admin').where('gmail', '==', user.email).limit(1).get();
                 unsub();
-
                 if (adminSnap.empty) reject('Not admin');
                 else resolve();
             });
         });
-
         setTimeout(() => {
             document.getElementById('loadingScreen').classList.add('hidden');
             document.getElementById('mainContainer').style.display = 'block';
             loadCards();
         }, 1200);
-
     } catch (err) {
-        document.querySelector('.loading-text').textContent =
-            'Access denied. Redirecting...';
+        console.error('Auth error:', err);        document.querySelector('.loading-text').textContent = 'Access denied. Redirecting...';
         setTimeout(() => location.href = 'index.html', 2000);
     }
 }
 
-/* ===================== LOAD CARDS (FIXED) ===================== */
+/* ===================== SHOW MESSAGE HELPER ===================== */
+function showMessage(text, type) {
+    const msg = document.getElementById('messageBox');
+    msg.className = `message ${type}`;
+    msg.textContent = text;
+    setTimeout(() => { msg.textContent = ''; msg.className = ''; }, 4000);
+}
+
+/* ===================== LOAD CARDS ===================== */
 async function loadCards() {
     const grid = document.getElementById('cardsGrid');
-    grid.innerHTML = '';
-
+    grid.innerHTML = '<div class="loading">Loading cards...</div>';
     try {
-        const snap = await db.collection('cards')
-            .orderBy('publishedAt', 'desc')
-            .get();
-
+        const snap = await db.collection('cards').orderBy('publishedAt', 'desc').get();
         if (snap.empty) {
-            grid.innerHTML = '<div>No cards found.</div>';
+            grid.innerHTML = '<div style="color:#a0aec0">No cards found. Add your first card!</div>';
             return;
         }
-
+        grid.innerHTML = '';
         snap.forEach(doc => {
             const c = doc.data();
-            const date = c.publishedAt?.toDate().toLocaleDateString() || 'N/A';
-
+            const date = c.publishedAt?.toDate?.().toLocaleDateString('en-GB') || 'N/A';
             const card = document.createElement('div');
             card.className = 'card-item';
-
             card.innerHTML = `
-                <img class="card-image"
-                     src="${c.imageUrl}"
-                     onerror="this.src='https://via.placeholder.com/300x180'">
-
+                <img class="card-image" src="${c.imageUrl}" onerror="this.src='https://via.placeholder.com/300x180?text=Image+Not+Found'">
                 <div class="card-content">
                     <h3 class="card-heading"></h3>
                     <p class="card-description"></p>
-
                     <div class="card-stats">
                         <span><i class="fas fa-eye"></i> ${c.views || 0}</span>
                         <span><i class="fas fa-heart"></i> ${c.likes || 0}</span>
                         <span><i class="fas fa-calendar"></i> ${date}</span>
                     </div>
-
                     <div style="margin-top:10px">
                         <button class="edit-btn">✏️ Edit</button>
                     </div>
                 </div>
             `;
-
             card.querySelector('.card-heading').textContent = c.heading;
-            card.querySelector('.card-description').textContent =
-                c.description.length > 100
-                ? c.description.slice(0, 100) + '...'
-                : c.description;
-
-            const editBtn = card.querySelector('.edit-btn');
-            editBtn.addEventListener('click', () => {
+            card.querySelector('.card-description').textContent = 
+                c.description?.length > 100 ? c.description.slice(0, 100) + '...' : c.description;
+            card.querySelector('.edit-btn').addEventListener('click', () => {
                 openEditModal(doc.id, c.heading, c.description, c.imageUrl);
-            });
-
-            grid.appendChild(card);
+            });            grid.appendChild(card);
         });
-
     } catch (e) {
-        grid.innerHTML = '<div class="error">Failed to load cards</div>';
-        console.error(e);
+        console.error('Load cards error:', e);
+        grid.innerHTML = '<div class="error">Failed to load cards. Check console.</div>';
     }
 }
 
-/* ===================== ADD CARD ===================== */
+/* ===================== ADD CARD (FIXED) ===================== */
 document.getElementById('cardForm').addEventListener('submit', async e => {
     e.preventDefault();
-    const msg = document.getElementById('messageBox');
-
     const heading = headingInput.value.trim();
     const description = descriptionInput.value.trim();
     const imageUrl = imageUrlInput.value.trim();
 
     if (!heading || !description || !imageUrl) {
-        msg.className = 'message error';
-        msg.textContent = 'All fields required';
+        showMessage('All fields are required', 'error');
         return;
     }
-
+    try { new URL(imageUrl); } catch {
+        showMessage('Please enter a valid image URL (must start with https://)', 'error');
+        return;
+    }
     try {
         await db.collection('cards').add({
             heading,
@@ -590,15 +569,12 @@ document.getElementById('cardForm').addEventListener('submit', async e => {
             likes: 0,
             publishedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-
-        msg.className = 'message success';
-        msg.textContent = 'Card added successfully';
+        showMessage('✅ Card added successfully!', 'success');
         e.target.reset();
         loadCards();
-
     } catch (err) {
-        msg.className = 'message error';
-        msg.textContent = err.message;
+        console.error('Add card error:', err);
+        showMessage('Error: ' + err.message, 'error');
     }
 });
 
@@ -610,47 +586,47 @@ function openEditModal(id, heading, desc, img) {
     editImageUrl.value = img;
     editModal.classList.remove('hidden');
 }
-
 function closeEditModal() {
     editModal.classList.add('hidden');
 }
 
 document.getElementById('editCardForm').addEventListener('submit', async e => {
     e.preventDefault();
-    const msg = document.getElementById('messageBox');
-
+    const heading = editHeading.value.trim();
+    const description = editDescription.value.trim();
+    const imageUrl = editImageUrl.value.trim();
+    if (!heading || !description || !imageUrl) {
+        showMessage('All fields are required', 'error');
+        return;
+    }
     try {
         await db.collection('cards').doc(editCardId.value).update({
-            heading: editHeading.value.trim(),
-            description: editDescription.value.trim(),
-            imageUrl: editImageUrl.value.trim()
+            heading,
+            description,
+            imageUrl,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-
-        msg.className = 'message success';
-        msg.textContent = 'Card updated successfully';
+        showMessage('✅ Card updated successfully!', 'success');
         closeEditModal();
         loadCards();
-
     } catch (err) {
-        msg.className = 'message error';
-        msg.textContent = err.message;
+        console.error('Update error:', err);
+        showMessage('Error: ' + err.message, 'error');
     }
 });
 
 /* ===================== UTILS ===================== */
-function goBack() {
-    location.href = 'admin_panel.html';
-}
-
-window.onclick = e => {
-    if (e.target === editModal) closeEditModal();
-};
+function goBack() { location.href = 'admin_panel.html'; }
+window.onclick = e => { if (e.target === editModal) closeEditModal(); };
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !editModal.classList.contains('hidden')) closeEditModal();
+});
 
 /* ===================== INIT ===================== */
 document.addEventListener('DOMContentLoaded', () => {
     createStars();
     checkAuth();
 });
-</script>
+    </script>
 </body>
 </html>
