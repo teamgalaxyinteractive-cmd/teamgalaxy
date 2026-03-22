@@ -1,1055 +1,1088 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Galaxy Blogs — Team Galaxy</title>
-<meta name="description" content="Latest news, updates, match highlights, and stories from the Team Galaxy community.">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css   " />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png">
-
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png">
-
-    <link rel="manifest" href="manifest.json">
-  <!-- Canonical -->
-  <link rel="canonical" href="https://www.teamgalaxy.net/galaxy_blogs">
-
-  <!-- Robots -->
-  <meta name="robots" content="index, follow">
-
-  <!-- Open Graph (social preview) -->
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="en_US">
-  <meta property="og:url" content="https://www.teamgalaxy.net/galaxy_blogs">
-  <meta property="og:title" content="Team Galaxy — WoT Blitz Clan (Est. May 2025)">
-  <meta property="og:description" content="Latest news, updates, match highlights, and stories from the Team Galaxy community.">
-  <meta property="og:image" content="https://www.teamgalaxy.net/assets/images/og-team-galaxy-1200_630.jpg">
-  <meta property="og:image:alt" content="Team Galaxy — World of Tanks Blitz clan banner">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:site_name" content="Team Galaxy">
-
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@teamgalaxy_wotb"> <!-- replace with your Twitter/X handle -->
-  <meta name="twitter:creator" content="@teamgalaxy_wotb">
-  <meta name="twitter:title" content="Team Galaxy — WoT Blitz Clan">
-  <meta name="twitter:description" content="Latest news, updates, match highlights, and stories from the Team Galaxy community.">
-  <meta name="twitter:image" content="https://www.teamgalaxy.net/assets/images/team-galaxy-1530_800.jpg">
-
-  <!-- Mobile / PWA -->
-  <meta name="theme-color" content="#0f172a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-
-<script src="assets/js/cookie-consent.js" defer></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Blogs | Galaxy Designs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2563eb',
+            secondary: '#06b6d4',
+            accent: '#93c5fd',
+            dark: '#0a0f1d',
+            dark2: '#111827',
+            dark3: '#1e293b',
+            gradientStart: '#0c4a6e',
+            gradientEnd: '#0284c7'
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Playfair Display', 'serif']
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
+            'orbit': 'orbit 20s linear infinite',
+            'morph': 'morph 15s ease-in-out infinite',
+            'wave': 'wave 8s ease-in-out infinite'
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-15px)' }
+            },
+            pulseGlow: {
+              '0%, 100%': { 'box-shadow': '0 0 20px rgba(37, 99, 235, 0.5)' },
+              '50%': { 'box-shadow': '0 0 40px rgba(37, 99, 235, 0.9)' }
+            },
+            orbit: {
+              '0%': { transform: 'rotate(0deg) translateX(100px) rotate(0deg)' },
+              '100%': { transform: 'rotate(360deg) translateX(100px) rotate(-360deg)' }
+            },
+            morph: {
+              '0%, 100%': { borderRadius: '63% 37% 54% 46% / 55% 48% 52% 45%' },
+              '14%': { borderRadius: '40% 60% 54% 46% / 49% 60% 40% 51%' },
+              '28%': { borderRadius: '54% 46% 38% 62% / 49% 70% 30% 51%' },
+              '42%': { borderRadius: '61% 39% 54% 46% / 61% 38% 62% 39%' },
+              '56%': { borderRadius: '61% 39% 67% 33% / 70% 50% 50% 30%' },
+              '70%': { borderRadius: '50% 50% 34% 66% / 56% 68% 32% 44%' },
+              '84%': { borderRadius: '46% 54% 50% 50% / 35% 61% 39% 65%' }
+            },
+            wave: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '25%': { transform: 'translateY(-10px)' },
+              '50%': { transform: 'translateY(0)' },
+              '75%': { transform: 'translateY(10px)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    html, body { padding:0; margin:0; background: #181f2b; color: #fff; font-family: Arial, sans-serif; }
-    body { box-sizing: border-box; position: relative; min-height: 100vh; overflow-x: hidden; display: flex; flex-direction: column; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; max-width: 100vw; overflow-x: hidden; position: relative; }
+    body { background: linear-gradient(135deg, #0a0f1d 0%, #111827 100%); color: #e2e8f0; font-family: 'Inter', sans-serif; overflow-x: hidden; overflow-y: auto; }
+    .hero-gradient { background: linear-gradient(135deg, #0c4a6e 0%, #0284c7 100%); position: relative; overflow: hidden; width: 100%; max-width: 100vw; }
+    .section-gradient { background: linear-gradient(135deg, #111827 0%, #0a0f1d 100%); position: relative; width: 100%; max-width: 100vw; }
+    .max-w-7xl { width: 100%; padding-left: 1rem; padding-right: 1rem; }
 
-    .star {
-      position: absolute;
-      background-color: white;
-      border-radius: 50%;
-      opacity: 0.85;
-      box-shadow: 0 0 6px rgba(255,255,255,0.6);
-      transform: translate3d(0,0,0);
-      animation: twinkle var(--duration, 5s) infinite ease-in-out, drift var(--driftDur, 60s) linear infinite;
-      will-change: transform, opacity;
-    }
-
-/* .stars: bring above page bg */
-.stars {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;     /* was -1 */
-  overflow: hidden;
-}
-
-/* shooting star should be visible above stars */
-.shooting-star {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0));
-  box-shadow: 0 0 8px rgba(255,255,255,0.95);
-  opacity: 0;
-  transform-origin: 0 50%;
-  z-index: 1;      /* was -1 */
-  pointer-events: none;
-}
-
-/* twinkle: only opacity now (avoid transform conflict with drift) */
-@keyframes twinkle {
-  0%,100% { opacity: 0.15; }
-  50%     { opacity: 1; }
-}
-
-/* drift keeps doing translate3d */
-@keyframes drift {
-  0% { transform: translate3d(0,0,0); }
-  100% { transform: translate3d(var(--driftX, 10px), var(--driftY, 6px), 0); }
-}
-    @keyframes shoot {
-      0% { opacity: 0; transform: translateX(0) scaleX(1); }
-      10% { opacity: 1; }
-      100% { opacity: 0; transform: translateX(var(--travel, 600px)) scaleX(1); }
-    }
-
-    /* Header */
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 80px;
-      background: rgba(16, 23, 36, 0.85);
-      padding: 0 20px;
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      position: sticky;
-      top: 0;
-      z-index: 100;
+    /* Cards */
+    .card {
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(56, 189, 248, 0.15);
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.2), 0 0 30px rgba(37, 99, 235, 0.05);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
       width: 100%;
-      box-sizing: border-box;
+      max-width: 100%;
     }
-
-    .logo-title {
-      margin-left: 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 1.5rem;
-      font-weight: bold;
-      font-family: 'Montserrat', sans-serif;
-      color: #fff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex: 0 0 auto;
-    }
-
-    .logo-title img {
-      height: 50px;
-      filter: drop-shadow(0 0 8px rgba(97, 218, 251, 0.7));
-      flex-shrink: 0;
-    }
-
-    .hamburger {
-      display: none;
-      background: none;
-      border: none;
-      color: #e0e0e0;
-      cursor: pointer;
-      font-size: 1.2rem;
-      padding: 8px;
-      margin-right: 10px;
-      flex-shrink: 0;
-    }
-
-    .nav-buttons {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      font-size: 1rem;
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .nav-btn,
-    .profile-btn {
-      background: none;
-      border: none;
-      color: #e0e0e0;
-      cursor: pointer;
-      font-size: 0.95rem;
-      position: relative;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 500;
-      padding: 6px 10px;
-      border-radius: 6px;
-      transition: all 0.3s ease;
-      white-space: nowrap;
-    }
-
-    .nav-btn:hover, .profile-btn:hover {
-      color: #64c2ff;
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .profile-btn img {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #64c2ff;
-    }
-
-    .dropdown-content {
-      display: none;
+    .card::before {
+      content: '';
       position: absolute;
-      right: 0;
-      background: rgba(29, 35, 54, 0.95);
-      min-width: 140px;
-      border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-      top: 50px;
-      z-index: 1000;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      overflow: hidden;
-    }
-
-    .dropdown-content a {
-      color: #e0e0e0;
-      padding: 10px 14px;
-      text-decoration: none;
-      display: block;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      transition: all 0.2s ease;
-      font-size: 0.95rem;
-    }
-
-    .dropdown-content a:last-child { border-bottom: none; }
-
-    .dropdown-content a:hover {
-      background: rgba(100, 194, 255, 0.1);
-      color: #64c2ff;
-    }
-
-    .nav-buttons .more-options:hover .dropdown-content,
-    .nav-buttons .profile-btn.show-menu + .dropdown-content {
-      display: block;
-    }
-
-    /* Mobile-specific fixes */
-    @media (max-width: 768px) {
-      .logo-title {
-        font-size: 1.2rem;
-      }
-      .logo-title img {
-        height: 40px;
-      }
-      .hamburger {
-        display: block;
-      }
-      .top-bar {
-        justify-content: flex-end;
-      }
-      .logo-title {
-        margin-left: auto;
-      }
-      .nav-buttons {
-        display: none;
-        position: absolute;
-        top: 100%;
-        right: 0;
-        background: rgba(16, 23, 36, 0.95);
-        flex-direction: column;
-        padding: 20px;
-        gap: 10px;
-        border-radius: 8px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        z-index: 100;
-        width: 100%;
-        box-sizing: border-box;
-      }
-      .nav-buttons.show {
-        display: flex;
-      }
-    }
-
-    /* Banner image */
-    .banner-img-section { width: 100%; height: 400px; background: #23263a; display: flex; align-items: flex-end; justify-content: flex-start; position: relative; overflow: hidden; z-index: 2;}
-    .banner-img-section img { width: 100%; height: 100%; object-fit: cover; display: block; border-bottom: 2px solid rgba(255,255,255,0.08); }
-
-    /* Blog grid - 2 columns, smaller cards, overlap top 2 by 80px */
-    .blogs-grid {
-      max-width: 1100px;
-      margin: 0 auto 60px auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px 32px;
-      padding: 0 18px;
-      position: relative;
-      z-index: 3;
-      flex: 1 0 auto;
-    }
-    .blog-card {
-      border-radius: 15px;
-      overflow: hidden;
-      cursor: pointer;
-      height: 210px;
-      background: #141926;
-      position: relative;
-      box-shadow: 0 6px 18px #19213585;
-      transition: box-shadow 0.18s, transform 0.2s;
-      display: flex; align-items: stretch; justify-content: stretch;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
       opacity: 0;
-      transform: translateY(20px);
-      animation: fadeInUp 0.5s forwards;
+      transition: opacity 0.5s ease;
+      z-index: -1;
     }
-    .blog-card.loaded {
-      opacity: 1;
-      transform: translateY(0);
+    .card:hover::before { opacity: 1; }
+    .card:hover {
+      transform: translateY(-15px) scale(1.02);
+      box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.3), 0 0 50px rgba(37, 99, 235, 0.2);
+      border-color: rgba(37, 99, 235, 0.3);
     }
-    @keyframes fadeInUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    .blog-card:hover { box-shadow: 0 12px 26px #232746cc; transform: translateY(-3px); }
-    .blog-card-image { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.2s; }
-    .blog-card:hover .blog-card-image { transform: scale(1.04);}
-    .blog-card-info {
-      position: absolute;
-      left: 16px;
-      bottom: 16px;
-      display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
-      color: #fff;
-      z-index: 2;
-    }
-    .blog-info-row {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 0.98rem; color: #b6ebfc;
-      font-weight: 500;
-      text-shadow: 0 2px 8px #000, 0 0px 2px #232750;
-    }
-    .blog-info-row i { font-size: 1.04rem; color: #64c2ff;}
-
-    /* Skeleton Loader Styles */
-    .skeleton-blog-card {
-      border-radius: 15px;
-      overflow: hidden;
-      height: 210px;
-      background: #141926;
+    .feature-card {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(37, 99, 235, 0.1);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
-      box-shadow: 0 6px 18px #19213585;
-      display: flex;
-      align-items: stretch;
-      justify-content: stretch;
-      transition: opacity .28s, transform .28s;
+      overflow: hidden;
+      width: 100%;
     }
-    .skeleton-blog-card-image {
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, #2a334a 25%, #3a4461 50%, #2a334a 75%);
-      background-size: 200% 100%;
-      animation: skeleton-shimmer 1.5s infinite linear;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: -1;
     }
-    .skeleton-blog-card-info {
+    .feature-card:hover::before { opacity: 1; }
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.3), 0 0 30px rgba(37, 99, 235, 0.2);
+      border-color: rgba(37, 99, 235, 0.3);
+    }
+    .stat-card {
+      background: linear-gradient(135deg, #0c4a6e 0%, #0284c7 100%);
+      backdrop-filter: blur(10px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 10px 30px -10px rgba(2, 132, 199, 0.4);
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+    }
+    .stat-card::after {
+      content: '';
       position: absolute;
-      left: 16px;
-      bottom: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
-      z-index: 2;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      animation: orbit 20s linear infinite;
+      z-index: -1;
     }
-    .skeleton-info-row {
-      height: 16px;
-      width: 80px;
-      background: linear-gradient(90deg, #2a334a 25%, #3a4461 50%, #2a334a 75%);
-      background-size: 200% 100%;
-      animation: skeleton-shimmer 1.5s infinite linear;
-      border-radius: 4px;
+    .stat-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 15px 40px -10px rgba(2, 132, 199, 0.6);
     }
-    .skeleton-info-row:nth-child(2) {
-      width: 120px;
-    }
-    @keyframes skeleton-shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-
-    /* skeleton fade helper (we fade skeletons before replacing) */
-    .skeleton-fade {
-      animation: skeletonFade 0.32s forwards;
-    }
-    @keyframes skeletonFade {
-      to { opacity: 0; transform: translateY(8px); }
-    }
-
-    /* Overlap first row */
-    .blogs-grid .blog-card:nth-child(1),
-    .blogs-grid .blog-card:nth-child(2),
-    .blogs-grid .skeleton-blog-card:nth-child(1),
-    .blogs-grid .skeleton-blog-card:nth-child(2) {
-      margin-top: -80px;
-      z-index: 10;
-    }
-    @media (max-width:900px){
-      .blogs-grid { grid-template-columns: 1fr; gap: 26px; }
-      .blog-card, .skeleton-blog-card { height: 130px;}
-      .banner-img-section { height: 200px;}
-      .blogs-grid .blog-card:nth-child(1),
-      .blogs-grid .blog-card:nth-child(2),
-      .blogs-grid .skeleton-blog-card:nth-child(1),
-      .blogs-grid .skeleton-blog-card:nth-child(2) {
-        margin-top: 0;
-      }
-    }
-
-    /* Footer */
-    .footer {
-      min-height: 300px;
-      background: linear-gradient(90deg, #181f2b 60%, #232e44 100%);
-      color: #fff;
-      display: flex;
-      flex-direction: row;
-      gap: 30px;
-      align-items: stretch;
-      justify-content: space-between;
-      padding: 30px 50px 20px 50px;
-      border-top: 2px solid #163053;
-      box-sizing: border-box;
-      flex-wrap: wrap;
-      margin-top: auto;
-    }
-    .footer-col {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      flex: 1 1 45%;
-    }
-    .footer-links {
-      margin-bottom: 24px;
-    }
-    .footer-links a {
-      font-size: 1.13rem;
-      color: #aaa;
+    .sponsor-card {
+      background: rgba(30, 41, 59, 0.5);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(37, 99, 235, 0.1);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
       text-decoration: none;
-      margin-bottom: 12px;
-      font-weight: 600;
-      transition: color 0.2s;
       display: block;
+      width: 100%;
     }
-    .footer-links a:hover {
-      color: #fab84f;
+    .sponsor-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: -1;
     }
-    .footer-about-title {
-      font-size: 1.46rem;
-      font-weight: bold;
-      margin-bottom: 8px;
-      color: #fab84f;
+    .sponsor-card:hover::before { opacity: 1; }
+    .sponsor-card:hover {
+      transform: scale(1.08);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.4), 0 0 30px rgba(37, 99, 235, 0.3);
+      border-color: rgba(37, 99, 235, 0.4);
     }
-    .footer-about-text {
-      font-size: 1rem;
-      color: #e5e5e5;
-      margin-bottom: 18px;
-      line-height: 1.5;
+
+    /* Floating Elements */
+    .design-element {
+      position: absolute;
+      z-index: -1;
+      filter: blur(60px);
+      opacity: 0.6;
+      animation: float 15s ease-in-out infinite;
+      max-width: 100vw;
     }
-    .footer-social {
-      margin-top: auto;
+    .design-element-1 { top: 15%; right: 5%; width: 300px; height: 300px; background: radial-gradient(circle, #2563eb 0%, transparent 70%); }
+    .design-element-2 { bottom: 10%; left: 5%; width: 250px; height: 250px; background: radial-gradient(circle, #06b6d4 0%, transparent 70%); }
+    .design-element-3 { top: 50%; left: 15%; width: 200px; height: 200px; background: radial-gradient(circle, #3b82f6 0%, transparent 70%); animation-delay: -5s; }
+    .morph-shape {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+      border-radius: 50%;
+      animation: morph 15s ease-in-out infinite;
+      filter: blur(40px);
+      opacity: 0.4;
+      z-index: -1;
+    }
+    .glowing-text {
+      text-shadow: 0 0 20px rgba(37, 99, 235, 0.8), 0 0 40px rgba(37, 99, 235, 0.6);
+      animation: pulseGlow 3s ease-in-out infinite;
+    }
+    .glowing-button {
+      box-shadow: 0 0 30px rgba(37, 99, 235, 0.6);
+      animation: pulseGlow 3s ease-in-out infinite;
+    }
+    .glowing-button:hover { box-shadow: 0 0 50px rgba(37, 99, 235, 0.8); }
+    .floating { animation: float 6s ease-in-out infinite; }
+
+    /* Navigation */
+    .nav-glass {
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(56, 189, 248, 0.15);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      width: 100vw;
+      max-width: 100vw;
+      z-index: 1000;
+    }
+    .nav-glass::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent 0%, rgba(37, 99, 235, 0.05) 50%, transparent 100%);
+      transform: translateX(-100%);
+      transition: transform 0.5s ease;
+      z-index: -1;
+    }
+    .nav-glass:hover::before { transform: translateX(100%); }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 800;
+      font-size: 2.5rem;
+      line-height: 1.1;
+      background: linear-gradient(90deg, #ffffff 0%, #cbd5e1 50%, #e2e8f0 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      word-wrap: break-word;
+    }
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #2563eb 0%, #06b6d4 100%);
+      border-radius: 2px;
+      opacity: 0.7;
+    }
+    .cursor-fx {
+      position: fixed;
+      width: 30px;
+      height: 30px;
+      border: 2px solid #2563eb;
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      mix-blend-mode: difference;
+      opacity: 0.7;
+      transition: transform 0.1s ease;
+      display: none;
+    }
+    .cursor-dot {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      background: #2563eb;
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      opacity: 0.9;
+      display: none;
+    }
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #2563eb 0%, #06b6d4 100%);
+      z-index: 9999;
+      transition: width 0.1s ease;
+      width: 0%;
+    }
+    .counter {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #2563eb 0%, #06b6d4 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+    .gradient-border {
+      position: relative;
+      overflow: hidden;
+    }
+    .gradient-border::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #2563eb, #06b6d4, #3b82f6, #2563eb);
+      background-size: 400% 400%;
+      animation: gradientShift 8s ease infinite;
+      z-index: -1;
+      opacity: 0.2;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .wave {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100px;
+      background: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%230c4a6e' fill-opacity='0.3' d='M0,128L48,144C96,160,192,192,288,186.7C384,181,480,139,576,133.3C672,128,768,160,864,176C960,192,1056,192,1152,192C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E");
+      background-size: cover;
+      animation: wave 15s linear infinite;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .section-title { font-size: 2rem; }
+      .counter { font-size: 2rem; }
+      .nav-links.desktop { display: none !important; }
+      .hamburger { display: flex !important; }
+      .desktop-signin { display: none !important; }
+      .nav-links.mobile { display: none !important; opacity: 0; visibility: hidden; transform: translateY(-20px); }
+      .nav-links.mobile.active { display: flex !important; opacity: 1; visibility: visible; transform: translateY(0); }
+      .hero-grid { grid-template-columns: 1fr !important; text-align: center; }
+      .hero-content { order: 2; }
+      .hero-visual { order: 1; margin-bottom: 1.5rem; }
+      .services-grid { grid-template-columns: 1fr !important; }
+      .designs-grid { grid-template-columns: 1fr !important; }
+      .team-grid { grid-template-columns: 1fr !important; }
+      .sponsors-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .cta-buttons { flex-direction: column !important; align-items: center; }
+      .footer-grid { grid-template-columns: 1fr !important; }
+      .cursor-fx, .cursor-dot { display: none !important; }
+      .blogs-grid { grid-template-columns: 1fr !important; }
+    }
+    @media (max-width: 600px) {
+      .section-title { font-size: 1.75rem; }
+      .counter { font-size: 1.75rem; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .nav-brand span { font-size: 1.25rem; }
+      .hero-badge { width: 100%; justify-content: center; }
+      .design-element-1 { width: 200px; height: 200px; }
+      .design-element-2 { width: 150px; height: 150px; }
+      .design-element-3 { width: 120px; height: 120px; }
+      .morph-shape { width: 150px; height: 150px; }
+    }
+    @media (min-width: 901px) {
+      .cursor-fx, .cursor-dot { display: block; }
+      .nav-links.mobile { display: none !important; }
+      .hamburger { display: none !important; }
+      .mobile-signin { display: none !important; }
+    }
+    @media (min-width: 901px) and (max-width: 1200px) {
+      .section-title { font-size: 2.5rem; }
+      .services-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .designs-grid { grid-template-columns: repeat(2, 1fr) !important; }
+      .team-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    }
+
+    /* Hamburger */
+    .hamburger {
+      cursor: pointer;
+      padding: 8px;
+      z-index: 1001;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 44px;
+      height: 44px;
+      background: transparent !important;
+      border: none !important;
+      outline: none !important;
+      position: relative;
+    }
+    .hamburger span {
+      display: block !important;
+      width: 26px !important;
+      height: 3px !important;
+      margin: 4px 0 !important;
+      background: #ffffff !important;
+      transition: all 0.3s ease !important;
+      border-radius: 2px !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+    .hamburger:hover span { background: #2563eb !important; }
+    .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    /* Mobile Menu */
+    .nav-links.mobile {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.98);
+      backdrop-filter: blur(20px);
+      padding: 1rem;
+      border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+    }
+    .nav-links.mobile.active {
       display: flex;
-      gap: 21px;
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
     }
-    .footer-social a {
-      color: #fff;
-      font-size: 2rem;
+    .nav-links.mobile a {
+      padding: 0.85rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-weight: 500;
+      color: #e2e8f0;
       text-decoration: none;
-      transition: color 0.22s;
     }
-    .footer-social a:hover {
-      color: #fab84f;
+    .nav-links.mobile a:hover {
+      color: #2563eb;
+      padding-left: 0.5rem;
+      transition: all 0.2s;
     }
-    .footer-contact-row {
-      margin-bottom: 8px;
-      font-size: 1rem;
+
+    /* Performance */
+    .card, .feature-card, .blog-card, .sponsor-card, .stat-card {
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+    footer { width: 100%; max-width: 100vw; overflow-x: hidden; }
+    footer a { word-break: break-word; }
+    
+    /* Blog Card Specific */
+    .blog-card {
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(56, 189, 248, 0.15);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.5s ease;
+      position: relative;
+    }
+    .blog-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #2563eb 0%, #06b6d4 100%);
+      transform: scaleX(0);
+      transition: transform 0.5s ease;
+      transform-origin: left;
+    }
+    .blog-card:hover::before { transform: scaleX(1); }
+    .blog-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 25px 50px rgba(37, 99, 235, 0.2);
+      border-color: rgba(37, 99, 235, 0.4);
+    }
+    .blog-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+    }
+    .blog-meta {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 1rem;
+      color: #94a3b8;
+      font-size: 0.875rem;
     }
-    .footer-contact-label {
-      color: #fab84f;
-      margin-right: 4px;
+    .insight-score {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      background: rgba(37, 99, 235, 0.15);
+      border: 1px solid rgba(37, 99, 235, 0.25);
+      border-radius: 20px;
+      font-size: 0.875rem;
       font-weight: 500;
-      font-size: 1rem;
+      color: #93c5fd;
     }
-    .footer-contact {
-      margin-top: 12px;
-      font-size: 1.02rem;
-      color: #fff;
+    .insight-score::before {
+      content: "✦";
+      margin-right: 0.25rem;
+      color: #2563eb;
     }
-    .footer-contact-icon {
-      font-size: 1.18rem;
-      vertical-align: middle;
-      color: #afeafd;
-      margin-right: 7px;
+    .feature-card {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(37, 99, 235, 0.1);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      width: 100%;
     }
-    @media (max-width: 900px) {
-      .footer {
-        flex-direction: column;
-        padding: 30px 20px 20px 20px;
-        gap: 30px;
-      }
-      .footer-col {
-        flex: 1 1 100%;
-      }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: -1;
+    }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.3), 0 0 30px rgba(37, 99, 235, 0.2);
+      border-color: rgba(37, 99, 235, 0.3);
+    }
+    
+    /* Loading Spinner */
+    .loading-spinner {
+      border: 3px solid rgba(37, 99, 235, 0.2);
+      border-top: 3px solid #2563eb;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 2rem auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
-<body>
-  <!-- Star Background -->
-  <div class="stars" id="stars"></div>
+<body class="overflow-x-hidden overflow-y-auto">
+  <!-- Custom Cursor (Desktop Only) -->
+  <div class="cursor-fx" id="cursor"></div>
+  <div class="cursor-dot" id="cursorDot"></div>
+  <!-- Scroll Progress Bar -->
+  <div class="scroll-progress" id="scrollProgress"></div>
 
-  <!-- HEADER -->
-  <div class="top-bar">
-    <button class="hamburger" id="hamburgerBtn">
-      <i class="fa-solid fa-bars"></i>
-    </button>
-  <div class="logo-title" onclick="window.location.href='dashboard.html';" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
-  <img src="https://dl.dropboxusercontent.com/scl/fi/v5d7xte4tksarsdufk4ay/image.png?rlkey=ca8p4jsfcw1pnqr79q8uympso&st=ikst5uy1&dl=0" height="46" alt="Logo" />
-  GalaxyWeb
-</div>
-        <div class="nav-buttons" id="navButtons">
-      <button class="nav-btn" onclick="window.location.href='dashboard.html';">Home</button>
-      <button class="nav-btn" onclick="window.location.href='about_us.html';">Team Galaxy</button>
-      <div class="more-options" id="moreOptions" style="position:relative;">
-        <button class="nav-btn">More ▼</button>
-        <div class="dropdown-content" id="moreDropdown">
-          <a href="galaxy_blogs.html">News!!</a>
-          <a href="galaxy_portfolio.html">Portfolio</a>
-          <a href="posts.html">Posts</a>
-          <a href="community_chat.html">Community Chat</a>
-          <a href="galaxy_studio.html">Galaxy Design</a>
+  <!-- Navigation (Same as Main Page) -->
+  <nav class="fixed w-full z-50 nav-glass border-b border-gray-800/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <!-- Logo -->
+        <div class="flex items-center space-x-2 nav-brand flex-shrink-0">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center relative overflow-hidden group flex-shrink-0">
+            <span class="text-white font-bold text-lg sm:text-xl relative z-10">G</span>
+            <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity rounded-xl"></div>
+          </div>
+          <span class="text-lg sm:text-xl font-serif font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary whitespace-nowrap">
+            Galaxy<span class="text-white">Designs</span>
+          </span>
+        </div>
+
+        <!-- Desktop Nav -->
+        <div class="hidden md:flex items-center space-x-6 lg:space-x-8 nav-links desktop flex-shrink-0">
+          <a href="/" class="font-medium hover:text-primary transition-colors relative group text-sm">
+            Home
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </a>
+          <a href="/#designs" class="font-medium hover:text-primary transition-colors relative group text-sm">
+            Our Work
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </a>
+          <a href="/#services" class="font-medium hover:text-primary transition-colors relative group text-sm">
+            Services
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </a>
+          <a href="/#team" class="font-medium hover:text-primary transition-colors relative group text-sm">
+            Team
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </a>
+          <a href="/#contact" class="font-medium hover:text-primary transition-colors relative group text-sm">
+            Contact
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </a>
+        </div>
+
+        <!-- Right Actions -->
+        <div class="flex items-center space-x-3 flex-shrink-0">
+          <!-- Hamburger Button -->
+          <button class="hamburger md:hidden" id="hamburger" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+          </button>
+          <!-- Sign In - Desktop -->
+          <a href="/sign_in_page" class="px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-700 rounded-lg font-medium hover:bg-gray-800 transition-colors hover:border-primary relative overflow-hidden group desktop-signin inline-block text-center text-sm whitespace-nowrap">
+            <span class="relative z-10">Sign In</span>
+            <div class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-10 transition-opacity"></div>
+          </a>
         </div>
       </div>
-      <button id="profileBtn" class="profile-btn" title="Sign In">
+    </div>
+
+    <!-- Mobile Menu -->
+    <div class="nav-links mobile" id="mobileMenu">
+      <a href="/">Home</a>
+      <a href="/#designs">Our Work</a>
+      <a href="/#services">Services</a>
+      <a href="/#team">Team</a>
+      <a href="/#contact">Contact</a>
+      <a href="/sign_in_page" class="mt-3 px-4 py-2 bg-gradient-to-r from-primary to-secondary text-white rounded-lg font-medium glowing-button text-center mobile-signin">
         Sign In
-      </button>
-      <div id="profileMenu" class="dropdown-content" style="right: 30px; display:none;">
-        <a href="/teamgalaxy/user_management/user_profile.html" id="profileLink">Profile</a>
-        <a href="#" id="logoutLink">Logout</a>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Blogs Hero Section -->
+  <section class="pt-24 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8 hero-gradient relative overflow-hidden">
+    <div class="design-element design-element-1"></div>
+    <div class="design-element design-element-2"></div>
+    <div class="design-element design-element-3"></div>
+    <div class="morph-shape" style="top: 20%; right: 10%;"></div>
+    <div class="morph-shape" style="bottom: 15%; left: 5%; animation-delay: -7s;"></div>
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-4xl mx-auto">
+        <div class="inline-flex items-center px-4 py-2 bg-blue-900/40 backdrop-blur-sm text-blue-300 rounded-full text-sm font-medium border border-blue-800/50 mb-6">
+          <i class="fas fa-newspaper mr-2"></i>
+          <span>Latest Insights & Updates</span>
+        </div>
+        <h1 class="section-title leading-tight mb-6">Our <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary glowing-text">Blog</span></h1>
+        <p class="text-base sm:text-lg text-gray-300 leading-relaxed mb-8 max-w-2xl mx-auto">Discover the latest trends, tips, and insights from the world of design. Stay updated with our expert articles and tutorials.</p>
       </div>
     </div>
-  </div>
-
-  <!-- Banner -->
-  <section class="banner-img-section">
-    <img src="     https://dl.dropboxusercontent.com/scl/fi/53qgrbveqyoqhqb2z8eot/IMG_20251122_204838.jpg?rlkey=cv69xdmnanqobt5swt8hpsg5f&st=a8xe10e4&dl=0" alt="Banner" />
   </section>
-  <main>
-    <!-- Updated: Added skeleton cards (8 now) -->
-    <section class="blogs-grid" id="blogsGrid">
-      <!-- Skeleton Cards (keep until real cards fully loaded) -->
-      <div class="skeleton-blog-card">
-        <div class="skeleton-blog-card-image"></div>
-        <div class="skeleton-blog-card-info">
-          <div class="skeleton-info-row"></div>
-          <div class="skeleton-info-row"></div>
-        </div>
-      </div>
-      <div class="skeleton-blog-card">
-        <div class="skeleton-blog-card-image"></div>
-        <div class="skeleton-blog-card-info">
-          <div class="skeleton-info-row"></div>
-          <div class="skeleton-info-row"></div>
-        </div>
-      </div>
-      <div class="skeleton-blog-card">
-        <div class="skeleton-blog-card-image"></div>
-        <div class="skeleton-blog-card-info">
-          <div class="skeleton-info-row"></div>
-          <div class="skeleton-info-row"></div>
-        </div>
-      </div>
-      <div class="skeleton-blog-card">
-        <div class="skeleton-blog-card-image"></div>
-        <div class="skeleton-blog-card-info">
-          <div class="skeleton-info-row"></div>
-          <div class="skeleton-info-row"></div>
-        </div>
-      </div>
-      <div class="skeleton-blog-card">
-        <div class="skeleton-blog-card-image"></div>
-        <div class="skeleton-blog-card-info">
-          <div class="skeleton-info-row"></div>
-          <div class="skeleton-info-row"></div>
-        </div>
-      </div>
-      <div class="skeleton-blog-card">
-        <div class="skeleton-blog-card-image"></div>
-        <div class="skeleton-blog-card-info">
-          <div class="skeleton-info-row"></div>
-          <div class="skeleton-info-row"></div>
-        </div>
-      </div>
-      <div class="skeleton-blog-card">
-        <div class="skeleton-blog-card-image"></div>
-        <div class="skeleton-blog-card-info">
-          <div class="skeleton-info-row"></div>
-          <div class="skeleton-info-row"></div>
-        </div>
-      </div>
-      <div class="skeleton-blog-card">
-        <div class="skeleton-blog-card-image"></div>
-        <div class="skeleton-blog-card-info">
-          <div class="skeleton-info-row"></div>
-          <div class="skeleton-info-row"></div>
-        </div>
-      </div>
-    </section>
-  </main>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <!-- Left: About + Social -->
-    <div class="footer-col footer-left">
-      <div>
-        <div class="footer-about-title">About TeamGalaxy</div>
-        <div class="footer-about-text">
-          TeamGalaxy is an innovative gaming and creative community, united by passion and the spirit of collaboration.
-          We host tournaments, share design ideas, and grow talents together — join now to explore the Galaxy!
-        </div>
+  <!-- Blogs Section -->
+  <section class="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 section-gradient relative overflow-hidden">
+    <div class="design-element" style="top: 20%; right: 15%; width: 200px; height: 200px; background: radial-gradient(circle, #3b82f6 0%, transparent 70%); opacity: 0.4;"></div>
+    <div class="max-w-7xl mx-auto">
+      <!-- Loading Spinner -->
+      <div id="loadingSpinner" class="loading-spinner"></div>
+      <!-- Blogs Grid -->
+      <div id="blogsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 blogs-grid">
+        <!-- Blog cards will be dynamically inserted here -->
       </div>
-      <div class="footer-social">
-        <a href="https://x.com/teamgalaxy_wotb" title="Twitter"><i class="fab fa-twitter"></i></a>
-     <!--   <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a> -->
-        <a href="https://discord.gg/26pSCyMRPM" title="Discord"><i class="fab fa-discord"></i></a>
+      <!-- No Blogs Message -->
+      <div id="noBlogsMessage" class="text-center py-12 hidden">
+        <i class="fas fa-inbox text-6xl text-gray-600 mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-400 mb-2">No Blogs Yet</h3>
+        <p class="text-gray-500">Check back soon for new content!</p>
+      </div>
+      <!-- Error Message -->
+      <div id="errorMessage" class="text-center py-12 hidden">
+        <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-4"></i>
+        <h3 class="text-xl font-semibold text-red-400 mb-2">Failed to Load Blogs</h3>
+        <p class="text-gray-500 mb-4">Please try again later.</p>
+        <button onclick="loadBlogs()" class="px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-lg font-medium hover:opacity-90 transition-opacity">Retry</button>
       </div>
     </div>
+  </section>
 
-    <!-- Right: Links + Address -->
-    <div class="footer-col footer-right">
-      <div class="footer-links">
-        <a href="legal/privacy_policy.html">Privacy Policy</a>
-        <a href="legal/terms_and_conditions.html">Terms & Conditions</a>
-        <a href="about_us.html">About</a>
+  <!-- Footer (Same as Main Page) -->
+  <footer class="bg-dark py-8 sm:py-10 md:py-12 px-4 sm:px-6 lg:px-8 border-t border-gray-800/50">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 footer-grid">
+        <div>
+          <div class="flex items-center space-x-2 mb-3 sm:mb-4">
+            <div class="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center flex-shrink-0">
+              <span class="text-white font-bold text-lg sm:text-xl">G</span>
+            </div>
+            <span class="text-lg sm:text-xl md:text-2xl font-serif font-bold">Galaxy<span class="text-primary">Designs</span></span>
+          </div>
+          <p class="text-gray-400 mb-3 sm:mb-4 text-xs sm:text-sm">A premier design studio creating exceptional visual experiences for brands worldwide.</p>
+          <div class="flex space-x-2 sm:space-x-3">
+            <a href="#" class="text-gray-400 hover:text-primary transition-colors w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-800/50 flex items-center justify-center hover:bg-primary/20"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="text-gray-400 hover:text-primary transition-colors w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-800/50 flex items-center justify-center hover:bg-primary/20"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="text-gray-400 hover:text-primary transition-colors w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-800/50 flex items-center justify-center hover:bg-primary/20"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="text-gray-400 hover:text-primary transition-colors w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-800/50 flex items-center justify-center hover:bg-primary/20"><i class="fab fa-dribbble"></i></a>
+            <a href="#" class="text-gray-400 hover:text-primary transition-colors w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-800/50 flex items-center justify-center hover:bg-primary/20"><i class="fab fa-behance"></i></a>
+          </div>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-3 sm:mb-4 text-base sm:text-lg text-white">Quick Links</h3>
+          <ul class="space-y-1.5 sm:space-y-2 text-gray-400 text-xs sm:text-sm">
+            <li><a href="/" class="hover:text-white transition-colors hover:pl-2">Home</a></li>
+            <li><a href="/#designs" class="hover:text-white transition-colors hover:pl-2">Our Work</a></li>
+            <li><a href="/#services" class="hover:text-white transition-colors hover:pl-2">Services</a></li>
+            <li><a href="/#team" class="hover:text-white transition-colors hover:pl-2">Team</a></li>
+            <li><a href="/#contact" class="hover:text-white transition-colors hover:pl-2">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-3 sm:mb-4 text-base sm:text-lg text-white">Resources</h3>
+          <ul class="space-y-1.5 sm:space-y-2 text-gray-400 text-xs sm:text-sm">
+            <li><a href="/blogs" class="hover:text-white transition-colors hover:pl-2">Blog</a></li>
+            <li><a href="#" class="hover:text-white transition-colors hover:pl-2">Help Center</a></li>
+            <li><a href="#" class="hover:text-white transition-colors hover:pl-2">Documentation</a></li>
+            <li><a href="#" class="hover:text-white transition-colors hover:pl-2">Community</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-3 sm:mb-4 text-base sm:text-lg text-white">Contact</h3>
+          <ul class="space-y-2 sm:space-y-3 text-gray-400 text-xs sm:text-sm">
+            <li class="flex items-start"><i class="fas fa-envelope mr-2 sm:mr-3 text-primary mt-0.5"></i><span>hello@galaxydesigns.com</span></li>
+            <li class="flex items-start"><i class="fas fa-map-marker-alt mr-2 sm:mr-3 text-primary mt-0.5"></i><span>New York, USA</span></li>
+          </ul>
+        </div>
       </div>
-      <div>
-      <!--  <div class="footer-contact-row">
-          <span class="footer-contact-label">
-            <i class="fa-solid fa-location-dot footer-contact-icon"></i>Address:
-          </span>
-          Not Available 
-        </div>
-        <div class="footer-contact-row">
-          <span class="footer-contact-label">
-            <i class="fa-solid fa-phone footer-contact-icon"></i>Phone:
-          </span>
-          Not Available 
-        </div> -->
-        <div class="footer-contact-row">
-          <span class="footer-contact-label">
-            <i class="fa-solid fa-envelope footer-contact-icon"></i>Email:
-          </span>
-          info@teamgalaxy.net
-        </div>
-        <div class="footer-contact">
-          <span class="footer-contact-label">
-            <i class="fa-regular fa-clock footer-contact-icon"></i>Working Hours:
-          </span>
-          Mon-Sat 10am - 10pm
-        </div>
+      <div class="border-t border-gray-800 mt-6 sm:mt-8 md:mt-12 pt-4 sm:pt-6 md:pt-8 text-center text-gray-500 text-xs sm:text-sm">
+        <p>© 2026 Galaxy Designs. All rights reserved.</p>
       </div>
     </div>
   </footer>
 
-  <!-- reCAPTCHA v3 -->
-<script src="https://www.google.com/recaptcha/api.js?render=6LfJDgcsAAAAABRkg1BC_ni3R8dFSCAXimVRAYOD"></script>
+  <!-- Firebase SDK -->
+  <script type="module">
+    // Import Firebase SDK v11.9.0
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+    import { getFirestore, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-  import { 
-    getAuth, 
-    onAuthStateChanged, 
-    signInWithPopup, 
-    GoogleAuthProvider, 
-    signOut, 
-    setPersistence, 
-    browserLocalPersistence 
-  } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-  import { 
-    getFirestore, 
-    collection, 
-    query, 
-    orderBy, 
-    limit, 
-    getDocs 
-  } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
-  import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app-check.js";
+    // ============================================
+    // ⚠️ REPLACE WITH YOUR FIREBASE CONFIG
+    // ============================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
+      authDomain: "teamgalaxy-77344.firebaseapp.com",
+      projectId: "teamgalaxy-77344",
+      storageBucket: "teamgalaxy-77344.firebasestorage.app",
+      messagingSenderId: "770256225320",
+      appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
+      measurementId: "G-6C2W9NSNCH"
+    };
 
-  // ===== Firebase config =====
-  const firebaseConfig = {
-    apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
-    authDomain: "teamgalaxy-77344.firebaseapp.com",
-    projectId: "teamgalaxy-77344",
-    storageBucket: "teamgalaxy-77344.firebasestorage.app",
-    messagingSenderId: "770256225320",
-    appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
-    measurementId: "G-6C2W9NSNCH"
-  };
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+    // Base URL for blog detail page (Read More route)
+    const BLOG_BASE_URL = "/blog_view?=";
 
-  // ===== App Check activation =====
-  try {
-    const appCheckProvider = new ReCaptchaV3Provider("6LfJDgcsAAAAABRkg1BC_ni3R8dFSCAXimVRAYOD");
-    initializeAppCheck(app, {
-      provider: appCheckProvider,
-      isTokenAutoRefreshEnabled: true
-    });
-    console.log("App Check activated");
-  } catch (e) {
-    console.warn("App Check activation failed:", e);
-  }
-
-  // ===== Auth persistence (HARDENED) =====
-  (async () => {
-    try {
-      await setPersistence(auth, browserLocalPersistence);
-      console.log("Auth persistence set to LOCAL");
-    } catch (err) {
-      console.warn("Failed to set auth persistence:", err);
-    }
-  })();
-
-  // ===== DOM elements =====
-  const profileBtn = document.getElementById("profileBtn");
-  const profileMenu = document.getElementById("profileMenu");
-  const logoutLink = document.getElementById("logoutLink");
-  const profileLink = document.getElementById("profileLink");
-  const cardsContainer = document.getElementById("cardsContainer");
-
-  // ===== Header Elements and Event Handlers =====
-  document.addEventListener('DOMContentLoaded', function() {
-    // Hamburger menu
-    const hamburgerBtn = document.getElementById("hamburgerBtn");
-    const navButtons = document.getElementById("navButtons");
-
-    if (hamburgerBtn && navButtons) {
-      hamburgerBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        navButtons.classList.toggle('show');
+    // ============================================
+    // CUSTOM CURSOR (Desktop Only)
+    // ============================================
+    const cursor = document.getElementById('cursor');
+    const cursorDot = document.getElementById('cursorDot');
+    if (window.innerWidth > 900) {
+      document.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+        cursorDot.style.left = e.clientX + 'px';
+        cursorDot.style.top = e.clientY + 'px';
       });
+      document.querySelectorAll('a, button, .card, .feature-card, .blog-card, .sponsor-card').forEach(link => {
+        link.addEventListener('mouseenter', () => {
+          cursor.style.transform = 'translate(-50%, -50%) scale(1.5)';
+          cursorDot.style.transform = 'translate(-50%, -50%) scale(0.5)';
+        });
+        link.addEventListener('mouseleave', () => {
+          cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+          cursorDot.style.transform = 'translate(-50%, -50%) scale(1)';
+        });
+      });
+    }
 
-      // Close hamburger menu when clicking outside
-      document.addEventListener('click', function(e) {
-        if (!hamburgerBtn.contains(e.target) && !navButtons.contains(e.target)) {
-          navButtons.classList.remove('show');
+    // ============================================
+    // SCROLL PROGRESS BAR
+    // ============================================
+    window.addEventListener('scroll', () => {
+      const scrollTop = document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (scrollTop / scrollHeight) * 100;
+      document.getElementById('scrollProgress').style.width = scrolled + '%';
+    });
+
+    // ============================================
+    // SMOOTH SCROLL
+    // ============================================
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          window.scrollTo({
+            top: target.offsetTop - 80,
+            behavior: 'smooth'
+          });
         }
       });
-    }
+    });
 
-    // More dropdown
-    const moreOptions = document.getElementById("moreOptions");
-    if (moreOptions) {
-      const moreBtn = moreOptions.querySelector(".nav-btn");
-      const moreDropdown = moreOptions.querySelector(".dropdown-content");
-
-      if (moreBtn && moreDropdown) {
-        // Toggle dropdown on click (works for both touch and pointer)
-        moreBtn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          const isVisible = moreDropdown.style.display === "block";
-          moreDropdown.style.display = isVisible ? "none" : "block";
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(e) {
-          if (!moreOptions.contains(e.target)) {
-            moreDropdown.style.display = "none";
-          }
-        });
-
-        // Close dropdown when clicking on any link inside it
-        moreDropdown.querySelectorAll('a').forEach(link => {
-          link.addEventListener('click', () => {
-            moreDropdown.style.display = "none";
-          });
-        });
-
-        // Prevent dropdown from closing when clicking inside it
-        moreDropdown.addEventListener('click', function(e) {
-          e.stopPropagation();
-        });
-      }
-    }
-  });
-
-  // ===== Auth state + profile handling =====
-  let currentUser = null;
-
-  function updateProfileButton() {
-    if (!profileBtn) return;
-
-    const u = auth.currentUser; // live snapshot; currentUser also holds last known
-    if (u) {
-      currentUser = u;
-      if (u.photoURL) {
-        profileBtn.innerHTML = `<img src="${u.photoURL}" alt="Profile" style="width:36px;height:36px;border-radius:50%;">`;
+    // ============================================
+    // HEADER SCROLL EFFECT
+    // ============================================
+    window.addEventListener('scroll', function() {
+      const nav = document.querySelector('nav');
+      if (window.scrollY > 50) {
+        nav.classList.add('shadow-lg', 'bg-dark');
+        nav.classList.remove('nav-glass');
       } else {
-        profileBtn.innerHTML = `<i class="fa-solid fa-user"></i>`;
+        nav.classList.remove('shadow-lg', 'bg-dark');
+        nav.classList.add('nav-glass');
       }
-      profileBtn.title = u.displayName || u.email || "Profile";
-    } else {
-      currentUser = null;
-      profileBtn.innerHTML = "Sign In";
-      profileBtn.title = "Sign In";
-    }
-  }
-
-  function handleProfileBtnClick(e) {
-    e && e.stopPropagation();
-    try {
-      // use currentUser so we respect restored session from onAuthStateChanged
-      const liveUser = currentUser || auth.currentUser;
-      if (!liveUser) {
-        window.location.href = "/legal/sign_up.html";
-        return;
-      }
-      if (!profileMenu) return;
-      profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
-    } catch (err) {
-      console.error("Error in profile button click handler:", err);
-    }
-  }
-
-  if (profileBtn && !profileBtn._attached) {
-    profileBtn.addEventListener("click", handleProfileBtnClick);
-    profileBtn._attached = true;
-  }
-
-  window.addEventListener("click", () => {
-    if (profileMenu) profileMenu.style.display = "none";
-  });
-
-  async function signIn() {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-      console.log("Sign-in succeeded");
-    } catch (error) {
-      console.error("Sign-in failed:", error);
-      alert("Sign-in failed: " + (error && error.message ? error.message : error));
-    }
-  }
-
-  async function signOutUser() {
-    try {
-      await signOut(auth);
-      console.log("User signed out");
-      if (profileMenu) profileMenu.style.display = "none";
-    } catch (error) {
-      console.error("Sign-out failed:", error);
-      alert("Sign-out failed: " + (error && error.message ? error.message : error));
-    }
-  }
-
-  // Optional global hooks if you ever call from inline HTML
-  window.teamGalaxySignIn = signIn;
-  window.teamGalaxySignOut = signOutUser;
-
-  if (logoutLink && !logoutLink._attached) {
-    logoutLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      signOutUser();
     });
-    logoutLink._attached = true;
-  }
 
-  if (profileLink && !profileLink._attached) {
-    profileLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!currentUser && !auth.currentUser) {
-        window.location.href = "/legal/sign_up.html";
-        return;
-      }
-      window.location.href = "/user_management/user_profile.html";
-      if (profileMenu) profileMenu.style.display = "none";
-    });
-    profileLink._attached = true;
-  }
-
-  // ===== Auth state listener (single, safe) =====
-  if (!auth._ourOnAuthAttached) {
-    onAuthStateChanged(auth, (user) => {
-      console.log("onAuthStateChanged fired. user:", !!user);
-      currentUser = user;
-      updateProfileButton();
-      if (typeof loadBlogs === "function") loadBlogs();
-    });
-    auth._ourOnAuthAttached = true;
-  } else {
-    console.log("Auth listener already attached - skipping re-attach");
-  }
-
-  // ===== Blog loading =====
-  function formatPublishedAt(ts) {
-    if (!ts) return "";
-    const date = ts.toDate ? ts.toDate() : new Date(ts);
-    const now = new Date();
-    const diff = (now - date) / 1000;
-
-    if (diff < 60 * 60 * 24 * 2) {
-      if (diff < 60 * 60) return Math.max(1, Math.round(diff / 60)) + " min ago";
-      return Math.max(1, Math.round(diff / 3600)) + " hours ago";
-    }
-    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-  }
-
-  async function loadBlogs() {
-    const grid = document.getElementById("blogsGrid");
-    if (!grid) return;
-
-    try {
-      const q = query(collection(db, "cards"), orderBy("publishedAt", "desc"), limit(8));
-      const snapshot = await getDocs(q);
-
-      if (snapshot.empty) {
-        setTimeout(() => {
-          grid.innerHTML = `<p style="color: #ff6b6b; text-align: center; width: 100%;">No posts yet. Check back later.</p>`;
-        }, 500);
-        return;
-      }
-
-      const cards = [];
-      const imgLoadPromises = [];
-
-      snapshot.docs.forEach((docSnap, index) => {
-        const data = docSnap.data();
-        const id = docSnap.id;
-
-        const card = document.createElement("div");
-        card.className = "blog-card";
-        card.tabIndex = 0;
-        card.setAttribute("role", "button");
-
-        card.onclick = () => window.location.href = `/card_showcase.html?id=${encodeURIComponent(id)}`;
-        card.onkeydown = (e) => { if (e.key === "Enter") card.click(); };
-
-        const img = document.createElement("img");
-        img.className = "blog-card-image";
-        img.alt = data.heading || "Blog Post";
-
-        const p = new Promise((resolve) => {
-          img.onload = () => resolve({ ok: true, img, card });
-          img.onerror = () => resolve({ ok: false, img, card });
-        });
-        imgLoadPromises.push(p);
-
-        img.src = data.imageUrl || "https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=500&q=80";
-
-        card.appendChild(img);
-
-        const info = document.createElement("div");
-        info.className = "blog-card-info";
-
-        const viewsRow = document.createElement("div");
-        viewsRow.className = "blog-info-row";
-        viewsRow.innerHTML = `<i class="fa-regular fa-eye"></i> ${data.views || 0}`;
-
-        const publishedRow = document.createElement("div");
-        publishedRow.className = "blog-info-row";
-        publishedRow.innerHTML = `<i class="fa-regular fa-clock"></i> ${formatPublishedAt(data.publishedAt)}`;
-
-        info.appendChild(viewsRow);
-        info.appendChild(publishedRow);
-        card.appendChild(info);
-
-        cards.push(card);
+    // ============================================
+    // HAMBURGER TOGGLE
+    // ============================================
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (hamburger && mobileMenu) {
+      hamburger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        hamburger.classList.toggle('active');
+        mobileMenu.classList.toggle('active');
       });
-
-      await Promise.all(imgLoadPromises);
-
-      const skeletons = Array.from(grid.querySelectorAll('.skeleton-blog-card'));
-      skeletons.forEach(s => s.classList.add('skeleton-fade'));
-
-      setTimeout(() => {
-        grid.innerHTML = '';
-        cards.forEach((c, idx) => {
-          grid.appendChild(c);
-          setTimeout(() => c.classList.add('loaded'), 20 + idx * 80);
+      document.addEventListener('click', function(e) {
+        if (!hamburger.contains(e.target) && !mobileMenu.contains(e.target)) {
+          hamburger.classList.remove('active');
+          mobileMenu.classList.remove('active');
+        }
+      });
+      mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          hamburger.classList.remove('active');
+          mobileMenu.classList.remove('active');
         });
-      }, 320);
+      });
+    }
 
-    } catch (error) {
-      console.error("Error loading blogs:", error);
-      if (grid) {
-        grid.innerHTML = `<p style="color: #ff6b6b; text-align: center; width: 100%;">Error loading content. Please try again later.</p>`;
+    // ============================================
+    // FORMAT DATE
+    // ============================================
+    function formatDate(timestamp) {
+      if (!timestamp) return 'Unknown Date';
+      const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return date.toLocaleDateString('en-US', options);
+    }
+
+    // ============================================
+    // FORMAT NUMBER
+    // ============================================
+    function formatNumber(num) {
+      if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
+      } else if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+      }
+      return num.toString();
+    }
+
+    // ============================================
+    // CREATE BLOG CARD
+    // ============================================
+    function createBlogCard(blogId, blogData) {
+      const { title, description, imageUrl, publishedAt, insight_score, min_read } = blogData;
+      const card = document.createElement('div');
+      card.className = 'blog-card';
+      card.innerHTML = `<img src="${imageUrl || 'https://via.placeholder.com/400x200?text=No+Image'}" alt="${title}" class="blog-image" onerror="this.src='https://via.placeholder.com/400x200?text=Image+Not+Found'">
+        <div class="p-5 sm:p-6">
+          <div class="blog-meta mb-3">
+            <span><i class="fas fa-calendar mr-2"></i>${formatDate(publishedAt)}</span>
+            <span><i class="fas fa-clock mr-2"></i>${min_read || 5} min read</span>
+          </div>
+          <h3 class="text-lg sm:text-xl font-semibold mb-3 text-white line-clamp-2">${title || 'Untitled Blog'}</h3>
+          <p class="text-gray-400 text-sm mb-4 line-clamp-3">${description || 'No description available'}</p>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center text-gray-400 text-sm">
+              <i class="fas fa-star mr-2 text-yellow-400"></i>
+              <span>${insight_score || 85}% Insight Score</span>
+            </div>
+            <button onclick="openBlog('${blogId}')" class="px-4 py-2 bg-gradient-to-r from-primary to-secondary text-white rounded-lg font-medium text-sm hover:opacity-90 transition-opacity flex items-center">Read More <i class="fas fa-arrow-right ml-2"></i></button>
+          </div>
+        </div>`;
+return card;  
+    }
+
+    // ============================================
+    // OPEN BLOG (Redirect to Detail Page)
+    // ============================================
+    function openBlog(blogId) {
+      // Navigate to the old-style detail URL as requested:
+      // {current site}/blog_view?={blogId}
+      window.location.href = BLOG_BASE_URL + blogId;
+    }
+
+    // Expose for inline onclick handlers in HTML (module scripts scope is local)
+    window.openBlog = openBlog;
+
+    // ============================================
+    // LOAD BLOGS FROM FIRESTORE
+    // ============================================
+    async function loadBlogs() {
+      const blogsGrid = document.getElementById('blogsGrid');
+      const loadingSpinner = document.getElementById('loadingSpinner');
+      const noBlogsMessage = document.getElementById('noBlogsMessage');
+      const errorMessage = document.getElementById('errorMessage');
+
+      // Reset state
+      blogsGrid.innerHTML = '';
+      loadingSpinner.style.display = 'block';
+      noBlogsMessage.classList.add('hidden');
+      errorMessage.classList.add('hidden');
+
+      try {
+        // Fetch blogs from Firestore
+        const q = query(collection(db, 'blog'), orderBy('publishedAt', 'desc'));
+        const snapshot = await getDocs(q);
+
+        // Hide loading spinner
+        loadingSpinner.style.display = 'none';
+
+        if (snapshot.empty) {
+          noBlogsMessage.classList.remove('hidden');
+          return;
+        }
+
+        // Create blog cards
+        snapshot.docs.forEach(doc => {
+          const blogData = doc.data();
+          const blogCard = createBlogCard(doc.id, blogData);
+          blogsGrid.appendChild(blogCard);
+        });
+
+        // Trigger GSAP animations for new elements
+        if (typeof gsap !== 'undefined') {
+          gsap.from('.blog-card', {
+            scrollTrigger: {
+              trigger: '.blog-card',
+              start: 'top 90%',
+              toggleActions: 'play none none none'
+            },
+            y: 50,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: 'power3.out'
+          });
+        }
+      } catch (error) {
+        console.error('Error loading blogs:', error);
+        loadingSpinner.style.display = 'none';
+        errorMessage.classList.remove('hidden');
       }
     }
-  }
 
-  // ===== Star field generation =====
-  (function generateStars() {
-    const starsContainer = document.getElementById('stars');
-    if (!starsContainer) return;
-
-    const starCount = 150;
-    for (let i = 0; i < starCount; i++) {
-      const star = document.createElement('div');
-      star.classList.add('star');
-
-      const posX = Math.random() * 100;
-      const posY = Math.random() * 100;
-      const size = Math.random() * 2 + 1;
-      const duration = Math.random() * 6 + 3;
-      const driftDur = 40 + Math.random() * 120;
-      const driftX = (Math.random() - 0.5) * 20;
-      const driftY = (Math.random() - 0.5) * 10;
-
-      star.style.left = `${posX}%`;
-      star.style.top = `${posY}%`;
-      star.style.width = `${size}px`;
-      star.style.height = `${size}px`;
-      star.style.setProperty('--duration', `${duration}s`);
-      star.style.setProperty('--driftDur', `${driftDur}s`);
-      star.style.setProperty('--driftX', `${driftX}px`);
-      star.style.setProperty('--driftY', `${driftY}px`);
-      star.style.animationDelay = `${Math.random() * 6}s`;
-
-      starsContainer.appendChild(star);
+    // ============================================
+    // GSAP ANIMATIONS
+    // ============================================
+    if (typeof gsap !== 'undefined') {
+      gsap.registerPlugin(ScrollTrigger);
+      gsap.utils.toArray('.feature-card, .sponsor-card, .stat-card').forEach((el, index) => {
+        gsap.from(el, {
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 90%',
+            toggleActions: 'play none none none'
+          },
+          y: 50,
+          opacity: 0,
+          duration: 0.8,
+          delay: index * 0.1,
+          ease: 'power3.out'
+        });
+      });
     }
 
-    function shoot() {
-      const s = document.createElement('div');
-      s.className = 'shooting-star';
-      const startLeft = Math.random() * 80;
-      const startTop = Math.random() * 40;
-      const angle = -20 - Math.random() * 40;
-      const dur = 0.7 + Math.random() * 0.9;
-      const travel = 400 + Math.random() * 900;
+    // ============================================
+    // LOAD BLOGS ON PAGE LOAD
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+      loadBlogs();
+    });
 
-      s.style.left = `${startLeft}%`;
-      s.style.top = `${startTop}%`;
-      s.style.setProperty('--angle', `${angle}deg`);
-      s.style.setProperty('--dur', `${dur}s`);
-      s.style.setProperty('--travel', `${travel}px`);
-      s.style.setProperty('--travelY', `${travel * 0.2}px`);
-      s.style.transform = `rotate(${angle}deg)`;
-      s.style.animation = `shoot ${dur}s linear forwards`;
-      s.style.width = `${1 + Math.random() * 2}px`;
+    // ============================================
+    // FIREBASE AUTH INTEGRATION
+    // ============================================
+    // DOM Elements
+    const desktopSignInBtn = document.querySelector('.desktop-signin');
+    const mobileSignInBtn = document.querySelector('.mobile-signin');
 
-      starsContainer.appendChild(s);
-      s.addEventListener('animationend', () => s.remove());
+    // Function to update button state based on auth status
+    function updateAuthButton(user) {
+      const buttonText = user ? 'Sign Out' : 'Sign In';
+      const buttonHref = user ? '#' : '/sign_in_page';
+      
+      // Update desktop button
+      if (desktopSignInBtn) {
+        desktopSignInBtn.querySelector('.relative.z-10').textContent = buttonText;
+        desktopSignInBtn.href = buttonHref;
+        
+        if (user) {
+          desktopSignInBtn.classList.add('auth-signed-in');
+          desktopSignInBtn.onclick = (e) => {
+            e.preventDefault();
+            handleSignOut();
+          };
+        } else {
+          desktopSignInBtn.classList.remove('auth-signed-in');
+        }
+      }
+      
+      // Update mobile button
+      if (mobileSignInBtn) {
+        mobileSignInBtn.textContent = buttonText;
+        mobileSignInBtn.href = buttonHref;
+        
+        if (user) {
+          mobileSignInBtn.classList.add('auth-signed-in');
+          mobileSignInBtn.onclick = (e) => {
+            e.preventDefault();
+            handleSignOut();
+          };
+        } else {
+          mobileSignInBtn.classList.remove('auth-signed-in');
+        }
+      }
     }
 
-    setInterval(() => {
-      if (Math.random() < 0.25) shoot();
-    }, 1200);
-  })();
+    // Sign out function
+    function handleSignOut() {
+      signOut(auth).then(() => {
+        console.log('User signed out');
+        localStorage.removeItem('galaxy_user');
+      }).catch((error) => {
+        console.error('Sign out error:', error);
+      });
+    }
 
-  // ===== Initial load (blogs will also refresh when auth state changes) =====
-  window.onload = loadBlogs;
-</script>
+    // Listen for auth state changes
+    onAuthStateChanged(auth, (user) => {
+      updateAuthButton(user);
+      
+      // Store user info in localStorage for persistence
+      if (user) {
+        localStorage.setItem('galaxy_user', JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL
+        }));
+      } else {
+        localStorage.removeItem('galaxy_user');
+      }
+    });
+  </script>
 </body>
 </html>
