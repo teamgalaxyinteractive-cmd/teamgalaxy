@@ -1,1540 +1,432 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>About Team Galaxy</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css " />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | Galaxy Designs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none; /* Hiding default cursor for our custom one */
+        }
 
-    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png">
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030303;
+            color: #ffffff;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
 
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png">
+        /* --- Global Cinematic Effects --- */
 
-    <link rel="manifest" href="manifest.json">
-  <!-- Canonical -->
-  <link rel="canonical" href="https://www.teamgalaxy.net/about_us">
+        /* Film Grain Noise */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9998;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
 
-  <!-- Robots -->
-  <meta name="robots" content="index, follow">
+        /* Custom Cursor */
+        .custom-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+        }
 
-  <!-- Open Graph (social preview) -->
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="en_US">
-  <meta property="og:url" content="https://www.teamgalaxy.net/about_us">
-  <meta property="og:title" content="Team Galaxy — WoT Blitz Clan (Est. May 2025)">
-  <meta property="og:description" content="Join Team Galaxy — a World of Tanks Blitz clan that mixes competitive drive and casual fun. Weekly missions, clan leaderboards, and member events. Apply via Discord.">
-  <meta property="og:image" content="https://www.teamgalaxy.net/assets/images/og-team-galaxy-1200_630.jpg">
-  <meta property="og:image:alt" content="Team Galaxy — World of Tanks Blitz clan banner">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:site_name" content="Team Galaxy">
+        .custom-cursor.hovering {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
 
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@teamgalaxy_wotb"> <!-- replace with your Twitter/X handle -->
-  <meta name="twitter:creator" content="@teamgalaxy_wotb">
-  <meta name="twitter:title" content="Team Galaxy — WoT Blitz Clan">
-  <meta name="twitter:description" content="Climb leaderboards, earn stars in clan missions, and enjoy member-only events. Competitive & casual players welcome.">
-  <meta name="twitter:image" content="https://www.teamgalaxy.net/assets/images/team-galaxy-1530_800.jpg">
+        /* Subtle Studio Grid Background */
+        .studio-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            pointer-events: none;
+        }
 
-  <!-- Mobile / PWA -->
-  <meta name="theme-color" content="#0f172a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
+        /* --- Sections --- */
 
-<script src="assets/js/cookie-consent.js" defer></script>
+        /* Hero Section */
+        .hero-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+        }
 
-  <style>
-    /* ------- ORIGINAL STYLES (kept as-is) ------- */
-    body { 
-      background: #181f2b; 
-      color: #fff; 
-      margin: 0; 
-      font-family: Arial, sans-serif; 
-      position: relative;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+        .hero-heading {
+            font-size: clamp(4rem, 12vw, 10rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            line-height: 0.85;
+            text-align: center;
+            letter-spacing: -0.05em;
+            margin-bottom: 2rem;
+            animation: textReveal 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
 
-    /* Star background */
-    .stars {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: -1;
-    }
+        .hollow-text {
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.4);
+            display: block;
+            transition: all 0.5s ease;
+        }
 
-    .star {
-      position: absolute;
-      background-color: white;
-      border-radius: 50%;
-      animation: twinkle var(--duration, 5s) infinite ease-in-out;
-    }
+        .hero-heading:hover .hollow-text {
+            color: #ffffff;
+            -webkit-text-stroke: 1px transparent;
+            text-shadow: 0 0 40px rgba(255,255,255,0.3);
+            transform: scale(1.02);
+        }
 
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.2; }
-      50% { opacity: 1; }
-    }
+        .hero-subtext {
+            font-size: clamp(0.9rem, 1.2vw, 1rem);
+            max-width: 500px;
+            color: #666;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            text-align: center;
+            animation: fadeInUp 1.5s ease-out 0.6s both;
+        }
 
-    /* Header */
-    .top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 80px;
-      background: rgba(16, 23, 36, 0.85);
-      padding: 0 20px;
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      width: 100%;
-      box-sizing: border-box;
-    }
+        /* Infinite Marquee */
+        .marquee-container {
+            width: 100%;
+            overflow: hidden;
+            background: #ffffff;
+            color: #000000;
+            padding: 1.5rem 0;
+            display: flex;
+            white-space: nowrap;
+            transform: rotate(-2deg) scale(1.05);
+            margin: 4rem 0;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
 
-    .logo-title {
-      margin-left: 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 1.5rem;
-      font-weight: bold;
-      font-family: 'Montserrat', sans-serif;
-      color: #fff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex: 0 0 auto;
-    }
+        .marquee-content {
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            display: inline-block;
+            animation: marquee 20s linear infinite;
+        }
 
-    .logo-title img {
-      height: 50px;
-      filter: drop-shadow(0 0 8px rgba(97, 218, 251, 0.7));
-      flex-shrink: 0;
-    }
+        .marquee-content span {
+            margin: 0 2rem;
+            -webkit-text-stroke: 1px #000;
+            color: transparent;
+        }
 
-    .hamburger {
-      display: none;
-      background: none;
-      border: none;
-      color: #e0e0e0;
-      cursor: pointer;
-      font-size: 1.2rem;
-      padding: 8px;
-      margin-right: 10px;
-      flex-shrink: 0;
-    }
+        .marquee-content span.solid {
+            color: #000;
+        }
 
-    .nav-buttons {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      font-size: 1rem;
-      position: relative;
-      flex-shrink: 0;
-    }
+        /* Section Styling */
+        .section-container {
+            padding: 8rem 2vw;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
 
-    .nav-btn,
-    .profile-btn {
-      background: none;
-      border: none;
-      color: #e0e0e0;
-      cursor: pointer;
-      font-size: 0.95rem;
-      position: relative;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 500;
-      padding: 6px 10px;
-      border-radius: 6px;
-      transition: all 0.3s ease;
-      white-space: nowrap;
-    }
+        .section-title {
+            font-size: clamp(2rem, 5vw, 4rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.03em;
+            margin-bottom: 5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem;
+            color: rgba(255,255,255,0.9);
+        }
 
-    .nav-btn:hover, .profile-btn:hover {
-      color: #64c2ff;
-      background: rgba(255, 255, 255, 0.05);
-    }
+        /* Philosophy Text */
+        .philosophy-text {
+            font-size: clamp(1.5rem, 3.5vw, 3rem);
+            font-weight: 300;
+            color: #444;
+            line-height: 1.3;
+            max-width: 1100px;
+            transition: color 0.5s ease;
+        }
 
-    .profile-btn img {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #64c2ff;
-    }
+        .philosophy-text:hover {
+            color: #888;
+        }
 
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      right: 0;
-      background: rgba(29, 35, 54, 0.95);
-      min-width: 140px;
-      border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-      top: 50px;
-      z-index: 1000;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      overflow: hidden;
-    }
+        .philosophy-text span {
+            color: #fff;
+            font-weight: 700;
+        }
 
-    .dropdown-content a {
-      color: #e0e0e0;
-      padding: 10px 14px;
-      text-decoration: none;
-      display: block;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      transition: all 0.2s ease;
-      font-size: 0.95rem;
-    }
+        /* Team Grid */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 3rem;
+        }
 
-    .dropdown-content a:last-child { border-bottom: none; }
+        .team-card {
+            position: relative;
+        }
 
-    .dropdown-content a:hover {
-      background: rgba(100, 194, 255, 0.1);
-      color: #64c2ff;
-    }
+        .image-wrapper {
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            background: #111;
+        }
 
-    .nav-buttons .more-options:hover .dropdown-content,
-    .nav-buttons .profile-btn.show-menu + .dropdown-content {
-      display: block;
-    }
+        .profile-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(1.2);
+            transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+        }
 
-    /* Mobile-specific fixes */
-    @media (max-width: 768px) {
-      .logo-title {
-        font-size: 1.2rem;
-      }
-      .logo-title img {
-        height: 40px;
-      }
-      .hamburger {
-        display: block;
-      }
-      .top-bar {
-        justify-content: flex-end;
-      }
-      .logo-title {
-        margin-left: auto;
-      }
-      .nav-buttons {
-        display: none;
-        position: absolute;
-        top: 100%;
-        right: 0;
-        background: rgba(16, 23, 36, 0.95);
-        flex-direction: column;
-        padding: 20px;
-        gap: 10px;
-        border-radius: 8px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        z-index: 100;
-        width: 100%;
-        box-sizing: border-box;
-      }
-      .nav-buttons.show {
-        display: flex;
-      }
-    }
+        .team-card:hover .profile-image {
+            filter: grayscale(0%) contrast(1);
+            transform: scale(1.08);
+        }
 
-    /* About Container (kept identical) */
-    .about-blank-space { height: 380px; }
-    .about-main { max-width: 900px; margin: 180px auto 50px auto; padding-top: 70px; position: relative; }
-    .about-section { background: rgba(24,31,43,0.97); border-radius: 12px; box-shadow: 0 8px 24px #20294429; padding: 44px 48px; margin-bottom: 44px; }
-    .about-flex-row { display: flex; align-items: flex-start; gap: 36px; margin-bottom: 38px; flex-wrap: wrap; }
+        .team-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 1rem;
+        }
 
-    /* Updated image styles with 3:4 ratio and improved frames */
-    .about-img-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 12px;
-      background: transparent;
-      box-shadow: 0 2px 24px #23274680;
-      overflow: hidden;
-      flex-shrink: 0;
-      border: 2px solid rgba(255, 255, 255, 0.15); /* Added border for better frame visibility */
-      position: relative;
-    }
+        .team-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+        }
 
-    .about-img-container::before {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      right: 2px;
-      bottom: 2px;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      pointer-events: none;
-    }
+        .team-role {
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 400;
+            margin-top: 0.4rem;
+        }
 
-    .about-img-container img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+        .team-description {
+            font-size: 1rem;
+            color: #666;
+            font-weight: 300;
+            line-height: 1.6;
+        }
 
-    .about-img-left {
-      width: 260px;
-      height: 347px; /* 3:4 ratio (260 * 4 / 3) */
-      margin-right: 20px;
-      margin-bottom: 10px;
-    }
+        /* Footer & Magnetic Button */
+        .footer-section {
+            height: 60vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 4rem;
+        }
 
-    .about-img-right {
-      width: 260px;
-      height: 347px; /* 3:4 ratio */
-      margin-left: 35px;
-      margin-bottom: 10px;
-    }
+        .magnetic-btn-wrapper {
+            padding: 3rem; /* Hit area for the magnet effect */
+            display: inline-block;
+        }
 
-    .about-img-inline {
-      width: 760px;
-      height: 340px; 
-      margin: 16px auto 20px auto;
-      border-radius: 10px;
-      box-shadow: 0 2px 20px #23274680;
-      display: block;
-      border: 2px solid rgba(255, 255, 255, 0.15);
-    }
+        .cta-button {
+            display: inline-block;
+            background: #fff;
+            color: #000;
+            padding: 1.5rem 4rem;
+            font-size: 1.1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-decoration: none;
+            border-radius: 100px;
+            transition: transform 0.2s cubic-bezier(0.19, 1, 0.22, 1), background-color 0.3s;
+            will-change: transform;
+        }
 
-    .about-img-inline::before {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      right: 2px;
-      bottom: 2px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      pointer-events: none;
-    }
+        .cta-button:hover {
+            background: #ccc;
+        }
 
-    .about-flex-text { flex: 1 1 340px; font-size: 1.18rem; line-height: 1.7; white-space: pre-line; color: #fff; }
-    .about-section h2 { color: #fab84f; font-size: 2rem; margin-top: 0; margin-bottom: 16px; }
-    .about-section ul { margin: 18px 0 18px 24px; }
-    .about-section ul li { font-size: 1.10rem; margin-bottom: 9px; color: #b3e6ff; }
+        /* --- Animations --- */
+        @keyframes textReveal {
+            from { clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); transform: translateY(100px); }
+            to { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: translateY(0); }
+        }
 
-    /* Footer Styles (kept as-is) */
-    .footer {
-      min-height: 300px;
-      background: linear-gradient(90deg, #181f2b 60%, #232e44 100%);
-      color: #fff;
-      display: flex;
-      flex-direction: row;
-      gap: 30px;
-      align-items: stretch;
-      justify-content: space-between;
-      padding: 30px 50px 20px 50px;
-      border-top: 2px solid #163053;
-      box-sizing: border-box;
-      flex-wrap: wrap;
-    }
-    .footer-col {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      flex: 1 1 45%;
-    }
-    .footer-links {
-      margin-bottom: 24px;
-    }
-    .footer-links a {
-      font-size: 1.13rem;
-      color: #aaa;
-      text-decoration: none;
-      margin-bottom: 12px;
-      font-weight: 600;
-      transition: color 0.2s;
-      display: block;
-    }
-    .footer-links a:hover {
-      color: #fab84f;
-    }
-    .footer-about-title {
-      font-size: 1.46rem;
-      font-weight: bold;
-      margin-bottom: 8px;
-      color: #fab84f;
-    }
-    .footer-about-text {
-      font-size: 1rem;
-      color: #e5e5e5;
-      margin-bottom: 18px;
-      line-height: 1.5;
-    }
-    .footer-social {
-      margin-top: auto;
-      display: flex;
-      gap: 21px;
-    }
-    .footer-social a {
-      color: #fff;
-      font-size: 2rem;
-      text-decoration: none;
-      transition: color 0.22s;
-    }
-    .footer-social a:hover {
-      color: #fab84f;
-    }
-    .footer-contact-row {
-      margin-bottom: 8px;
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .footer-contact-label {
-      color: #fab84f;
-      margin-right: 4px;
-      font-weight: 500;
-      font-size: 1rem;
-    }
-    .footer-contact {
-      margin-top: 12px;
-      font-size: 1.02rem;
-      color: #fff;
-    }
-    .footer-contact-icon {
-      font-size: 1.18rem;
-      vertical-align: middle;
-      color: #afeafd;
-      margin-right: 7px;
-    }
-    @media (max-width: 900px) {
-      .footer {
-        flex-direction: column;
-        padding: 30px 20px 20px 20px;
-        gap: 30px;
-      }
-      .footer-col {
-        flex: 1 1 100%;
-      }
-      .about-flex-row {
-        flex-direction: column;
-      }
-      .about-img-left, .about-img-right {
-        margin-left: 0;
-        margin-right: 0;
-        align-self: center;
-      }
-    }
+        @keyframes fadeInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
 
-    /* ------- GAME STYLES (scoped, minimal) ------- */
-    .orbit-playground {
-      position: relative;
-      height: 380px; /* matches previous blank space height */
-      max-width: calc(100% - 40px);
-      margin: 20px auto 0;
-    }
-    .play-card {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      border-radius: 12px;
-      overflow: hidden;
-      background: linear-gradient(180deg, rgba(6,10,18,0.6), rgba(3,6,12,0.6));
-      border: 1px solid rgba(255,255,255,0.03);
-      box-shadow: 0 14px 40px rgba(0,0,0,0.6);
-    }
-    .play-canvas { position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none; }
-    /* Center Earth in middle of the play-card */
-    .orbit-center { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:6; display:flex; align-items:center; justify-content:center; pointer-events:auto; }
-    .earth-game {
-      width:120px; height:120px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:56px; cursor:default;
-      box-shadow: 0 10px 28px rgba(4,12,28,0.6), inset -6px -4px 20px rgba(0,0,0,0.45);
-      border:1px solid rgba(255,255,255,0.04);
-      background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.04), rgba(0,0,0,0.18));
-      -webkit-user-select:none; user-select:none;
-      pointer-events: auto;
-    }
-    .hud-small {
-      position:absolute; right:14px; top:14px; z-index:18; background:rgba(6,10,18,0.6); padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);
-      display:flex; gap:10px; align-items:center; backdrop-filter: blur(6px);
-    }
-    .hud-small .btn { background:transparent; border:1px solid rgba(255,255,255,0.04); padding:6px 8px; border-radius:8px; color:#bfeaff; cursor:pointer; font-weight:600; }
-    .hud-small .btn:hover { background: rgba(100,194,255,0.06); color:#fff; }
-    .hud-small .label { font-weight:700; color:#fff; font-size:0.9rem; }
-    .hud-small .muted { color:#bfeaff; font-size:0.82rem; }
-    @media (max-width:700px) {
-      .orbit-center { left: 50%; top: 50%; transform: translate(-50%,-50%); }
-      .earth-game { width:84px;height:84px;font-size:40px; }
-      .play-card { border-radius:10px; }
-    }
-  </style>
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(60px);
+            transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
 </head>
 <body>
-   <!-- Star Background -->
-  <div class="stars" id="stars"></div>
 
-   <!-- Top Section -->
-  <div class="top-bar">
-    <button class="hamburger">
-      <i class="fa-solid fa-bars"></i>
-    </button>
-    <div class="logo-title" onclick="window.location.href='dashboard.html';" style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
-      <img src="https://dl.dropboxusercontent.com/scl/fi/v5d7xte4tksarsdufk4ay/image.png?rlkey=ca8p4jsfcw1pnqr79q8uympso&st=ikst5uy1&dl=0" height="46" alt="Logo" />
-      GalaxyWeb
-    </div>
-    <div class="nav-buttons">
-      <button class="nav-btn" onclick="window.location.href='dashboard.html';">Home</button>
-      <button class="nav-btn" onclick="window.location.href='about_us.html';">Team Galaxy</button>
-      <div class="more-options" id="moreOptions" style="position:relative;">
-        <button class="nav-btn">More ▼</button>
-        <div class="dropdown-content" id="moreDropdown">
-          <a href="galaxy_blogs.html">Blog</a>
-          <a href="galaxy_portfolio.html">Portfolio</a>
-          <a href="posts.html">Posts</a>
-          <a href="community_chat.html">Community Chat</a>
-          <a href="galaxy_studio.html">Galaxy Design</a>
+    <div class="noise-overlay"></div>
+    <div class="custom-cursor" id="cursor"></div>
+    <div class="studio-grid"></div>
+
+    <section class="hero-section">
+        <h1 class="hero-heading">
+            Premium<br>
+            <span class="hollow-text">Visuals</span>
+        </h1>
+        <p class="hero-subtext">A creative studio specializing in high-end aesthetics & visual identities.</p>
+    </section>
+
+    <div class="marquee-container">
+        <div class="marquee-content">
+            <span class="solid">GALAXY DESIGNS</span> • <span>CRAFTING PREMIUM VISUALS</span> • 
+            <span class="solid">GALAXY DESIGNS</span> • <span>ENGINEERING AESTHETICS</span> • 
+            <span class="solid">GALAXY DESIGNS</span> • <span>CRAFTING PREMIUM VISUALS</span> • 
+            <span class="solid">GALAXY DESIGNS</span> • <span>ENGINEERING AESTHETICS</span> • 
         </div>
-      </div>
-      <button id="profileBtn" class="profile-btn" title="Sign In">
-        Sign In
-      </button>
-      <div id="profileMenu" class="dropdown-content" style="right: 30px; display:none;">
-        <a href="/user_management/user_profile.html" id="profileLink">Profile</a>
-        <a href="#" id="logoutLink">Logout</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Title & Game inserted into the previously empty space -->
-  <div style="position:relative;">
-    <!-- replaced the blank space with the playground, keeping layout intact -->
-    <div class="orbit-playground" id="orbitPlay">
-      <div class="play-card" id="playCard" aria-label="Orbit playground">
-        <canvas id="playCanvas" class="play-canvas" aria-hidden="true"></canvas>
-
-        <div class="orbit-center" aria-hidden="false">
-          <!-- Earth DOM element - fixed center -->
-          <div class="earth-game" id="earthEl" title="Double-click to sign in (or use Sign In button)">🌎</div>
-        </div>
-
-        <!-- HUD showing slug & name and controls -->
-        <div class="hud-small" id="hud">
-          <div>
-            <div class="label" id="hudName">Guest</div>
-            <div class="muted" id="hudSlug">@guest</div>
-          </div>
-          <div style="width:6px"></div>
-          <div style="text-align:right">
-            <div class="label" id="hudCollected">0</div>
-            <div class="muted" id="hudHigh">High: 0</div>
-          </div>
-          <div style="width:12px"></div>
-          <div>
-            <button class="btn" id="btnSpawn">Spawn</button>
-            <button class="btn" id="btnClear">Clear</button>
-            <button class="btn" id="btnSave">Save</button>
-            <button class="btn" id="btnDownload">Download</button>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <!-- REMOVED the <h1 class="about-title">About Team Galaxy</h1> intentionally as requested -->
-  </div>
+    <section class="section-container scroll-reveal">
+        <h2 class="section-title">Visuals That Speak</h2>
+        <p class="philosophy-text">
+            We don't just design. We <span>engineer aesthetics</span>. From sleek modern logos to immersive 3D renders, we deliver crisp, high-quality visuals that push boundaries and leave lasting impressions.
+        </p>
+    </section>
 
-  <div class="about-main">
+    <section class="section-container scroll-reveal">
+        <h2 class="section-title">The Core Team</h2>
+        <div class="team-grid">
+            <div class="team-card hover-target">
+                <div class="image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop" alt="Ege" class="profile-image">
+                </div>
+                <div class="team-info">
+                    <h3 class="team-name">Ege</h3>
+                    <span class="team-role">Founder / Design</span>
+                </div>
+                <p class="team-description">Crafting top-tier 3D designs and visual assets. Master of pixel-perfect precision and visual storytelling.</p>
+            </div>
 
-    <div class="about-section">
-      <div class="about-flex-row">
-        <div class="about-img-container about-img-left">
-          <img src=" https://dl.dropboxusercontent.com/scl/fi/4r0o3ymhfol2ndauy5bwb/IMG_20251108_205841.png?rlkey=hagnr2tms6hzf36vc0qgldu4e&st=czyyqfdb&dl=0" alt="Team Galaxy" />
+            <div class="team-card hover-target">
+                <div class="image-wrapper">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=600&h=800&fit=crop" alt="Prince" class="profile-image">
+                </div>
+                <div class="team-info">
+                    <h3 class="team-name">Prince</h3>
+                    <span class="team-role">CTO / Tech</span>
+                </div>
+                <p class="team-description">The technical backbone. Ensuring platforms run flawlessly while bridging the gap between creativity and logic.</p>
+            </div>
         </div>
-        <div class="about-flex-text">
-          <h2>What is Team Galaxy?</h2>
-          Est. May 2025<br>
-          <br>
-          Team Galaxy shines brightly on the competitive stage of World of Tanks Blitz. Our mission is to showcase our skills, push our limits, and aim for the top. With a strong and united roster, we make our mark not only in tournaments but in every battle we fight.<br>
-          <br>
-          But Team Galaxy isn't just about victory — it's about having fun, too! Our custom ranking system makes clan missions more exciting and creates a sense of friendly competition among members. Whether you want to fight at the highest level or just relax and enjoy the game with friends, you'll always find your place here.<br>
-          <br>
-          In Galaxy, every member is a star. 🌌
+    </section>
+
+    <footer class="footer-section scroll-reveal">
+        <div class="magnetic-btn-wrapper">
+            <a href="/designers" class="cta-button hover-target">Meet Our Designers</a>
         </div>
-      </div>
-    </div>
+    </footer>
 
-    <div class="about-section">
-      <div class="about-flex-row">
-        <div class="about-flex-text">
-          <h2>Clan Events & Activities</h2>
-          At Team Galaxy, we believe that a clan should be more than just a tag next to your name — it should be an experience. That's why we host exclusive member-only events designed to bring our community closer and keep the game exciting.<br>
-          <br>
-          One of our biggest traditions is turning weekly clan missions into a fun competition. Members earn stars by completing missions, and these stars contribute to a long-term leaderboard. The higher you climb, the more rewards you can win — from in-game gifts to special Galaxy merchandise.<br>
-          <br>
-          These events are perfect for both competitive warriors and laid-back tankers who just want to enjoy the ride while working toward something rewarding.
-        </div>
-        <div class="about-img-container about-img-right">
-          <img src=" https://dl.dropboxusercontent.com/scl/fi/g4wq4m8pkzd32dc7g79dt/1762616781.png?rlkey=m4ctngnu14zl6lffhbw5lvexz&st=bbrct8s5&dl=0" alt="Clan Event" />
-        </div>
-      </div>
-    </div>
+    <script>
+        // --- 1. Custom Cursor Logic ---
+        const cursor = document.getElementById('cursor');
+        const hoverTargets = document.querySelectorAll('.hover-target, a, .hero-heading');
 
-    <div class="about-section">
-      <h2>How to Apply</h2>
-      <div class="about-img-container about-img-inline">
-        <img src=" https://dl.dropboxusercontent.com/scl/fi/extuxsxwz66h4kxz8apek/IMG_20251108_212726.jpg?rlkey=xw6xxxqtx62ahy9bikj0em3i3&st=34gxu7oj&dl=0" alt="Apply Clan" />
-      </div>
-      <div>
-        Currently, we operate one main clan that welcomes both competitive and casual players.<br>
-        <br>
-        <strong>Competitive Player Requirements:</strong>
-        <ul>
-          <li>2400+ WN8 (last 30 days)</li>
-          <li>5,000+ total battles</li>
-          <li>60%+ overall win rate</li>
-        </ul>
-        <strong>Casual Player Requirements:</strong>
-        <ul>
-          <li>10,000+ total battles</li>
-          <li>60%+ overall win rate</li>
-        </ul>
-        <br>
-        If you meet the requirements, simply reach out to us through our official Discord or in-game contact. Our recruitment officers will review your stats and chat with you before inviting you to join.<br>
-        <br>
-        💡 Coming Soon: We are planning to launch our second clan to welcome even more players into the Galaxy family. Stay tuned for updates!
-      </div>
-    </div>
-
-    <div class="about-section">
-      <div class="about-flex-row">
-        <div class="about-img-container about-img-left">
-          <img src=" https://dl.dropboxusercontent.com/scl/fi/2o26yjla61had31bwpcqh/IMG_20251108_213648.jpg?rlkey=dh5e6uqjquk7bb8jnaofxixt5&st=mt7scwa4&dl=0" alt="Team Philosophy" />
-        </div>
-        <div class="about-flex-text">
-          <h2>Our Playstyle & Philosophy</h2>
-          At Team Galaxy, we believe that victory is built on teamwork, strategy, and trust. We don't just play — we play smart, fast, and as one. Every battle is a chance to learn, improve, and grow stronger together.<br>
-          <br>
-          Our philosophy is simple: push your limits, respect your team, and enjoy the game. Whether we're fighting for the top spot in a tournament or just having a relaxed evening in platoon, we bring the same passion and dedication to every match.<br>
-          <br>
-          We value communication, adaptability, and the drive to become better — because in the Galaxy, every star shines brighter when united. 🌌
-        </div>
-      </div>
-    </div>
-    <div class="about-section">
-      <h2>Achievements & Journey</h2>
-      <div class="about-flex-row">
-        <div class="about-flex-text">
-          Since our formation in May 2025, Team Galaxy has quickly built a name for itself in the Blitz community. While our sights are set on the biggest stages, we've already dominated numerous smaller-scale tournaments and community events — proving that our teamwork and skill can consistently bring home the win.<br>
-          <br>
-          <strong>Highlights so far:</strong>
-          <ul>
-            <li>Multiple weekly and community tournament victories.</li>
-            <li>Strong performance in clan mission challenges and internal competitions.</li>
-            <li>Established a solid and active roster of both competitive and casual players.</li>
-            <li>Launched our Galaxy Mission Challenge, turning weekly clan missions into a fun, rewarding contest.</li>
-          </ul>
-          Our journey is just beginning — and each win, no matter the size, brings us closer to our ultimate goal: competing and triumphing at the highest levels.
-        </div>
-        <div class="about-img-container about-img-right">
-          <img src=" https://dl.dropboxusercontent.com/scl/fi/athrvawp9mjtjc6psfxhv/1762616303.png?rlkey=4wwayymq6wn1632tquut9fn55&st=f10ldv4f&dl=0" alt="Galaxy Journey" />
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <!-- Left: About + Social -->
-    <div class="footer-col footer-left">
-      <div>
-        <div class="footer-about-title">About TeamGalaxy</div>
-        <div class="footer-about-text">
-          TeamGalaxy is an innovative gaming and creative community, united by passion and the spirit of collaboration. We host tournaments, share design ideas, and grow talents together — join now to explore the Galaxy!
-        </div>
-      </div>
-      <div class="footer-social">
-        <a href="https://x.com/teamgalaxy_wotb" title="Twitter"><i class="fab fa-twitter"></i></a>
-     <!--   <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="#" title="YouTube"><i class="fab fa-youtube"></i></a> -->
-        <a href="https://discord.gg/26pSCyMRPM" title="Discord"><i class="fab fa-discord"></i></a>
-      </div>
-    </div>
-
-    <!-- Right: Links + Address -->
-    <div class="footer-col footer-right">
-      <div class="footer-links">
-        <a href="legal/privacy_policy.html">Privacy Policy</a>
-        <a href="legal/terms_and_conditions.html">Terms & Conditions</a>
-        <a href="about_us.html">About</a>
-      </div>
-      <div>
-      <!--  <div class="footer-contact-row">
-          <span class="footer-contact-label">
-            <i class="fa-solid fa-location-dot footer-contact-icon"></i>Address:
-          </span>
-          Not Available 
-        </div>
-        <div class="footer-contact-row">
-          <span class="footer-contact-label">
-            <i class="fa-solid fa-phone footer-contact-icon"></i>Phone:
-          </span>
-          Not Available
-        </div> -->
-        <div class="footer-contact-row">
-          <span class="footer-contact-label">
-            <i class="fa-solid fa-envelope footer-contact-icon"></i>Email:
-          </span>
-          info@teamgalaxy.net
-        </div>
-        <div class="footer-contact">
-          <span class="footer-contact-label">
-            <i class="fa-regular fa-clock footer-contact-icon"></i>Working Hours:
-          </span>
-          Mon-Sat 10am - 10pm
-        </div>
-      </div>
-    </div>
-  </footer>
-
-<!-- ReCAPTCHA (kept as-is) -->
-<script src="https://www.google.com/recaptcha/api.js?render=6LfJDgcsAAAAABRkg1BC_ni3R8dFSCAXimVRAYOD"></script>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
-  import { 
-    getAuth, 
-    onAuthStateChanged, 
-    signInWithPopup, 
-    GoogleAuthProvider, 
-    signOut,
-    setPersistence,
-    browserLocalPersistence
-  } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
-  import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app-check.js";
-  import { getFirestore, doc, setDoc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
-
-  // Firebase config (unchanged)
-  const firebaseConfig = {
-    apiKey: "AIzaSyD0Yv_bQjxi2_kjzPR4XHOlaB7Sb6NRVUc",
-    authDomain: "teamgalaxy-77344.firebaseapp.com",
-    projectId: "teamgalaxy-77344",
-    storageBucket: "teamgalaxy-77344.firebasestorage.app",
-    messagingSenderId: "770256225320",
-    appId: "1:770256225320:web:5a363ebd757de6cde3a11d",
-    measurementId: "G-6C2W9NSNCH"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  try {
-    const appCheckProvider = new ReCaptchaV3Provider('6LfJDgcsAAAAABRkg1BC_ni3R8dFSCAXimVRAYOD');
-    initializeAppCheck(app, { provider: appCheckProvider, isTokenAutoRefreshEnabled: true });
-  } catch (e) { console.warn('App Check init failed', e); }
-
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
-  const db = getFirestore(app);
-
-  // ✅ Force LOCAL persistence so login survive reload / nav
-  (async () => {
-    try {
-      await setPersistence(auth, browserLocalPersistence);
-      console.log('Auth persistence set to LOCAL (modular)');
-    } catch (e) {
-      console.warn('Failed to set auth persistence:', e);
-    }
-  })();
-
-  /* -------------------------
-     Inject CSS fixes (keep existing look + ensure left HUD static + button style)
-     ------------------------- */
-  (function injectStyles(){
-    const css = `
-      .orbit-playground { height: 520px !important; max-width: calc(100% - 40px); margin: 10px auto 8px auto; }
-      @media (max-width:900px){ .orbit-playground{ height: 420px !important; } .about-main{ margin-top: 80px; } }
-      .about-main { margin-top: 40px !important; max-width: 1100px; }
-
-      /* Top-left static card */
-      .hud-left {
-        position: absolute;
-        left: 16px;
-        top: 12px;
-        z-index: 30;
-        background: linear-gradient(180deg, rgba(8,14,22,0.6), rgba(10,18,30,0.36));
-        padding: 8px 10px;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.06);
-        backdrop-filter: blur(6px);
-        display:flex;
-        gap:10px;
-        align-items:center;
-        min-width:180px;
-        box-shadow: 0 8px 20px rgba(2,8,20,0.5);
-      }
-      .hud-left .avatar { width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#bfeaff;background:linear-gradient(180deg,#0b2b3a,#06202a); border:2px solid rgba(150,220,255,0.12); }
-      .hud-left .text { display:flex;flex-direction:column;gap:2px; }
-      .hud-left .title { font-weight:700;color:#fff;font-size:1rem; }
-      .hud-left .subtitle { font-weight:600;color:#9fd8ff;font-size:0.82rem; }
-
-      /* Right HUD (keep visible as before) */
-      .hud-small { right: 14px; top: 14px; left: auto !important; z-index:25; }
-
-      /* Play Full Game button styling */
-      .play-full-btn {
-        position: absolute;
-        right: 14px;
-        bottom: 14px;
-        z-index: 40;
-        background: linear-gradient(90deg,#64c2ff 0%, #8ee7ff 50%, #d7fbff 100%);
-        color: #052027;
-        padding: 10px 14px;
-        border-radius: 12px;
-        border: none;
-        font-weight: 800;
-        cursor: pointer;
-        box-shadow: 0 12px 36px rgba(6,16,28,0.5), inset 0 -2px 8px rgba(0,0,0,0.06);
-        display:flex; align-items:center; gap:10px;
-      }
-      .play-full-btn i { font-size:14px; transform: translateY(-1px); }
-      .play-full-btn:hover { transform: translateY(-2px); transition: transform .12s ease; box-shadow: 0 18px 48px rgba(6,20,36,0.6); }
-
-      .nebula-canvas { position:absolute; inset:0; z-index:2; pointer-events:none; }
-    `;
-    const s = document.createElement('style');
-    s.innerText = css;
-    document.head.appendChild(s);
-  })();
-
-  /* -------------------------
-     DOM refs
-     ------------------------- */
-  const playCanvas = document.getElementById('playCanvas');
-  const playCard = document.getElementById('playCard');
-  const earthEl = document.getElementById('earthEl');
-
-  const hudNameRight = document.getElementById('hudName');   // top-right name label
-  const hudSlugRight = document.getElementById('hudSlug');   // top-right slug label
-  const hudCollected = document.getElementById('hudCollected');
-  const hudHigh = document.getElementById('hudHigh');
-  const btnSpawn = document.getElementById('btnSpawn');
-  const btnClear = document.getElementById('btnClear');
-  const btnSave = document.getElementById('btnSave');
-  const btnDownload = document.getElementById('btnDownload');
-  const profileBtn = document.getElementById('profileBtn');
-  const profileMenu = document.getElementById('profileMenu');
-  const logoutLink = document.getElementById('logoutLink');
-  const profileLink = document.getElementById('profileLink');
-  const globalStarsEl = document.getElementById('stars');
-
-  /* -------------------------
-     Create static top-left HUD (strictly static — no user data)
-     ------------------------- */
-  const hudLeft = document.createElement('div');
-  hudLeft.className = 'hud-left';
-  hudLeft.innerHTML = `
-    <div class="avatar">🌌</div>
-    <div class="text">
-      <div class="title">Orbit Playground</div>
-      <div class="subtitle">Play & Collect</div>
-    </div>
-  `;
-  playCard.appendChild(hudLeft);
-
-  /* -------------------------
-     Play Full Game button (preserve behavior)
-     ------------------------- */
-  const playFullBtn = document.createElement('button');
-  playFullBtn.className = 'play-full-btn';
-  playFullBtn.innerHTML = `<i class="fa-solid fa-rocket"></i><span>Play Full Game</span>`;
-  playFullBtn.addEventListener('click', () => { window.location.href = '/game/full_game.html'; });
-  playCard.appendChild(playFullBtn);
-
-  /* -------------------------
-     Nebula canvas
-     ------------------------- */
-  const nebulaCanvas = document.createElement('canvas');
-  nebulaCanvas.className = 'nebula-canvas';
-  nebulaCanvas.setAttribute('aria-hidden', 'true');
-  playCard.appendChild(nebulaCanvas);
-  const nebCtx = nebulaCanvas.getContext('2d');
-
-  /* -------------------------
-     State & game setup (kept from last working version)
-     ------------------------- */
-  let DPR = Math.max(1, window.devicePixelRatio || 1);
-  let W = 0, H = 0;
-  const ctx = playCanvas.getContext('2d');
-  let last = performance.now();
-  let orbs = [], pops = [], stars = [];
-  let nextId = 1;
-  const MAX_ORBS = 28;
-  const ORB_TYPES = [
-    { name:'common', chance:0.75, size:18, score:1, color:'#8EE7FF' },
-    { name:'uncommon', chance:0.18, size:26, score:3, color:'#FFD57B' },
-    { name:'rare', chance:0.06, size:34, score:6, color:'#B8FF9A' },
-    { name:'epic', chance:0.01, size:44, score:12, color:'#FF9AD6' }
-  ];
-
-  // score state
-  let collected = 0; // always start session from 0
-  let high = parseInt(localStorage.getItem('galaxy_high')) || 0;
-
-  // spawn config
-  const AUTO_SPAWN_INTERVAL_MS = 1200;
-  const AUTO_SPAWN_BURST_PROB = 0.22;
-
-  // identity
-  let currentUser = null;
-  let currentProfile = null;
-  let userPrivUnsub = null;
-
-  // helpers
-  function rand(a,b){ return a + Math.random()*(b-a); }
-  function pickType(){ const r=Math.random(); let s=0; for(const t of ORB_TYPES){ s+=t.chance; if(r <= s) return t; } return ORB_TYPES[0]; }
-  function hexToRgb(hex){ const s = hex.replace('#',''); return { r:parseInt(s.slice(0,2),16), g:parseInt(s.slice(2,4),16), b:parseInt(s.slice(4,6),16) }; }
-
-  /* -------------------------
-     updateHUD — IMPORTANT: only update RIGHT HUD with user name & slug.
-     Do NOT change the static left HUD.
-     ------------------------- */
-  function updateHUD(){
-    try {
-      if (currentUser || currentProfile) {
-        const displayName = currentProfile?.name || currentUser?.displayName || 'Guest';
-        const slug = currentProfile?.slug ? ('@' + currentProfile.slug) : '@guest';
-
-        if (hudNameRight) hudNameRight.textContent = displayName;
-        if (hudSlugRight) hudSlugRight.textContent = slug;
-      } else {
-        if (hudNameRight) hudNameRight.textContent = 'Guest';
-        if (hudSlugRight) hudSlugRight.textContent = '@guest';
-      }
-    } catch(e){ console.warn('updateHUD right failure', e); }
-
-    if (hudCollected) hudCollected.textContent = collected;
-    if (hudHigh) hudHigh.textContent = 'High: ' + high;
-
-    updateProfileButton();
-  }
-
-  /* -------------------------
-     Canvas sizing, nebula, stars (kept)
-     ------------------------- */
-  function resizeCanvas(){
-    const rect = playCard.getBoundingClientRect();
-    const computedHeight = Math.max(260, rect.height || 520);
-    const computedWidth = Math.min(rect.width || (window.innerWidth - 80), Math.max(320, rect.width));
-    W = Math.max(200, Math.floor(computedWidth));
-    H = Math.max(220, Math.floor(computedHeight));
-    playCanvas.style.width = W + 'px'; playCanvas.style.height = H + 'px';
-    playCanvas.width = Math.floor(W * DPR); playCanvas.height = Math.floor(H * DPR);
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-
-    nebulaCanvas.style.width = W + 'px'; nebulaCanvas.style.height = H + 'px';
-    nebulaCanvas.width = Math.floor(W * DPR); nebulaCanvas.height = Math.floor(H * DPR);
-    nebCtx.setTransform(DPR,0,0,DPR,0,0);
-
-    initStars(); initNebula();
-  }
-  window.addEventListener('resize', resizeCanvas);
-
-  function initStars(){
-    stars.length = 0;
-    const count = Math.max(16, Math.round((W*H)/90000));
-    for(let i=0;i<count;i++) stars.push({ x:Math.random()*W, y:Math.random()*H, s:Math.random()*1.6+0.4, phase:Math.random()*Math.PI*2, speed: 0.001 + Math.random()*0.004 });
-  }
-
-  (function initGlobalStars(){
-    if(!globalStarsEl) return;
-    const STAR_COUNT = 160;
-    for(let i=0;i<STAR_COUNT;i++){
-      const el = document.createElement('div');
-      el.className = 'star';
-      const x = Math.random()*100, y = Math.random()*100;
-      const size = Math.random()*2 + 0.6;
-      el.style.left = x+'%'; el.style.top = y+'%';
-      el.style.width = size+'px'; el.style.height = size+'px';
-      el.style.opacity = (0.18 + Math.random()*0.82).toString();
-      el.style.setProperty('--duration', `${2 + Math.random()*5}s`);
-      globalStarsEl.appendChild(el);
-    }
-    document.addEventListener('mousemove', (e)=>{
-      const w = window.innerWidth, h = window.innerHeight;
-      const rx = (e.clientX / w - 0.5) * 6;
-      const ry = (e.clientY / h - 0.5) * 6;
-      globalStarsEl.style.transform = `translate(${rx}px, ${ry}px)`;
-    });
-  })();
-
-  let nebulaBlobs = [];
-  function initNebula(){
-    nebulaBlobs = [];
-    const blobCount = Math.max(2, Math.round(W/420));
-    for(let i=0;i<blobCount;i++){
-      nebulaBlobs.push({
-        x: Math.random()*W,
-        y: Math.random()*H,
-        r: Math.max(80, Math.random()*220),
-        vx: (Math.random()-0.5)*0.14,
-        vy: (Math.random()-0.5)*0.14,
-        hue: Math.floor(180 + Math.random()*120),
-        alpha: 0.06 + Math.random()*0.12
-      });
-    }
-  }
-  function drawNebula(now){
-    nebCtx.clearRect(0,0,W,H);
-    for(const b of nebulaBlobs){
-      b.x += b.vx; b.y += b.vy;
-      if(b.x < -b.r) b.x = W + b.r;
-      if(b.x > W + b.r) b.x = -b.r;
-      if(b.y < -b.r) b.y = H + b.r;
-      if(b.y > H + b.r) b.y = -b.r;
-      const g = nebCtx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
-      g.addColorStop(0, `hsla(${b.hue}, 75%, 60%, ${b.alpha*1.6})`);
-      g.addColorStop(0.5, `hsla(${b.hue}, 65%, 40%, ${b.alpha})`);
-      g.addColorStop(1, `rgba(0,0,0,0)`);
-      nebCtx.fillStyle = g;
-      nebCtx.beginPath(); nebCtx.arc(b.x, b.y, b.r, 0, Math.PI*2); nebCtx.fill();
-    }
-  }
-
-  /* -------------------------
-     Spawn / collect (kept)
-     ------------------------- */
-  function spawnOrbAt(clientX, clientY){
-    if (orbs.length >= MAX_ORBS) return;
-    const rect = playCard.getBoundingClientRect();
-    const cx = rect.left + rect.width/2;
-    const cy = rect.top + rect.height/2;
-    const px = clientX || (cx + rand(-140,140));
-    const py = clientY || (cy + rand(-90,90));
-    const dx = px - cx; const dy = py - cy;
-    const radius = Math.max(72, Math.min(Math.hypot(dx,dy), Math.min(rect.width, rect.height)/2 - 36));
-    const angle = Math.atan2(dy, dx);
-    const baseSpeed = 1.1 / Math.sqrt(Math.max(1, radius/90));
-    const speed = (Math.random() < 0.5 ? 1 : -1) * baseSpeed * (0.7 + Math.random()*1.0);
-    const t = pickType();
-    const orb = {
-      id: nextId++,
-      angle, radius, speed,
-      size: t.size * (0.92 + Math.random()*0.18),
-      color: t.color, score: t.score, rarity: t.name,
-      rotation: Math.random()*Math.PI*2,
-      rotSpeed: (Math.random()*0.9-0.45)*0.02
-    };
-    orbs.push(orb);
-  }
-
-  function toLocalCoords(clientX, clientY){
-    const rect = playCard.getBoundingClientRect();
-    return { x: clientX - rect.left, y: clientY - rect.top };
-  }
-
-  function hitTest(x,y){
-    let best=null, bestD=Infinity;
-    const rect = playCard.getBoundingClientRect();
-    const cx = rect.width/2, cy = rect.height/2;
-    for(const o of orbs){
-      const ox = cx + o.radius * Math.cos(o.angle), oy = cy + o.radius * Math.sin(o.angle);
-      const d = Math.hypot(x-ox, y-oy);
-      const hitR = Math.max(18, o.size*1.6);
-      if (d <= hitR && d < bestD){ best = o; bestD = d; }
-    }
-    return best;
-  }
-
-  function collectOrb(o){
-    if(!o) return;
-    spawnPopForOrb(o);
-    collected += o.score;
-    if (collected > high){
-      high = collected;
-      localStorage.setItem('galaxy_high', high);
-      flashHigh(); playCelebration(); launchConfetti({count:90});
-    }
-    if (collected % 10 === 0){ launchConfetti({count:28}); playCelebration(); }
-    orbs = orbs.filter(x => x.id !== o.id);
-    updateHUD(); playCollect();
-  }
-
-  function spawnPopForOrb(o){
-    const rect = playCard.getBoundingClientRect(); const cx = rect.width/2, cy = rect.height/2;
-    const x = cx + o.radius * Math.cos(o.angle); const y = cy + o.radius * Math.sin(o.angle);
-    const rgb = hexToRgb(o.color);
-    const parts = []; const count = Math.min(34, Math.round(8 + o.size*1.4));
-    for(let i=0;i<count;i++){
-      const ang = Math.random()*Math.PI*2;
-      parts.push({ vx: Math.cos(ang)*(0.6 + Math.random()*3.2), vy: Math.sin(ang)*(0.6 + Math.random()*3.2), size: Math.random()*(o.size*0.8)+0.6, color: `rgba(${rgb.r},${rgb.g},${rgb.b},` });
-    }
-    pops.push({ x,y, parts, life:1, lifeMax:1, speed: 42 + o.size*6 });
-  }
-
-  /* -------------------------
-     Drawing functions (kept)
-     ------------------------- */
-  function drawBackground(now){
-    ctx.save();
-    const grad = ctx.createLinearGradient(0,0,0,H);
-    grad.addColorStop(0, 'rgba(6,10,18,0.20)');
-    grad.addColorStop(1, 'rgba(3,6,12,0.32)');
-    ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
-    for(let i=0;i<Math.max(8, Math.round((W*H)/200000)); i++){
-      const x = (i*37*13) % W + ((now/1200) % 7);
-      const y = ((i*17*7) % H) + Math.sin((now/12000)+i)*6;
-      ctx.fillStyle = 'rgba(200,230,255,0.02)';
-      ctx.beginPath(); ctx.ellipse(x,y,1.2,1.2,0,0,Math.PI*2); ctx.fill();
-    }
-    ctx.restore();
-  }
-
-  function drawOrbs(now, dt){
-    const rect = playCard.getBoundingClientRect();
-    const cx = rect.width/2, cy = rect.height/2;
-    for(const o of orbs){
-      o.angle += o.speed * (dt/1000);
-      o.rotation += o.rotSpeed;
-      const x = cx + o.radius * Math.cos(o.angle), y = cy + o.radius * Math.sin(o.angle);
-      ctx.save();
-      ctx.translate(x,y);
-      ctx.rotate(o.rotation * 0.12);
-      const glow = ctx.createRadialGradient(0,0,0,0,0,o.size*2.6);
-      glow.addColorStop(0, 'rgba(255,255,255,0.08)');
-      glow.addColorStop(0.6, 'rgba(255,255,255,0.02)');
-      glow.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = glow;
-      ctx.beginPath(); ctx.arc(0,0,o.size*2.6,0,Math.PI*2); ctx.fill();
-      const fontSize = Math.max(16, Math.min(56, o.size));
-      ctx.font = `${fontSize}px serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('🛰️', 0, 0);
-      if (o.rarity === 'epic' || o.rarity === 'rare'){
-        ctx.font = '10px Poppins, Arial';
-        ctx.fillStyle = '#fff';
-        ctx.fillText(o.rarity[0].toUpperCase(), o.size*0.85, -o.size*0.82);
-      }
-      ctx.restore();
-      o.screenX = x; o.screenY = y;
-    }
-  }
-
-  function drawPops(now, dt){
-    ctx.save();
-    for(let i=pops.length-1;i>=0;i--){
-      const p = pops[i];
-      p.life -= dt / 420;
-      const alpha = Math.max(0, p.life / p.lifeMax);
-      for(const part of p.parts){
-        const px = p.x + part.vx * (1 - alpha) * p.speed;
-        const py = p.y + part.vy * (1 - alpha) * p.speed;
-        const s = Math.max(0.6, part.size * alpha);
-        ctx.fillStyle = part.color + (0.88 * alpha) + ')';
-        ctx.beginPath(); ctx.ellipse(px, py, s, s, 0,0,Math.PI*2); ctx.fill();
-      }
-      if (p.life <= 0) pops.splice(i,1);
-    }
-    ctx.restore();
-  }
-
-  function drawVignette(){
-    const g = ctx.createRadialGradient(W/2, H/2, Math.max(W,H)/6, W/2, H/2, Math.max(W,H)/1.0);
-    g.addColorStop(0,'rgba(255,255,255,0)');
-    g.addColorStop(1,'rgba(0,0,0,0.18)');
-    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
-  }
-
-  function loop(now){
-    requestAnimationFrame(loop);
-    const dt = Math.max(8, now - last);
-    last = now;
-    ctx.clearRect(0,0,W,H);
-    drawBackground(now);
-    drawOrbs(now, dt);
-    drawPops(now, dt);
-    drawVignette();
-    drawNebula(now);
-  }
-
-  /* -------------------------
-     Pointer / controls
-     ------------------------- */
-  playCard.addEventListener('pointerdown', (e)=> {
-    if(e.pointerType === 'mouse' && e.button !== 0) return;
-    const p = toLocalCoords(e.clientX, e.clientY);
-    const found = hitTest(p.x, p.y);
-    if(found){ collectOrb(found); return; }
-    spawnOrbAt(e.clientX, e.clientY);
-  });
-
-  btnSpawn.addEventListener('click', ()=> { for(let i=0;i<3;i++) spawnOrbAt(); });
-  btnClear.addEventListener('click', ()=> { orbs=[]; pops=[]; ctx.clearRect(0,0,W,H); });
-  btnDownload.addEventListener('click', downloadScoreImage);
-  btnSave.addEventListener('click', saveScoreToCloud);
-
-  /* -------------------------
-     Audio + confetti (kept)
-     ------------------------- */
-  let audioCtx = null;
-  function ensureAudio(){ if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-  function playTone(freq=420, dur=0.06){ try{ ensureAudio(); const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sine'; o.frequency.value=freq; o.connect(g); g.connect(audioCtx.destination); const now = audioCtx.currentTime; g.gain.setValueAtTime(0.001, now); g.gain.exponentialRampToValueAtTime(0.12, now + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, now + dur); o.start(now); o.stop(now + dur + 0.02);}catch(e){} }
-  function playCollect(){ playTone(720,0.05); }
-  function playCelebration(){ try{ ensureAudio(); const now = audioCtx.currentTime; const notes = [880, 1100, 1320, 1760]; notes.forEach((n,i)=>{ const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='triangle'; o.frequency.value = n; o.connect(g); g.connect(audioCtx.destination); const t = now + i*0.07; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.14, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22); o.start(t); o.stop(t + 0.26); }); }catch(e){} }
-  document.addEventListener('pointerdown', ()=> ensureAudio(), { once:true });
-
-  const confettiCanvas = (function createConfetti(){
-    const c = document.createElement('canvas');
-    c.style.position = 'fixed'; c.style.left = '0'; c.style.top = '0'; c.style.width = '100%'; c.style.height = '100%';
-    c.style.pointerEvents = 'none'; c.style.zIndex = 9999; document.body.appendChild(c);
-    const ctx = c.getContext('2d');
-    function resize(){ c.width = window.innerWidth * DPR; c.height = window.innerHeight * DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
-    window.addEventListener('resize', resize); resize();
-    return { canvas:c, ctx, parts:[] };
-  })();
-
-  function launchConfetti({count=80, spread=Math.PI*1.1, duration=2200} = {}){
-    const { canvas, ctx, parts } = confettiCanvas;
-    const w = canvas.width / DPR, h = canvas.height / DPR;
-    const colors = ['#ffd166','#06d6a0','#118ab2','#ef476f','#a8dadc','#ffd6a5','#c084fc'];
-    for(let i=0;i<count;i++){
-      const angle = (Math.PI/2) + (Math.random()-0.5)*spread;
-      const speed = Math.random()*8 + 3;
-      const size = 6 + Math.random()*10;
-      const shape = Math.random() < 0.5 ? 'rect' : (Math.random() < 0.5 ? 'circle' : 'tri');
-      parts.push({ x: w * (0.2 + Math.random()*0.6), y: -10 - Math.random()*60, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed + 1.6, rot: Math.random()*Math.PI*2, rotSpeed: (Math.random()-0.5)*0.28, size, color: colors[Math.floor(Math.random()*colors.length)], shape, life: 1, decay: 1 / (duration/16 + Math.random()*40) });
-    }
-    let t0 = performance.now();
-    (function frame(now){
-      const dt = now - t0; t0 = now;
-      ctx.clearRect(0,0,w,h);
-      for(let i=parts.length-1;i>=0;i--){
-        const p = parts[i];
-        p.vy += 0.16; p.vx *= 0.998; p.x += p.vx; p.y += p.vy; p.rot += p.rotSpeed; p.life -= p.decay * (dt/16);
-        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.color;
-        if(p.shape === 'rect') ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
-        else if(p.shape === 'circle'){ ctx.beginPath(); ctx.ellipse(0,0,p.size*0.55,p.size*0.55,0,0,Math.PI*2); ctx.fill(); }
-        else { ctx.beginPath(); ctx.moveTo(0,-p.size/1.3); ctx.lineTo(p.size/1.2,p.size/1.6); ctx.lineTo(-p.size/1.2,p.size/1.6); ctx.closePath(); ctx.fill(); }
-        ctx.restore();
-        if(p.y > h - 12 && p.life > 0.2){ p.vy *= -0.32; p.vx *= 0.75; p.y = h - 12; }
-        if(p.life <= 0 || p.y > h + 80) parts.splice(i,1);
-      }
-      if(parts.length > 0) requestAnimationFrame(frame);
-      else ctx.clearRect(0,0,w,h);
-    })(performance.now());
-  }
-
-  /* -------------------------
-     Download & Save (includes photoUrl)
-     ------------------------- */
-  function downloadScoreImage(){
-    const w = 1400, h = 760;
-    const c = document.createElement('canvas'); c.width = w; c.height = h;
-    const g = c.getContext('2d');
-    const grad = g.createLinearGradient(0,0,0,h);
-    grad.addColorStop(0, '#021224'); grad.addColorStop(1, '#061224'); g.fillStyle = grad; g.fillRect(0,0,w,h);
-    for(let i=0;i<200;i++){ g.fillStyle = 'rgba(200,230,255,' + (0.02 + Math.random()*0.07) + ')'; const x=Math.random()*w,y=Math.random()*h,s= Math.random()*2.4; g.beginPath(); g.ellipse(x,y,s,s,0,0,Math.PI*2); g.fill(); }
-    g.fillStyle = 'rgba(8,14,22,0.62)'; roundRect(g, 64, 84, w-128, h-188, 20); g.fill();
-    const cx = 150, cy = 300, cr = 120;
-    const pg = g.createRadialGradient(cx-30, cy-30, 10, cx, cy, cr); pg.addColorStop(0, '#9ee6ff'); pg.addColorStop(0.5, '#6abcf1'); pg.addColorStop(1, '#1b3d66'); g.beginPath(); g.arc(cx, cy, cr, 0, Math.PI*2); g.fill();
-    g.strokeStyle = 'rgba(255,255,255,0.08)'; g.lineWidth = 8; g.beginPath(); g.ellipse(cx, cy+8, cr+28, cr-18, -0.35, 0, Math.PI*2); g.stroke();
-    g.font = '92px serif'; g.textAlign = 'center'; g.textBaseline='middle'; g.fillText('🌎', cx, cy);
-    g.font = '700 44px Poppins, Arial'; g.fillStyle = '#fff'; g.fillText('Team Galaxy — Orbit Score Card', 380, 140);
-    const displayName = currentProfile?.name || (currentUser?.displayName || 'Guest');
-    const slug = currentProfile?.slug ? ('@' + currentProfile.slug) : (currentUser ? ('@guest') : '@guest');
-    g.font = '600 28px Poppins, Arial'; g.fillStyle = '#bfeaff'; g.fillText(displayName, 380, 210);
-    g.font = '500 20px Poppins, Arial'; g.fillStyle = '#9fd8ff'; g.fillText(slug, 380, 246);
-    g.font = '700 88px Poppins, Arial'; g.fillStyle = '#fff'; g.fillText(String(high), 380, 380);
-    g.font = '500 20px Poppins, Arial'; g.fillStyle = '#9fd8ff'; g.fillText('High Score', 380, 420);
-    g.font = '700 38px Poppins, Arial'; g.fillStyle = '#fff'; g.fillText('Collected: ' + collected, 380, 520);
-    g.font = '400 16px Poppins, Arial'; g.fillStyle = 'rgba(255,255,255,0.8)'; g.fillText('Generated: ' + new Date().toLocaleString(), 380, 600);
-    g.font = '400 14px Poppins, Arial'; g.fillStyle = 'rgba(255,255,255,0.65)'; g.fillText('Public game stats only — no personal PII included.', w-300, h-56);
-    g.font = '28px serif'; const satPositions = [ [w-240,220], [w-160,340], [w-220,420] ]; g.fillStyle = '#d7f6ff'; satPositions.forEach((p,i)=> g.fillText('🛰️', p[0], p[1]));
-    c.toBlob(function(blob){ const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'galaxy-score-' + Date.now() + '.png'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }, 'image/png');
-  }
-  function roundRect(g, x, y, w, h, r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
-
-  async function saveScoreToCloud(){
-    if (!currentUser){ alert('Sign in to save to cloud (click Sign In or double-click the Earth).'); return; }
-    try{
-      const uid = currentUser.uid;
-      const ref = doc(db, 'gameScores', uid);
-      const payload = {
-        collected,
-        high,
-        name: currentProfile?.name || currentUser?.displayName || null,
-        slug: currentProfile?.slug || null,
-        photoUrl: currentUser?.photoURL || currentProfile?.profilePhotoUrl || null,
-        lastUpdated: serverTimestamp(),
-        clientTs: new Date().toISOString()
-      };
-      await setDoc(ref, payload, { merge: true });
-      alert('Saved to cloud.');
-    }catch(e){ console.error('save fail', e); alert('Save failed.'); }
-  }
-
-  /* -------------------------
-     Auth state: subscribe to usersPrivate to keep slug updated; updateHUD only affects RIGHT HUD.
-     ------------------------- */
-  function flashHigh(){ if (hudHigh) { hudHigh.style.transform = 'scale(1.06)'; hudHigh.style.color = '#fff'; setTimeout(()=>{ hudHigh.style.transform=''; hudHigh.style.color=''; }, 420); } }
-
-  function updateProfileButton(){
-    try {
-      if (!profileBtn) return;
-      const u = currentUser;
-      if (u) {
-        if (u.photoURL) { profileBtn.innerHTML = `<img src="${u.photoURL}" alt="Profile" style="width:36px;height:36px;border-radius:50%;">`; }
-        else { profileBtn.innerHTML = `<i class="fa-solid fa-user"></i>`; }
-        profileBtn.title = currentProfile?.name || u.displayName || u.email || "Profile";
-      } else {
-        profileBtn.innerHTML = 'Sign In';
-        profileBtn.title = 'Sign In';
-      }
-    } catch(e){ console.warn('updateProfileBtn err', e); }
-  }
-
-  onAuthStateChanged(auth, async (user) => {
-    if (userPrivUnsub) { try { userPrivUnsub(); } catch(_){} userPrivUnsub = null; }
-    currentUser = user;
-    if (user) {
-      try {
-        const privRef = doc(db, 'usersPrivate', user.uid);
-        userPrivUnsub = onSnapshot(privRef, (snap) => {
-          if (snap.exists()) currentProfile = snap.data();
-          else currentProfile = { name: user.displayName || null, slug: null, profilePhotoUrl: null };
-          updateHUD();
-        }, (err) => {
-          console.warn('usersPrivate snapshot error', err);
-          currentProfile = { name: user.displayName || null, slug: null, profilePhotoUrl: null };
-          updateHUD();
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
         });
-      } catch(e){
-        console.warn('usersPrivate subscription failed', e);
-        currentProfile = { name: user.displayName || null, slug: null, profilePhotoUrl: null };
-        updateHUD();
-      }
-    } else {
-      currentProfile = null;
-      updateHUD();
-    }
-  });
 
-  // Profile dropdown behaviour (auth-safe)
-  if (profileBtn && !profileBtn._attached) {
-    profileBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      e.preventDefault && e.preventDefault();
-      const liveUser = currentUser || auth.currentUser;
-      if (!liveUser) {
-        window.location.href = "/legal/sign_up.html";
-        return;
-      }
-      if (!profileMenu) return;
-      profileMenu.style.display = profileMenu.style.display === 'block' ? 'none' : 'block';
-    });
-    profileBtn._attached = true;
-  }
+        hoverTargets.forEach(target => {
+            target.addEventListener('mouseenter', () => cursor.classList.add('hovering'));
+            target.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
+        });
 
-  window.addEventListener('click', ()=> { if(profileMenu) profileMenu.style.display = 'none'; });
+        // --- 2. Magnetic Button Logic ---
+        const magneticWrapper = document.querySelector('.magnetic-btn-wrapper');
+        const magneticBtn = document.querySelector('.cta-button');
 
-  if (logoutLink && !logoutLink._attached) {
-    logoutLink.addEventListener('click', (e)=> {
-      e.preventDefault();
-      const liveUser = currentUser || auth.currentUser;
-      if (!liveUser) return;
-      signOut(auth)
-        .then(()=>{ alert('Signed out'); })
-        .catch(()=>{});
-    });
-    logoutLink._attached = true;
-  }
+        magneticWrapper.addEventListener('mousemove', (e) => {
+            const rect = magneticWrapper.getBoundingClientRect();
+            // Calculate distance from center of the wrapper
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            
+            // Move button smoothly towards cursor (x0.3 makes it subtle)
+            magneticBtn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+        });
 
-  if (profileLink && !profileLink._attached) {
-    profileLink.addEventListener('click', (e)=> {
-      e.preventDefault();
-      const liveUser = currentUser || auth.currentUser;
-      if(!liveUser) window.location.href = "/legal/sign_up.html";
-      else window.location.href = "/user_management/user_profile.html";
-    });
-    profileLink._attached = true;
-  }
+        magneticWrapper.addEventListener('mouseleave', () => {
+            // Snap back to center
+            magneticBtn.style.transform = `translate(0px, 0px)`;
+        });
 
-  earthEl.addEventListener('dblclick', async () => {
-    if (currentUser){ alert('Signed in as ' + (currentUser.displayName || currentUser.email)); return; }
-    try{ await signInWithPopup(auth, provider); alert('Signed in'); }catch(e){ console.warn(e); alert('Sign-in failed'); }
-  });
+        // --- 3. Scroll Reveal Logic ---
+        function handleScroll() {
+            const elements = document.querySelectorAll('.scroll-reveal');
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                if (elementTop < window.innerHeight - 100) {
+                    element.classList.add('visible');
+                }
+            });
+        }
 
-  /* -------------------------
-     Auto spawn and init loop
-     ------------------------- */
-  (function startAutoSpawn(){
-    setInterval(()=>{
-      if (orbs.length >= MAX_ORBS) return;
-      if(Math.random() < AUTO_SPAWN_BURST_PROB){
-        for(let i=0;i<3;i++) spawnOrbAt();
-      } else {
-        spawnOrbAt();
-      }
-    }, AUTO_SPAWN_INTERVAL_MS);
-  })();
-
-  function init(){
-    DPR = Math.max(1, window.devicePixelRatio || 1);
-    resizeCanvas();
-    const rect = playCard.getBoundingClientRect();
-    for(let i=0;i<5;i++) spawnOrbAt(rect.left + rect.width/2 + rand(-140,140), rect.top + rect.height/2 + rand(-90,90));
-    updateHUD();
-    last = performance.now();
-    requestAnimationFrame(loop);
-  }
-  window.addEventListener('load', init);
-
-  window.addEventListener('beforeunload', ()=> { 
-    localStorage.setItem('galaxy_high', high); 
-    if (userPrivUnsub) try{ userPrivUnsub(); } catch(_){} 
-  });
-
-  // polyfill roundRect
-  if (!CanvasRenderingContext2D.prototype.roundRect) {
-    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
-      if (w < 2 * r) r = w / 2; if (h < 2 * r) r = h / 2;
-      this.beginPath(); this.moveTo(x+r, y); this.arcTo(x+w, y, x+w, y+h, r); this.arcTo(x+w, y+h, x, y+h, r); this.arcTo(x, y+h, x, y, r); this.arcTo(x, y, x+w, y, r); this.closePath();
-    };
-  }
-</script>
-
-<!-- Updated: Desktop-only overlay (unchanged) -->
-<script>
-(function () {
-  const DESKTOP_MIN_WIDTH = 1024; // adjust if you prefer a different breakpoint (px)
-
-  const css = `
-    .dg-desktop-overlay { position: fixed; inset: 0; display:flex; align-items:center; justify-content:center; z-index:2147483647; pointer-events:auto; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; backdrop-filter: blur(6px) saturate(120%); background: linear-gradient(180deg, rgba(6,10,15,0.72), rgba(2,6,12,0.86)); transition: opacity 280ms ease, visibility 280ms ease; opacity:0; visibility:hidden; }
-    .dg-desktop-overlay.show { opacity:1; visibility:visible; }
-    .dg-desktop-card { max-width:880px; margin:24px; width:calc(100% - 48px); border-radius:14px; box-shadow:0 10px 30px rgba(2,6,12,0.6),0 3px 8px rgba(0,0,0,0.35); background: linear-gradient(180deg, rgba(18,22,26,0.9), rgba(10,14,18,0.95)); padding:32px; color:#e6eef8; font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; text-align:left; border:1px solid rgba(255,255,255,0.04);}
-    .dg-desktop-top { display:flex; gap:16px; align-items:center; }
-    .dg-desktop-icon { width:72px; height:72px; flex:0 0 72px; display:grid; place-items:center; border-radius:12px; background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02); }
-    .dg-desktop-icon svg{ width:40px; height:40px; color:#cfe7ff; opacity:0.95; }
-    .dg-desktop-heading { font-size:20px; line-height:1.25; margin:0 0 6px 0; color:#ffffff; font-weight:600; }
-    .dg-desktop-sub { margin:0; color: rgba(230,238,248,0.92); font-size:14px; line-height:1.5; }
-    .dg-desktop-body { margin-top:18px; display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap; }
-    .dg-desktop-list { flex:1 1 280px; }
-    .dg-desktop-list p { margin:0 0 10px 0; font-size:13.5px; color: rgba(230,238,248,0.86); }
-    .dg-desktop-actions { display:flex; gap:12px; align-items:center; justify-content:flex-end; margin-top:20px; }
-    .dg-desktop-hint { margin-top:10px; font-size:12px; color: rgba(230,238,248,0.65); }
-    @media print { .dg-desktop-overlay { display:none !important; } }
-    @media (prefers-reduced-motion: reduce) { .dg-desktop-overlay, .dg-desktop-card { transition: none; } }
-  `;
-  const style = document.createElement('style');
-  style.id = 'dg-desktop-overlay-styles';
-  style.appendChild(document.createTextNode(css));
-  document.head.appendChild(style);
-
-  const overlay = document.createElement('div');
-  overlay.className = 'dg-desktop-overlay';
-  overlay.setAttribute('role', 'dialog');
-  overlay.setAttribute('aria-modal', 'true');
-  overlay.setAttribute('aria-label', 'Desktop view required');
-  overlay.innerHTML = `
-    <div class="dg-desktop-card" role="document" tabindex="-1">
-      <div class="dg-desktop-top">
-        <div class="dg-desktop-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect x="3" y="4" width="18" height="12" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/>
-            <path d="M8 20h8M12 16v4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div style="flex:1 1 auto; min-width:0;">
-          <h2 class="dg-desktop-heading">Desktop view recommended</h2>
-          <p class="dg-desktop-sub">For the best experience and full functionality, please switch your browser to a desktop viewport or use a desktop device.</p>
-        </div>
-      </div>
-      <div class="dg-desktop-body">
-        <div class="dg-desktop-list">
-          <p><strong>Why:</strong> This site is optimized for desktop layout and features. On smaller screens some content and controls may be hidden or not behave as intended.</p>
-          <p><strong>What you can do:</strong> Open the page on a desktop/laptop or enable "Request Desktop Site" in your mobile browser.</p>
-          <ul style="margin:6px 0 0 18px; color: rgba(230,238,248,0.86); font-size:13.5px;">
-            <li>Open on a desktop or laptop, or</li>
-            <li>Enable "Request Desktop Site" in your mobile browser (if available).</li>
-          </ul>
-        </div>
-        <div style="flex:0 0 220px; min-width:180px;">
-          <div style="background: rgba(255,255,255,0.02); padding:12px; border-radius:10px;">
-            <p style="margin:0 0 8px 0; font-weight:600;">Important</p>
-            <p style="margin:0; font-size:13px; color: rgba(230,238,248,0.85);">This prompt is required for correct layout and to access all features.</p>
-          </div>
-        </div>
-      </div>
-      <div class="dg-desktop-actions" aria-hidden="true"></div>
-      <div class="dg-desktop-hint" aria-hidden="true">Tip: If you enabled "Request Desktop Site" and the overlay remains, try refreshing after toggling the setting.</div>
-    </div>
-  `;
-  document.body.appendChild(overlay);
-
-  const MOBILE_RE = /Mobi|Android|iPhone|iPad|Windows Phone|BlackBerry|BB10|Opera Mini|Mobile/i;
-
-  function isUserAgentMobile() {
-    try {
-      return MOBILE_RE.test(navigator.userAgent || '');
-    } catch (e) {
-      return false;
-    }
-  }
-
-  function isLikelyDesktopByUA() {
-    return !isUserAgentMobile();
-  }
-
-  function isLikelyDesktopByWidth() {
-    const w = window.innerWidth || document.documentElement.clientWidth || screen.width;
-    return w >= DESKTOP_MIN_WIDTH;
-  }
-
-  function shouldShowOverlay() {
-    return !(isLikelyDesktopByWidth() || isLikelyDesktopByUA());
-  }
-
-  function applyOverlayState(show) {
-    if (show) {
-      overlay.classList.add('show');
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
-      try { overlay.querySelector('.dg-desktop-card').focus(); } catch (e) {}
-    } else {
-      overlay.classList.remove('show');
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
-    }
-  }
-
-  function updateOverlay() {
-    applyOverlayState(shouldShowOverlay());
-  }
-
-  setTimeout(updateOverlay, 60);
-
-  let resizeTimer = null;
-  function schedule() {
-    if (resizeTimer) clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(updateOverlay, 120);
-  }
-  window.addEventListener('resize', schedule, { passive: true });
-  window.addEventListener('orientationchange', schedule, { passive: true });
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', schedule, { passive: true });
-    window.visualViewport.addEventListener('scroll', schedule, { passive: true });
-  }
-  document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState === 'visible') updateOverlay();
-  });
-  window.addEventListener('pagehide', function () {
-    document.documentElement.style.overflow = '';
-    document.body.style.overflow = '';
-  });
-
-})();
-</script>
+        window.addEventListener('scroll', handleScroll);
+        handleScroll(); // Trigger on load
+    </script>
 </body>
 </html>
