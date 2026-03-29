@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>Blog Detail | Galaxy Designs</title>
+    <title>Blog Detail | Galaxy Design</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -671,8 +671,10 @@
           <span>Back</span>
         </a>
         <a href="/" class="header-logo">
-          <div class="logo-icon">G</div>
-          <span class="logo-text">Galaxy<span>Designs</span></span>
+          <div class="logo-icon overflow-hidden">
+            <img src="https://dl.dropboxusercontent.com/scl/fi/qiz5tbbi77uay7b4b0hro/1000049265-removebg-preview.png?rlkey=uu02he5cjm03e3ehjqceiw1hr&st=10n27rjt&dl=0" alt="Galaxy Design Logo" class="w-full h-full object-contain" />
+          </div>
+          <span class="logo-text">Galaxy<span>Design</span></span>
         </a>
       </div>
       <!-- Header right section removed (user avatar/sign-out) -->
@@ -737,7 +739,7 @@
 
         <div id="authRequired" class="auth-required hidden">
           <i class="fas fa-lock" style="margin-right: 0.5rem"></i>
-          Please <a href="/sign_in_page">sign in</a> to post comments
+          Please <a href="/legal/sign_up">sign in</a> to post comments
         </div>
 
         <div id="commentForm" class="comment-form hidden">
@@ -760,10 +762,9 @@
 
     <!-- ===== FOOTER ===== -->
     <footer>
-      <p>© 2026 Galaxy Designs. All rights reserved.</p>
+      <p>© 2026 Galaxy Design. All rights reserved.</p>
     </footer>
 
-   
     <!-- ===== FIREBASE & FUNCTIONALITY ===== -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
