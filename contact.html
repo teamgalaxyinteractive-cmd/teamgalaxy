@@ -537,6 +537,7 @@
             100% { transform: rotate(360deg); }
         }
 
+
         /* Responsive Breakpoints */
         @media (max-width: 900px) {
             .section-title { font-size: 2rem; }
@@ -801,9 +802,21 @@
                         <div class="contact-icon">
                             <i class="fas fa-clock"></i>
                         </div>
-                        <h3 class="text-lg font-semibold text-white mb-2">Business Hours</h3>
-                        <p class="text-gray-400 text-sm mb-2">Weekdays</p>
-                        <p class="text-primary font-medium">9:00 AM - 6:00 PM</p>
+                        <h3 class="text-xl sm:text-2xl font-semibold text-white mb-4">Working Schedule</h3>
+                        <div class="text-gray-300 text-sm sm:text-base space-y-2">
+                            <div class="flex justify-between items-center py-2 border-b border-gray-700/50">
+                                <span class="font-medium">Mon, Tue, Sat</span>
+                                <span class="text-blue-400 font-semibold">Part Time (Afternoon)</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-700/50">
+                                <span class="font-medium">Sunday</span>
+                                <span class="text-green-400 font-semibold">Open All Day</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2">
+                                <span class="font-medium">Wed - Fri</span>
+                                <span class="text-gray-500 font-semibold">Offline</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -811,19 +824,41 @@
     </section>
 
     <!-- Premium Location Section -->
-    <section class="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-10 sm:mb-12 md:mb-16">
-                <h2 class="section-title mb-3 sm:mb-4">Our Premium Base</h2>
-                <p class="text-gray-400 max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-4">Located in the heart of Europe</p>
+<section class="py-10 sm:py-12 md:py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style="background-image: url('https://dl.dropboxusercontent.com/scl/fi/eusgyo9lophlkaw3a3b7v/IMG_20260329_220800.png?rlkey=am3foi9snd92oxbz96j2z6r7a&st=avh68y7s&dl=0'); background-size: cover; background-position: center; background-attachment: scroll;">
+    <!-- Subtle Dark Overlay for Text Readability -->
+    <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60"></div>
+    
+    <!-- Subtle Background Effects -->
+    <div class="design-element" style="top: 10%; left: 10%; width: 100px; height: 100px; background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%); opacity: 0.3;"></div>
+    <div class="design-element" style="bottom: 10%; right: 10%; width: 100px; height: 100px; background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%); opacity: 0.3;"></div>
+    
+    <div class="max-w-7xl mx-auto relative z-10">
+        <!-- Section Header -->
+        <div class="text-center mb-8 sm:mb-10 md:mb-12">
+            <div class="inline-flex items-center px-5 py-2.5 bg-blue-500/20 backdrop-blur-md text-blue-200 rounded-full text-sm font-semibold border border-blue-400/30 mb-4 shadow-lg shadow-blue-500/20">
+                <i class="fas fa-map-marker-alt mr-2 text-blue-300"></i>
+                <span>Our Location</span>
             </div>
-            <div class="contact-card p-8 text-center">
-                <i class="fas fa-city text-5xl text-primary mb-4"></i>
-                <h3 class="text-3xl font-bold text-white mb-2">France, Strasbourg</h3>
-                <p class="text-gray-300 max-w-md mx-auto">Our European headquarters nestled in the historic city of Strasbourg, offering global reach with a touch of elegance.</p>
-            </div>
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2" style="font-family: 'Inter', sans-serif; letter-spacing: -0.03em; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);">
+                Premium <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-blue-400 to-cyan-300">Base</span>
+            </h2>
+            <p class="text-gray-400 max-w-xl mx-auto text-xs sm:text-sm" style="text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);">Located in the heart of Europe</p>
         </div>
-    </section>
+        
+        <!-- Location Content (No Card/Container) -->
+        <div class="text-center">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center mb-4 sm:mb-6 mx-auto border border-blue-500/20">
+                <i class="fas fa-city text-3xl sm:text-4xl text-blue-400"></i>
+            </div>
+            <h3 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 sm:mb-4" style="text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);">
+                France, <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-blue-400 to-cyan-300">Strasbourg</span>
+            </h3>
+            <p class="text-gray-300 max-w-xl mx-auto text-sm sm:text-base leading-relaxed" style="text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);">
+                Our European headquarters nestled in the historic city of Strasbourg, offering global reach with a touch of elegance.
+            </p>
+        </div>
+    </div>
+</section>
 
   <!-- Footer -->
   <footer class="bg-dark py-8 sm:py-10 md:py-12 px-4 sm:px-6 lg:px-8 border-t border-gray-800/50">
@@ -832,14 +867,14 @@
         <div>
           <div class="flex items-center space-x-2 mb-3 sm:mb-4">
             <div class="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-              <img src="https://dl.dropboxusercontent.com/scl/fi/qiz5tbbi77uay7b4b0hro/1000049265-removebg-preview.png?rlkey=uu02he5cjm03e3ehjqceiw1hr&st=10n27rjt&dl=0" alt="Logo" class="w-full h-full object-contain" />
+              <img src="https://dl.dropboxusercontent.com/scl/fi/mfz74416c9hveejjam3l2/GalaxyPREMIUM.png?rlkey=5iilzg4ugl81jqlz0dwu71ww1&st=qoq8f477&dl=0" alt="Logo" class="w-full h-full object-contain" />
             </div>
             <span class="text-lg sm:text-xl md:text-2xl font-serif font-bold">Galaxy<span class="text-primary">Design</span></span>
           </div>
           <p class="text-gray-400 mb-3 sm:mb-4 text-xs sm:text-sm">A premier design studio creating exceptional visual experiences for brands worldwide.</p>
           <div class="flex space-x-2 sm:space-x-3">
             <a href="https://x.com/teamgalaxy_wotb" class="text-gray-400 hover:text-primary transition-colors w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-800/50 flex items-center justify-center hover:bg-primary/20"><i class="fab fa-twitter"></i></a>
-            <a href="https://discord.gg/26pSCyMRPM" class="text-gray-400 hover:text-primary transition-colors w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-800/50 flex items-center justify-center hover:bg-primary/20"><i class="fab fa-discord"></i></a>
+            <a href="https://discord.gg/kJAjmPJ8GX" class="text-gray-400 hover:text-primary transition-colors w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-800/50 flex items-center justify-center hover:bg-primary/20"><i class="fab fa-discord"></i></a>
              <a href="https://www.behance.net/creatine1907" class="text-gray-400 hover:text-primary transition-colors w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gray-800/50 flex items-center justify-center hover:bg-primary/20"><i class="fab fa-behance"></i></a>
           </div>
         </div>
