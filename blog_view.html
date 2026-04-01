@@ -13,7 +13,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;700;800&display=swap"
       rel="stylesheet"
     />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -22,23 +22,23 @@
         theme: {
           extend: {
             colors: {
-              primary: "#2563eb",
-              secondary: "#06b6d4",
-              accent: "#93c5fd",
-              dark: "#0a0f1d",
-              dark2: "#111827",
+              primary: "#00e5ff", /* Neon Cyan from image */
+              secondary: "#2563eb", /* Deep Blue */
+              accent: "#80eeff",
+              dark: "#030712", /* Deep space black */
+              dark2: "#0a1128", /* Dark card background */
               dark3: "#1e293b",
             },
             fontFamily: {
               sans: ["Inter", "sans-serif"],
-              serif: ["Playfair Display", "serif"],
+              heading: ["Outfit", "sans-serif"],
             },
           },
         },
       };
     </script>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap");
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;700;800&display=swap");
 
       * {
         margin: 0;
@@ -54,8 +54,9 @@
       }
 
       body {
-        background: linear-gradient(135deg, #0a0f1d 0%, #111827 50%, #0a0f1d 100%);
-        color: #e2e8f0;
+        /* Deep space background matching the image */
+        background: radial-gradient(circle at 50% 0%, #0a1128 0%, #03050a 60%, #000000 100%);
+        color: #94a3b8; /* Lighter text for paragraphs */
         font-family: "Inter", sans-serif;
         overflow-x: hidden;
         overflow-y: auto;
@@ -85,8 +86,9 @@
       }
 
       .minimal-header.scrolled {
-        background: rgba(10, 15, 29, 0.95);
-        border-bottom: 1px solid rgba(37, 99, 235, 0.2);
+        background: rgba(3, 5, 10, 0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(0, 229, 255, 0.1);
         padding: 0.75rem 2rem;
       }
 
@@ -96,24 +98,25 @@
         gap: 1.5rem;
       }
 
+      /* Styled to match the "View Our Work" button in your image */
       .back-btn {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        color: #94a3b8;
+        color: #00e5ff;
         text-decoration: none;
         font-size: 0.9rem;
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        border: 1px solid rgba(148, 163, 184, 0.2);
+        font-weight: 600;
+        padding: 0.5rem 1.25rem;
+        border-radius: 50px; /* Pill shape */
+        border: 1px solid #00e5ff;
         transition: all 0.3s ease;
-        background: rgba(30, 41, 59, 0.3);
+        background: transparent;
       }
 
       .back-btn:hover {
-        color: #2563eb;
-        border-color: rgba(37, 99, 235, 0.5);
-        background: rgba(37, 99, 235, 0.1);
+        background: rgba(0, 229, 255, 0.1);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
         transform: translateX(-3px);
       }
 
@@ -127,7 +130,7 @@
       .logo-icon {
         width: 36px;
         height: 36px;
-        background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+        background: linear-gradient(135deg, #00e5ff 0%, #2563eb 100%);
         border-radius: 10px;
         display: flex;
         align-items: center;
@@ -138,14 +141,15 @@
       }
 
       .logo-text {
-        font-family: "Playfair Display", serif;
-        font-weight: 700;
-        font-size: 1.1rem;
+        font-family: "Outfit", sans-serif;
+        font-weight: 800;
+        font-size: 1.2rem;
         color: white;
+        letter-spacing: -0.5px;
       }
 
       .logo-text span {
-        color: #2563eb;
+        color: #00e5ff; /* Cyan accent matching "Flow" */
       }
 
       /* ===== OPTIMIZED HERO SECTION ===== */
@@ -159,35 +163,34 @@
         overflow: hidden;
       }
 
-      /* ===== SIMPLIFIED BACKGROUND (Performance Optimized) ===== */
+      /* Glowing aura matching the reference image backdrop */
       .hero-bg-gradient {
         position: absolute;
         inset: 0;
-        background: radial-gradient(ellipse at 25% 35%, rgba(37, 99, 235, 0.2) 0%, transparent 50%),
-          radial-gradient(ellipse at 75% 25%, rgba(6, 182, 212, 0.15) 0%, transparent 50%);
+        background: radial-gradient(ellipse at 50% 35%, rgba(0, 229, 255, 0.08) 0%, transparent 60%);
         z-index: -1;
       }
 
-      /* ===== REDUCED PARTICLES (4 instead of 8) ===== */
       .hero-particle {
         position: absolute;
         border-radius: 50%;
-        background: #2563eb;
-        opacity: 0.3;
+        background: #00e5ff;
+        opacity: 0.5;
         z-index: -1;
+        box-shadow: 0 0 10px #00e5ff;
       }
 
       .hero-particle-1 {
-        width: 6px;
-        height: 6px;
+        width: 4px;
+        height: 4px;
         top: 20%;
         left: 15%;
         animation: particleFloat1 15s ease-in-out infinite;
       }
 
       .hero-particle-2 {
-        width: 4px;
-        height: 4px;
+        width: 3px;
+        height: 3px;
         top: 35%;
         right: 20%;
         animation: particleFloat2 18s ease-in-out infinite;
@@ -202,62 +205,40 @@
       }
 
       .hero-particle-4 {
-        width: 4px;
-        height: 4px;
+        width: 3px;
+        height: 3px;
         bottom: 35%;
         right: 15%;
         animation: particleFloat2 16s ease-in-out infinite;
       }
 
       @keyframes particleFloat1 {
-        0%,
-        100% {
-          transform: translateY(0);
-          opacity: 0.3;
-        }
-        50% {
-          transform: translateY(-20px);
-          opacity: 0.5;
-        }
+        0%, 100% { transform: translateY(0); opacity: 0.3; }
+        50% { transform: translateY(-20px); opacity: 0.8; }
       }
 
       @keyframes particleFloat2 {
-        0%,
-        100% {
-          transform: translateY(0);
-          opacity: 0.3;
-        }
-        50% {
-          transform: translateY(-15px);
-          opacity: 0.4;
-        }
+        0%, 100% { transform: translateY(0); opacity: 0.3; }
+        50% { transform: translateY(-15px); opacity: 0.6; }
       }
 
-      /* ===== SINGLE ORB (instead of 4) ===== */
       .hero-orb {
         position: absolute;
-        width: 300px;
-        height: 300px;
+        width: 400px;
+        height: 400px;
         border-radius: 50%;
-        background: radial-gradient(circle, rgba(37, 99, 235, 0.3) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 60%);
         filter: blur(60px);
-        opacity: 0.4;
-        top: 10%;
-        right: 10%;
+        opacity: 0.6;
+        top: 5%;
+        right: 5%;
         z-index: -1;
         animation: orbFloat 25s ease-in-out infinite;
       }
 
       @keyframes orbFloat {
-        0%,
-        100% {
-          transform: translate(0, 0);
-          opacity: 0.4;
-        }
-        50% {
-          transform: translate(-30px, 20px);
-          opacity: 0.5;
-        }
+        0%, 100% { transform: translate(0, 0); opacity: 0.4; }
+        50% { transform: translate(-30px, 20px); opacity: 0.7; }
       }
 
       .hero-content {
@@ -272,29 +253,31 @@
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.5rem 1.25rem;
-        background: rgba(37, 99, 235, 0.15);
-        border: 1px solid rgba(37, 99, 235, 0.3);
+        padding: 0.4rem 1.25rem;
+        background: rgba(0, 229, 255, 0.05);
+        border: 1px solid rgba(0, 229, 255, 0.2);
         border-radius: 50px;
-        font-size: 0.85rem;
-        color: #93c5fd;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #00e5ff;
         margin-bottom: 2rem;
       }
 
+      /* Clean, bold, white text matching "Design" in the image */
       .blog-hero-title {
-        font-family: "Playfair Display", serif;
-        font-size: clamp(1.75rem, 4vw, 3rem);
-        font-weight: 700;
-        line-height: 1.3;
+        font-family: "Outfit", sans-serif;
+        font-size: clamp(2rem, 5vw, 4rem);
+        font-weight: 800;
+        line-height: 1.1;
         margin-bottom: 1.5rem;
-        background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #93c5fd 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #ffffff;
         word-wrap: break-word;
         overflow-wrap: break-word;
         text-align: center;
         width: 100%;
+        letter-spacing: -1px;
       }
 
       .blog-hero-meta {
@@ -302,9 +285,9 @@
         flex-wrap: wrap;
         justify-content: center;
         gap: 2rem;
-        color: #94a3b8;
+        color: #64748b;
         font-size: 0.9rem;
-        margin-bottom: 2.5rem;
+        margin-bottom: 3rem;
       }
 
       .meta-item {
@@ -315,7 +298,7 @@
       }
 
       .meta-item i {
-        color: #2563eb;
+        color: #00e5ff;
       }
 
       .hero-image-container {
@@ -323,9 +306,10 @@
         width: 100%;
         max-width: 800px;
         margin: 0 auto;
-        border-radius: 20px;
+        border-radius: 16px;
         overflow: hidden;
-        border: 1px solid rgba(37, 99, 235, 0.2);
+        border: 1px solid rgba(0, 229, 255, 0.15);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
       }
 
       .hero-image {
@@ -338,54 +322,56 @@
       .image-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(to top, rgba(10, 15, 29, 0.6) 0%, transparent 50%);
+        background: linear-gradient(to top, #03050a 0%, transparent 50%);
       }
 
       /* ===== BLOG CONTENT SECTION ===== */
       .blog-content-section {
-        padding: 4rem 2rem;
+        padding: 2rem 2rem 4rem;
         max-width: 800px;
         margin: 0 auto;
         width: 100%;
       }
 
+      /* Dark glass card matching the reference image graphic */
       .content-card {
-        background: rgba(30, 41, 59, 0.5);
-        border: 1px solid rgba(37, 99, 235, 0.15);
-        border-radius: 24px;
-        padding: 2.5rem;
+        background: rgba(10, 17, 40, 0.4);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 229, 255, 0.08);
+        border-radius: 20px;
+        padding: 3rem;
         margin-bottom: 3rem;
         width: 100%;
         overflow-wrap: break-word;
-        word-wrap: break-word;
-        word-break: break-word;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
       }
 
       .blog-full-content {
-        font-size: 1.125rem;
-        line-height: 1.9;
+        font-size: 1.1rem;
+        line-height: 1.8;
         color: #cbd5e1;
         width: 100%;
-        overflow-wrap: break-word;
-        word-wrap: break-word;
       }
 
       .blog-full-content p {
         margin-bottom: 1.5rem;
-        overflow-wrap: break-word;
       }
 
       .blog-full-content h2 {
-        font-family: "Playfair Display", serif;
-        font-size: 1.75rem;
+        font-family: "Outfit", sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
         color: #ffffff;
-        margin: 2.5rem 0 1rem;
+        margin: 3rem 0 1.25rem;
+        letter-spacing: -0.5px;
       }
 
       .blog-full-content h3 {
-        font-size: 1.4rem;
+        font-family: "Outfit", sans-serif;
+        font-weight: 600;
+        font-size: 1.5rem;
         color: #e2e8f0;
-        margin: 2rem 0 0.75rem;
+        margin: 2rem 0 1rem;
       }
 
       .blog-full-content ul,
@@ -399,27 +385,33 @@
       }
 
       .blog-full-content a {
-        color: #2563eb;
-        text-decoration: underline;
+        color: #00e5ff;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(0, 229, 255, 0.3);
+        transition: border-color 0.3s;
+      }
+
+      .blog-full-content a:hover {
+        border-color: #00e5ff;
       }
 
       .blog-full-content blockquote {
-        border-left: 4px solid #2563eb;
+        border-left: 3px solid #00e5ff;
         padding-left: 1.5rem;
         margin: 2rem 0;
         font-style: italic;
-        color: #93c5fd;
-        background: rgba(37, 99, 235, 0.1);
-        padding: 1rem 1.5rem;
-        border-radius: 0 8px 8px 0;
+        color: #e2e8f0;
+        background: linear-gradient(90deg, rgba(0, 229, 255, 0.05) 0%, transparent 100%);
+        padding: 1.5rem;
+        border-radius: 0 12px 12px 0;
       }
 
       /* ===== COMMENT SECTION ===== */
       .comment-section {
-        background: rgba(15, 23, 42, 0.5);
-        border: 1px solid rgba(37, 99, 235, 0.15);
+        background: rgba(10, 17, 40, 0.4);
+        border: 1px solid rgba(0, 229, 255, 0.08);
         border-radius: 20px;
-        padding: 2rem;
+        padding: 2.5rem;
         width: 100%;
       }
 
@@ -427,14 +419,15 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
         flex-wrap: wrap;
         gap: 1rem;
       }
 
       .comment-header h2 {
+        font-family: "Outfit", sans-serif;
         font-size: 1.5rem;
-        font-weight: 600;
+        font-weight: 700;
         color: #ffffff;
       }
 
@@ -442,42 +435,47 @@
         display: flex;
         flex-direction: column;
         gap: 1rem;
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
       }
 
       .comment-input {
         width: 100%;
         padding: 1rem 1.25rem;
-        background: rgba(30, 41, 59, 0.7);
-        border: 1px solid rgba(56, 189, 248, 0.2);
+        background: rgba(3, 5, 10, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 12px;
         color: #e2e8f0;
         font-family: "Inter", sans-serif;
         font-size: 1rem;
         resize: vertical;
         min-height: 120px;
-        transition: border-color 0.3s ease;
+        transition: all 0.3s ease;
       }
 
       .comment-input:focus {
         outline: none;
-        border-color: #2563eb;
+        border-color: #00e5ff;
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.1);
       }
 
+      /* Styled similarly to the "Contact Us" solid pill button */
       .comment-submit {
         align-self: flex-end;
         padding: 0.75rem 2rem;
-        background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+        background: #ffffff;
+        color: #03050a;
         border: none;
-        border-radius: 10px;
-        color: white;
-        font-weight: 600;
+        border-radius: 50px;
+        font-weight: 700;
+        font-family: "Outfit", sans-serif;
         cursor: pointer;
-        transition: opacity 0.3s ease;
+        transition: all 0.3s ease;
       }
 
       .comment-submit:hover {
-        opacity: 0.9;
+        background: #00e5ff;
+        color: #03050a;
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
       }
 
       .comment-submit:disabled {
@@ -493,23 +491,23 @@
       }
 
       .comment-card {
-        background: rgba(30, 41, 59, 0.5);
-        border: 1px solid rgba(56, 189, 248, 0.15);
-        border-radius: 14px;
-        padding: 1.25rem;
+        background: rgba(3, 5, 10, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 1.5rem;
         transition: border-color 0.3s ease;
         width: 100%;
       }
 
       .comment-card:hover {
-        border-color: rgba(37, 99, 235, 0.3);
+        border-color: rgba(0, 229, 255, 0.2);
       }
 
       .comment-header-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.75rem;
+        margin-bottom: 1rem;
         flex-wrap: wrap;
         gap: 0.5rem;
       }
@@ -517,54 +515,52 @@
       .comment-author {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 1rem;
       }
 
       .comment-avatar {
-        width: 40px;
-        height: 40px;
+        width: 42px;
+        height: 42px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+        background: rgba(0, 229, 255, 0.1);
+        border: 1px solid rgba(0, 229, 255, 0.3);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: 600;
-        color: white;
+        font-weight: 700;
+        color: #00e5ff;
+        font-family: "Outfit", sans-serif;
         flex-shrink: 0;
       }
 
       .comment-author-name {
         font-weight: 600;
-        color: #e2e8f0;
-        word-break: break-word;
-        max-width: 200px;
+        color: #ffffff;
+        font-family: "Outfit", sans-serif;
       }
 
       .comment-time {
         color: #64748b;
         font-size: 0.8rem;
-        white-space: nowrap;
       }
 
       .comment-text {
-        color: #cbd5e1;
+        color: #94a3b8;
         line-height: 1.6;
-        word-break: break-word;
-        width: 100%;
       }
 
       .auth-required {
-        background: rgba(37, 99, 235, 0.15);
-        border: 1px solid rgba(37, 99, 235, 0.3);
+        background: rgba(0, 229, 255, 0.05);
+        border: 1px solid rgba(0, 229, 255, 0.2);
         border-radius: 12px;
-        padding: 1.25rem;
+        padding: 1.5rem;
         text-align: center;
-        color: #93c5fd;
-        margin-bottom: 1rem;
+        color: #94a3b8;
+        margin-bottom: 2rem;
       }
 
       .auth-required a {
-        color: #2563eb;
+        color: #00e5ff;
         text-decoration: none;
         font-weight: 600;
       }
@@ -575,22 +571,18 @@
 
       /* ===== LOADING ===== */
       .loading-spinner {
-        border: 3px solid rgba(37, 99, 235, 0.2);
-        border-top: 3px solid #2563eb;
+        border: 2px solid rgba(0, 229, 255, 0.1);
+        border-top: 2px solid #00e5ff;
         border-radius: 50%;
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
         animation: spin 1s linear infinite;
         margin: 2rem auto;
       }
 
       @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
       }
 
       .hidden {
@@ -600,70 +592,28 @@
       /* ===== FOOTER ===== */
       footer {
         padding: 3rem 2rem;
-        border-top: 1px solid rgba(37, 99, 235, 0.15);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
         text-align: center;
         color: #64748b;
         font-size: 0.9rem;
         width: 100%;
+        background: #000000;
       }
 
       /* ===== RESPONSIVE ===== */
       @media (max-width: 768px) {
-        .minimal-header {
-          padding: 0.75rem 1rem;
-        }
-        .blog-hero {
-          padding: 6rem 1rem 3rem;
-          min-height: 50vh;
-        }
-        .blog-hero-title {
-          font-size: 1.5rem;
-        }
-        .hero-image {
-          height: 250px;
-        }
-        .content-card {
-          padding: 1.5rem;
-        }
-        .blog-content-section {
-          padding: 2rem 1rem;
-        }
-        .comment-section {
-          padding: 1.25rem;
-        }
-        .blog-hero-meta {
-          gap: 1rem;
-          font-size: 0.8rem;
-          flex-direction: column;
-          align-items: center;
-        }
-        .back-btn span {
-          display: none;
-        }
-        .hero-orb {
-          width: 200px;
-          height: 200px;
-        }
-      }
-
-      @media (max-width: 480px) {
-        .blog-hero-title {
-          font-size: 1.25rem;
-        }
-        .hero-image {
-          height: 200px;
-        }
-        .content-card {
-          padding: 1rem;
-        }
-        .blog-full-content {
-          font-size: 1rem;
-        }
+        .minimal-header { padding: 1rem; }
+        .blog-hero { padding: 6rem 1rem 3rem; min-height: 50vh; }
+        .blog-hero-title { font-size: 2rem; }
+        .hero-image { height: 250px; }
+        .content-card, .comment-section { padding: 1.5rem; border-radius: 16px; }
+        .blog-content-section { padding: 2rem 1rem; }
+        .blog-hero-meta { gap: 1rem; flex-direction: column; align-items: center; }
+        .hero-orb { width: 200px; height: 200px; }
       }
     </style>
   </head>
   <body>
-    <!-- ===== MINIMAL HEADER ===== -->
     <header class="minimal-header" id="mainHeader">
       <div class="header-left">
         <a href="/blogs" class="back-btn">
@@ -672,15 +622,13 @@
         </a>
         <a href="/" class="header-logo">
           <div class="logo-icon overflow-hidden">
-            <img src="https://dl.dropboxusercontent.com/scl/fi/qiz5tbbi77uay7b4b0hro/1000049265-removebg-preview.png?rlkey=uu02he5cjm03e3ehjqceiw1hr&st=10n27rjt&dl=0" alt="Galaxy Design Logo" class="w-full h-full object-contain" />
+            <img src="https://dl.dropboxusercontent.com/scl/fi/mfz74416c9hveejjam3l2/GalaxyPREMIUM.png?rlkey=5iilzg4ugl81jqlz0dwu71ww1&st=qoq8f477&dl=0" alt="Galaxy Design Logo" class="w-full h-full object-contain" />
           </div>
           <span class="logo-text">Galaxy<span>Design</span></span>
         </a>
       </div>
-      <!-- Header right section removed (user avatar/sign-out) -->
     </header>
 
-    <!-- ===== HERO SECTION ===== -->
     <section class="blog-hero">
       <div class="hero-bg-gradient"></div>
       <div class="hero-orb"></div>
@@ -691,7 +639,7 @@
 
       <div class="hero-content">
         <div class="blog-category-badge">
-          <i class="fas fa-article"></i>
+          <i class="fas fa-cube"></i>
           <span>Blog Post</span>
         </div>
         <h1 class="blog-hero-title" id="blogTitle">Loading...</h1>
@@ -705,7 +653,7 @@
             <span id="blogReadTime">-- min read</span>
           </div>
           <div class="meta-item">
-            <i class="fas fa-star" style="color: #fbbf24"></i>
+            <i class="fas fa-star" style="color: #00e5ff"></i>
             <span id="blogInsight">--% Insight</span>
           </div>
         </div>
@@ -722,17 +670,15 @@
       </div>
     </section>
 
-    <!-- ===== BLOG CONTENT ===== -->
     <section class="blog-content-section">
       <div class="content-card">
         <div id="blogFullContent" class="blog-full-content"></div>
       </div>
 
-      <!-- ===== COMMENTS ===== -->
       <div class="comment-section">
         <div class="comment-header">
           <h2>
-            <i class="fas fa-comments" style="color: #2563eb; margin-right: 0.5rem"></i>Comments
+            <i class="fas fa-comment-dots" style="color: #00e5ff; margin-right: 0.5rem"></i> Discussion
           </h2>
           <span id="commentCount" style="color: #64748b; font-size: 0.9rem">0 comments</span>
         </div>
@@ -750,7 +696,7 @@
             maxlength="500"
           ></textarea>
           <button id="submitCommentBtn" class="comment-submit" onclick="submitComment()">
-            <i class="fas fa-paper-plane" style="margin-right: 0.5rem"></i> Post Comment
+            Post Comment <i class="fas fa-arrow-right" style="margin-left: 0.5rem"></i>
           </button>
         </div>
 
@@ -760,12 +706,10 @@
       </div>
     </section>
 
-    <!-- ===== FOOTER ===== -->
     <footer>
       <p>© 2026 Galaxy Design. All rights reserved.</p>
     </footer>
 
-    <!-- ===== FIREBASE & FUNCTIONALITY ===== -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
@@ -885,7 +829,6 @@
           const fullContent = blogData.content || blogData.description || "No content available";
           if (blogFullContent) blogFullContent.innerHTML = formatContent(fullContent);
 
-          // Lightweight GSAP animation
           if (typeof gsap !== "undefined") {
             gsap.from(".hero-content", {
               opacity: 0,
@@ -1030,7 +973,7 @@
           if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerHTML =
-              '<i class="fas fa-paper-plane" style="margin-right: 0.5rem;"></i> Post Comment';
+              'Post Comment <i class="fas fa-arrow-right" style="margin-left: 0.5rem"></i>';
           }
         }
       }
@@ -1044,7 +987,6 @@
         if (user) {
           if (authRequired) authRequired.classList.add("hidden");
           if (commentForm) commentForm.classList.remove("hidden");
-          // User avatar/sign-out removed as requested
         } else {
           if (authRequired) authRequired.classList.remove("hidden");
           if (commentForm) commentForm.classList.add("hidden");
