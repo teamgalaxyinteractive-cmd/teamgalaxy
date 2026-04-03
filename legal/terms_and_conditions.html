@@ -3,64 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terms & Conditions — Team Galaxy</title>
-<meta name="description" content="Terms and conditions for using Team Galaxy services and platform.">
+  <title>Terms & Conditions — Galaxy Designs</title>
+  <meta name="description" content="Terms and conditions for Galaxy Designs services and digital assets.">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png">
-
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png">
-
-    <link rel="manifest" href="/manifest.json">
-  <!-- Canonical -->
-  <link rel="canonical" href="https://www.teamgalaxy.net/legal/terms_and_confitions">
-
-  <!-- Robots -->
-  <meta name="robots" content="index, follow">
-
-  <!-- Open Graph (social preview) -->
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="en_US">
-  <meta property="og:url" content="https://www.teamgalaxy.net/legal/terms_and_comditions">
-  <meta property="og:title" content="Team Galaxy — WoT Blitz Clan (Est. May 2025)">
-  <meta property="og:description" content="Terms and conditions for using Team Galaxy services and platform.">
-  <meta property="og:image" content="https://www.teamgalaxy.net/assets/images/og-team-galaxy-1200_630.jpg">
-  <meta property="og:image:alt" content="Team Galaxy — World of Tanks Blitz clan banner">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:site_name" content="Team Galaxy">
-
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@teamgalaxy_wotb"> <!-- replace with your Twitter/X handle -->
-  <meta name="twitter:creator" content="@teamgalaxy_wotb">
-  <meta name="twitter:title" content="Team Galaxy — WoT Blitz Clan">
-  <meta name="twitter:description" content="Terms and conditions for using Team Galaxy services and platform.">
-  <meta name="twitter:image" content="https://www.teamgalaxy.net/assets/images/team-galaxy-1530_800.jpg">
-
-  <!-- Mobile / PWA -->
-  <meta name="theme-color" content="#0f172a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-
-<script src="/assets/js/cookie-consent.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --cosmic-purple: #6c5ce7;
-      --starlight-turquoise: #00cec9;
-      --deep-space: #0f0c29;
-      --nebula-blue: #304675;
-      --text-light: #f8f9fa;
-      --text-dark: #2d3436;
-      --text-bright: #ffffff;
-      --text-secondary: #e2e8f0;
-      --text-tertiary: #cbd5e0;
-      --text-footer: #a0aec0;
+      --bg-dark: #07090E;
+      --bg-card: rgba(13, 17, 28, 0.6);
+      --neon-cyan: #00E5FF;
+      --neon-blue: #3B82F6;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --border-glow: rgba(0, 229, 255, 0.2);
     }
 
     * {
@@ -70,43 +27,22 @@
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      line-height: 1.6;
-      color: var(--text-dark);
-      background: linear-gradient(135deg, var(--deep-space) 0%, #304352 100%);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.7;
+      color: var(--text-main);
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(0, 229, 255, 0.05), transparent 25%);
       min-height: 100vh;
       padding-bottom: 4rem;
       position: relative;
       overflow-x: hidden;
     }
 
-    /* Star Background */
-    .stars {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    .star {
-      position: absolute;
-      background-color: white;
-      border-radius: 50%;
-      animation: twinkle var(--duration, 4s) infinite ease-in-out;
-      opacity: var(--opacity, 0.8);
-    }
-
-    @keyframes twinkle {
-      0%, 100% { opacity: var(--opacity, 0.8); transform: scale(1); }
-      50% { opacity: calc(var(--opacity, 0.8) * 1.5); transform: scale(1.2); }
-    }
-
     .container {
       width: 90%;
-      max-width: 1000px;
+      max-width: 900px;
       margin: 0 auto;
       padding: 2rem 0;
       position: relative;
@@ -115,586 +51,286 @@
 
     header {
       text-align: center;
-      padding: 2rem 0;
+      padding: 3rem 0 2rem;
       margin-bottom: 2rem;
-      border-bottom: 1px solid rgba(108, 92, 231, 0.3);
-      animation: fadeInUp 1s ease-out;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      animation: fadeIn 1s ease-out;
     }
 
     .logo {
-      font-size: 2.5rem;
+      font-size: 2.2rem;
       font-weight: 800;
-      background: linear-gradient(45deg, var(--cosmic-purple), var(--starlight-turquoise));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--text-main);
       margin-bottom: 0.5rem;
-      transition: transform 0.3s ease;
+      cursor: pointer;
+      display: inline-block;
     }
 
-    .logo:hover {
-      transform: scale(1.05);
-    }
-
-    .logo i {
-      margin-right: 10px;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 0.8; }
-      50% { opacity: 1; }
-      100% { opacity: 0.8; }
+    .logo span {
+      color: var(--neon-cyan);
     }
 
     .page-title {
-      font-size: 2.8rem;
+      font-size: 2.5rem;
+      font-weight: 800;
       margin: 1.5rem 0;
-      color: var(--text-bright);
-      text-shadow: 0 2px 10px rgba(0, 206, 201, 0.3);
-      animation: fadeInDown 1s ease-out;
+      background: linear-gradient(to right, var(--text-main), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: slideDown 0.8s ease-out;
     }
 
     .last-updated {
-      background: rgba(108, 92, 231, 0.15);
-      color: var(--starlight-turquoise);
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--neon-cyan);
       display: inline-block;
-      padding: 0.3rem 1rem;
+      padding: 0.4rem 1.2rem;
       border-radius: 20px;
-      margin: 1rem 0;
-      font-weight: 600;
-      animation: fadeIn 1.5s ease-out;
+      font-size: 0.9rem;
+      margin: 1rem 0 2rem;
+      border: 1px solid var(--border-glow);
     }
 
     .content-card {
-      background: rgba(25, 18, 66, 0.7);
-      backdrop-filter: blur(10px);
-      border-radius: 15px;
-      padding: 2.5rem;
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      border-radius: 20px;
+      padding: 3rem;
       margin-bottom: 2rem;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(108, 92, 231, 0.2);
-      animation: slideInUp 1s ease-out;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .content-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      animation: slideUp 0.8s ease-out;
     }
 
     h2 {
-      color: var(--starlight-turquoise);
-      font-size: 1.8rem;
-      margin: 1.5rem 0 1rem;
+      color: var(--text-main);
+      font-size: 1.6rem;
+      margin: 2.5rem 0 1rem;
       padding-bottom: 0.5rem;
-      border-bottom: 2px solid var(--cosmic-purple);
-      transition: color 0.3s ease;
-    }
-
-    h2:hover {
-      color: #00e5e0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     h3 {
-      color: var(--cosmic-purple);
-      font-size: 1.4rem;
-      margin: 1.2rem 0 0.8rem;
-      transition: color 0.3s ease;
-    }
-
-    h3:hover {
-      color: #8a7fff;
+      color: var(--neon-cyan);
+      font-size: 1.2rem;
+      margin: 1.5rem 0 0.8rem;
+      font-weight: 600;
     }
 
     p {
       margin: 1rem 0;
-      color: var(--text-secondary);
-      font-size: 1.1rem;
+      color: var(--text-muted);
+      font-size: 1rem;
     }
 
     ul {
-      padding-left: 1.8rem;
-      margin: 1.5rem 0;
+      padding-left: 1.5rem;
+      margin: 1rem 0;
+      color: var(--text-muted);
     }
 
     li {
-      margin-bottom: 0.8rem;
-      color: var(--text-tertiary);
-      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
     }
 
     li::marker {
-      color: var(--starlight-turquoise);
-      font-weight: bold;
+      color: var(--neon-cyan);
     }
 
     .highlight-box {
-      background: rgba(0, 206, 201, 0.1);
-      border-left: 4px solid var(--starlight-turquoise);
-      padding: 1.2rem;
-      margin: 1.5rem 0;
-      border-radius: 0 8px 8px 0;
-      transition: background-color 0.3s ease;
-    }
-
-    .highlight-box:hover {
-      background: rgba(0, 206, 201, 0.15);
+      background: rgba(0, 229, 255, 0.05);
+      border-left: 3px solid var(--neon-cyan);
+      padding: 1.5rem;
+      margin: 2rem 0;
+      border-radius: 0 12px 12px 0;
     }
 
     .highlight-box strong {
-      color: var(--text-bright);
+      color: var(--text-main);
+      display: block;
+      margin-bottom: 0.5rem;
     }
 
     footer {
       text-align: center;
       padding: 2rem 0;
-      margin-top: 2rem;
-      color: var(--text-footer);
-      font-size: 1.1rem;
-      border-top: 1px solid rgba(0, 206, 201, 0.2);
-      animation: fadeInUp 2s ease-out;
+      margin-top: 3rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .footer-links {
       display: flex;
       justify-content: center;
-      gap: 1.5rem;
-      margin-top: 1rem;
+      gap: 2rem;
+      margin-top: 1.5rem;
     }
 
     .footer-links a {
-      color: var(--starlight-turquoise);
+      color: var(--text-muted);
       text-decoration: none;
-      transition: all 0.3s;
-      font-weight: 500;
+      transition: color 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
 
     .footer-links a:hover {
-      color: var(--cosmic-purple);
-      text-shadow: 0 0 10px rgba(108, 92, 231, 0.7);
-      transform: scale(1.1);
+      color: var(--neon-cyan);
     }
 
     /* Animations */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes slideInUp {
-      from {
-        opacity: 0;
-        transform: translateY(50px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
     @media (max-width: 768px) {
-      .page-title {
-        font-size: 2.2rem;
-      }
-
-      .content-card {
-        padding: 1.8rem;
-      }
-
-      .footer-links {
-        flex-direction: column;
-        gap: 0.8rem;
-      }
+      .content-card { padding: 1.5rem; }
+      .page-title { font-size: 2rem; }
+      .footer-links { flex-direction: column; gap: 1rem; align-items: center; }
     }
   </style>
 </head>
 <body>
-  <!-- Star Background -->
-  <div class="stars" id="stars"></div>
-
   <div class="container">
     <header>
-      <div class="logo" onclick="window.location.href='../dashboard.html'" style="cursor: pointer;">
-        <img src="https://dl.dropboxusercontent.com/scl/fi/v5d7xte4tksarsdufk4ay/image.png?rlkey=ca8p4jsfcw1pnqr79q8uympso&st=ikst5uy1&dl=0" alt="Team Galaxy Logo" style="height: 130px; width: auto;">
+      <div class="logo" onclick="window.location.href='/'">
+        Galaxy<span>Design</span>
       </div>
-      <p style="color: var(--text-footer); max-width: 700px; margin: 0 auto;">
-        Building the future of gaming communities in the cosmos
+      <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto; font-size: 1.1rem;">
+        Engineering exceptional visual experiences.
       </p>
     </header>
 
     <main>
-      <h1 class="page-title">Terms of Use</h1>
-      <div class="last-updated">Last Updated: December 7, 2025</div>
+      <div style="text-align: center;">
+        <h1 class="page-title">Terms & Conditions</h1>
+        <div class="last-updated">Last Updated: April 2026</div>
+      </div>
 
       <div class="content-card">
         <p>
-          These Terms of Use (“Terms”) govern your access to and use of the websites, services,
-          communities, and related features operated under the <strong>Team Galaxy</strong> brand
-          (collectively, the “Services”). By accessing or using the Services, you confirm that you
-          have read, understood, and agreed to be bound by these Terms.
+          These Terms & Conditions (“Terms”) govern your access to and use of the design services, website, 
+          and digital products provided by <strong>Galaxy Designs</strong> (collectively, the “Services”). 
+          By requesting a project, accessing our platform, or communicating with our team, you agree to be bound by these Terms.
         </p>
 
         <div class="highlight-box">
           <strong>Important:</strong>
-          <p>
-            If you do not agree with these Terms, you should not access or use the Services.
-            Your continued use of the Services means you accept these Terms as updated from time to time.
+          <p style="margin: 0;">
+            Please read these terms carefully before commissioning any design work. Your continued engagement 
+            with Galaxy Designs constitutes your acceptance of our project workflows, revision policies, and payment terms.
           </p>
         </div>
 
-        <h2>1. Eligibility &amp; Accounts</h2>
+        <h2>1. Design Services & Project Onboarding</h2>
 
-        <h3>1.1. Eligibility</h3>
+        <h3>1.1. Project Initiation</h3>
         <p>
-          You may use the Services only if you are able to form a binding contract under applicable law.
-          If you are under the age where you need parental consent in your country, you must have your
-          parent or legal guardian’s permission to use the Services.
+          All project requests, discussions, and onboarding are primarily handled via our official Discord server 
+          or official email (info@teamgalaxy.net). We reserve the right to decline any project that does not align 
+          with our creative vision or schedule.
         </p>
 
-        <h3>1.2. Account Creation &amp; Security</h3>
+        <h3>1.2. Revisions & Modifications</h3>
         <p>
-          Some parts of the Services may require you to create an account or log in via a third-party
-          platform (for example, a game account, Discord, or other services). You agree to provide
-          accurate and up-to-date information and to keep your login credentials secure.
-        </p>
-        <p>
-          You are responsible for all activity that occurs under your account. If you suspect any
-          unauthorized use of your account, you should notify us as soon as possible at
-          <a href="mailto:info@teamgalaxy.net" style="color: var(--starlight-turquoise); text-decoration: none;">info@teamgalaxy.net</a>.
+          Each design package includes a specific number of revisions as agreed upon during the project onboarding phase. 
+          Any additional revisions beyond the agreed scope may incur extra charges. Revisions must be requested within a 
+          reasonable timeframe.
         </p>
 
-        <h2>2. Community Conduct &amp; Acceptable Use</h2>
+        <h2>2. Client Communication & Conduct</h2>
 
-        <h3>2.1. Be Respectful</h3>
+        <h3>2.1. Professional Behavior</h3>
         <p>
-          Our goal is to build a positive, inclusive community. When using any chat, forum, or community
-          features, you agree not to:
+          We maintain a professional and respectful environment for our designers and clients. When communicating 
+          via our Discord ticketing system or email, you agree not to:
         </p>
         <ul>
-          <li>Harass, threaten, or intimidate others.</li>
-          <li>Engage in hate speech, discrimination, or abusive behavior.</li>
-          <li>Post content that is obscene, illegal, or intentionally harmful.</li>
-          <li>Spam, advertise aggressively, or flood chats with repetitive content.</li>
+          <li>Harass, threaten, or rush our designers outside of agreed timelines.</li>
+          <li>Engage in abusive behavior or demand free unapproved iterations.</li>
         </ul>
-
-        <h3>2.2. Fair Play &amp; In-Game Rules</h3>
         <p>
-          Where the Services relate to games or gaming communities, you agree to:
+          We reserve the right to terminate a project and refuse future service if a client violates these communication standards.
         </p>
+
+        <h2>3. Intellectual Property Rights</h2>
+
+        <h3>3.1. Ownership of Final Assets</h3>
+        <p>
+          Upon full and final payment, the client is granted the agreed-upon usage rights for the final delivered 
+          digital assets (e.g., 3D renders, UI/UX designs, custom graphics). Unless a full copyright buyout is negotiated, 
+          Galaxy Designs retains the underlying copyright.
+        </p>
+
+        <h3>3.2. Portfolio Rights</h3>
+        <p>
+          Galaxy Designs reserves the right to showcase the completed work, preliminary sketches, and 3D renders in our 
+          digital portfolio, website, and social media channels for promotional purposes, unless a Non-Disclosure Agreement (NDA) 
+          is signed prior to the project's commencement.
+        </p>
+
+        <h2>4. Payments, Deliverables & Refunds</h2>
+
+        <h3>4.1. General Payment Terms</h3>
         <ul>
-          <li>Follow the official rules and terms of the game publisher or platform.</li>
-          <li>Not use cheats, hacks, exploits, or unauthorized third-party tools.</li>
-          <li>Respect other players and not disrupt gameplay experiences.</li>
-        </ul>
-        <p>
-          We may, at our discretion, remove, restrict, or suspend access for users who violate these
-          rules or damage the community experience.
-        </p>
-
-        <h3>2.3. Prohibited Uses</h3>
-        <p>You agree not to use the Services to:</p>
-        <ul>
-          <li>Attempt to gain unauthorized access to any systems, accounts, or data.</li>
-          <li>Reverse engineer, decompile, or attempt to extract source code from our Services except where permitted by law.</li>
-          <li>Upload malware, viruses, or other harmful code.</li>
-          <li>Impersonate any person, brand, or entity without authorization.</li>
+          <li>Payments must be made through our approved payment gateways before final high-resolution source files are delivered.</li>
+          <li>Prices are subject to change based on project complexity and scope adjustments.</li>
         </ul>
 
-        <h2>3. Intellectual Property</h2>
-
-        <h3>3.1. Our Content</h3>
+        <h3>4.2. Digital Items & Non-Refund Policy (French Law)</h3>
         <p>
-          Unless otherwise stated, all logos, graphics, designs, UI elements, text, code, and other
-          content related to the Team Galaxy brand (“Galaxy Content”) are owned or licensed by us and
-          are protected by applicable intellectual property laws.
+          Because our deliverables consist of custom digital content (3D models, graphics, digital art), all sales are 
+          <strong>final and non-refundable</strong> once the digital assets have been supplied or the design work has significantly commenced.
         </p>
         <p>
-          You may not copy, modify, distribute, publicly display, or create derivative works from Galaxy
-          Content without our prior written permission, except as allowed by applicable law.
+          For consumers located in France or the European Union, digital content falls under exceptions to the standard right 
+          of withdrawal, notably where you have given prior consent for performance to begin.
         </p>
 
-        <h3>3.2. User-Generated Content</h3>
+        <h3>4.3. Prices & VAT (Micro-Entrepreneur – France)</h3>
         <p>
-          “User-Generated Content” (“UGC”) includes any content you upload, post, or share via the Services
-          (for example, messages, screenshots, suggestions, or media).
+          Our services are offered under a French micro-entrepreneur regime. Therefore, invoices are issued under the condition:
         </p>
-        <p>
-          By submitting UGC, you represent that you have the necessary rights to do so and that your content
-          does not violate any third-party rights or applicable law.
-        </p>
-        <p>
-          You retain ownership of your UGC, but you grant Team Galaxy a worldwide, non-exclusive,
-          royalty-free, sublicensable, and transferable license to use, reproduce, adapt, modify, publish,
-          translate, display, and distribute such content for the purpose of operating, improving, and
-          promoting the Services (for example, showcasing community achievements or highlights).
+        <p style="color: var(--text-main); font-weight: 600;">
+          "TVA non applicable, conformément à l’article 293 B du Code général des impôts (CGI)."
         </p>
 
-        <h2>4. Purchases, Digital Items &amp; Merchandise</h2>
+        <h2>5. Disclaimers & Limitation of Liability</h2>
         <p>
-          From time to time, we may offer digital items, in-community perks, or physical merchandise
-          (“Items”) through our Services or via linked platforms.
+          Galaxy Designs provides its digital assets "as is". We ensure high-quality standards, but we do not guarantee 
+          that the designs will result in specific financial or business outcomes for your brand. 
+        </p>
+        <p>
+          To the maximum extent permitted by law, Galaxy Designs will not be liable for any indirect damages, loss of profits, 
+          or data loss resulting from the use of our delivered digital assets.
         </p>
 
-        <h3>4.1. General Terms</h3>
-        <ul>
-          <li>Prices, availability, and descriptions of Items are subject to change at any time.</li>
-          <li>Taxes, fees, and currency conversion charges may apply, depending on your location and payment provider.</li>
-          <li>You are responsible for ensuring that your payment details are correct and authorized.</li>
-        </ul>
-
-        <h3>4.2. Digital Items, Right of Withdrawal &amp; Non-Refund Policy (French Law)</h3>
+        <h2>6. Governing Law</h2>
         <p>
-          Digital content (such as digital perks, roles, or other virtual benefits) may be delivered
-          immediately or within a short processing time once your payment is confirmed.
-        </p>
-        <p>
-          For consumers located in France or the European Union, certain digital content and services
-          may fall under exceptions to the standard right of withdrawal, in particular where:
-        </p>
-        <ul>
-          <li>The service has been fully performed before the end of any withdrawal period; and</li>
-          <li>You have given your express prior consent for performance to begin and acknowledged that
-              you will lose your right of withdrawal once the service is fully performed or the digital
-              content is supplied.</li>
-        </ul>
-        <p>
-          These principles are derived from the French Consumer Code, notably provisions such as
-          <em>article L121-21-8</em> and its successor articles (including
-          <em>article L221-28</em> concerning digital content).
-        </p>
-        <p>
-          Because digital items are usually non-returnable and may be consumed instantly, all sales are
-          generally <strong>final and non-refundable</strong> once the digital content has been supplied,
-          except:
-        </p>
-        <ul>
-          <li>Where a refund is required by mandatory French or EU consumer law; or</li>
-          <li>Where we explicitly state otherwise in writing for a specific offer.</li>
-        </ul>
-
-        <h3>4.3. No Guarantees of Continuity</h3>
-        <p>
-          Any digital perks or benefits linked to specific features, games, or platforms may depend
-          on third-party services or our ongoing operations. We do not guarantee that any particular
-          perk or benefit will remain available forever, and we reserve the right to modify or discontinue
-          them as needed (for example, if a game or external API changes).
+          These Terms and any dispute arising out of them are governed by the laws of <strong>France</strong>. 
+          Any disputes will be subject to the competent French courts.
         </p>
 
-        <h3>4.4. Prices, Currency &amp; VAT (Micro-Entrepreneur – France)</h3>
+        <h2>7. Contact Us</h2>
         <p>
-          Where paid Items or services are offered under a French micro-entrepreneur regime, prices are
-          generally expressed in EUR (€) and, in that context:
+          For any inquiries regarding these terms or your project, please contact us at:
         </p>
         <p>
-          <strong>TVA non applicable, conformément à l’article 293 B du Code général des impôts (CGI).</strong>
+          <a href="mailto:info@teamgalaxy.net" style="color: var(--neon-cyan); text-decoration: none;">info@teamgalaxy.net</a>
         </p>
-        <p>
-          This means that, under that regime, invoices are issued without VAT. If your country or situation
-          requires specific tax treatment, you remain responsible for any declarations or obligations
-          applicable to you.
-        </p>
-
-        <h2>5. Third-Party Services &amp; Links</h2>
-        <p>
-          Our Services may integrate with or link to third-party platforms such as game publishers,
-          Discord, payment providers, analytics tools, or external websites. These third parties
-          have their own terms and privacy policies, which you should review separately.
-        </p>
-        <p>
-          We do not control and are not responsible for:
-        </p>
-        <ul>
-          <li>The availability, accuracy, or content of third-party services.</li>
-          <li>Any losses or issues arising from your use of those third-party services.</li>
-        </ul>
-        <p>
-          Any reference to third-party games, platforms, or brands is for identification purposes only
-          and does not imply sponsorship, endorsement, or official partnership unless explicitly stated.
-        </p>
-
-        <h2>6. Disclaimers</h2>
-        <p>
-          The Services are provided on an “as is” and “as available” basis. To the maximum extent
-          permitted by law, we do not make any promises or warranties about:
-        </p>
-        <ul>
-          <li>The accuracy, completeness, or reliability of content.</li>
-          <li>Uninterrupted or error-free operation of the Services.</li>
-          <li>Suitability of the Services for any particular purpose.</li>
-        </ul>
-        <p>
-          You use the Services at your own discretion and risk. Nothing in these Terms is intended to
-          exclude or limit any legal rights that cannot be excluded or limited under applicable law.
-        </p>
-
-        <h2>7. Limitation of Liability</h2>
-        <p>
-          To the maximum extent permitted by applicable law, Team Galaxy and its owners, collaborators,
-          and affiliates will not be liable for:
-        </p>
-        <ul>
-          <li>Any indirect, incidental, special, consequential, or punitive damages.</li>
-          <li>Any loss of profits, data, reputation, or goodwill.</li>
-          <li>Any loss or damage resulting from:
-            <ul>
-              <li>Your use of or inability to use the Services,</li>
-              <li>Any unauthorized access to or use of your account or data,</li>
-              <li>Any interruption, suspension, or termination of the Services.</li>
-            </ul>
-          </li>
-        </ul>
-        <p>
-          Where liability cannot be fully excluded, and to the extent permitted by law, our total aggregate
-          liability arising out of or relating to the Services or these Terms will be limited to the amount
-          you have paid directly to us for the relevant part of the Services in the six (6) months preceding
-          the event giving rise to the claim (if any).
-        </p>
-
-        <h2>8. Indemnity</h2>
-        <p>
-          To the extent permitted by law, you agree to indemnify and hold harmless Team Galaxy from and
-          against any claims, damages, liabilities, losses, and expenses (including reasonable legal fees)
-          arising out of or related to:
-        </p>
-        <ul>
-          <li>Your use of the Services;</li>
-          <li>Your violation of these Terms;</li>
-          <li>Your violation of any law or third-party rights.</li>
-        </ul>
-
-        <h2>9. Suspension &amp; Termination</h2>
-        <p>
-          We reserve the right, at our discretion, to suspend or terminate access to the Services (or
-          specific features) at any time, including if we reasonably believe that:
-        </p>
-        <ul>
-          <li>You have violated these Terms or applicable law;</li>
-          <li>Your behavior poses a risk to other users or to the integrity of the Services;</li>
-          <li>We need to do so to comply with legal obligations or technical constraints.</li>
-        </ul>
-        <p>
-          Where reasonable, we will try to provide notice, but we are not obligated to offer prior
-          notice in urgent situations (for example, severe abuse or security risks).
-        </p>
-
-        <h2>10. Changes to the Services &amp; These Terms</h2>
-        <p>
-          We may update or modify the Services from time to time (for example, to add or remove
-          features, improve performance, or adapt to platform/game changes).
-        </p>
-        <p>
-          We may also update these Terms. When we make material changes, we will take reasonable
-          steps to inform you, such as updating the “Last Updated” date at the top of this page or
-          providing a notice within the Services.
-        </p>
-        <p>
-          Your continued use of the Services after any update means that you have read and understood
-          the updated Terms. If you do not agree with the updated Terms, you should stop using the
-          Services.
-        </p>
-
-        <h2>11. Governing Law &amp; Dispute Resolution</h2>
-        <p>
-          These Terms and any dispute arising out of or relating to them or the Services are governed
-          by the laws of <strong>France</strong>, without prejudice to any mandatory consumer protection
-          rules that may apply in your country of residence.
-        </p>
-        <p>
-          Before taking any formal action, both you and Team Galaxy agree to first attempt to resolve
-          any dispute informally in good faith. If a dispute is not resolved within a reasonable time,
-          and unless otherwise required by mandatory law, disputes may be brought before the competent
-          French courts.
-        </p>
-        <p>
-          Nothing in this section removes or limits any rights that you may mandatorily have under
-          applicable French or EU consumer law.
-        </p>
-
-        <h2>12. Contact</h2>
-        <p>
-          If you have any questions about these Terms or the Services, you can contact us at:
-        </p>
-        <ul>
-          <li><strong>Email:</strong> <a href="mailto:info@teamgalaxy.net" style="color: var(--starlight-turquoise); text-decoration: none;">info@teamgalaxy.net</a></li>
-        </ul>
       </div>
     </main>
 
     <footer>
-      <p>Team Galaxy © 2025 • Building communities across the cosmos</p>
+      <p>Galaxy Designs © 2026 • Premium Digital Aesthetics</p>
       <div class="footer-links">
         <a href="legal_notice.html"><i class="fas fa-shield-alt"></i> Legal Notice</a>
-        <a href="mailto:info@teamgalaxy.net"><i class="fas fa-envelope"></i> info@teamgalaxy.net</a>
-        <a href="../dashboard.html"><i class="fas fa-home"></i> Return to Homepage</a>
+        <a href="mailto:info@teamgalaxy.net"><i class="fas fa-envelope"></i> Contact Support</a>
+        <a href="/"><i class="fas fa-home"></i> Return to Homepage</a>
       </div>
     </footer>
   </div>
-
-  <script>
-    // Create realistic star background
-    function createStars() {
-      const starsContainer = document.getElementById('stars');
-      const starCount = 200;
-
-      for (let i = 0; i < starCount; i++) {
-        const star = document.createElement('div');
-        star.classList.add('star');
-
-        const x = Math.random() * 100;
-        const y = Math.random() * 100;
-        const size = Math.random() * 1.5 + 0.5;
-        const opacity = Math.random() * 0.7 + 0.3;
-        const duration = Math.random() * 6 + 2;
-
-        star.style.left = `${x}%`;
-        star.style.top = `${y}%`;
-        star.style.width = `${size}px`;
-        star.style.height = `${size}px`;
-        star.style.setProperty('--opacity', opacity);
-        star.style.setProperty('--duration', `${duration}s`);
-        star.style.animationDelay = `${Math.random() * 5}s`;
-
-        starsContainer.appendChild(star);
-      }
-    }
-
-    window.addEventListener('load', createStars);
-
-    // Subtle parallax effect for stars
-    document.addEventListener('mousemove', (e) => {
-      const stars = document.querySelectorAll('.star');
-      const x = e.clientX / window.innerWidth;
-      const y = e.clientY / window.innerHeight;
-
-      stars.forEach((star, index) => {
-        const speed = (index % 10) * 0.01;
-        const moveX = x * speed * 10;
-        const moveY = y * speed * 10;
-        star.style.transform = `translate(${moveX}px, ${moveY}px)`;
-      });
-    });
-  </script>
 </body>
 </html>
