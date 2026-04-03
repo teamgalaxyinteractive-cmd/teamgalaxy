@@ -1,74 +1,54 @@
-# TeamGalaxy — Official Web Platform
+# Galaxy Designs — Official Web Platform
 
-TeamGalaxy is a modern, community-driven web platform designed to provide
-a unified digital ecosystem where users can create content, interact with
-others, manage profiles, and explore multiple integrated modules under a
-single structured environment.
+Galaxy Designs is a premier digital design studio engineering exceptional visual experiences. 
+Our web platform serves as an elite portfolio and client gateway, showcasing high-end 3D aesthetics, 
+custom graphics, and pixel-perfect visual identities under a sleek, modern environment.
 
-🌐 **Live Platform:** https://www.teamgalaxy.net/
+🌐 **Live Platform:** https://teamgalaxy.net/
 
 ---
 
 ## Platform Capabilities
 
-- User account management with public profile previews
-- Content publishing system (posts and blogs)
-- Community interaction through real-time chat
-- Portfolio and card showcase modules
-- Content creation tools
-- Interactive game module
-- Centralized user dashboard
-- Structured legal and compliance pages
-- User feedback collection system
+- Premium 3D Visuals & Digital Art Showcase
+- Designer & Team Profile Management (Lead Designers, Assets Specialists)
+- High-End UI/UX Design Portfolio
+- Agency Blog & Creative Insights
+- Centralized Client Contact & Onboarding Gateway
+- Professional Legal & Compliance Infrastructure
+- SEO-Optimized Architecture with High-Performance Rendering
 
 ---
 
 ## Publicly Accessible Pages
 
 Only the following pages are intended for public access and search engine
-indexing. All other pages are internal and restricted by design.
+indexing. All internal testing, draft, or administrative pages are restricted by design.
 
 ### Core Pages
-- `/`
+- `/index.html` (Home / Design Flow)
 - `/about_us.html`
-- `/dashboard.html`
-- `/community_chat.html`
-- `/posts.html`
-- `/user_feedback.html`
+- `/team.html` (Designer Profiles)
+- `/contact.html`
 
 ### Content and Showcase
-- `/galaxy_blogs.html`
-- `/galaxy_portfolio.html`
-- `/card_showcase.html`
-- `/galaxy_studio.html`
+- `/portfolio.html`
+- `/blogs.html`
 
-### User Management
-- `/user_management/user_profile.html`
-- `/user_management/user_posts.html`
-- `/user_management/user_settings.html`
-
-### Tools
-- `/tools/create_post.html`
-
-### Public Data Manager
-- `/public_data_manager/public_user_profile.html`
-- `/public_data_manager/public_user_posts.html`
-
-### Game
-- `/game/full_game.html`
+### System & Utility Pages
+- `/offline.html` (Custom Offline PWA Experience)
 
 ### Legal Pages
-- `/legal/privacy_policy.html`
-- `/legal/terms_and_conditions.html`
-- `/legal/legal_notice.html`
-- `/legal/sign_up.html`
+- `/legal_notice.html`
+- `/privacy_policy.html`
+- `/terms_and_conditions.html`
 
 ---
 
 ## SEO and Indexing Strategy
 
-TeamGalaxy follows standard-compliant SEO practices to ensure proper indexing
-and crawl efficiency across major search engines.
+Galaxy Designs follows standard-compliant SEO practices to ensure proper indexing
+and crawl efficiency across major search engines, maximizing our agency's visibility.
 
 - A single canonical URL is defined per page
 - Only public, user-accessible pages are included in the sitemap
@@ -81,4 +61,4 @@ Each page must declare itself as the canonical version.
 
 Example:
 ```html
-<link rel="canonical" href="https://www.teamgalaxy.net/about_us.html">
+<link rel="canonical" href="[https://teamgalaxy.net/about_us.html](https://teamgalaxy.net/about_us.html)">
