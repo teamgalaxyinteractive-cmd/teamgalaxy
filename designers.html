@@ -112,6 +112,15 @@
     .section-gradient { background: linear-gradient(135deg, #111827 0%, #0a0f1d 100%); position: relative; width: 100%; max-width: 100vw; }
     .max-w-7xl { width: 100%; padding-left: 1rem; padding-right: 1rem; }
 
+    @font-face {
+    font-family: 'Sefa';
+    src: url('/assets/fonts/Sefa-Regular.woff2') format('woff2'),
+         url('/assets/fonts/Sefa-Regular.woff') format('woff');
+    font-weight: normal; /* Ya 400 */
+    font-style: normal;
+    font-display: swap; /* Loading ke time text hide hone se bachata hai */
+    }
+
     /* Cards */
     .card {
       background: rgba(30, 41, 59, 0.6);
@@ -657,14 +666,14 @@
             <img src="https://dl.dropboxusercontent.com/scl/fi/mfz74416c9hveejjam3l2/GalaxyPREMIUM.png?rlkey=5iilzg4ugl81jqlz0dwu71ww1&st=qoq8f477&dl=0" alt="Galaxy Design Logo" class="w-full h-full object-contain relative z-10" />
             <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity rounded-xl"></div>
           </div>
-          <span class="text-lg sm:text-xl font-serif font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary whitespace-nowrap">
+          <span class="font-['Sefa'] text-xl sm:text-2xl tracking-wide font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary whitespace-nowrap">
             Galaxy<span class="text-white">Design</span>
           </span>
         </div>
 
         <!-- Desktop Nav -->
         <div class="hidden md:flex items-center space-x-6 lg:space-x-8 nav-links desktop flex-shrink-0">
-          <a href="#" class="font-medium hover:text-primary transition-colors relative group text-sm">
+          <a href="/dashboard" class="font-medium hover:text-primary transition-colors relative group text-sm">
             Home
             <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
           </a>
@@ -673,7 +682,7 @@
             <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
           </a>
           <a href="/blogs" class="font-medium hover:text-primary transition-colors relative group text-sm">
-            Blogs
+            News
             <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
           </a>
           <a href="/contact" class="font-medium hover:text-primary transition-colors relative group text-sm">
@@ -703,9 +712,9 @@
 
     <!-- Mobile Menu -->
     <div class="nav-links mobile" id="mobileMenu">
-      <a href="#">Home</a>
+      <a href="/dashboard">Home</a>
       <a href="/designers">Team</a>
-      <a href="/blogs">Blogs</a>
+      <a href="/blogs">News</a>
       <a href="/contact">Contact</a>
       <a href="/about_us">About Us</a>
       <a href="/legal/sign_up" class="mt-3 px-4 py-2 bg-gradient-to-r from-primary to-secondary text-white rounded-lg font-medium glowing-button text-center mobile-signin auth-btn">
@@ -767,7 +776,7 @@
         </div>
         
         <!-- Tools Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
             <!-- Figma -->
             <div class="tool-card p-3 sm:p-4 rounded-xl text-center group hover:scale-105 transition-transform duration-300" style="background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(56, 189, 248, 0.1);">
                 <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mb-2 mx-auto group-hover:scale-110 transition-transform">
@@ -775,6 +784,15 @@
                 </div>
                 <h3 class="text-xs sm:text-sm font-semibold text-white">Figma</h3>
                 <p class="text-gray-500 text-xs">UI/UX Design</p>
+            </div>
+
+            <!-- Ibis Paint X -->
+            <div class="tool-card p-3 sm:p-4 rounded-xl text-center group hover:scale-105 transition-transform duration-300" style="background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(56, 189, 248, 0.1);">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-green-500/20 to-teal-500/20 flex items-center justify-center mb-2 mx-auto group-hover:scale-110 transition-transform">
+                    <span class="text-green-400 text-base sm:text-lg font-bold">iP</span>
+                </div>
+                <h3 class="text-xs sm:text-sm font-semibold text-white">Ibis Paint X</h3>
+                <p class="text-gray-500 text-xs">Digital Illustration</p>
             </div>
 
             <!-- Blender -->
@@ -786,45 +804,26 @@
                 <p class="text-gray-500 text-xs">3D Modeling</p>
             </div>
 
-            <!-- Adobe Photoshop -->
+            <!-- CapCut -->
             <div class="tool-card p-3 sm:p-4 rounded-xl text-center group hover:scale-105 transition-transform duration-300" style="background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(56, 189, 248, 0.1);">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center mb-2 mx-auto group-hover:scale-110 transition-transform">
-                    <span class="text-blue-400 text-base sm:text-lg font-bold">Ps</span>
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center mb-2 mx-auto group-hover:scale-110 transition-transform">
+                    <span class="text-cyan-400 text-base sm:text-lg font-bold">CC</span>
                 </div>
-                <h3 class="text-xs sm:text-sm font-semibold text-white">Photoshop</h3>
-                <p class="text-gray-500 text-xs">Photo Editing</p>
+                <h3 class="text-xs sm:text-sm font-semibold text-white">CapCut</h3>
+                <p class="text-gray-500 text-xs">Video Editing</p>
             </div>
 
-            <!-- Adobe Illustrator -->
-            <div class="tool-card p-3 sm:p-4 rounded-xl text-center group hover:scale-105 transition-transform duration-300" style="background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(56, 189, 248, 0.1);">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-yellow-500/20 to-orange-500/20 flex items-center justify-center mb-2 mx-auto group-hover:scale-110 transition-transform">
-                    <span class="text-yellow-400 text-base sm:text-lg font-bold">Ai</span>
+            <!-- DaVinci Resolve -->
+            <div class="tool-card p-3 sm:px-4 rounded-xl text-center group hover:scale-105 transition-transform duration-300" style="background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(56, 189, 248, 0.1);">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-gray-400/20 to-orange-500/20 flex items-center justify-center mb-2 mx-auto group-hover:scale-110 transition-transform">
+                    <span class="text-orange-400 text-base sm:text-lg font-bold">DR</span>
                 </div>
-                <h3 class="text-xs sm:text-sm font-semibold text-white">Illustrator</h3>
-                <p class="text-gray-500 text-xs">Vector Graphics</p>
-            </div>
-
-            <!-- After Effects -->
-            <div class="tool-card p-3 sm:p-4 rounded-xl text-center group hover:scale-105 transition-transform duration-300" style="background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(56, 189, 248, 0.1);">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center mb-2 mx-auto group-hover:scale-110 transition-transform">
-                    <span class="text-purple-400 text-base sm:text-lg font-bold">Ae</span>
-                </div>
-                <h3 class="text-xs sm:text-sm font-semibold text-white">After Effects</h3>
-                <p class="text-gray-500 text-xs">Motion Graphics</p>
-            </div>
-
-            <!-- Cinema 4D -->
-            <div class="tool-card p-3 sm:p-4 rounded-xl text-center group hover:scale-105 transition-transform duration-300" style="background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(56, 189, 248, 0.1);">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-red-500/20 to-pink-500/20 flex items-center justify-center mb-2 mx-auto group-hover:scale-110 transition-transform">
-                    <span class="text-red-400 text-base sm:text-lg font-bold">C4D</span>
-                </div>
-                <h3 class="text-xs sm:text-sm font-semibold text-white">Cinema 4D</h3>
-                <p class="text-gray-500 text-xs">3D Animation</p>
+                <h3 class="text-xs sm:text-sm font-semibold text-white">DaVinci Resolve</h3>
+                <p class="text-gray-500 text-xs">Color & Editing</p>
             </div>
         </div>
     </div>
 </section>
-
 <!-- Featured Designers Section -->
 <section id="designers" class="py-10 sm:py-12 md:py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style="background: linear-gradient(135deg, rgba(17, 24, 39, 0.95) 0%, rgba(10, 15, 29, 0.95) 100%);">
     <!-- Subtle Background Effects -->
@@ -852,7 +851,7 @@
                 <div class="flex items-start gap-4 mb-5">
                     <!-- Profile Avatar with Image (BIGGER SIZE) -->
                     <div class="profile-avatar flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border border-blue-500/20 group-hover:border-blue-400/40 transition-colors">
-                        <img src="https://dl.dropboxusercontent.com/scl/fi/pr4cizdmw1g8pgyna4rxz/IMG_20260326_220419.png?rlkey=j6ddqcjtaidcqcssw1nbnywfe&st=7fxn1zlz&dl=0" alt="Creatine" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                        <img src="https://dl.dropboxusercontent.com/scl/fi/l7gjhp0ic7szvhrjg5ony/CreatineforWEB.png?rlkey=r4qushlbpxyt06v9g0ixb9ym3&st=pnbin54f&dl=0" alt="Creatine" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                     </div>
                     <div class="flex-1 min-w-0">
                         <h3 class="text-lg sm:text-xl font-bold text-white mb-1">Creatine</h3>
@@ -866,13 +865,12 @@
                 <p class="text-gray-500 text-sm mb-4 leading-relaxed">Specializing in user-centered design systems and interactive prototypes for SaaS platforms.</p>
                 <div class="flex flex-wrap gap-2 mb-5">
                     <span class="px-3 py-1 bg-blue-500/10 text-blue-300 rounded-full text-xs border border-blue-500/20">UI/UX</span>
-                    <span class="px-3 py-1 bg-purple-500/10 text-purple-300 rounded-full text-xs border border-purple-500/20">Prototyping</span>
-                    <span class="px-3 py-1 bg-cyan-500/10 text-cyan-300 rounded-full text-xs border border-cyan-500/20">Figma</span>
+                    <span class="px-3 py-1 bg-purple-500/10 text-purple-300 rounded-full text-xs border border-purple-500/20">VFX</span>
+                    <span class="px-3 py-1 bg-cyan-500/10 text-cyan-300 rounded-full text-xs border border-cyan-500/20">Blender</span>
                 </div>
                 <div class="social-links flex items-center gap-2 mb-5">
-                    <a href="#" class="social-link w-8 h-8 rounded-lg bg-gray-800/50 flex items-center justify-center text-gray-400 hover:text-blue-400 hover:bg-blue-500/20 transition-all hover:scale-110"><i class="fab fa-dribbble text-sm"></i></a>
-                    <a href="#" class="social-link w-8 h-8 rounded-lg bg-gray-800/50 flex items-center justify-center text-gray-400 hover:text-purple-400 hover:bg-purple-500/20 transition-all hover:scale-110"><i class="fab fa-behance text-sm"></i></a>
-                    <a href="#" class="social-link w-8 h-8 rounded-lg bg-gray-800/50 flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-500/20 transition-all hover:scale-110"><i class="fab fa-linkedin-in text-sm"></i></a>
+                    <a href="https://discord.gg/kJAjmPJ8GX" class="social-link w-8 h-8 rounded-lg bg-gray-800/50 flex items-center justify-center text-gray-400 hover:text-blue-400 hover:bg-blue-500/20 transition-all hover:scale-110"><i class="fab fa-discord text-sm"></i></a>
+                    <a href="https://www.behance.net/creatine1907" class="social-link w-8 h-8 rounded-lg bg-gray-800/50 flex items-center justify-center text-gray-400 hover:text-purple-400 hover:bg-purple-500/20 transition-all hover:scale-110"><i class="fab fa-behance text-sm"></i></a>
                 </div>
                 <a href="/designers/designer_profile_001.html" class="w-full px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg font-medium text-sm hover:opacity-90 transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105 transform text-center block">
                     View Profile
@@ -884,11 +882,11 @@
                 <div class="flex items-start gap-4 mb-5">
                     <!-- Profile Avatar with Image (BIGGER SIZE) -->
                     <div class="profile-avatar flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border border-purple-500/20 group-hover:border-purple-400/40 transition-colors">
-                        <img src="https://dl.dropboxusercontent.com/scl/fi/u6smc0zmcwb558xuka9c5/IMG_20260326_220511.png?rlkey=avo3a6udps5jmqgddkhatovqt&st=yy2z38rl&dl=0" alt="Alexcraft" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                        <img src="https://dl.dropboxusercontent.com/scl/fi/l5ss96skz13y22on1ur4x/AlexcraftWEB.png?rlkey=3picmqnfown5nw3s322xh3sc8&st=inrhekbj&dl=0" alt="Alexcraft" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                     </div>
                     <div class="flex-1 min-w-0">
                         <h3 class="text-lg sm:text-xl font-bold text-white mb-1">Alexcraft</h3>
-                        <p class="text-purple-400 font-medium text-sm mb-2">Senior Designer</p>
+                        <p class="text-purple-400 font-medium text-sm mb-2">Team Member</p>
                         <div class="status-badge inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-500/10 rounded-full text-xs">
                             <span class="status-dot w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                             <span class="text-green-400">Available for projects</span>
@@ -897,14 +895,12 @@
                 </div>
                 <p class="text-gray-500 text-sm mb-4 leading-relaxed">Specializing in user-centered design systems and interactive prototypes for SaaS platforms.</p>
                 <div class="flex flex-wrap gap-2 mb-5">
-                    <span class="px-3 py-1 bg-blue-500/10 text-blue-300 rounded-full text-xs border border-blue-500/20">UI/UX</span>
-                    <span class="px-3 py-1 bg-purple-500/10 text-purple-300 rounded-full text-xs border border-purple-500/20">Prototyping</span>
+                    <span class="px-3 py-1 bg-blue-500/10 text-blue-300 rounded-full text-xs border border-blue-500/20">3D/2D</span>
+                    <span class="px-3 py-1 bg-purple-500/10 text-purple-300 rounded-full text-xs border border-purple-500/20">GFX</span>
                     <span class="px-3 py-1 bg-cyan-500/10 text-cyan-300 rounded-full text-xs border border-cyan-500/20">Figma</span>
                 </div>
                 <div class="social-links flex items-center gap-2 mb-5">
-                    <a href="#" class="social-link w-8 h-8 rounded-lg bg-gray-800/50 flex items-center justify-center text-gray-400 hover:text-blue-400 hover:bg-blue-500/20 transition-all hover:scale-110"><i class="fab fa-dribbble text-sm"></i></a>
-                    <a href="#" class="social-link w-8 h-8 rounded-lg bg-gray-800/50 flex items-center justify-center text-gray-400 hover:text-purple-400 hover:bg-purple-500/20 transition-all hover:scale-110"><i class="fab fa-behance text-sm"></i></a>
-                    <a href="#" class="social-link w-8 h-8 rounded-lg bg-gray-800/50 flex items-center justify-center text-gray-400 hover:text-blue-500 hover:bg-blue-500/20 transition-all hover:scale-110"><i class="fab fa-linkedin-in text-sm"></i></a>
+                    <a href="https://discord.gg/9KN5UH6Rtz" class="social-link w-8 h-8 rounded-lg bg-gray-800/50 flex items-center justify-center text-gray-400 hover:text-blue-400 hover:bg-blue-500/20 transition-all hover:scale-110"><i class="fab fa-discord text-sm"></i></a>
                 </div>
                 <a href="/designers/designer_profile_002.html" class="w-full px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg font-medium text-sm hover:opacity-90 transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105 transform text-center block">
                     View Profile
@@ -1012,7 +1008,9 @@
             <div class="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
               <img src="https://dl.dropboxusercontent.com/scl/fi/mfz74416c9hveejjam3l2/GalaxyPREMIUM.png?rlkey=5iilzg4ugl81jqlz0dwu71ww1&st=qoq8f477&dl=0" alt="Logo" class="w-full h-full object-contain" />
             </div>
-            <span class="text-lg sm:text-xl md:text-2xl font-serif font-bold">Galaxy<span class="text-primary">Design</span></span>
+            <span class="font-['Sefa'] text-xl sm:text-2xl md:text-3xl tracking-wide font-bold">
+              Galaxy<span class="text-primary">Design</span>
+            </span>
           </div>
           <p class="text-gray-400 mb-3 sm:mb-4 text-xs sm:text-sm">A premier design studio creating exceptional visual experiences for brands worldwide.</p>
           <div class="flex space-x-2 sm:space-x-3">
