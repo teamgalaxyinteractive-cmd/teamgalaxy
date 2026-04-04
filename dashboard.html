@@ -118,6 +118,15 @@
     .section-gradient { background: linear-gradient(135deg, #111827 0%, #0a0f1d 100%); position: relative; width: 100%; max-width: 100vw; }
     .max-w-7xl { width: 100%; padding-left: 1rem; padding-right: 1rem; }
 
+    @font-face {
+    font-family: 'Sefa';
+    src: url('/assets/fonts/Sefa-Regular.woff2') format('woff2'),
+         url('/assets/fonts/Sefa-Regular.woff') format('woff');
+    font-weight: normal; /* Ya 400 */
+    font-style: normal;
+    font-display: swap; /* Loading ke time text hide hone se bachata hai */
+    }
+
     /* Cards */
     .card {
       background: rgba(30, 41, 59, 0.6);
@@ -571,7 +580,7 @@
             <img src="https://dl.dropboxusercontent.com/scl/fi/mfz74416c9hveejjam3l2/GalaxyPREMIUM.png?rlkey=5iilzg4ugl81jqlz0dwu71ww1&st=qoq8f477&dl=0" alt="Galaxy Design Logo" class="w-full h-full object-contain relative z-10" />
             <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity rounded-xl"></div>
           </div>
-          <span class="text-lg sm:text-xl font-semibold font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary whitespace-nowrap">
+          <span class="font-['Sefa'] text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary whitespace-nowrap">
             Galaxy<span class="text-white">Design</span>
           </span>
         </div>
@@ -1042,7 +1051,9 @@
             <div class="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
               <img src="https://dl.dropboxusercontent.com/scl/fi/mfz74416c9hveejjam3l2/GalaxyPREMIUM.png?rlkey=5iilzg4ugl81jqlz0dwu71ww1&st=qoq8f477&dl=0" alt="Logo" class="w-full h-full object-contain" />
             </div>
-            <span class="text-lg sm:text-xl md:text-2xl font-serif font-bold">Galaxy<span class="text-primary">Design</span></span>
+            <span class="font-['Sefa'] text-lg sm:text-xl md:text-2xl font-bold">
+              Galaxy<span class="text-primary">Design</span>
+            </span>
           </div>
           <p class="text-gray-400 mb-3 sm:mb-4 text-xs sm:text-sm">A premier design studio creating exceptional visual experiences for brands worldwide.</p>
           <div class="flex space-x-2 sm:space-x-3">
