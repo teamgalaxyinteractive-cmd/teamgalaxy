@@ -11,12 +11,12 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon-16x16.png">
 
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/apple-touch-icon.png">
 
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="/manifest.json">
     <!-- Canonical -->
     <link rel="canonical" href="https://www.teamgalaxy.net/dashboard">
 
@@ -43,7 +43,7 @@
     <meta name="twitter:description" content="Mastermind behind the galaxy's visual language. Specializing in high-end 3D aesthetics and elite brand identities.">
     <meta name="twitter:image" content="https://www.teamgalaxy.net/assets/images/galaxy_design.png">
 
-    <script src="assets/js/cookie-consent.js" defer></script>
+    <script src="/assets/js/cookie-consent.js" defer></script>
 
   <script>
     tailwind.config = {
@@ -840,7 +840,7 @@
 
         <!-- Desktop Nav -->
         <div class="hidden md:flex items-center space-x-6 lg:space-x-8 nav-links desktop flex-shrink-0">
-          <a href="#" class="font-medium hover:text-primary transition-colors relative group text-sm">
+          <a href="/dashboard" class="font-medium hover:text-primary transition-colors relative group text-sm">
             Home
             <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
           </a>
@@ -849,7 +849,7 @@
             <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
           </a>
           <a href="/blogs" class="font-medium hover:text-primary transition-colors relative group text-sm">
-            Blogs
+            News
             <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
           </a>
           <a href="/contact" class="font-medium hover:text-primary transition-colors relative group text-sm">
@@ -879,9 +879,9 @@
 
     <!-- Mobile Menu -->
     <div class="nav-links mobile" id="mobileMenu">
-      <a href="#">Home</a>
+      <a href="/dashboard">Home</a>
       <a href="/designers">Team</a>
-      <a href="/blogs">Blogs</a>
+      <a href="/blogs">News</a>
       <a href="/contact">Contact</a>
       <a href="/about_us">About Us</a>
       <a href="/legal/sign_up" class="mt-3 px-4 py-2 bg-gradient-to-r from-primary to-secondary text-white rounded-lg font-medium glowing-button text-center mobile-signin auth-btn">
@@ -908,7 +908,7 @@
     <div class="max-w-7xl mx-auto relative z-10">
       <div class="flex flex-col items-center text-center">
         <!-- Direct PNG Image (No Circle) -->
-        <img src="https://dl.dropboxusercontent.com/scl/fi/oyo45tb889cqokhtch97a/cropped_circle_image-4.png?rlkey=u65zxd19la2mhhiq8u09urm6t&st=b0lew9yh&dl=0" alt="Alexcraft" class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain mb-4" />
+        <img src="https://dl.dropboxusercontent.com/scl/fi/08tnfxbl1p638bgfirv8b/1000054310-modified.png?rlkey=sq7qgoxpxvq4w4siktjzig8yx&st=jpjbogjx&dl=0" alt="Alexcraft" class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain mb-4" />
       
         <h1 class="section-title mb-2">Alexcraft</h1>
         <p class="text-gray-300 mb-4">Team Member</p>
@@ -1175,9 +1175,9 @@
         <div>
           <h3 class="font-semibold mb-3 sm:mb-4 text-base sm:text-lg text-white">Legal</h3>
           <ul class="space-y-1.5 sm:space-y-2 text-gray-400 text-xs sm:text-sm">
-            <li><a href="privacy_policy.html" class="hover:text-white transition-colors hover:pl-2">Privacy Policy</a></li>
-            <li><a href="terms_and_conditions.html" class="hover:text-white transition-colors hover:pl-2">Terms & Conditions</a></li>
-            <li><a href="legal_notice.html" class="hover:text-white transition-colors hover:pl-2">Legal Notice</a></li>
+            <li><a href="legal/privacy_policy.html" class="hover:text-white transition-colors hover:pl-2">Privacy Policy</a></li>
+            <li><a href="legal/terms_and_conditions.html" class="hover:text-white transition-colors hover:pl-2">Terms & Conditions</a></li>
+            <li><a href="legal/legal_notice.html" class="hover:text-white transition-colors hover:pl-2">Legal Notice</a></li>
             <li><a href="about_us.html" class="hover:text-white transition-colors hover:pl-2">About Us</a></li>
           </ul>
         </div>
