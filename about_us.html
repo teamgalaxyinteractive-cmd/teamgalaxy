@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,17 +10,13 @@
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png">
-
     <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png">
-
     <link rel="manifest" href="manifest.json">
-    <!-- Canonical -->
+    
     <link rel="canonical" href="https://www.teamgalaxy.net/about_us">
 
-    <!-- Robots -->
     <meta name="robots" content="index, follow">
 
-    <!-- Open Graph (social preview) -->
     <meta property="og:type" content="website">
     <meta property="og:locale" content="en_US">
     <meta property="og:url" content="https://www.teamgalaxy.net/about_us">
@@ -31,9 +28,8 @@
     <meta property="og:image:height" content="1071">
     <meta property="og:site_name" content="Galaxy Design">
 
-    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:site" content="@teamgalaxy_wotb"> <!-- replace with your Twitter/X handle -->
+    <meta name="twitter:site" content="@teamgalaxy_wotb"> 
     <meta name="twitter:creator" content="@teamgalaxy_wotb">
     <meta name="twitter:title" content="Galaxy Designs | Premium 3D Visuals & Digital Art Studio">
     <meta name="twitter:description" content="Elevate your brand with high-end 3D aesthetics, custom graphics, and elite visual identities. Crafted with precision, delivered with impact. Explore our designer universe.">
@@ -42,287 +38,202 @@
     <script src="assets/js/cookie-consent.js" defer></script>
 
     <style>
+        :root {
+            --primary-bg: #05070a;
+            --accent-cyan: #00f2ff;
+            --accent-blue: #0072ff;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            cursor: none; /* Hiding default cursor for our custom one */
+            cursor: none; 
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #030303;
+            background-color: var(--primary-bg);
             color: #ffffff;
             line-height: 1.5;
             overflow-x: hidden;
         }
 
         /* --- Global Cinematic Effects --- */
-
-        /* Film Grain Noise */
         .noise-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 9998;
-            opacity: 0.04;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 9998; opacity: 0.05;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .nebula-glow {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at 80% 20%, rgba(0, 114, 255, 0.1), transparent 40%),
+                        radial-gradient(circle at 20% 80%, rgba(0, 242, 255, 0.08), transparent 40%);
+            z-index: -1; pointer-events: none;
         }
 
         /* Custom Cursor */
         .custom-cursor {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 20px;
-            height: 20px;
+            position: fixed; top: 0; left: 0; width: 20px; height: 20px;
             border-radius: 50%;
-            background-color: #ffffff;
-            pointer-events: none;
-            z-index: 9999;
-            mix-blend-mode: difference;
+            background-color: var(--accent-cyan);
+            box-shadow: 0 0 15px var(--accent-cyan);
+            pointer-events: none; z-index: 9999;
+            mix-blend-mode: screen;
             transform: translate(-50%, -50%);
             transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
         }
 
         .custom-cursor.hovering {
-            width: 60px;
-            height: 60px;
-            background-color: rgba(255, 255, 255, 0.8);
+            width: 50px; height: 50px;
+            background-color: rgba(0, 242, 255, 0.5);
         }
 
-        /* Subtle Studio Grid Background */
         .studio-grid {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            z-index: -1;
-            pointer-events: none;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: -2; pointer-events: none;
         }
 
         /* --- Sections --- */
-
-        /* Hero Section */
         .hero-section {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-            position: relative;
+            height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 2rem; position: relative;
         }
 
         .hero-heading {
             font-size: clamp(4rem, 12vw, 10rem);
-            font-weight: 900;
-            text-transform: uppercase;
-            line-height: 0.85;
-            text-align: center;
-            letter-spacing: -0.05em;
-            margin-bottom: 2rem;
+            font-weight: 900; text-transform: uppercase;
+            line-height: 0.85; text-align: center;
+            letter-spacing: -0.05em; margin-bottom: 2rem;
             animation: textReveal 1.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
         .hollow-text {
             color: transparent;
-            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.4);
-            display: block;
-            transition: all 0.5s ease;
+            -webkit-text-stroke: 2px var(--accent-cyan);
+            display: block; transition: all 0.5s ease;
         }
 
         .hero-heading:hover .hollow-text {
-            color: #ffffff;
-            -webkit-text-stroke: 1px transparent;
-            text-shadow: 0 0 40px rgba(255,255,255,0.3);
+            color: var(--accent-cyan);
+            -webkit-text-stroke: 2px transparent;
+            text-shadow: 0 0 40px rgba(0, 242, 255, 0.4);
             transform: scale(1.02);
         }
 
         .hero-subtext {
             font-size: clamp(0.9rem, 1.2vw, 1rem);
-            max-width: 500px;
-            color: #666;
-            font-weight: 400;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            text-align: center;
+            max-width: 500px; color: #888;
+            font-weight: 400; text-transform: uppercase;
+            letter-spacing: 0.2em; text-align: center;
             animation: fadeInUp 1.5s ease-out 0.6s both;
         }
 
         /* Infinite Marquee */
         .marquee-container {
-            width: 100%;
-            overflow: hidden;
-            background: #ffffff;
-            color: #000000;
-            padding: 1.5rem 0;
-            display: flex;
-            white-space: nowrap;
-            transform: rotate(-2deg) scale(1.05);
-            margin: 4rem 0;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            width: 100%; overflow: hidden;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            color: #000; padding: 1.5rem 0; display: flex;
+            white-space: nowrap; transform: rotate(-2deg) scale(1.05);
+            margin: 4rem 0; box-shadow: 0 20px 50px rgba(0, 242, 255, 0.1);
         }
 
         .marquee-content {
-            font-size: 2.5rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            display: inline-block;
+            font-size: 2.5rem; font-weight: 900;
+            text-transform: uppercase; display: inline-block;
             animation: marquee 20s linear infinite;
         }
 
         .marquee-content span {
-            margin: 0 2rem;
-            -webkit-text-stroke: 1px #000;
-            color: transparent;
+            margin: 0 2rem; -webkit-text-stroke: 1px #000; color: transparent;
         }
+        .marquee-content span.solid { color: #000; }
 
-        .marquee-content span.solid {
-            color: #000;
-        }
-
-        /* Section Styling */
         .section-container {
-            padding: 8rem 2vw;
-            max-width: 1400px;
-            margin: 0 auto;
+            padding: 8rem 5%; max-width: 1400px; margin: 0 auto;
         }
 
         .section-title {
-            font-size: clamp(2rem, 5vw, 4rem);
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: -0.03em;
-            margin-bottom: 5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 1rem;
-            color: rgba(255,255,255,0.9);
+            font-size: clamp(2rem, 5vw, 4rem); font-weight: 900;
+            text-transform: uppercase; letter-spacing: -0.03em;
+            margin-bottom: 3rem; border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1rem; color: #fff;
         }
 
-        /* Philosophy Text */
+        /* Philosophy Text - Updated for Client Request */
         .philosophy-text {
-            font-size: clamp(1.5rem, 3.5vw, 3rem);
-            font-weight: 300;
-            color: #444;
-            line-height: 1.3;
-            max-width: 1100px;
+            font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 300;
+            color: #aaa; line-height: 1.4; max-width: 1100px;
             transition: color 0.5s ease;
         }
+        
+        .philosophy-text span { color: var(--accent-cyan); font-weight: 700; }
 
-        .philosophy-text:hover {
-            color: #888;
-        }
-
-        .philosophy-text span {
-            color: #fff;
-            font-weight: 700;
-        }
-
-        /* Team Grid */
+        /* Team Grid (Glassmorphism) */
         .team-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 3rem;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 3rem;
         }
 
         .team-card {
-            position: relative;
+            background: var(--glass-bg); border: 1px solid var(--glass-border);
+            border-radius: 24px; padding: 2rem; backdrop-filter: blur(15px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .team-card:hover {
+            transform: translateY(-10px); border-color: var(--accent-cyan);
+            box-shadow: 0 20px 40px rgba(0, 242, 255, 0.1);
         }
 
         .image-wrapper {
-            width: 100%;
-            aspect-ratio: 3 / 4;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-            background: #111;
+            width: 100%; aspect-ratio: 1/1; border-radius: 16px;
+            overflow: hidden; margin-bottom: 1.5rem;
         }
 
         .profile-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: grayscale(100%) contrast(1.2);
-            transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+            width: 100%; height: 100%; object-fit: cover;
+            filter: grayscale(100%); transition: 0.5s;
         }
 
-        .team-card:hover .profile-image {
-            filter: grayscale(0%) contrast(1);
-            transform: scale(1.08);
-        }
+        .team-card:hover .profile-image { filter: grayscale(0%); }
 
         .team-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding-top: 1rem;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 1rem; border-top: 1px solid var(--glass-border); padding-top: 1rem;
         }
 
-        .team-name {
-            font-size: 1.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: -0.02em;
-        }
+        .team-name { font-size: 1.5rem; font-weight: 700; text-transform: uppercase; }
+        .team-role { font-size: 0.8rem; color: var(--accent-cyan); text-transform: uppercase; font-weight: 700; }
+        .team-description { font-size: 0.95rem; color: #aaa; font-weight: 400; line-height: 1.6; }
 
-        .team-role {
-            font-size: 0.8rem;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-weight: 400;
-            margin-top: 0.4rem;
-        }
-
-        .team-description {
-            font-size: 1rem;
-            color: #666;
-            font-weight: 300;
-            line-height: 1.6;
-        }
-
-        /* Footer & Magnetic Button */
-        .footer-section {
-            height: 60vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            margin-top: 4rem;
-        }
-
+        /* Buttons */
         .magnetic-btn-wrapper {
-            padding: 3rem; /* Hit area for the magnet effect */
             display: inline-block;
+            cursor: pointer;
         }
 
         .cta-button {
-            display: inline-block;
-            background: #fff;
-            color: #000;
-            padding: 1.5rem 4rem;
-            font-size: 1.1rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            text-decoration: none;
-            border-radius: 100px;
-            transition: transform 0.2s cubic-bezier(0.19, 1, 0.22, 1), background-color 0.3s;
+            display: inline-block; background: transparent;
+            color: #fff; padding: 1rem 3rem; font-size: 1rem;
+            font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+            text-decoration: none; border-radius: 50px;
+            border: 2px solid var(--accent-cyan);
+            transition: 0.1s ease-out; /* Faster response for magnetic effect */
             will-change: transform;
         }
 
         .cta-button:hover {
-            background: #ccc;
+            background: var(--accent-cyan); color: #000;
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.5);
         }
 
         /* --- Animations --- */
@@ -330,32 +241,25 @@
             from { clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); transform: translateY(100px); }
             to { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform: translateY(0); }
         }
-
         @keyframes fadeInUp {
             from { transform: translateY(30px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-
         @keyframes marquee {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
-
         .scroll-reveal {
-            opacity: 0;
-            transform: translateY(60px);
+            opacity: 0; transform: translateY(60px);
             transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
         }
-
-        .scroll-reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .scroll-reveal.visible { opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body>
 
     <div class="noise-overlay"></div>
+    <div class="nebula-glow"></div>
     <div class="custom-cursor" id="cursor"></div>
     <div class="studio-grid"></div>
 
@@ -379,8 +283,14 @@
     <section class="section-container scroll-reveal">
         <h2 class="section-title">Visuals That Speak</h2>
         <p class="philosophy-text">
-            We don't just design. We <span>engineer aesthetics</span>. From sleek modern logos to immersive 3D renders, we deliver crisp, high-quality visuals that push boundaries and leave lasting impressions.
+            Founded by <span>Creatine in 2021</span>, Galaxy Design is a premium design brand dedicated to pushing digital boundaries. From high-end <span>3D GFX</span> to immersive <span>VFX and video effects</span>, we don't just design—we engineer aesthetics. 
         </p>
+        <p class="philosophy-text" style="font-size: clamp(1rem, 2vw, 1.2rem); margin-top: 1.5rem; color: #888;">
+            Over the years, we've successfully delivered countless projects, turning wild imaginations into breathtaking, pixel-perfect reality for brands across the globe.
+        </p>
+        <div class="magnetic-btn-wrapper" style="margin-top: 3rem;">
+            <a href="/projects" class="cta-button hover-target">View Our Projects</a>
+        </div>
     </section>
 
     <section class="section-container scroll-reveal">
@@ -410,9 +320,9 @@
         </div>
     </section>
 
-    <footer class="footer-section scroll-reveal">
+    <footer style="text-align: center; padding-bottom: 8rem;" class="scroll-reveal">
         <div class="magnetic-btn-wrapper">
-            <a href="/designers" class="cta-button hover-target">Meet Our Designers</a>
+            <a href="/designers" class="cta-button hover-target" style="border-color: rgba(255,255,255,0.2); color: #aaa;">Meet Our Designers</a>
         </div>
     </footer>
 
@@ -431,23 +341,28 @@
             target.addEventListener('mouseleave', () => cursor.classList.remove('hovering'));
         });
 
-        // --- 2. Magnetic Button Logic ---
-        const magneticWrapper = document.querySelector('.magnetic-btn-wrapper');
-        const magneticBtn = document.querySelector('.cta-button');
-
-        magneticWrapper.addEventListener('mousemove', (e) => {
-            const rect = magneticWrapper.getBoundingClientRect();
-            // Calculate distance from center of the wrapper
-            const x = e.clientX - rect.left - rect.width / 2;
-            const y = e.clientY - rect.top - rect.height / 2;
+        // --- 2. Magnetic Button Logic (FIXED) ---
+        const magneticWrappers = document.querySelectorAll('.magnetic-btn-wrapper');
+        
+        magneticWrappers.forEach(wrapper => {
+            const btn = wrapper.querySelector('.cta-button');
             
-            // Move button smoothly towards cursor (x0.3 makes it subtle)
-            magneticBtn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
-        });
+            wrapper.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect(); // Calculate center of the BUTTON, not the full wrapper
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                // Vector from center to cursor
+                const x = e.clientX - centerX;
+                const y = e.clientY - centerY;
+                
+                // Apply a small attraction factor (0.2)
+                btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+            });
 
-        magneticWrapper.addEventListener('mouseleave', () => {
-            // Snap back to center
-            magneticBtn.style.transform = `translate(0px, 0px)`;
+            wrapper.addEventListener('mouseleave', () => {
+                btn.style.transform = `translate(0px, 0px)`;
+            });
         });
 
         // --- 3. Scroll Reveal Logic ---
@@ -462,7 +377,7 @@
         }
 
         window.addEventListener('scroll', handleScroll);
-        handleScroll(); // Trigger on load
+        handleScroll(); 
     </script>
 </body>
 </html>
