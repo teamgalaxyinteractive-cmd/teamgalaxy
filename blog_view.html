@@ -40,6 +40,15 @@
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;700;800&display=swap");
 
+    @font-face {
+    font-family: 'Sefa';
+    src: url('/assets/fonts/Sefa-Regular.woff2') format('woff2'),
+         url('/assets/fonts/Sefa-Regular.woff') format('woff');
+    font-weight: normal; /* Ya 400 */
+    font-style: normal;
+    font-display: swap; /* Loading ke time text hide hone se bachata hai */
+    }
+
       * {
         margin: 0;
         padding: 0;
@@ -624,7 +633,9 @@
           <div class="logo-icon overflow-hidden">
             <img src="https://dl.dropboxusercontent.com/scl/fi/mfz74416c9hveejjam3l2/GalaxyPREMIUM.png?rlkey=5iilzg4ugl81jqlz0dwu71ww1&st=qoq8f477&dl=0" alt="Galaxy Design Logo" class="w-full h-full object-contain" />
           </div>
-          <span class="logo-text">Galaxy<span>Design</span></span>
+          <span class="font-['Sefa'] text-xl sm:text-2xl tracking-wide font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary whitespace-nowrap">
+            Galaxy<span class="text-white">Design</span>
+          </span>
         </a>
       </div>
     </header>
@@ -1025,3 +1036,4 @@
     </script>
   </body>
 </html>
+
