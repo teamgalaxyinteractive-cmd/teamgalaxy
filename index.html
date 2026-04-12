@@ -3,264 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Under Maintenance | Galaxy Designs</title>
+    <title>Galaxy Design | Excellence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #01040a;
+            --accent: #3b82f6;
+            --cyan: #06b6d4;
+            --text: #ffffff;
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
         }
-        
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
-            color: #e0e0e0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            min-height: 100vh;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
             display: flex;
-            align-items: center;
             justify-content: center;
-            line-height: 1.7;
+            align-items: center;
             position: relative;
-            overflow-x: hidden;
         }
-        
-        /* Subtle animated background pattern */
-        body::before {
-            content: '';
+
+        /* --- 1. DYNAMIC BACKGROUND (NEBULA DUST) --- */
+        .universe {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.05) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(79, 70, 229, 0.05) 0%, transparent 20%);
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, #0a192f 0%, #01040a 100%);
+            z-index: 1;
+        }
+
+        .nebula {
+            position: absolute;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+            filter: blur(80px);
+            animation: drift 20s infinite alternate ease-in-out;
+        }
+
+        /* --- 2. THE STAGE --- */
+        .stage {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            will-change: transform;
+        }
+
+        /* LOGO: STEP 1 (Fade & Focus) */
+        .logo-wrap {
+            width: 160px; /* Adjusted for premium look */
+            margin-bottom: 20px;
+            opacity: 0;
+            filter: blur(15px);
+            transform: scale(0.9) translateY(10px);
+            animation: logoIn 1.8s var(--ease) forwards 0.5s;
+        }
+
+        .logo-wrap img {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 0 25px rgba(59, 130, 246, 0.4));
+        }
+
+        /* TITLE MASK: STEP 2 (Slide Down) */
+        .title-mask {
+            overflow: hidden;
+            padding: 5px 20px;
+        }
+
+        .brand-name {
+            font-size: clamp(2rem, 8vw, 5rem);
+            font-weight: 800;
+            letter-spacing: 1.5rem;
+            text-transform: uppercase;
+            opacity: 0;
+            transform: translateY(-105%);
+            
+            /* High-end Metallic Gradient */
+            background: linear-gradient(to bottom, #fff 40%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            
+            animation: titleSlide 1.8s var(--ease) forwards 1.8s;
+            position: relative;
+        }
+
+        /* LIGHT SWEEP EFFECT (The "Impressive" Touch) */
+        .brand-name::after {
+            content: "GALAXY DESIGN";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            -webkit-background-clip: text;
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite 3.5s;
             pointer-events: none;
         }
-        
-        .container {
-            text-align: center;
-            max-width: 700px;
-            padding: 3rem 2rem;
-            background: rgba(15, 15, 15, 0.85);
-            backdrop-filter: blur(10px);
-            border-radiuspx;
-            box-shadow: 
-                0 25px 50px -12px rgba(0, 0, 0, 0.5),
-                inset 0 0 0 1px rgba(255, 255, 255, 0.05);            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-            z-index: 1;
-            margin: 2rem;
-        }
-        
-        .icon-container {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1.5rem;
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: #ffffff;
-            font-weight: 700;
-            letter-spacing: -0.025em;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white;
-            padding: 0.6rem 1.8rem;
-            border-radius: 30px;
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
-            font-weight: 600;
-            letter-spacing: 0.025em;
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
-        }
-        
-        .message {
-            font-size: 1.2rem;
-            margin-bottom: 2.5rem;
-            color: #a0a0a0;
-            max-width: 600px;            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .card {
-            background: rgba(30, 30, 30, 0.7);
-            padding: 2rem;
-            border-radius: 15px;
-            margin: 2rem 0;
-            border-left: 4px solid #4f46e5;
-            text-align: left;
-            backdrop-filter: blur(5px);
-        }
-        
-        .card-title {
-            color: #4f46e5;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
+
+        /* TAGLINE: STEP 3 */
+        .tagline {
+            font-size: clamp(0.6rem, 1.5vw, 0.85rem);
+            font-weight: 200;
+            letter-spacing: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            color: var(--cyan);
+            margin-top: 15px;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: fadeUp 1.2s var(--ease) forwards 3s;
+            text-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
         }
-        
-        .card-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+        /* --- 3. REDIRECT FADE --- */
+        .white-out {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff;
+            z-index: 1000;
+            mix-blend-mode: overlay;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease;
         }
-        
-        .card-item:last-child: none;
+
+        /* --- ANIMATIONS --- */
+        @keyframes drift {
+            from { transform: translate(-10%, -10%); }
+            to { transform: translate(10%, 10%); }
         }
-        
-        .label {
-            color: #a0a0a0;
-            font-weight: 500;
+
+        @keyframes logoIn {
+            to { opacity: 1; filter: blur(0); transform: scale(1) translateY(0); }
         }
-        
-        .value {
-            color: #ffffff;
-            font-weight: 600;
+
+        @keyframes titleSlide {
+            to { opacity: 1; transform: translateY(0); }
         }
-        
-        .highlight {
-            color: #4f46e5;
-            font-weight: 600;
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            30% { background-position: 200% 0; }
+            100% { background-position: 200% 0; }
         }
-        
-        .additional-info {
-            background: rgba(79, 70, 229, 0.1);            border: 1px solid rgba(79, 70, 229, 0.2);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 2rem 0;
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
         }
-        
-        .info-text {
-            margin-bottom: 1rem;
-            color: #c0c0c0;
-        }
-        
-        .closing {
-            margin-top: 2.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .closing p {
-            margin: 0.3rem 0;
-            font-size: 1rem;
-            color: #777;
-        }
-        
-        .brand-name {
-            font-weight: 700;
-            color: #4f46e5;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                margin: 1rem;
-                padding: 2rem 1.5rem;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .status-badge {
-                font-size: 1rem;
-                padding: 0.5rem 1.2rem;
-            }
-            
-            .message {
-                font-size: 1.1rem;
-            }
-            
-            .card {
-                padding: 1.5rem;
-            }            
-            .card-item {
-                flex-direction: column;
-                gap: 0.25rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .container {
-                padding: 1.5rem;
-                border-radius: 15px;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
-            
-            .icon-container {
-                width: 70px;
-                height: 70px;
-                font-size: 2rem;
-            }
+
+        .is-leaving .stage {
+            transform: scale(1.05);
+            opacity: 0;
+            filter: blur(20px);
+            transition: all 1s var(--ease);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="icon-container">
-            ⚙️
-        </div>
-        
-        <h1>Website Under Maintenance</h1>
-        
-        <div class="status-badge">Redesign in Progress</div>
-        
-        <div class="message">
-            <p>The website is currently undergoing a complete redesign and is temporarily unavailable.</p>
-        </div>
-        
-        <div class="card">
-            <div class="card-title">Service Status</div>
-            <div class="card-item">
-                <span class="label">Current State</span>
-                <span class="value">Mostly Non-Functional</span>
-            </div>
-            <div class="card-item">
-                <span class="label">Legacy Features</span>
-                <span class="value">Some May Still Work</span>
-            </div>
-            <div class="card-item">                <span class="label">New Version</span>
-                <span class="value">Coming Soon</span>
-            </div>
-            <div class="card-item">
-                <span class="label">Timeline</span>
-                <span class="value">Development Phase</span>
-            </div>
-        </div>
-        
-        <div class="additional-info">
-            <p class="info-text">I'm personally working on redesigning the entire website. During this transition period, the site is temporarily down. A few basic features might still be operational, but most functionality is currently disabled.</p>
-            <p class="info-text">Please check back soon for the completely redesigned experience!</p>
-        </div>
-        
-        <div class="closing">
-            <p>Thank you for your patience and understanding.</p>
-            <p>— <span class="brand-name">SquadVertex</span> Team</p>
-        </div>
+
+    <div class="universe">
+        <div class="nebula"></div>
     </div>
+
+    <div class="white-out" id="flash"></div>
+
+    <div class="stage" id="stage">
+        <div class="logo-wrap">
+            <img src="https://dl.dropboxusercontent.com/scl/fi/38qel415mk6bd3n5bnsfv/premium_png_logo.png.jpg?rlkey=0v8zyz7568mmm5zr2ko6ldt10&st=hieetjls&raw=1" alt="Galaxy Design Premium Logo">
+        </div>
+
+        <div class="title-mask">
+            <h1 class="brand-name">GALAXY DESIGN</h1>
+        </div>
+
+        <p class="tagline">Designing Digital Universes</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const stage = document.getElementById('stage');
+            const flash = document.getElementById('flash');
+
+            // 1. Ultra-Smooth Parallax (Client loves this subtle movement)
+            document.addEventListener('mousemove', (e) => {
+                const moveX = (e.clientX - window.innerWidth / 2) * 0.006;
+                const moveY = (e.clientY - window.innerHeight / 2) * 0.006;
+                stage.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            });
+
+            // 2. Redirect Sequence (Total 7 seconds for full impact)
+            setTimeout(() => {
+                document.body.classList.add('is-leaving');
+                flash.style.opacity = '0.1'; // Subtle flash effect
+
+                setTimeout(() => {
+                    // Path to your dashboard
+                    window.location.href = '/dashboard';
+                }, 900);
+            }, 6800);
+        });
+    </script>
 </body>
 </html>
